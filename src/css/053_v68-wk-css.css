@@ -1,0 +1,22 @@
+
+/* ② 習作答案總覽：預設隱藏，點單格顯示 */
+.v68-ao-bar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+.v68-ao-bar button { appearance:none; padding:5px 14px; border:1px solid rgba(202,187,150,.9); border-radius:5px; background:var(--mk-paper-warm,#f7f2e6); color:var(--mk-ink-deep,#211710); font:inherit; font-size:.86em; font-weight:700; cursor:pointer; }
+.v68-ao-bar button:hover { border-color:var(--L-gloss,#1f6fb2); }
+.v68-ao-hidden .wk-ao-chip { cursor:pointer; }
+.v68-ao-hidden .wk-ao-chip:not(.v68-show) > span,
+.v68-ao-hidden .wk-ao-choice:not(.v68-show) strong { position:relative; color:transparent !important; min-width:1.4em; display:inline-block; }
+.v68-ao-hidden .wk-ao-chip:not(.v68-show) > span *,
+.v68-ao-hidden .wk-ao-choice:not(.v68-show) strong * { color:transparent !important; }
+.v68-ao-hidden .wk-ao-chip:not(.v68-show) > span::after,
+.v68-ao-hidden .wk-ao-choice:not(.v68-show) strong::after { content:"？"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; border-radius:3px; background:rgba(202,187,150,.35); color:var(--mk-ink-soft,#6b5a42); font-weight:700; }
+
+/* ③ 課文頁下方：本頁出現的字詞辨析 */
+.v68-cbbar { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin:14px 0 4px; padding-top:10px; border-top:1px dashed rgba(202,187,150,.9); }
+.v68-cbbar-h { font-size:.82em; font-weight:700; color:var(--mk-ink-soft,#6b5a42); margin-right:2px; }
+.v68-cbbar button { appearance:none; padding:4px 11px; border:1px solid rgba(31,111,178,.45); border-radius:14px; background:transparent; color:var(--L-gloss,#1f6fb2); font:inherit; font-size:.86em; font-weight:700; cursor:pointer; }
+.v68-cbbar button:hover { background:rgba(31,111,178,.1); }
+
+/* ④ 導覽列：字·X 收進「字詞辨析 ▾」 */
+.v68-cb-group { display:none; }
+.v68-cb-group.open { display:contents; }

@@ -1,0 +1,60 @@
+
+/* ═══ v39：浮框改為「字級同步、內容自適應」；教學按鈕固定尺寸 ═══ */
+/*
+   浮框原本因 overflow:auto + 很低的 max-height 產生瀏覽器捲軸箭頭，
+   在大字級時看起來像一個很矮的輸入框。
+   現在改成：字級與觸發文字完全相同；高度不設上限；寬度盡量依內容，
+   但最多不超過課文區／視窗可用寬度。內容真的很長時，靠增加寬度減少換行。
+*/
+.tp-gd, .tp-pd, .tp-zd {
+  box-sizing:border-box !important;
+  width:max-content !important;
+  min-width:0 !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:none !important;
+  overflow:visible !important;
+  white-space:normal !important;
+  font-size:inherit !important;
+  line-height:1.5 !important;
+  padding:7px 12px !important;
+  letter-spacing:.02em !important;
+  -webkit-overflow-scrolling:auto !important;
+  overscroll-behavior:auto !important;
+}
+@media (max-width:700px){
+  .tp-gd, .tp-pd, .tp-zd {
+    max-width:calc(100vw - 18px) !important;
+    max-height:none !important;
+    overflow:visible !important;
+  }
+}
+
+/* 課文操作按鈕固定尺寸；不隨右下角字體滑桿一起變大。
+   頁碼 .tp-page 例外，仍依使用者設定同步縮放。 */
+.tp-btns,
+.tp-btns .tp-b,
+.tp-lbtns,
+.tp-lbtns .tp-lb,
+.tp-style-before,
+.tp-style-before > .tp-lb {
+  font-size:16px !important;
+  line-height:1.35 !important;
+}
+.tp-btns .tp-b,
+.tp-lbtns .tp-lb,
+.tp-style-before > .tp-lb {
+  min-height:38px !important;
+  padding:7px 12px !important;
+}
+/* 「段旨／段析／翻譯／課堂提問」開啟後的標題也保持緊湊，
+   避免按鈕區本身佔掉太多投影版面。內容文字仍可正常閱讀。 */
+.tp-panel .tp-pk,
+.tp-panel .tp-askl,
+.tp-panel .tp-qa .tp-qn,
+.tp-panel .tp-acov,
+.tp-panel .tp-askb {
+  font-size:16px !important;
+}
+
+/* 筆法按鈕維持紫色，但固定為操作元件尺寸。 */
+.tp-style-before > .tp-lb.tp-lb-s { font-size:16px !important; }

@@ -1,0 +1,70 @@
+
+/* ════ v34：補充浮框固定尺寸＋頁碼固定右上角 ════ */
+/* 字義／片語／注音浮框不再跟著課文字級滑桿放大。
+   內容很多時在浮框內自行捲動，不再把整張投影片撐爆。 */
+.tp-gd, .tp-pd, .tp-zd {
+  box-sizing: border-box !important;
+  width: min(340px, calc(100vw - 24px)) !important;
+  min-width: 0 !important;
+  max-width: min(340px, calc(100vw - 24px)) !important;
+  max-height: min(42vh, 260px) !important;
+  overflow: auto !important;
+  white-space: normal !important;
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+  letter-spacing: .02em !important;
+  padding: 6px 10px !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.tp-zd { font-size: 16px !important; }
+/* 小螢幕再縮一點，避免浮框吃掉整個畫面 */
+@media (max-width:700px) {
+  .tp-gd, .tp-pd, .tp-zd {
+    width: min(300px, calc(100vw - 20px)) !important;
+    max-width: min(300px, calc(100vw - 20px)) !important;
+    max-height: min(38vh, 220px) !important;
+    font-size: 16px !important;
+  }
+}
+/* 「生乎吾前／生乎吾後」本身是藍色字義標記；點開後浮框仍維持紫色補充系統。 */
+.tp-p.tp-p-blue {
+  color: var(--L-gloss,#1f6fb2) !important;
+  border-bottom-color: var(--L-gloss,#1f6fb2) !important;
+}
+/* 頁碼固定在視窗右上角；課文往下捲時仍一直看得到。
+   只有頁碼的字級跟隨右下角滑桿（--slider-base-size）。 */
+.tp-page,
+.wks-book-page {
+  position: fixed !important;
+  top: 58px !important;
+  right: 24px !important;
+  z-index: 9400 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  padding: 3px 10px !important;
+  border: 1px solid var(--mk-line,#cabb96) !important;
+  border-radius: 5px !important;
+  background: var(--mk-paper,#f4f0ea) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10) !important;
+  white-space: nowrap !important;
+  font-size: calc(var(--slider-base-size, 15px) * 0.95) !important;
+}
+body.dark-mode .tp-page,
+body.dark-mode .wks-book-page {
+  background: var(--mk-paper,#1c1917) !important;
+}
+@media (max-width:820px) {
+  .tp-page,
+  .wks-book-page {
+    top: 52px !important;
+    right: 12px !important;
+  }
+}
+/* 全螢幕標題列仍在頁碼之上，避免兩者互撞。 */
+#wk-fullscreen .tp-page,
+#wk-fullscreen .wks-book-page {
+  top: 52px !important;
+  right: 18px !important;
+  z-index: 9600 !important;
+}

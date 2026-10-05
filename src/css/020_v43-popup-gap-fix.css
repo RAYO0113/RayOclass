@@ -1,0 +1,5 @@
+
+/* v43：下方浮框貼近原文；僅保留 3px 間距，避免多個浮框時被額外推遠。 */
+.tp-gd, .tp-pd, .tp-zd {
+  margin:0 !important;
+}

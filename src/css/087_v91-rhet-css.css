@@ -1,0 +1,54 @@
+
+/* v91：修辭呈現改版（老師 9/30：學生不知道「抄在哪、抄什麼」）
+   B：下方修辭框不再顯示課文引句，只留修辭名稱＋說明
+   A：修辭開啟時，在課文被框的字正上方顯示紅色修辭名稱（＝學生抄在課本上的字，比照 RAY PPT）
+   整句型修辭（錯綜、回文、跨行映襯等）：每一橫列畫一個完整外框，不再被其他標記切成好幾段 */
+.v91-rq-hide { display:none !important; }
+.tp-text.v91-rel { position:relative; }
+.tp-text.v91-lab-on { line-height:3.3 !important; padding-top:1.05em; }
+.v91-lab {
+  position:absolute; transform:translateY(-100%);
+  white-space:nowrap; pointer-events:none; z-index:3;
+  font-family:"Noto Sans TC",sans-serif; font-weight:800;
+  font-size:0.8em; line-height:1.2; letter-spacing:0.02em;
+  color:var(--L-rhet,#c0392b);
+}
+/* 大框深紅、裡面的小框維持原本淺紅（老師：顏色相近會亂）；大框內再有大框時深淺交錯 */
+.v91-frame {
+  position:absolute; pointer-events:none; z-index:2; box-sizing:border-box;
+  border:2.5px solid #a3160c; border-radius:5px;
+}
+.v91-frame.v91-light { border:2px solid var(--L-rhet,#c0392b); }
+body.dark-mode .v91-frame { border-color:#ffb4aa; }
+body.dark-mode .v91-frame.v91-light { border-color:var(--L-rhet,#FF5151); }
+
+/* 藍色字義浮框：同頁依出現順序深、淺交錯（浮框、連接線、課文藍字底線同色） */
+.tp-gd.v91-ga, .tp-zd.v91-ga, .tp-pd.v91-ga {
+  color:#0f4a85 !important; border:2px solid #0f4a85 !important;
+}
+.tp-gd.v91-gb, .tp-zd.v91-gb, .tp-pd.v91-gb {
+  color:#3b8bd0 !important; border:2px solid #86bbe9 !important; background:#eef6fd !important;
+}
+/* 課文上的字義字也跟浮框同色（老師：對應的課本原文顏色要跟著改）；
+   選擇器加 .tp-text 以蓋過 .tp-seg-rhet .tp-g 的統一藍 */
+.tp-text .tp-g.v91-ga, .tp-text .tp-p.tp-p-blue.v91-ga, .tp-text .tp-seg-rhet .tp-g.v91-ga {
+  color:#0f4a85 !important; border-bottom-color:#0f4a85 !important;
+}
+.tp-text .tp-g.v91-gb, .tp-text .tp-p.tp-p-blue.v91-gb, .tp-text .tp-seg-rhet .tp-g.v91-gb {
+  color:#3b8bd0 !important; border-bottom-color:#86bbe9 !important;
+}
+body.dark-mode .tp-gd.v91-ga, body.dark-mode .tp-zd.v91-ga, body.dark-mode .tp-pd.v91-ga {
+  color:#d6ebff !important; border-color:#b9dcff !important; background:#10243a !important;
+}
+body.dark-mode .tp-gd.v91-gb, body.dark-mode .tp-zd.v91-gb, body.dark-mode .tp-pd.v91-gb {
+  color:#8fb8e0 !important; border-color:#4a7bab !important; background:#1d2a38 !important;
+}
+body.dark-mode .tp-text .tp-g.v91-ga, body.dark-mode .tp-text .tp-p.tp-p-blue.v91-ga, body.dark-mode .tp-text .tp-seg-rhet .tp-g.v91-ga {
+  color:#d6ebff !important; border-bottom-color:#b9dcff !important;
+}
+body.dark-mode .tp-text .tp-g.v91-gb, body.dark-mode .tp-text .tp-p.tp-p-blue.v91-gb, body.dark-mode .tp-text .tp-seg-rhet .tp-g.v91-gb {
+  color:#8fb8e0 !important; border-bottom-color:#4a7bab !important;
+}
+.tp-seg.tp-seg-rhet.v91-wseg { box-shadow:none !important; }
+.tp-line.v91-twin-only .tp-lb-r, .tp-line.v91-twin-only .tp-box-r { display:none !important; }
+.tp-rhet.v91-twin { display:none !important; }

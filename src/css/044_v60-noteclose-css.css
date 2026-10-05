@@ -1,0 +1,16 @@
+
+/* v60：快速收合右側「注釋」欄。
+   ①注釋欄標題列加「✕ 收合」。
+   ②捲動後標題列不在畫面上時，注釋欄上方浮出「✕ 收合註釋」。
+     原因：.tp-side 雖設 position:sticky，但外層 #wk-slide-area（overflow:hidden）、.wk-slide（overflow:auto）讓 sticky 失效；不改外層，避免影響畫筆與版面。 */
+.tp-side-h{ display:flex; align-items:center; }
+.tp-side-h .v60-side-x{ margin-left:auto; flex:0 0 auto; min-height:36px; padding:0 12px; cursor:pointer;
+  font-family:"Noto Sans TC",sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; border-radius:8px;
+  color:#7a2e2e; background:rgba(122,46,46,.06); border:1px solid rgba(122,46,46,.45); }
+.tp-side-h .v60-side-x:active{ background:rgba(122,46,46,.16); }
+body.dark-mode .tp-side-h .v60-side-x{ color:#e6b0a8; border-color:rgba(230,176,168,.55); background:rgba(230,176,168,.08); }
+#v60-side-float{ position:fixed; z-index:10500; display:none; min-height:44px; padding:0 16px; cursor:pointer;
+  font-family:"Noto Sans TC",sans-serif; font-size:16px; font-weight:700; letter-spacing:1px; border-radius:999px;
+  color:#fff; background:#7a2e2e; border:1px solid #5e2020; box-shadow:0 3px 12px rgba(0,0,0,.28); }
+#v60-side-float.show{ display:block; }
+#v60-side-float:active{ background:#5e2020; }

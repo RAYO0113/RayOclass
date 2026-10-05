@@ -1,0 +1,9 @@
+
+/* v99：考試日曆 ↔ V84 完成紀錄 連動 */
+#v98-cal .v98-pill.v99-done { opacity:.55; text-decoration:line-through; }
+#v98-cal .v98-it button.v99-ck { color:var(--muted,#7a6a55); border:1px solid var(--border,#d4c4a8); border-radius:4px; font-size:13px; padding:1px 6px; white-space:nowrap; }
+#v98-cal .v98-it button.v99-ck.on { background:#e3f1e7; color:#1f6b3a; border-color:#8cc29f; font-weight:700; }
+#v98-cal .v98-it.v99-done .v98-tx { text-decoration:line-through; opacity:.6; }
+#v84-hw button.v84-c .v99-plan { display:block; font-size:11px; color:#a33; font-weight:700; }
+body.dark-mode #v98-cal .v98-it button.v99-ck.on { background:#244a33; color:#9fe0b4; }
+body.dark-mode #v84-hw button.v84-c .v99-plan { color:#ffb3a8; }

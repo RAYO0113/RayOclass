@@ -1,0 +1,6 @@
+
+/* v104：窄畫面（iPad 直拿）編輯區太矮 → 「接下來三週」縮小，空間讓給編輯區 */
+@media (max-width:820px) {
+  #v98-cal .v98-ed { flex:1 1 auto; min-height:0; }
+  #v98-cal .v98-up { flex:0 0 auto; max-height:110px; }
+}

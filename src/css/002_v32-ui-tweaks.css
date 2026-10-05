@@ -1,0 +1,82 @@
+
+/* ════ v32：筆法／字義補充視覺統一 ════ */
+/* 筆法：與句意同級字級，改用紫色補充系統 */
+.tp-style {
+  font-family: "Noto Sans TC", sans-serif !important;
+  font-size: calc(var(--base-size)*1.12) !important;
+  line-height: 1.85 !important;
+  color: var(--L-supp,#7c4da0) !important;
+  border-left: 3px solid var(--L-supp,#7c4da0) !important;
+  background: var(--L-supp-bg,rgba(124,77,160,.10)) !important;
+  padding: 7px 13px !important;
+  margin-top: 5px !important;
+  border-radius: 2px;
+}
+.tp-style b { color: var(--L-supp,#7c4da0) !important; font-size:1em !important; }
+.tp-stk { background: var(--L-supp,#7c4da0) !important; }
+.tp-lb-s { color: var(--L-supp,#7c4da0) !important; border-color: var(--L-supp,#7c4da0) !important; }
+.tp-lb-s.on, .tp-lb-s:hover { background: var(--L-supp,#7c4da0) !important; color:#fff !important; }
+#wk-fullscreen .tp-style { font-size: calc(var(--base-size)*1.32) !important; }
+
+/* 長篇補充與字義補充：統一成紫色芫荽浮框 */
+.tp-g, .tp-p {
+  color: var(--L-supp,#7c4da0) !important;
+  cursor: pointer;
+  border-bottom: 1px dashed var(--L-supp,#7c4da0) !important;
+  position: relative;
+  font-family: "Noto Serif TC","Zen Old Mincho",serif;
+}
+.tp-gd, .tp-pd {
+  display:none;
+  position:absolute;
+  left:50%;
+  bottom:100%;
+  transform:translateX(-50%) translateY(-6px);
+  z-index:120;
+  max-width:min(72vw, 340px);
+  min-width:max-content;
+  white-space:normal;
+  box-sizing:border-box;
+  padding:5px 10px;
+  border:1px solid var(--L-supp,#7c4da0);
+  border-radius:5px;
+  background:var(--mk-paper,#fffdf8);
+  color:var(--L-supp,#7c4da0);
+  font-family:"Iansui","Noto Sans TC",sans-serif !important;
+  font-size:.86em;
+  line-height:1.6;
+  letter-spacing:.02em;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);
+  pointer-events:none;
+}
+.tp-g.show .tp-gd, .tp-p.show .tp-pd { display:block; }
+.tp-g.tp-pop-below .tp-gd, .tp-p.tp-pop-below .tp-pd {
+  top:100%;
+  bottom:auto;
+  transform:translateX(-50%) translateY(6px);
+}
+body.dark-mode .tp-gd, body.dark-mode .tp-pd { background:var(--mk-paper,#1c1917); }
+/* 傳道這類補充不再只貼在原文旁邊，而是和字義一樣浮出 */
+.tp-pd { min-width:180px; }
+
+/* 注音／通假仍保留藍色識別，但同樣使用智慧上下浮框 */
+.tp-z { position:relative; }
+.tp-z.tp-pop-below .tp-zd { top:100%; bottom:auto; transform:translateX(-50%) translateY(6px); }
+
+/* 只有「筆法」放在正文之前；句意／修辭／翻譯／提問維持正文之後。 */
+.tp-style-before { display:flex; align-items:flex-start; gap:10px; margin:0 0 7px 0; }
+.tp-style-before > .tp-lb {
+  flex:0 0 auto; width:auto !important; min-width:4.6em;
+  text-align:center; padding:5px 8px !important; min-height:34px !important;
+}
+.tp-style-before-box { flex:1; min-width:0; margin-top:0 !important; }
+.tp-line > .tp-extra { margin-top:7px !important; margin-bottom:7px !important; }
+@media (max-width:700px) {
+  .tp-style-before { gap:8px; margin-bottom:6px; }
+  .tp-style-before > .tp-lb { min-width:4em; }
+}
+
+@media (max-width:700px) {
+  .tp-line > .tp-extra { margin-bottom:6px !important; }
+  .tp-gd, .tp-pd, .tp-zd { max-width:min(82vw, 320px); }
+}

@@ -1,0 +1,77 @@
+
+/* ═══ v42：回到 v39 的可靠浮框做法；修正「上方浮框文字跑出框外」 ═══
+   這版不改整體資料，只修浮框定位與換行。 */
+.tp-gd, .tp-pd, .tp-zd {
+  position:fixed !important;
+  display:none !important;
+  box-sizing:border-box !important;
+  width:max-content !important;
+  min-width:0 !important;
+  max-width:calc(100vw - 24px) !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow:visible !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+  line-break:auto !important;
+  font-size:inherit !important;
+  line-height:1.5 !important;
+  padding:7px 12px !important;
+  letter-spacing:.02em !important;
+  transform:none !important;
+  top:auto;
+  right:auto !important;
+  bottom:auto !important;
+  left:auto;
+  z-index:12000 !important;
+  pointer-events:auto !important;
+}
+.tp-g.show > .tp-gd,
+.tp-p.show > .tp-pd,
+.tp-z.show > .tp-zd { display:block !important; }
+
+/* 上下切換只由 JS 決定，CSS 不再用 top:100%／bottom:100% 拉伸浮框。 */
+.tp-g.tp-pop-below .tp-gd,
+.tp-p.tp-pop-below .tp-pd,
+.tp-z.tp-pop-below .tp-zd {
+  top:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+}
+
+/* 藍色：字義／字音；紫色：補充／典故／由來。 */
+.tp-gd, .tp-zd,
+.tp-p.tp-p-blue > .tp-pd {
+  color:var(--L-gloss,#1f6fb2) !important;
+  border:1px solid var(--L-gloss,#1f6fb2) !important;
+  background:var(--mk-paper,#fffdf8) !important;
+  font-family:"Iansui","Noto Sans TC",sans-serif !important;
+}
+.tp-pd {
+  color:var(--L-supp,#7c4da0) !important;
+  border:1px solid var(--L-supp,#7c4da0) !important;
+  background:var(--mk-paper,#fffdf8) !important;
+  font-family:"Iansui","Noto Sans TC",sans-serif !important;
+}
+
+/* 修辭採用指定色 #FF5151，但維持淡底＋框線，避免整塊實心過豔。 */
+#tab-wenxue, #wk-fullscreen {
+  --L-rhet:#FF5151;
+  --L-rhet-bg:rgba(255,81,81,.08);
+}
+body.dark-mode #tab-wenxue, body.dark-mode #wk-fullscreen {
+  --L-rhet:#FF5151;
+  --L-rhet-bg:rgba(255,81,81,.12);
+}
+.tp-seg-rhet {
+  color:var(--L-rhet,#FF5151) !important;
+  background:var(--L-rhet-bg) !important;
+  box-shadow:inset 0 0 0 2px var(--L-rhet,#FF5151) !important;
+}
+.tp-rcite { border-color:var(--L-rhet,#FF5151) !important; }
+
+@media (max-width:700px){
+  .tp-gd, .tp-pd, .tp-zd { max-width:calc(100vw - 18px) !important; }
+}

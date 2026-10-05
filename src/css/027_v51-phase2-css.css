@@ -1,0 +1,31 @@
+
+/* ===== Phase2：課本／注釋 直式注音（符號直排、聲調獨立定位；不使用旋轉）===== */
+.tp-ruby{ display:inline-block; position:relative; width:1.06em; height:1em;
+  vertical-align:.32em; line-height:1; font-size:.40em; font-weight:700; margin:0 .14em 0 .03em;
+  font-family:"Noto Sans TC",sans-serif; letter-spacing:0; white-space:nowrap; pointer-events:none; }
+.tp-ruby-col{ position:absolute; left:0; top:50%; display:flex; flex-direction:column; align-items:center;
+  transform:translateY(-50%); }
+.tp-ruby-char{ display:block; line-height:1.04; }
+.tp-ruby-tone{ position:absolute; left:.73em; top:0; display:block; line-height:1; }
+.tp-ruby-tone-light{ top:-1.05em; }
+.tp-ruby-book{ color:#111; }
+.tp-ruby-note{ color:#7a2e2e; }
+/* {n} 專用：保留原文字大小，為深紅直式注音與註號保留獨立的右側空間。 */
+.tp-n > .tp-ruby-note{ width:1.48em; margin-left:.24em; margin-right:.32em; }
+.tp-n > .tp-ruby-note .tp-ruby-col{ left:.16em; }
+.tp-n > .tp-ruby-note .tp-ruby-tone{ left:1.02em; }
+.tp-n:has(> .tp-ruby-note) > .tp-num{ position:relative; left:.18em; top:-.20em; margin-left:0; }
+body.dark-mode .tp-ruby-book{ color:#f0ece0; }
+body.dark-mode .tp-ruby-note{ color:#e2a6a6; }
+/* ===== Phase2：作者／題解 首行縮排（僅師說）===== */
+.wks-shishuo-info .wks-info-body p.wks-para{ margin:0 0 .55em 0; text-indent:2em; }
+.wks-shishuo-info .wks-info-body p.wks-para:last-child{ margin-bottom:0; }
+/* ===== Phase2：A卷對答案 分組排列（單題每列5，題組不拆）===== */
+.wks-asheet .as-rows{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+.wks-asheet .as-row{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+.wks-asheet .as-unit{ display:inline-flex; align-items:center; gap:3px; cursor:pointer;
+  padding:6px 9px; border:1px solid var(--mk-line,#cabb96); border-radius:5px;
+  background:var(--mk-paper-warm,#f7f2e6); white-space:nowrap; }
+body.dark-mode .wks-asheet .as-unit{ background:var(--mk-paper-warm,#221d18); }
+.wks-asheet .as-grp{ display:inline-flex; flex-wrap:nowrap; gap:8px; padding:5px 8px;
+  border:1px dashed var(--L-supp,#7c4da0); border-radius:7px; break-inside:avoid; }

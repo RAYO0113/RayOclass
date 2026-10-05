@@ -1,0 +1,38 @@
+
+/* v60：正式註釋與補充分開。註釋下方只留「補充」按鈕，補充內容移到置中大卡片（遮罩＋關閉回原畫面）。
+   補充原文（bk-note）保留在註釋內的隱藏容器，不改課文資料。 */
+.tp-note .v60-bk-store{ display:none !important; }
+.v60-bk-btn{ display:inline-block; margin:6px 0 2px; padding:4px 14px; font-size:.78em; line-height:1.5;
+  font-family:"Noto Sans TC",sans-serif; letter-spacing:2px; cursor:pointer; border-radius:999px;
+  color:var(--L-supp,#7c4da0); background:rgba(124,77,160,.07); border:1px solid rgba(124,77,160,.55); }
+.v60-bk-btn:active{ background:rgba(124,77,160,.18); }
+body.dark-mode .v60-bk-btn{ color:#c9a8e6; border-color:rgba(201,168,230,.6); background:rgba(201,168,230,.08); }
+.v60-bk-btn-wrap{ display:block; }
+
+#v60-bk-ov{ position:fixed; inset:0; z-index:11000; display:none; align-items:center; justify-content:center;
+  background:rgba(15,20,35,.55); padding:16px; box-sizing:border-box; }
+#v60-bk-ov.show{ display:flex; }
+#v60-bk-ov.in-fs{ position:absolute; z-index:20; }        /* 投影：放在畫筆圖層（#wk-ink-layer，實際 z12500）下方，畫筆可直接畫在卡片上 */
+#v60-bk-ov .v60-bk-card{ width:min(92vw,980px); max-height:100%; display:flex; flex-direction:column; box-sizing:border-box;
+  background:#fbf8f0; color:#2a1f12; border:1px solid #b99ad4; border-top:6px solid #7c4da0; border-radius:14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35); overflow:hidden; }
+#v60-bk-ov .v60-bk-head{ flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:14px 76px 12px 22px;
+  border-bottom:1px solid #e3d6ee; font-family:"Noto Serif TC",serif; }
+#v60-bk-ov .v60-bk-tag{ flex:0 0 auto; font-family:"Noto Sans TC",sans-serif; font-size:15px; letter-spacing:3px;
+  color:#fff; background:#7c4da0; border-radius:6px; padding:3px 10px; }
+#v60-bk-ov .v60-bk-ttl{ font-size:24px; font-weight:700; color:#5a2f7e; }
+#v60-bk-ov .v60-bk-body{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:18px 26px 26px;
+  font-family:"Noto Serif TC","Zen Old Mincho",serif; font-size:30px; line-height:1.8; }
+#v60-bk-ov .v60-bk-item{ display:block; padding:4px 0 4px 16px; margin:0 0 14px; border-left:3px solid #b99ad4; color:#3a2350; }
+#v60-bk-ov .v60-bk-item:last-child{ margin-bottom:0; }
+#v60-bk-ov .v60-bk-item b{ color:#7c4da0; }
+body.dark-mode #v60-bk-ov .v60-bk-card{ background:#221c26; color:#eee4f5; border-color:#5d4675; border-top-color:#9a6cc4; }
+body.dark-mode #v60-bk-ov .v60-bk-head{ border-bottom-color:#3e3148; }
+body.dark-mode #v60-bk-ov .v60-bk-ttl{ color:#d7bdf0; }
+body.dark-mode #v60-bk-ov .v60-bk-item{ color:#eee4f5; border-left-color:#7a5a99; }
+body.dark-mode #v60-bk-ov .v60-bk-item b{ color:#d7bdf0; }
+/* 關閉鈕獨立掛在 body、定位在卡片右上角；z-index 由 JS 設成畫筆圖層＋1，畫筆開著也按得到 */
+#v60-bk-x{ position:fixed; z-index:11001; display:none; min-width:52px; min-height:44px; padding:0 14px;
+  font-size:18px; font-family:"Noto Sans TC",sans-serif; cursor:pointer; border-radius:10px;
+  color:#fff; background:#7c4da0; border:1px solid #5a2f7e; box-shadow:0 2px 8px rgba(0,0,0,.25); }
+#v60-bk-x.show{ display:block; }

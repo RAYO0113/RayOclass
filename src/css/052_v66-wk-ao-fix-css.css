@@ -1,0 +1,3 @@
+
+/* 全域 section{display:none}（分頁切換用）也命中了總覽分組 <section class="wk-ao-group">，導致各課總覽全空白 */
+.wks-workanswers section.wk-ao-group { display:block; }

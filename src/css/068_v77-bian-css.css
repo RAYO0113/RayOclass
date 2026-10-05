@@ -1,0 +1,8 @@
+
+.v77-bian { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin:0 3px; vertical-align:middle;
+  border:2px solid #1f9ad6; border-radius:4px; background:#fff; color:#1f9ad6; font-size:14px; font-weight:700; line-height:1;
+  font-family:"Noto Sans TC",sans-serif; cursor:pointer; text-indent:0; }
+.v77-bian::before { content:"辨"; }  /* 用 CSS 顯示，不產生文字節點：避免改變課文可見文字（v54「總」框以可見文字找錨點） */
+.v77-bian:hover { background:#1f9ad6; color:#fff; }
+#wk-fullscreen .v77-bian { width:32px; height:32px; font-size:17px; }
+body.dark-mode .v77-bian { background:#1c1917; color:#6cc4f0; border-color:#6cc4f0; }

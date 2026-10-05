@@ -1,0 +1,22 @@
+
+/* v111：小考紀錄手動編輯（日期、班級、編號、增刪題目、答案與句子） */
+#v108-nqr .v111-eb { margin-left:6px; border:1px solid #7a2e2e; background:#fff; color:#7a2e2e; border-radius:10px; padding:0 9px; font-size:13px; cursor:pointer; }
+#v108-nqr .v111-ed { border:2px solid #7a2e2e; border-radius:8px; padding:10px 12px; margin:0 0 12px; background:var(--surface,#fff); font-size:14px; }
+#v108-nqr .v111-ed h4 { margin:0 0 8px; color:#7a2e2e; font-size:16px; }
+#v108-nqr .v111-ed .rw { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0; }
+#v108-nqr .v111-ed .k { min-width:56px; color:var(--muted,#7a6a55); }
+#v108-nqr .v111-ed input[type=text], #v108-nqr .v111-ed input[type=date], #v108-nqr .v111-ed textarea { font:inherit; font-size:14px; padding:3px 6px; border:1px solid var(--border,#d4c4a8); border-radius:4px; background:transparent; color:inherit; }
+#v108-nqr .v111-ed .cd input { width:72px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+#v108-nqr .v111-ed button { border:1px solid var(--border,#d4c4a8); background:transparent; color:inherit; border-radius:10px; padding:1px 9px; cursor:pointer; font-size:13px; }
+#v108-nqr .v111-ed button.on { background:#7a2e2e; color:#fff; border-color:#7a2e2e; }
+#v108-nqr .v111-ed .q { border-top:1px dotted var(--border,#d4c4a8); padding:6px 0; display:grid; grid-template-columns:auto 1fr auto; gap:4px 8px; align-items:start; }
+#v108-nqr .v111-ed .q .n { color:#7a2e2e; font-weight:700; white-space:nowrap; }
+#v108-nqr .v111-ed .q textarea { width:100%; box-sizing:border-box; min-height:34px; resize:vertical; }
+#v108-nqr .v111-ed .q .del { color:#c0392b; border-color:#c0392b; }
+#v108-nqr .v111-ed .add .g { display:flex; flex-wrap:wrap; gap:4px; max-height:160px; overflow:auto; margin-top:4px; }
+#v108-nqr .v111-ed .add .g button small { color:#7a2e2e; margin-right:3px; }
+#v108-nqr .v111-ed .add .g button:disabled { opacity:.35; cursor:default; }
+#v108-nqr .v111-ed .ft { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+#v108-nqr .v111-ed .ft .ok { background:#7a2e2e; color:#fff; border-color:#7a2e2e; padding:4px 18px; font-size:15px; }
+#v108-nqr .v111-ed .ft .no { padding:4px 14px; font-size:15px; }
+#v108-nqr .v111-ed .warn { color:#c0392b; font-size:13px; }

@@ -1,0 +1,19 @@
+
+/* v50：Apple Pencil 優先繪圖；畫記開啟時，手指不觸發文字選取 */
+#wk-ink-layer.active,
+#wk-ink-layer.active #wk-ink-canvas{
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-touch-callout:none!important;
+  touch-action:none!important;
+  -webkit-touch-action:none!important;
+}
+
+/* 畫記開啟時，整個課文內容不接受瀏覽器的長按選取；
+   仍保留按鈕、浮框等既有互動。 */
+#wk-fullscreen.ink-mode,
+#wk-fullscreen.ink-mode *{
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-touch-callout:none!important;
+}

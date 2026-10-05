@@ -1,0 +1,10 @@
+
+/* v37：浮框高度只跟當前字級走，最多四行；高度限制不影響字級。 */
+.tp-gd, .tp-pd, .tp-zd {
+  font-size: inherit !important;
+  line-height: 1.5 !important;
+  max-height: calc(6em + 14px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}

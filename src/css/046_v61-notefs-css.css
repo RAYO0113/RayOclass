@@ -1,0 +1,40 @@
+
+/* v61：①正式註釋／補充卡／「總」字卡的閱讀文字共用一個字級（滑桿 26～46px，存 localStorage）。
+        只改閱讀文字；按鈕、工具列、標題維持原大小。
+   ②注音（zy-note）資料保留，正式註釋畫面與補充卡預設隱藏。 */
+:root{ --v61-nfs:30px; }
+/* 註釋欄（一般畫面＋投影）；覆蓋 v51-r2 的 calc(var(--student-read-size)*.8) */
+.tp-note, #wk-fullscreen .tp-note{ font-size:var(--v61-nfs) !important; }
+/* 「補充」按鈕原本是 .78em，會跟著文字變大 → 固定大小 */
+.tp-note .v60-bk-btn{ font-size:18px !important; }
+/* 補充卡內文 */
+#v60-bk-ov .v60-bk-body{ font-size:var(--v61-nfs) !important; }
+/* 「總」字卡：沿用其 --rt（原滑桿 15～30，改由共用字級控制） */
+#ss-anno-ov .ss-body{ --rt:var(--v61-nfs) !important; }
+/* 例句編號縮排原為 1.6em（以外層 16px 計），字級放大後「1.」會被切掉 → 改隨字級 */
+#ss-anno-ov .ss-exs{ padding-left:calc(var(--rt) * 1.6); }
+/* 例句格原固定 max-height 150px（19px 時約 5 行）→ 改為隨字級維持約 5 行 */
+#ss-anno-ov .ss-c-ex{ max-height:calc(var(--rt) * 1.55 * 5 + 6px); }
+/* 「總」字卡加寬（原 min(94vw,900px)），字級放大後例句欄才不會太窄 */
+#ss-anno-ov .ss-sheet{ width:min(96vw,1280px); }
+
+/* 注音預設隱藏（資料仍在 DOM 內） */
+.tp-note .zy-note, #v60-bk-ov .zy-note{ display:none !important; }
+
+/* 滑桿元件（固定 px，不隨字級縮放） */
+.v61-fs{ display:inline-flex; align-items:center; gap:8px; flex:0 0 auto;
+  font-family:"Noto Sans TC",sans-serif; font-size:14px; font-weight:400; letter-spacing:0; line-height:1; color:#8a7560; }
+.v61-fs input[type=range]{ width:130px; height:32px; margin:0; accent-color:#7a2e2e; cursor:pointer; }
+.v61-fs .v61-fs-v{ min-width:3.2em; text-align:right; font-variant-numeric:tabular-nums; color:#7a2e2e; }
+body.dark-mode .v61-fs{ color:#bba99a; }
+body.dark-mode .v61-fs .v61-fs-v{ color:#e6b0a8; }
+/* 註釋欄標題列：滑桿放第二列，避免擠壓「注　釋」與「✕ 收合」 */
+.tp-side-h[data-v61fs]{ flex-wrap:wrap; row-gap:4px; }
+.tp-side-h .v61-fs{ order:3; flex:1 0 100%; }
+.tp-side-h .v61-fs input[type=range]{ flex:1 1 auto; width:auto; min-width:80px; }
+/* 補充卡標題列：放在標題右側；✕ 關閉另外掛在 body、實際約佔右側 97px → 右側留白加大到 120px */
+#v60-bk-ov .v60-bk-head[data-v61fs]{ padding-right:120px; }
+#v60-bk-ov .v60-bk-head .v61-fs{ margin-left:auto; }
+#v60-bk-ov .v61-fs input[type=range]{ accent-color:#7c4da0; }
+#v60-bk-ov .v61-fs .v61-fs-v{ color:#7c4da0; }
+body.dark-mode #v60-bk-ov .v61-fs .v61-fs-v{ color:#d7bdf0; }

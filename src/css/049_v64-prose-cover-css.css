@@ -1,0 +1,74 @@
+
+/* 白話文封面：稿紙白＋靛藍，橫排靠左（古文封面為深底金字置中，刻意區隔） */
+.wks-pcover {
+  position: relative; overflow: hidden; min-height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 44px 56px 40px 84px; text-align: left;
+  color: #16263d;
+  background:
+    linear-gradient(90deg, transparent 58px, rgba(196,74,58,0.38) 58px, rgba(196,74,58,0.38) 60px, transparent 60px),
+    repeating-linear-gradient(180deg, transparent 0, transparent 37px, rgba(31,63,110,0.08) 37px, rgba(31,63,110,0.08) 38px),
+    linear-gradient(160deg, #f7f3ea 0%, #efe8da 100%) !important;
+}
+.wks-pcover::before {            /* 左側靛藍書背 */
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 18px;
+  background: linear-gradient(180deg, #1f3f6e, #2d5a93);
+}
+.wks-pcover .pc-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; position: relative; z-index: 1; }
+.wks-pcover .pc-cat {
+  background: #1f3f6e; color: #fff; padding: 5px 14px 5px 16px;
+  font-size: calc(var(--base-size) * 0.8); letter-spacing: 0.3em; font-weight: 700;
+}
+.wks-pcover .pc-no { color: #1f3f6e; font-size: calc(var(--base-size) * 0.85); letter-spacing: 0.18em; font-weight: 700; }
+.wks-pcover .pc-body { position: relative; z-index: 1; margin: 28px 0; }
+.wks-pcover .pc-title {
+  font-family: "Noto Serif TC", serif; font-weight: 900; margin: 0;
+  font-size: calc(var(--base-size) * 3.6); line-height: 1.15; letter-spacing: 0.1em; color: #14243a;
+}
+.wks-pcover .pc-rule { width: 76px; height: 5px; background: #c44a3a; margin: 22px 0 18px; }
+.wks-pcover .pc-author {
+  font-family: "Noto Serif TC", serif; font-size: calc(var(--base-size) * 1.45);
+  letter-spacing: 0.2em; font-weight: 700; color: #22364f;
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.wks-pcover .pc-by { font-size: 0.62em; font-weight: 400; color: #5b6b80; letter-spacing: 0.1em; }
+.wks-pcover .pc-era {
+  font-size: 0.5em; font-weight: 400; letter-spacing: 0.2em; color: #1f3f6e;
+  border: 1px solid rgba(31,63,110,0.45); padding: 2px 10px; border-radius: 999px;
+}
+.wks-pcover .pc-sub { margin-top: 14px; font-size: calc(var(--base-size) * 0.85); color: #5b6b80; letter-spacing: 0.08em; }
+.wks-pcover .pc-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.wks-pcover .pc-q {              /* 右側淡淡的大引號（包在 pc-deco 內裁切，不撐出捲軸） */
+  position: absolute; right: 34px; font-family: "Noto Serif TC", serif; font-weight: 900;
+  font-size: calc(var(--base-size) * 9); line-height: 1; color: rgba(31,63,110,0.09); pointer-events: none;
+}
+.wks-pcover .pc-q1 { top: 18px; }
+.wks-pcover .pc-q2 { bottom: 10px; }
+.wks-pcover .pc-foot {
+  position: relative; z-index: 1; font-size: calc(var(--base-size) * 0.75);
+  color: #7b8798; letter-spacing: 0.3em;
+}
+#wk-fullscreen .wks-pcover .pc-title { font-size: calc(var(--base-size) * 5); }
+#wk-fullscreen .wks-pcover .pc-author { font-size: calc(var(--base-size) * 1.8); }
+/* 深色模式：夜讀靛藍 */
+body.dark-mode .wks-pcover {
+  color: #e9e3d6;
+  background:
+    linear-gradient(90deg, transparent 58px, rgba(214,120,100,0.35) 58px, rgba(214,120,100,0.35) 60px, transparent 60px),
+    repeating-linear-gradient(180deg, transparent 0, transparent 37px, rgba(143,182,224,0.07) 37px, rgba(143,182,224,0.07) 38px),
+    linear-gradient(160deg, #0f1b2d 0%, #16263d 100%) !important;
+}
+body.dark-mode .wks-pcover::before { background: linear-gradient(180deg, #8fb6e0, #5a90d0); }
+body.dark-mode .wks-pcover .pc-cat { background: #8fb6e0; color: #0d1a2c; }
+body.dark-mode .wks-pcover .pc-no, body.dark-mode .wks-pcover .pc-era { color: #8fb6e0; border-color: rgba(143,182,224,0.5); }
+body.dark-mode .wks-pcover .pc-title { color: #f3ecdc; }
+body.dark-mode .wks-pcover .pc-author { color: #e0d8c6; }
+body.dark-mode .wks-pcover .pc-by, body.dark-mode .wks-pcover .pc-sub, body.dark-mode .wks-pcover .pc-foot { color: #9aa8bb; }
+body.dark-mode .wks-pcover .pc-q { color: rgba(143,182,224,0.10); }
+body.dark-mode .wks-pcover .pc-rule { background: #d67864; }
+@media (max-width: 820px) {
+  .wks-pcover { padding: 30px 22px 28px 50px; }
+  .wks-pcover { background-size: auto; }
+  .wks-pcover .pc-title { font-size: calc(var(--base-size) * 2.4); }
+  .wks-pcover .pc-q { display: none; }
+}

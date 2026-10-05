@@ -1,0 +1,117 @@
+
+/* ═══ v35：教學標記系統、智慧浮框、形音義互動、習作答案總覽 ═══ */
+/* 色彩語意：紫＝補充；藍＝字義字音；橘＝段旨段析；暗紅＝修辭；綠＝句意。 */
+#tab-wenxue, #wk-fullscreen {
+  --L-gloss: #1f6fb2;
+  --L-supp: #7c4da0;
+  --L-rhet: #985050;
+  --L-rhet-bg: rgba(152,80,80,.075);
+  --L-mean: #2d7a4f;
+  --L-mean-bg: rgba(45,122,79,.08);
+}
+body.dark-mode #tab-wenxue, body.dark-mode #wk-fullscreen {
+  --L-gloss: #63a5d7;
+  --L-supp: #aa86c7;
+  --L-rhet: #c08080;
+  --L-rhet-bg: rgba(192,128,128,.11);
+  --L-mean: #78bc93;
+  --L-mean-bg: rgba(120,188,147,.11);
+}
+
+/* 字義／字音：藍色；補充：紫色。 */
+.tp-g { color:var(--L-gloss,#1f6fb2) !important; border-bottom-color:var(--L-gloss,#1f6fb2) !important; }
+.tp-gd, .tp-zd { color:var(--L-gloss,#1f6fb2) !important; border-color:var(--L-gloss,#1f6fb2) !important; font-family:"Iansui","Noto Sans TC",sans-serif !important; }
+.tp-p { color:var(--L-supp,#7c4da0) !important; border-bottom-color:var(--L-supp,#7c4da0) !important; }
+.tp-pd { color:var(--L-supp,#7c4da0) !important; border-color:var(--L-supp,#7c4da0) !important; font-family:"Iansui","Noto Sans TC",sans-serif !important; }
+.tp-p.tp-p-blue { color:var(--L-gloss,#1f6fb2) !important; border-bottom-color:var(--L-gloss,#1f6fb2) !important; }
+.tp-p.tp-p-blue .tp-pd { color:var(--L-gloss,#1f6fb2) !important; border-color:var(--L-gloss,#1f6fb2) !important; }
+
+/* 浮框：跟著主字級放大，但有上限；太長時只滾動浮框本身。 */
+.tp-gd, .tp-pd, .tp-zd {
+  box-sizing:border-box !important;
+  width:min(360px, calc(100vw - 24px)) !important;
+  max-width:min(360px, calc(100vw - 24px)) !important;
+  min-width:0 !important;
+  max-height:min(48vh, 360px) !important;
+  overflow:auto !important;
+  white-space:normal !important;
+  font-size:clamp(16px, calc(var(--base-size,15px) * .82 + 4px), 30px) !important;
+  line-height:1.58 !important;
+  letter-spacing:.02em !important;
+  padding:8px 12px !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  pointer-events:auto !important;
+  touch-action:pan-y !important;
+}
+@media (max-width:700px){
+  .tp-gd, .tp-pd, .tp-zd {
+    width:min(300px, calc(100vw - 18px)) !important;
+    max-width:min(300px, calc(100vw - 18px)) !important;
+    max-height:min(43vh, 300px) !important;
+    font-size:clamp(16px, calc(var(--base-size,15px) * .76 + 4px), 26px) !important;
+  }
+}
+
+/* 修辭：不再用刺眼的大紅色，改成低飽和暗磚紅「框」。 */
+.tp-seg-rhet {
+  background:var(--L-rhet-bg) !important;
+  color:var(--L-rhet,#985050) !important;
+  box-shadow:inset 0 0 0 2px var(--L-rhet,#985050) !important;
+  border-radius:4px !important;
+  padding:0 .10em !important;
+  box-decoration-break:clone !important;
+  -webkit-box-decoration-break:clone !important;
+}
+.tp-seg-rhet, .tp-seg-rhet .tp-g, .tp-seg-rhet .tp-n, .tp-seg-rhet .tp-p, .tp-seg-rhet .tp-num, .tp-seg-rhet .tp-z { color:inherit !important; }
+.tp-seg-rhet .tp-g, .tp-seg-rhet .tp-p.tp-p-blue { color:var(--L-gloss,#1f6fb2) !important; }
+.tp-seg-rhet .tp-p { color:var(--L-supp,#7c4da0) !important; }
+.tp-seg-rhet .tp-num { color:var(--L-rhet,#985050) !important; }
+
+/* 句意：只有指定的字／詞才標綠色，取消「有句意就整句框」。 */
+.tp-cite, .tp-cite.lit, .tp-seg-mean { color:var(--L-mean,#2d7a4f) !important; font-weight:700 !important; background:transparent !important; border-bottom:3px solid var(--L-mean,#2d7a4f) !important; box-shadow:none !important; border-radius:0 !important; padding:0 !important; }
+
+/* 互動形音義辨析 */
+.wks-charquiz { background:var(--mk-paper,#f4f0ea) !important; padding:22px 28px; justify-content:flex-start; }
+body.dark-mode .wks-charquiz { background:var(--mk-paper,#1c1917) !important; }
+.wks-charquiz .jy-topbar { border-bottom-color:var(--L-gloss,#1f6fb2); }
+.wks-charquiz .jy-title { color:var(--L-gloss,#1f6fb2); }
+.wks-cq-hint { margin:8px 0 16px; color:var(--L-gloss,#1f6fb2); font-family:"Iansui","Noto Sans TC",sans-serif; }
+.wks-cq-grid { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:14px; }
+.wks-cq-card { position:relative; min-height:205px; padding:20px 16px 16px; border:1px solid var(--L-gloss,#1f6fb2); border-radius:7px; background:rgba(31,111,178,.045); cursor:pointer; text-align:center; box-sizing:border-box; }
+.wks-cq-card:hover { background:rgba(31,111,178,.09); }
+.wks-cq-n { position:absolute; top:8px; left:10px; font-size:.82em; color:var(--L-gloss,#1f6fb2); }
+.wks-cq-char { font-family:"Noto Serif TC","Zen Old Mincho",serif; font-size:calc(var(--base-size)*1.65); font-weight:700; color:var(--L-gloss,#1f6fb2); margin-top:8px; }
+.wks-cq-word { margin-top:7px; font-family:"Noto Serif TC",serif; font-size:calc(var(--base-size)*1.02); }
+.wks-cq-cover { margin-top:24px; color:var(--mk-ink-soft,#6b5a42); font-family:"Iansui","Noto Sans TC",sans-serif; }
+.wks-cq-ans { display:none; margin-top:20px; padding-top:11px; border-top:1px dashed var(--L-gloss,#1f6fb2); font-family:"Iansui","Noto Sans TC",sans-serif; color:var(--L-gloss,#1f6fb2); }
+.wks-cq-ans b { display:block; font-family:"Noto Serif TC",serif; font-size:calc(var(--base-size)*1.3); }
+.wks-cq-ans span { display:block; margin-top:4px; }
+.wks-cq-card.show .wks-cq-cover { display:none; }
+.wks-cq-card.show .wks-cq-ans { display:block; }
+@media (max-width:900px){ .wks-cq-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media (max-width:560px){ .wks-cq-grid{grid-template-columns:1fr 1fr; gap:8px;} .wks-cq-card{min-height:175px;padding:14px 10px;} }
+
+/* 習作：不用再點完整選項後才看到答案。 */
+.wq-reveal-btn { margin:9px 0 0; padding:6px 10px; border:1px solid var(--L-gloss,#1f6fb2); border-radius:3px; background:transparent; color:var(--L-gloss,#1f6fb2); cursor:pointer; font-family:"Iansui","Noto Sans TC",sans-serif; font-size:calc(var(--base-size)*.78); }
+.wq-reveal-btn:hover { background:rgba(31,111,178,.07); }
+
+/* 習作答案總覽 */
+.wks-workanswers { padding:22px 28px; overflow:auto; }
+.wk-wa-top { display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--mk-line,#cabb96); position:sticky; top:0; background:var(--mk-paper,#f4f0ea); z-index:2; }
+body.dark-mode .wk-wa-top { background:var(--mk-paper,#1c1917); }
+.wk-wa-body { padding-top:10px; }
+.wk-wa-group { margin:0 0 18px; padding:14px 0 16px; border-bottom:1px dashed var(--mk-line,#cabb96); }
+.wk-wa-group h3 { margin:0 0 10px; font-size:calc(var(--base-size)*1.02); color:var(--L-gloss,#1f6fb2); }
+.wk-wa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(125px,1fr)); gap:8px; }
+.wk-wa-chip { display:flex; justify-content:space-between; gap:8px; padding:8px 10px; border:1px solid var(--mk-line,#cabb96); border-radius:4px; background:var(--mk-paper-warm,#f7f2e6); }
+.wk-wa-chip b { color:var(--mk-ink-soft,#6b5a42); }
+.wk-wa-chip span { color:var(--L-mean,#2d7a4f); font-weight:800; }
+.wk-wa-q { border:1px solid var(--mk-line,#cabb96); border-radius:5px; margin:7px 0; overflow:hidden; cursor:pointer; background:var(--mk-paper-warm,#f7f2e6); }
+.wk-wa-qhead { display:flex; align-items:center; gap:10px; padding:9px 11px; }
+.wk-wa-no { min-width:2.1em; color:var(--mk-ink-soft,#6b5a42); }
+.wk-wa-ans { font-weight:900; color:var(--L-mean,#2d7a4f); }
+.wk-wa-hint { margin-left:auto; color:var(--L-gloss,#1f6fb2); font-family:"Iansui","Noto Sans TC",sans-serif; font-size:.82em; }
+.wk-wa-exp { display:none; padding:9px 12px 11px; border-top:1px dashed var(--mk-line,#cabb96); line-height:1.75; }
+.wk-wa-q.show .wk-wa-exp { display:block; }
+.wk-wa-note { color:var(--mk-ink-soft,#6b5a42); font-family:"Iansui","Noto Sans TC",sans-serif; }

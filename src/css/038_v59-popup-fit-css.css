@@ -1,0 +1,5 @@
+
+/* v59：浮框最大寬度改由 JS 依可用範圍設定（原本 !important 的 100vw 規則會蓋掉定位程式設的寬度，長浮框因此超出視窗）。 */
+.tp-gd.tp-popup-detached, .tp-pd.tp-popup-detached, .tp-zd.tp-popup-detached {
+  max-width: var(--v59-pop-maxw, calc(100vw - 20px)) !important;
+}

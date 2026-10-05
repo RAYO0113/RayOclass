@@ -1,0 +1,77 @@
+
+/* ═══ v36：浮框尺寸修正＋習作答案入口／師說習作補回 ═══ */
+/* 浮框字級：跟隨被點擊的課文字級，不設上限；高度才設上限。 */
+.tp-gd, .tp-pd, .tp-zd {
+  position:fixed !important;
+  display:none !important;
+  box-sizing:border-box !important;
+  width:max-content !important;
+  min-width:0 !important;
+  max-width:calc(100vw - 16px) !important;
+  /* 最多四行：依目前浮框字級計算（line-height 1.5），不再用固定 vh 高度。 */
+  max-height:calc(6em + 14px) !important;
+  overflow:auto !important;
+  white-space:normal !important;
+  transform:none !important;
+  font-size:inherit !important;
+  line-height:1.5 !important;
+  padding:7px 11px !important;
+  border-radius:6px !important;
+  z-index:12000 !important;
+  pointer-events:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+}
+.tp-g.show > .tp-gd, .tp-p.show > .tp-pd, .tp-z.show > .tp-zd { display:block !important; }
+/* 浮框搬到 body 後仍必須可見；不能依賴原本的父子 selector。 */
+.tp-gd.tp-popup-detached, .tp-pd.tp-popup-detached, .tp-zd.tp-popup-detached { display:block !important; }
+
+/* 藍色：字義／字音補充，包括「生乎吾前／後」；浮框同樣是藍色芫荽。 */
+.tp-g, .tp-p.tp-p-blue, .tp-z {
+  color:var(--L-gloss,#1f6fb2) !important;
+  border-bottom-color:var(--L-gloss,#1f6fb2) !important;
+}
+.tp-gd, .tp-zd, .tp-p.tp-p-blue > .tp-pd {
+  color:var(--L-gloss,#1f6fb2) !important;
+  border:1px solid var(--L-gloss,#1f6fb2) !important;
+  font-family:"Iansui","Noto Sans TC",sans-serif !important;
+  background:var(--mk-paper,#fffdf8) !important;
+}
+
+/* 紫色：典故／由來／其他文獻／其他說法。 */
+.tp-p { color:var(--L-supp,#7c4da0) !important; border-bottom-color:var(--L-supp,#7c4da0) !important; }
+.tp-pd {
+  color:var(--L-supp,#7c4da0) !important;
+  border:1px solid var(--L-supp,#7c4da0) !important;
+  font-family:"Iansui","Noto Sans TC",sans-serif !important;
+  background:var(--mk-paper,#fffdf8) !important;
+}
+
+/* 修辭：再降一階飽和度，維持「框」而非亮紅底。 */
+#tab-wenxue, #wk-fullscreen { --L-rhet:#8f5b5b; --L-rhet-bg:rgba(143,91,91,.065); }
+body.dark-mode #tab-wenxue, body.dark-mode #wk-fullscreen { --L-rhet:#bd8d8d; --L-rhet-bg:rgba(189,141,141,.10); }
+.tp-seg-rhet {
+  background:var(--L-rhet-bg) !important;
+  color:var(--L-rhet,#8f5b5b) !important;
+  box-shadow:inset 0 0 0 2px var(--L-rhet,#8f5b5b) !important;
+}
+
+/* 習作：明確提供獨立的「答案總覽」入口。 */
+.wk-work-actions { display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; margin-top:-2px; margin-bottom:10px; }
+.wk-work-answer-link, .wk-work-back-link {
+  appearance:none; border:1px solid var(--L-gloss,#1f6fb2); color:var(--L-gloss,#1f6fb2);
+  background:rgba(31,111,178,.055); border-radius:5px; padding:6px 12px;
+  font:inherit; cursor:pointer;
+}
+.wk-work-answer-link:hover, .wk-work-back-link:hover { background:rgba(31,111,178,.11); }
+.wk-wa-qhead { cursor:pointer; }
+.wk-wa-ans { font-weight:800; color:var(--L-gloss,#1f6fb2); }
+
+/* 師說由現有 A 卷／題庫組成的習作：表格版與選擇題都沿用原習作介面。 */
+.wks-work .wk-head, .wks-workanswers .wk-head { min-width:0; }
+.wks-work .wk-body, .wks-workanswers .wk-wa-body { overflow-x:hidden; }
+@media (max-width:700px) {
+  .wk-work-answer-link, .wk-work-back-link { padding:6px 10px; }
+}

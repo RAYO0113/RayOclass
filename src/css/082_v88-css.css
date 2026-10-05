@@ -1,0 +1,31 @@
+
+#v88-ver { position:fixed; left:8px; bottom:6px; z-index:9000; pointer-events:none; user-select:none;
+  font:600 12px/1 "Noto Sans TC",sans-serif; letter-spacing:.06em; color:rgba(110,90,66,.55); }
+body.dark-mode #v88-ver { color:rgba(220,200,170,.45); }
+body.v56-proj-open #v88-ver { display:none; }
+/* 原句直接放在舞台；出處改小字 */
+.v88-by { font-family:"Noto Sans TC",sans-serif; font-size:.5em; color:var(--mk-ink-soft,#6b5a42); letter-spacing:0; margin-left:.4em; white-space:nowrap; }
+.v88-byline { position:absolute; top:-2px; right:12px; font-size:calc(var(--base-size) * 1.6); line-height:1; }
+#wk-fullscreen .v88-byline { font-size:calc(var(--base-size) * 1.9); }
+.v88 .v73-stage { margin-top:6px; }
+.v88 .pc { white-space:nowrap; }
+.v88 .pu { transition:opacity .4s; }
+/* 交錯語次：一開始是整句 */
+.v80-ro.v88-inl { display:block; }
+.v80-ro.v88-inl .ck { border-color:transparent; background:none; padding:0; border-radius:0; }
+.v80-ro.v88-inl .ck i { display:none; }
+.v80-ro:not(.v88-inl) .pu { display:none; }
+/* 伸縮文身：一開始是整句 */
+.v80-len.v88-inl { display:block; }
+.v80-len.v88-inl .ln { display:inline; }
+.v80-len.v88-inl .c { width:auto; }
+.v80-len.v88-inl .cnt { display:none; }
+.v80-len:not(.v88-inl) .pu { display:none; }
+.v80-len .tc { display:inline-block; }
+/* 回文：一開始上下兩句連成一行 */
+.v88 .v73-hw .r2, .v88 .v73-hw .r2 .mid { opacity:1; }
+.v88 .v73-hw.v88-inl .row { display:inline; }
+.v88 .v73-hw.v88-inl .r2 { margin-top:0; }
+.v88 .v73-hw .k, .v88 .v73-hw .row > span { display:inline-block; }
+/* 說明可多行 */
+.v88 .v73-note { line-height:1.8; }

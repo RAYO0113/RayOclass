@@ -1,0 +1,92 @@
+
+/* v56：註釋小考 第二版（取代 v55 的「註釋小考」抽屜面板；舊面板程式保留未刪，只是不再被開啟）
+   全螢幕：選題畫面（選題／必考／排除）＋ 考卷畫面（一頁 5 題、點題看答案、超過 5 題捲動） */
+#nq2{
+  --q-ink:#21180f; --q-paper:#f6efe2; --q-surface:#fffdf8; --q-line:#dccbb0;
+  --q-gold:#b8861b; --q-gold-soft:#f3e2b3; --q-muted:#7b6b57;
+  --q-hl:#c0392b; --q-hl-bg:#fde7c4; --q-ok:#2f6b4f; --q-ok-bg:#e6f2ea;
+  --q-ex:#9a8f82; --q-ex-bg:#ece6dc; --q-must:#c0392b;
+  --q-fs:1;
+  position:fixed; inset:0; z-index:99500; display:none;
+  background:var(--q-paper); color:var(--q-ink);
+  font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; -webkit-tap-highlight-color:transparent;
+}
+body.dark-mode #nq2{
+  --q-ink:#f1e9dc; --q-paper:#16120d; --q-surface:#221c15; --q-line:#4a3d2d;
+  --q-gold:#e0b04a; --q-gold-soft:#4a3a17; --q-muted:#b7a78f;
+  --q-hl:#ff8a70; --q-hl-bg:#4a2b16; --q-ok:#8fd3ad; --q-ok-bg:#1d3327;
+  --q-ex:#7d7264; --q-ex-bg:#2b251e; --q-must:#e0664f;
+}
+#nq2.open{display:block}
+#nq2 *{box-sizing:border-box}
+#nq2 button,#nq2 input,#nq2 select{font-family:inherit;color:inherit}
+#nq2 .serif{font-family:"Noto Serif TC","PMingLiU","MingLiU",serif}
+
+/* 選題畫面 */
+#nq2-setup{position:absolute;inset:0;overflow-y:auto}
+#nq2-setup .in{max-width:1100px;margin:0 auto;padding:20px 20px 120px}
+#nq2 .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+#nq2 .top h1{font-size:30px;margin:0;flex:1;min-width:220px}
+#nq2 select.big{font-size:22px;padding:10px 14px;border:2px solid var(--q-line);border-radius:12px;background:var(--q-surface)}
+#nq2 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--q-surface);
+  border:1px solid var(--q-line);border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:20px}
+#nq2 .bar input[type=number]{width:74px;font-size:22px;padding:6px 8px;border:2px solid var(--q-line);border-radius:10px;background:var(--q-paper);text-align:center}
+#nq2 .btn{font-size:20px;padding:10px 16px;border-radius:12px;border:2px solid var(--q-line);background:var(--q-surface);cursor:pointer;font-weight:700}
+#nq2 .btn:active{transform:scale(.97)}
+#nq2 .btn.dk{background:var(--q-ink);color:var(--q-paper);border-color:var(--q-ink)}
+#nq2 .seg{display:inline-flex;border:2px solid var(--q-ink);border-radius:12px;overflow:hidden}
+#nq2 .seg button{font-size:20px;padding:10px 18px;border:0;background:transparent;cursor:pointer;font-weight:700}
+#nq2 .seg button.on{background:var(--q-ink);color:var(--q-paper)}
+#nq2 .seg button.on.ex{background:var(--q-ex);color:#fff}
+#nq2 .seg button.on.mu{background:var(--q-must);color:#fff}
+#nq2 .hint{color:var(--q-muted);font-size:17px;margin:4px 2px 12px}
+#nq2 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 10px}
+#nq2 .chip{position:relative;text-align:left;border:2px solid var(--q-line);background:var(--q-surface);border-radius:12px;
+  padding:10px 12px;cursor:pointer;min-height:64px;display:flex;align-items:center;gap:10px}
+#nq2 .chip .no{font-size:15px;font-weight:800;min-width:30px;height:30px;border-radius:15px;display:grid;place-items:center;background:var(--q-paper);color:var(--q-muted)}
+#nq2 .chip .w{font-size:22px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#nq2 .chip.on{border-color:var(--q-gold);background:var(--q-gold-soft)}
+#nq2 .chip.on .no{background:var(--q-gold);color:#fff}
+#nq2 .chip.ex{background:var(--q-ex-bg);border-style:dashed;color:var(--q-ex)}
+#nq2 .chip.ex .w{text-decoration:line-through}
+#nq2 .chip.ex::after{content:"排除";position:absolute;top:-9px;right:8px;font-size:13px;background:var(--q-ex);color:#fff;border-radius:6px;padding:1px 6px}
+#nq2 .chip .vc{position:absolute;bottom:-9px;right:8px;font-size:12px;font-weight:700;background:var(--q-ink);color:var(--q-paper);border-radius:6px;padding:0 6px}
+#nq2 .chip.must{border-color:var(--q-must);border-width:3px}
+#nq2 .chip.must .no{background:var(--q-must);color:#fff}
+#nq2 .chip.must::after{content:"必考";position:absolute;top:-10px;right:8px;font-size:13px;font-weight:800;background:var(--q-must);color:#fff;border-radius:6px;padding:1px 6px}
+#nq2 .dock{position:absolute;left:0;right:0;bottom:0;background:var(--q-surface);border-top:1px solid var(--q-line);
+  padding:12px 20px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:20px;z-index:2}
+#nq2 .dock .go{font-size:24px;padding:12px 34px}
+#nq2 .dock label{display:flex;gap:6px;align-items:center;cursor:pointer}
+#nq2 .dock input[type=checkbox]{width:22px;height:22px}
+#nq2 .empty{padding:40px;text-align:center;color:var(--q-muted);font-size:20px}
+
+/* 考卷畫面 */
+#nq2-quiz{display:none;position:absolute;inset:0;z-index:3;flex-direction:column;background:var(--q-paper)}
+#nq2-quiz.show{display:flex}
+#nq2 .qhead{height:64px;flex:0 0 64px;display:flex;align-items:center;gap:10px;padding:0 16px;background:var(--q-ink);color:var(--q-paper)}
+#nq2 .qhead .t{flex:1;font-size:22px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nq2 .qhead .t small{font-weight:400;opacity:.75;font-size:17px;margin-left:8px}
+#nq2 .qhead button{font-size:18px;padding:8px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.35);background:transparent;color:inherit;cursor:pointer;font-weight:700}
+body.dark-mode #nq2 .qhead button{border-color:rgba(0,0,0,.3)}
+#nq2 .qhead button.gold{background:var(--q-gold);border-color:var(--q-gold);color:#fff}
+#nq2-qlist{flex:1;overflow-y:auto;display:flex;flex-direction:column;scroll-snap-type:y proximity}
+#nq2 .qc{flex:1 0 auto;min-height:calc((100dvh - 64px) / 5);display:flex;gap:18px;align-items:center;
+  padding:6px 24px;border-bottom:1.5px solid var(--q-line);background:var(--q-surface);cursor:pointer;scroll-snap-align:start}
+#nq2 .qc:nth-child(even){background:var(--q-paper)}
+#nq2 .qn{flex:0 0 auto;width:calc(54px*var(--q-fs));height:calc(54px*var(--q-fs));border-radius:50%;background:var(--q-ink);color:var(--q-paper);
+  display:grid;place-items:center;font-size:calc(28px*var(--q-fs));font-weight:800}
+#nq2 .qb{flex:1;min-width:0}
+#nq2 .qs{font-size:calc(36px*var(--q-fs));line-height:1.35}
+#nq2 .qs mark{background:var(--q-hl-bg);color:var(--q-hl);font-weight:800;padding:0 .08em;border-radius:4px;
+  text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+#nq2 .qs .el{color:var(--q-muted)}
+#nq2 .qa{margin-top:4px;font-size:calc(28px*var(--q-fs));line-height:1.35;min-height:1.35em}
+#nq2 .qa-hint{color:var(--q-muted);font-size:calc(20px*var(--q-fs));opacity:.7}
+#nq2 .qa-body{display:none;background:var(--q-ok-bg);color:var(--q-ok);border-radius:10px;padding:4px 14px}
+#nq2 .qa-body .aw{font-weight:800;margin-right:.5em}
+#nq2 .qa-body .bk-note,#nq2 .qa-body .zy-note{display:block;font-size:.66em;color:var(--q-muted);margin-top:2px}
+#nq2 .qc.open .qa-hint{display:none}
+#nq2 .qc.open .qa-body{display:block}
+#nq2 .qc .src{font-size:calc(16px*var(--q-fs));color:var(--q-muted);margin-left:.6em;font-weight:400}
+#nq2 .qend{padding:26px;text-align:center;color:var(--q-muted);font-size:18px}

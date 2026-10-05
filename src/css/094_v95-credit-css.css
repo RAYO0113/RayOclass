@@ -1,0 +1,8 @@
+
+/* v95：高解析替換圖的作者／授權小字（CC BY-SA 規定需標示；老師 10/1 挑選，來源見 source/…/補充圖片/高解析/來源與授權.md） */
+.v95-credit { font-size: 11px; color: #9a8b78; letter-spacing: .02em; margin-top: 2px; font-family: "Noto Sans TC", sans-serif; }
+.v90-banner .v95-credit { position: absolute; right: 8px; bottom: 6px; margin: 0; color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,.7); pointer-events: none; }
+#wkfs-body .v95-credit { font-size: 13px; }
+/* 修正 v94：「大圖」（火車過木瓜溪、成群的冬候鳥）被 v90 的 max-height:440px 擋住，全螢幕沒有放大 */
+#wkfs-body .v90-fig.v90-big img { max-height: none; }

@@ -1,0 +1,22 @@
+
+/* ═══ v46：習作答案總覽通用版 ═══ */
+.wks-workanswers.wk-ao-page { box-sizing:border-box; padding:20px 28px 24px; overflow:auto; }
+.wk-ao-desc { margin:-2px 0 10px; font-family:"Iansui","Noto Sans TC",sans-serif; font-size:.82em; color:var(--mk-ink-soft,#6b5a42); }
+.wk-ao-sub { margin:0 0 8px; }
+.wk-ao-subhead { font-family:"Noto Serif TC","Zen Old Mincho",serif; font-weight:700; font-size:.92em; color:var(--mk-ink-deep,#211710); margin:2px 0 5px; }
+.wk-ao-chipline { display:flex; flex-wrap:wrap; gap:5px 10px; align-items:baseline; }
+.wk-ao-chip { display:inline-flex; align-items:baseline; gap:4px; white-space:nowrap; padding:3px 7px; border:1px solid rgba(202,187,150,.8); border-radius:4px; background:var(--mk-paper-warm,#f7f2e6); }
+.wk-ao-chip b { color:var(--mk-ink-soft,#6b5a42); font-weight:700; }
+.wk-ao-chip span { color:var(--L-mean,#2d7a4f); font-weight:800; }
+.wk-ao-choice-grid { display:flex; flex-wrap:wrap; gap:6px 8px; }
+.wk-ao-choice { appearance:none; display:inline-flex; align-items:center; gap:7px; min-width:70px; padding:6px 9px; border:1px solid rgba(202,187,150,.9); border-radius:5px; background:var(--mk-paper-warm,#f7f2e6); color:var(--mk-ink-deep,#211710); font:inherit; cursor:pointer; }
+.wk-ao-choice:hover { border-color:var(--L-gloss,#1f6fb2); transform:translateY(-1px); }
+.wk-ao-cqn { color:var(--mk-ink-soft,#6b5a42); font-weight:700; }
+.wk-ao-choice strong { color:var(--L-mean,#2d7a4f); font-family:"Noto Serif TC",serif; }
+.wk-ao-empty { color:var(--mk-ink-soft,#6b5a42); font-size:.82em; padding:4px 0; }
+@media (max-width:720px){
+  .wks-workanswers.wk-ao-page { padding:15px 16px 20px; }
+  .wk-ao-chipline,.wk-ao-choice-grid { gap:5px 6px; }
+  .wk-ao-chip { padding:3px 6px; }
+  .wk-ao-choice { min-width:62px; padding:5px 8px; }
+}

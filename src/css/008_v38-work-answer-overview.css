@@ -1,0 +1,61 @@
+
+/* ═══ v38：〈世說新語選〉習作答案總覽單頁 ═══ */
+.wks-workanswers.wk-ao-page {
+  box-sizing:border-box;
+  padding:20px 28px 24px;
+  overflow:auto;
+  color:var(--mk-ink,#2a2520);
+  background:var(--mk-paper,#f4f0ea);
+}
+.wk-ao-title {
+  display:flex; align-items:baseline; gap:12px;
+  padding:2px 0 10px; margin-bottom:8px;
+  border-bottom:1px solid var(--mk-line,#cabb96);
+  font-family:"Noto Serif TC","Zen Old Mincho",serif;
+  font-weight:700; font-size:1.12em;
+}
+.wk-ao-kicker { font-size:.82em; color:var(--mk-ink-soft,#6b5a42); font-weight:500; }
+.wk-ao-group {
+  margin:0 0 10px; padding:0 0 8px;
+  border-bottom:1px solid rgba(202,187,150,.55);
+}
+.wk-ao-label {
+  display:inline-flex; align-items:center; gap:7px;
+  margin:0 0 5px; padding:3px 9px 3px 6px;
+  border-radius:4px;
+  font-family:"Iansui","Noto Sans TC",sans-serif;
+  font-size:.88em; font-weight:700;
+  color:var(--L-gloss,#1689a6);
+  background:rgba(31,111,178,.055);
+}
+.wk-ao-icon {
+  display:inline-grid; place-items:center;
+  width:1.55em; height:1.55em;
+  border-radius:3px;
+  color:#fff;
+  background:var(--L-gloss,#1689a6);
+  font-size:.78em;
+}
+.wk-ao-line {
+  display:flex; flex-wrap:wrap; align-items:baseline;
+  gap:5px 8px; margin:3px 0;
+  font-size:.92em; line-height:1.38;
+}
+.wk-ao-line > b { white-space:nowrap; color:var(--mk-ink-soft,#6b5a42); }
+.wk-ao-item { display:inline-flex; align-items:baseline; gap:2px; margin-right:7px; white-space:nowrap; }
+.wk-ao-item b { color:var(--mk-ink-soft,#6b5a42); font-weight:600; }
+.wk-ao-sel .wk-ao-label { color:#1f7d9f; }
+.wk-ao-fun .wk-ao-label { color:#1c86a1; }
+.wk-ao-chal .wk-ao-label { color:#7d6c57; }
+.wk-ao-tip {
+  margin-top:6px; padding-top:7px;
+  font-family:"Iansui","Noto Sans TC",sans-serif;
+  font-size:.78em; color:var(--mk-ink-soft,#6b5a42);
+}
+@media (max-width:720px){
+  .wks-workanswers.wk-ao-page { padding:15px 16px 20px; }
+  .wk-ao-line { font-size:.88em; }
+  .wk-ao-item { margin-right:5px; }
+}
+/* 答案總覽只在第一頁顯示；舊的逐頁連結樣式不再使用。 */
+.wk-work-actions { display:none !important; }

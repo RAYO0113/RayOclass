@@ -1,0 +1,5 @@
+
+/* 進階練習沿用習作表格外觀，但屬「課本應用練習」，答案一律藍色（蓋過 v69 習作綠色） */
+.wks-iadv .wk-tag { background:var(--L-gloss,#1f6fb2) !important; }
+.wks-iadv.v69-wk .wk-a, .wks-iadv.v69-wk td.v69-acol, .wks-iadv.v69-wk b.v69-a,
+.wks-iadv .wk-a { color:var(--L-gloss,#1f6fb2) !important; font-weight:800; }

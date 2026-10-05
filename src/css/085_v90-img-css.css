@@ -1,0 +1,39 @@
+
+/* v90：課文頁補充圖片（段落間置中圖／圖組／段首淡化橫幅／點圖放大） */
+.v90-banner { position: relative; height: 200px; margin: 0 0 18px; border-radius: 10px; overflow: hidden;
+  background-size: cover; background-position: center 80%; cursor: zoom-in; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+#wkfs-body .v90-banner { height: 240px; }
+.v90-fig { margin: 6px auto 20px; text-align: center; }
+.v90-fig img { display: block; margin: 0 auto; max-width: min(520px, 78%); max-height: 300px; border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.18); cursor: zoom-in; }
+.v90-fig.v90-big img { max-width: 92%; max-height: 380px; }
+.v90-cap { margin-top: 6px; font-size: .78em; color: #8a7760; letter-spacing: .05em; }
+.v90-group { margin: 6px 0 20px; }
+.v90-gtitle { text-align: center; font-size: .8em; color: #8a7760; letter-spacing: .3em; margin-bottom: 8px; }
+.v90-grow { display: flex; gap: 14px; justify-content: center; }
+.v90-grow figure { margin: 0; flex: 1 1 0; max-width: 250px; text-align: center; }
+.v90-grow img { display: block; width: 100%; height: 170px; object-fit: cover; border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.18); cursor: zoom-in; }
+.v90-contain .v90-grow img { object-fit: contain; background: #fff; }
+.v90-natural .v90-grow { align-items: flex-end; }
+.v90-natural .v90-grow figure { flex: 0 0 auto; max-width: none; }
+.v90-natural .v90-grow img { width: auto; height: 260px; }
+#wkfs-body .v90-natural .v90-grow img { height: 320px; }
+.v90-block > .v90-banner { margin: 6px 0 20px; }
+#wkfs-body .v90-grow img { height: 200px; }
+#wkfs-body .v90-fig img { max-height: 360px; }
+#wkfs-body .v90-fig.v90-big img { max-height: 440px; }
+body.dark-mode .v90-cap, body.dark-mode .v90-gtitle { color: #b8a58a; }
+body.dark-mode .v90-fig img, body.dark-mode .v90-grow img { box-shadow: 0 2px 12px rgba(0,0,0,.5); }
+/* 補充頁「閱讀指引」：問題＋點開參考答案 */
+.v90-q { margin: 14px 0 6px; line-height: 1.7; }
+.v90-strat { font-size: .8em; color: #8a7760; margin-left: 4px; }
+.v90-ans { border: 1px dashed rgba(138,119,96,.5); border-radius: 8px; padding: 8px 12px; cursor: pointer; margin-bottom: 8px; }
+.v90-ans-cov { color: #8a7760; font-size: .9em; }
+.v90-ans-body { display: none; line-height: 1.8; }
+.v90-ans.show .v90-ans-cov { display: none; }
+.v90-ans.show .v90-ans-body { display: block; }
+#v90-lb { position: fixed; inset: 0; z-index: 99990; background: rgba(0,0,0,.9); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px; cursor: zoom-out; }
+#v90-lb img { max-width: 94vw; max-height: 86vh; border-radius: 6px; box-shadow: 0 4px 30px rgba(0,0,0,.6); }
+#v90-lb div { color: #f3e9d8; font-size: 20px; letter-spacing: .1em; }

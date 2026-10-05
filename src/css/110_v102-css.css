@@ -1,0 +1,26 @@
+
+/* v102：日曆加「A卷檢討」、註釋小考可在日曆直接點選題目（選題／必考／不考） */
+#v98-cal .v98-pill.rvw { background:#e0f0ea; color:#1d6a4f; font-weight:700; }
+#v98-cal .v102-qm button.v102-m-pick.on { background:#7a2e2e; border-color:#7a2e2e; }
+#v98-cal .v102-qm button.v102-m-must.on { background:#c0392b; border-color:#c0392b; }
+#v98-cal .v102-qm button.v102-m-ex.on { background:#6b6b6b; border-color:#6b6b6b; }
+#v98-cal .v102-qgrid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px; margin:2px 0 6px; max-height:260px; overflow-y:auto;
+  padding:2px; border:1px solid var(--border,#e4d8c4); border-radius:4px; }
+#v98-cal .v102-qc { display:flex; align-items:center; gap:5px; min-width:0; border:1px solid var(--border,#d4c4a8); border-radius:4px;
+  background:transparent; color:var(--ink,#1a1209); padding:6px 5px; cursor:pointer; font-family:"Noto Serif TC",serif; font-size:14px; text-align:left;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; -webkit-tap-highlight-color:transparent; }
+#v98-cal .v102-qc b { flex:none; min-width:24px; height:24px; border-radius:12px; display:grid; place-items:center; font-size:12px;
+  background:var(--warm,#f5ede0); color:var(--muted,#7a6a55); }
+#v98-cal .v102-qc.out { opacity:.45; }
+#v98-cal .v102-qc.pick { background:#7a2e2e; color:#fff; border-color:#7a2e2e; }
+#v98-cal .v102-qc.pick b { background:#fff; color:#7a2e2e; }
+#v98-cal .v102-qc.must { background:#fdecea; color:#a5281b; border-color:#c0392b; font-weight:700; }
+#v98-cal .v102-qc.must b { background:#c0392b; color:#fff; }
+#v98-cal .v102-qc.must::after { content:'必考'; margin-left:auto; font-size:11px; }
+#v98-cal .v102-qc.ex { background:#eee; color:#888; text-decoration:line-through; }
+#v98-cal .v102-qc.ex b { background:#999; color:#fff; }
+#v98-cal .v102-qsum { font-size:13px; color:#5b3596; font-weight:700; margin:0 0 8px; }
+body.dark-mode #v98-cal .v98-pill.rvw { background:#1f4436; color:#a8e6cc; }
+body.dark-mode #v98-cal .v102-qc.must { background:#5a2420; color:#ffc9c2; }
+body.dark-mode #v98-cal .v102-qc.ex { background:#333; color:#888; }
+body.dark-mode #v98-cal .v102-qsum { color:#d6c2f5; }

@@ -1,0 +1,3 @@
+
+/* v103：日曆改星期日開頭（老師 10/1：不習慣週一開頭）；週日、週六兩欄窄 */
+#v98-cal .v98-grid { grid-template-columns:.55fr repeat(5,1fr) .55fr; }

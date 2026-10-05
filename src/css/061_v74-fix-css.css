@@ -1,0 +1,31 @@
+
+/* ① 字詞義飛行傘：字詞義欄點一下才顯示（綠色） */
+.v74-rv { display:inline-block; min-width:5.5em; padding:0 .4em; margin:1px 0; border-radius:4px; cursor:pointer;
+  border:1px dashed var(--L-mean,#2d7a4f); color:transparent !important; background:rgba(45,122,79,.06); user-select:none; }
+.v74-rv::before { content:"點選顯示"; color:var(--L-mean,#2d7a4f); opacity:.55; font-size:.85em; font-weight:400; }
+/* 隱藏時一律同寬（不透露答案字數） */
+.v74-rv:not(.on) { width:9em; min-width:0; height:1.7em; overflow:hidden; white-space:nowrap; vertical-align:middle; }
+.v74-rv:not(.on)::before { display:block; }
+.v74-rv.on { border-color:transparent; background:none; color:var(--L-mean,#2d7a4f) !important; font-weight:800; min-width:0; padding:0; }
+.v74-rv.on::before { content:none; }
+.v74-rvbar { display:flex; gap:10px; justify-content:flex-end; margin:0 0 8px; }
+.v74-rvbar button { font-size:calc(var(--base-size) * .9); padding:4px 14px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--L-mean,#2d7a4f); background:transparent; color:var(--L-mean,#2d7a4f); }
+.v74-rvbar button.all { background:var(--L-mean,#2d7a4f); color:#fff; }
+
+/* ② 國學常識解碼：依原卷表格 */
+table.v74-gx th.v74-gx-cap { text-align:center; font-size:1.08em; letter-spacing:.2em; }
+table.v74-gx th.jy-th { text-align:center; white-space:nowrap !important; width:auto !important; min-width:6.5em; writing-mode:horizontal-tb !important; }
+table.v74-gx td:nth-last-child(1):not([colspan]) { width:36%; }
+/* 「救國計畫｜影響或代價」表頭左右各半（老師指示） */
+table.v74-gx { table-layout:fixed !important; width:100% !important; }
+table.v74-gx col.c1 { width:7.5em; } table.v74-gx col.c2 { width:calc(50% - 7.5em); } table.v74-gx col.c3 { width:50%; }
+table.v74-gx th.jy-th { min-width:0; }
+table.v74-gx td:nth-last-child(1):not([colspan]) { width:auto; }
+table.v74-gx td { line-height:1.9; }
+table.v74-gx .v74-cn { font-weight:700; margin-right:.3em; }
+table.v74-gx ol { margin:0; padding-left:1.6em; }
+table.v74-gx ol li { margin:0 0 .2em; }
+.v74-box { display:inline-flex; flex-direction:column; align-items:center; vertical-align:top; line-height:1.5; }
+.v74-box > span:first-child { border:1px solid #4a86c5; border-radius:3px; padding:0 .2em; }
+.v74-box > small { color:var(--L-mean,#2d7a4f); font-weight:700; font-size:.78em; }

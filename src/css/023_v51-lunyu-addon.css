@@ -1,0 +1,78 @@
+
+/* ===== 學生閱讀基準字級（單一變數，隨課程字體滑桿 --base-size 同步） ===== */
+:root{
+  --student-read-size: calc(var(--base-size) * 2);          /* 預設 30px：學生投影閱讀主文 */
+  --student-map-label-size: calc(var(--student-read-size) * 0.8); /* 預設 24px：地圖標籤 */
+}
+/* 投影（全螢幕）時，所有「學生閱讀正文」統一為 --student-read-size；老師操作 UI 不受影響 */
+#wk-fullscreen .tp-text,
+#wk-fullscreen .tp-tr,
+#wk-fullscreen .tp-mean,
+#wk-fullscreen .tp-rhet,
+#wk-fullscreen .tp-panel,
+#wk-fullscreen .wks-info-body{
+  font-size: var(--student-read-size) !important;
+  line-height: 1.78 !important;
+}
+/* 小標籤（句意/修辭/段旨/註釋序號…）維持小字，屬提示非閱讀正文 */
+#wk-fullscreen div.tp-panel[data-k]{ font-size: var(--student-read-size) !important; line-height:1.78 !important; }
+#wk-fullscreen .tp-pk,
+#wk-fullscreen .tp-mk,
+#wk-fullscreen .tp-rt,
+#wk-fullscreen .tp-trk,
+#wk-fullscreen .tp-nn{ font-size: calc(var(--student-read-size) * 0.6) !important; }
+
+/* ===== 字體：課本教材內容（註釋/字義/字音/補充 popup）恢復正式教材字體，不用芫荽體 ===== */
+.tp-note, .tp-gd, .tp-zd, .tp-pd, .tp-src,
+.tp-gd, .tp-zd{ font-family: "Noto Serif TC","Zen Old Mincho",serif !important; }
+/* 芫荽體（Iansui）僅用於「學生需要抄寫的浮框」 */
+.student-copy-popup{
+  font-family: "Iansui","芫荽","Noto Serif TC",serif !important;
+  font-size: var(--student-read-size) !important;
+  line-height: 1.85;
+}
+
+/* ===== 孔子周遊列國互動：放大 viewport + 長圖 + HTML 文字 overlay + 逐停點字幕 ===== */
+.zy-wrap{ margin:10px 0 4px; }
+.zy-hint{ font-size:0.82em; color:var(--muted,#8a7a66); margin:4px 0 8px; line-height:1.6; }
+.zy-viewport{ width:100%; max-width:100%; height:clamp(260px,54vh,560px); overflow:hidden;
+  border:2px solid var(--L-supp,#7c4da0); border-radius:10px; background:#efe9df; }
+#wk-fullscreen .zy-viewport{ height:clamp(320px,64vh,760px); }
+body.dark-mode .zy-viewport{ background:#1c1917; }
+.zy-track{ position:relative; height:100%; display:inline-block; white-space:nowrap;
+  transform:translateX(0); transition:transform .5s ease; will-change:transform; }
+.zy-img{ height:100%; width:auto; max-width:none; display:block; user-select:none; -webkit-user-drag:none; }
+.zy-lbl{ position:absolute; transform:translate(-50%,0); white-space:nowrap;
+  font-family:"Noto Serif TC",serif; font-size:var(--student-map-label-size); font-weight:700;
+  color:#5a2e2e; background:rgba(255,255,255,0.88); border:1px solid var(--L-supp,#7c4da0);
+  border-radius:12px; padding:2px 12px; box-shadow:0 1px 5px rgba(0,0,0,.18); }
+.zy-lbl.on{ background:var(--L-supp,#7c4da0); color:#fff; }
+.zy-cap{ margin-top:10px; padding:10px 14px; border-left:5px solid var(--L-supp,#7c4da0);
+  background:rgba(124,77,160,0.06); border-radius:6px; }
+body.dark-mode .zy-cap{ background:rgba(124,77,160,0.14); }
+.zy-cap-item{ display:none; font-family:"Noto Serif TC",serif; font-size:var(--student-read-size);
+  line-height:1.8; margin:5px 0; }
+.zy-cap-item.on{ display:block; }
+.zy-cap-h{ color:var(--L-supp,#7c4da0); margin-right:10px; }
+.zy-ctrl{ margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.zy-btn{ border:1px solid var(--L-supp,#7c4da0); background:var(--L-supp,#7c4da0); color:#fff;
+  border-radius:6px; padding:6px 14px; cursor:pointer; font-size:calc(var(--base-size)*0.95); }
+.zy-btn[disabled]{ opacity:0.4; cursor:default; }
+.zy-ind{ color:var(--L-supp,#7c4da0); font-weight:700; margin-left:4px; font-size:calc(var(--base-size)*0.95); }
+
+/* ===== 四科十哲表 ===== */
+.ly-table{ border-collapse:collapse; width:100%; margin:6px 0; font-size:calc(var(--base-size)*0.98); }
+.ly-table th,.ly-table td{ border:1px solid var(--line,#d9cdb8); padding:6px 9px; vertical-align:top; line-height:1.7; }
+#wk-fullscreen .ly-table{ font-size:var(--student-read-size); }
+.ly-table th{ background:rgba(124,77,160,0.12); color:var(--L-supp,#7c4da0); white-space:nowrap; }
+.ly-table td:first-child{ background:rgba(124,77,160,0.06); color:var(--L-supp,#7c4da0); font-weight:700; text-align:center; white-space:nowrap; }
+
+/* ===== 作者圖 ===== */
+.au-fig{ float:right; margin:0 0 10px 16px; text-align:center; max-width:34%; }
+.au-img{ max-width:100%; height:auto; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.15); }
+.au-cap{ font-size:0.8em; color:var(--muted,#8a7a66); margin-top:4px; }
+@media (max-width:560px){ .au-fig{ float:none; max-width:60%; margin:0 auto 10px; } }
+
+/* ===== 版面微修：課本頁碼徽章不與「課堂提問」重疊（不縮小字級） ===== */
+.tp-top{ position:relative; padding-right:96px; }
+.tp-page{ max-width:88px; text-align:right; line-height:1.25; }

@@ -1,0 +1,6 @@
+
+/* 完整辨析／詳解（tp-more）：全域隱藏（含全螢幕投影） */
+.tp-more{ display:none !important; }
+/* 只有注音、沒有通假/說明的字（tp-z-inline，注音已直排在字旁、無浮窗可點）：
+   不上藍色、不加底線，維持與課文相同的黑字，避免誤以為可點。 */
+.tp-z.tp-z-inline{ color:inherit !important; border-bottom:none !important; cursor:default !important; }

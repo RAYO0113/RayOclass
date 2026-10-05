@@ -1,0 +1,19 @@
+
+/* v100：日曆加「註釋小考」、上課進度改下課才存＋手動更新＋最近三筆可選 */
+#v98-cal .v98-pill.qz { background:#efe6f8; color:#4f2a86; font-weight:700; }
+#v98-cal .v98-row.v100-q { font-size:14px; gap:6px; }
+#v98-cal .v98-row.v100-q input[type=number] { width:62px; padding:5px 6px; border:1px solid var(--border,#d4c4a8); border-radius:4px;
+  font-size:15px; background:var(--surface,#fff); color:var(--ink,#1a1209); text-align:center; }
+#v98-cal .v98-it button.v100-qgo { color:#fff; background:#5b3596; border-radius:4px; font-size:13px; padding:2px 8px; white-space:nowrap; }
+#v100-rmenu { position:fixed; z-index:9800; background:var(--surface,#fff); color:var(--ink,#1a1209); border:1px solid #7a2e2e; border-radius:6px;
+  box-shadow:0 6px 24px rgba(0,0,0,.3); padding:6px; min-width:240px; font-size:14px; }
+#v100-rmenu .v100-rh { font-weight:700; color:#7a2e2e; padding:4px 6px 6px; font-family:"Noto Serif TC",serif; }
+#v100-rmenu button { display:block; width:100%; text-align:left; border:none; border-top:1px solid var(--border,#e4d8c4); background:transparent;
+  color:inherit; padding:9px 8px; cursor:pointer; font-size:14px; }
+#v100-rmenu button:hover { background:rgba(122,46,46,.08); }
+#v100-rmenu button small { color:var(--muted,#7a6a55); margin-left:6px; }
+#v82-chip .v82-upd { margin-left:6px; }
+button.v100-from { margin-left:6px; font-size:12px; padding:1px 6px; border:1px solid #7a2e2e; border-radius:3px; background:transparent; color:#7a2e2e; cursor:pointer; }
+details.v100-older summary { cursor:pointer; color:var(--muted,#7a6a55); font-size:12px; margin:2px 0; }
+body.dark-mode #v98-cal .v98-pill.qz { background:#3b2d55; color:#d6c2f5; }
+body.dark-mode #v100-rmenu .v100-rh, body.dark-mode button.v100-from { color:#e3a0a0; border-color:#e3a0a0; }

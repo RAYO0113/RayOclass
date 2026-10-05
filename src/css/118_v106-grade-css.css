@@ -1,0 +1,90 @@
+
+/* v106：成績登記系統（規格 docs/規格_成績登記系統.md）。資料在老師學校帳號的 Google 試算表；HTML 不放任何學生姓名／成績。 */
+#v106-open { display:block; margin:8px 12px 0; padding:9px 8px; border:1px solid #2e5a7a; border-radius:4px; background:#eef4f8;
+  color:#2e5a7a; font-family:"Noto Serif TC",serif; font-size:14px; font-weight:700; letter-spacing:1px; cursor:pointer; flex-shrink:0; }
+#v106-open:hover { background:#2e5a7a; color:#fff; }
+#v106-gr { position:fixed; inset:0; z-index:9710; background:rgba(30,20,10,.45); display:none; align-items:center; justify-content:center; }
+#v106-gr.open { display:flex; }
+#v106-gr * { box-sizing:border-box; }
+#v106-gr .gr-box { background:var(--surface,#fff); color:var(--ink,#1a1209); width:min(1160px,97vw); height:min(810px,95vh);
+  border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; overflow:hidden; font-size:15px; }
+#v106-gr .gr-top { display:flex; align-items:center; gap:6px; padding:8px 12px; background:#2e5a7a; color:#fff; flex-wrap:wrap; }
+#v106-gr .gr-top h3 { margin:0 8px 0 0; font-family:"Noto Serif TC",serif; font-size:18px; letter-spacing:2px; }
+#v106-gr .gr-top button { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:4px; padding:5px 11px; cursor:pointer; font-size:14px; }
+#v106-gr .gr-top button.on { background:#fff; color:#2e5a7a; font-weight:700; }
+#v106-gr .gr-top .gr-sp { flex:1; }
+#v106-gr .gr-st { font-size:12px; opacity:.9; padding:0 4px; }
+#v106-gr .gr-st.err { background:#c0392b; border-radius:3px; padding:2px 6px; opacity:1; }
+#v106-gr .gr-cls { display:flex; gap:4px; padding:7px 12px; flex-wrap:wrap; border-bottom:1px solid var(--border,#d4c4a8); align-items:center; }
+#v106-gr .gr-chip { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#1a1209); border-radius:14px;
+  padding:4px 12px; cursor:pointer; font-family:"Noto Serif TC",serif; font-size:14px; }
+#v106-gr .gr-chip.on { background:#2e5a7a; color:#fff; border-color:#2e5a7a; font-weight:700; }
+#v106-gr .gr-chip.red.on { background:#b03a2e; border-color:#b03a2e; }
+#v106-gr .gr-chip.grn.on { background:#2f7d43; border-color:#2f7d43; }
+#v106-gr .gr-banner { background:#fff6d6; color:#6b5200; padding:5px 12px; font-size:13px; border-bottom:1px solid #e8d9a0; }
+#v106-gr .gr-main { flex:1; min-height:0; display:flex; overflow:hidden; }
+#v106-gr .gr-pane { flex:1; min-width:0; overflow:auto; padding:10px 14px; -webkit-overflow-scrolling:touch; }
+#v106-gr .gr-side { width:260px; flex-shrink:0; border-right:1px solid var(--border,#d4c4a8); overflow:auto; padding:8px; }
+#v106-gr .gr-btn { border:1px solid #2e5a7a; background:transparent; color:#2e5a7a; border-radius:4px; padding:5px 10px; cursor:pointer; font-size:14px; }
+#v106-gr .gr-btn.pri { background:#2e5a7a; color:#fff; }
+#v106-gr .gr-btn.warn { border-color:#b03a2e; color:#b03a2e; }
+#v106-gr .gr-btn:disabled { opacity:.4; cursor:default; }
+#v106-gr .gr-it { display:block; width:100%; text-align:left; border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#1a1209);
+  border-radius:5px; padding:6px 8px; margin:0 0 5px; cursor:pointer; font-size:14px; line-height:1.35; }
+#v106-gr .gr-it.on { border-color:#2e5a7a; background:rgba(46,90,122,.12); box-shadow:inset 3px 0 0 #2e5a7a; }
+#v106-gr .gr-it small { display:block; color:var(--muted,#7a6a55); font-size:12px; }
+#v106-gr .gr-tag { display:inline-block; font-size:11px; padding:0 5px; border-radius:3px; margin-right:4px; color:#fff; background:#7a6a55; vertical-align:1px; }
+#v106-gr .gr-tag.t-註釋小考 { background:#6b4aa0; } #v106-gr .gr-tag.t-A卷 { background:#7a2e2e; }
+#v106-gr .gr-tag.t-習作 { background:#1f7a7a; } #v106-gr .gr-tag.t-回家考卷 { background:#c0662a; }
+#v106-gr .gr-tag.t-筆記 { background:#3d8a3d; } #v106-gr .gr-tag.t-態度 { background:#555; }
+#v106-gr table.gr-t { border-collapse:collapse; width:100%; font-size:15px; }
+#v106-gr table.gr-t th, #v106-gr table.gr-t td { border-bottom:1px solid var(--border,#d4c4a8); padding:4px 6px; text-align:center; white-space:nowrap; }
+#v106-gr table.gr-t th { position:sticky; top:0; background:var(--surface,#fff); z-index:1; font-size:13px; color:var(--muted,#7a6a55); }
+#v106-gr table.gr-t td.nm { text-align:left; }
+#v106-gr table.gr-t tr.done td { background:rgba(47,125,67,.06); }
+#v106-gr input.gr-sc { width:64px; font-size:17px; padding:3px 4px; text-align:center; border:1px solid var(--border,#d4c4a8); border-radius:4px;
+  background:var(--surface,#fff); color:var(--ink,#1a1209); }
+#v106-gr input[type=date] { font-size:13px; padding:2px 3px; border:1px solid var(--border,#d4c4a8); border-radius:4px; background:var(--surface,#fff); color:var(--ink,#1a1209); max-width:132px; }
+#v106-gr select, #v106-gr input[type=text], #v106-gr input[type=password], #v106-gr input[type=number], #v106-gr textarea {
+  font-size:14px; padding:4px 6px; border:1px solid var(--border,#d4c4a8); border-radius:4px; background:var(--surface,#fff); color:var(--ink,#1a1209); }
+#v106-gr .gr-x { border:none; background:transparent; color:var(--muted,#7a6a55); cursor:pointer; font-size:14px; padding:0 3px; }
+#v106-gr .late { color:#b03a2e; font-weight:700; }
+#v106-gr .fin { font-weight:700; font-size:16px; }
+#v106-gr .gr-h { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 8px; }
+#v106-gr .gr-h h4 { margin:0; font-family:"Noto Serif TC",serif; font-size:18px; }
+#v106-gr .gr-muted { color:var(--muted,#7a6a55); font-size:13px; }
+#v106-gr .gr-sec { border:1px solid var(--border,#d4c4a8); border-radius:6px; padding:10px 12px; margin:0 0 12px; }
+#v106-gr .gr-sec h5 { margin:0 0 8px; font-size:16px; font-family:"Noto Serif TC",serif; }
+#v106-gr .gr-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:5px 0; }
+#v106-gr .gr-row > label.k { min-width:72px; color:var(--muted,#7a6a55); font-size:13px; }
+/* 投影：卡片 */
+#v106-gr .gr-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:8px; }
+#v106-gr .gr-card { border:1px solid var(--border,#d4c4a8); border-radius:6px; padding:6px 4px; text-align:center; }
+#v106-gr .gr-card b { display:block; font-size:15px; color:var(--muted,#7a6a55); }
+#v106-gr .gr-card .v { font-size:26px; font-weight:700; line-height:1.2; }
+#v106-gr .gr-card .s { font-size:12px; min-height:16px; }
+#v106-gr .gr-card.miss { border-color:#b03a2e; background:rgba(176,58,46,.07); }
+#v106-gr .gr-card.miss .v { font-size:18px; color:#b03a2e; padding:5px 0; }
+#v106-gr .gr-mask { cursor:pointer; min-width:54px; }
+#v106-gr .gr-mask.m { color:transparent; background:repeating-linear-gradient(45deg,#c9bba3 0 4px,#ddd2bf 4px 8px); border-radius:3px; }
+#v106-gr .gr-mask.m * { visibility:hidden; }
+/* 課堂加減分 */
+#v106-gr .gr-seats { display:grid; grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); gap:8px; }
+#v106-gr .gr-seat { position:relative; border:2px solid var(--border,#d4c4a8); border-radius:10px; background:var(--surface,#fff); color:var(--ink,#1a1209);
+  font-size:28px; font-weight:700; padding:12px 0 8px; cursor:pointer; touch-action:manipulation; user-select:none; -webkit-user-select:none; }
+#v106-gr .gr-seat small { display:block; font-size:12px; font-weight:400; color:var(--muted,#7a6a55); min-height:15px; }
+#v106-gr .gr-seats.plus .gr-seat:active { background:rgba(47,125,67,.18); }
+#v106-gr .gr-seats.minus .gr-seat:active { background:rgba(176,58,46,.18); }
+#v106-gr .gr-seat.flash-p { animation:grFlashP .6s; } #v106-gr .gr-seat.flash-m { animation:grFlashM .6s; }
+@keyframes grFlashP { 0% { background:#2f7d43; color:#fff; transform:scale(1.08); } 100% { } }
+@keyframes grFlashM { 0% { background:#b03a2e; color:#fff; transform:scale(.94); } 100% { } }
+#v106-gr .gr-fly { position:fixed; z-index:9720; font-size:34px; font-weight:800; pointer-events:none; animation:grFly 1s ease-out forwards; text-shadow:0 1px 3px rgba(0,0,0,.3); }
+#v106-gr .gr-fly.p { color:#2f7d43; } #v106-gr .gr-fly.m { color:#b03a2e; }
+@keyframes grFly { 0% { opacity:1; transform:translate(-50%,0) scale(.8); } 30% { transform:translate(-50%,-26px) scale(1.25); } 100% { opacity:0; transform:translate(-50%,-80px) scale(1); } }
+#v106-gr .pos { color:#2f7d43; font-weight:700; } #v106-gr .neg { color:#b03a2e; font-weight:700; }
+@media (max-width:760px) { #v106-gr .gr-side { width:180px; } #v106-gr .gr-box { width:100vw; height:100vh; border-radius:0; } }
+/* ── 以下原為 v110-css 區塊（v113 併入）── */
+/* v110：成績登記——兩種請假按鈕、請假標籤 */
+#v106-gr .v110-lb { padding: 2px 7px; font-size: 13px; margin: 1px 2px; border-color: var(--border,#d4c4a8); color: var(--muted,#7a6a55); }
+#v106-gr .v110-lv { display: inline-block; padding: 0 6px; margin-right: 3px; border-radius: 8px; background: #2c6e91; color: #fff; font-size: 12px; white-space: nowrap; }
+#v106-gr .v110-lv.x { background: #6b4aa0; }

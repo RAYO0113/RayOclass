@@ -1,0 +1,6 @@
+
+/* ⑤ 形音義相關處的注音不換行 */
+.v76-zy { white-space:nowrap; }
+#ss-anno-ov .ss-rv { white-space:nowrap; }
+#ss-anno-ov .ss-big { min-width:max-content; }
+#ss-anno-ov .ss-big .ss-rv { width:auto; padding-left:.35em; padding-right:.35em; }

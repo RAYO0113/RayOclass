@@ -1,0 +1,51 @@
+
+/* v56：任一右側面板（班級進度／顯示設定／舊註釋小考面板）打開時，隱藏所有右側邊籤，
+   避免邊籤蓋住面板右緣（例如班級進度每筆紀錄的刪除鍵 ✕）。面板用自己的 ✕ 關閉。 */
+body.v56-panel-open #cls-tab,
+body.v56-panel-open #display-tab,
+body.v56-panel-open #note-quiz-tab,
+body.v56-panel-open #wk-ink-tab,
+body.v56-panel-open #tp-close-blue-tab{ display:none !important; }
+/* 投影模式：右側第 3 格是「畫筆」（v51 的 #wk-ink-tab），「註釋小考」投影時移到第 5 格（關閉浮框下方） */
+body.v56-proj-open #note-quiz-tab{ top:calc(34% + 336px); }
+@media (max-width:820px){ body.v56-proj-open #note-quiz-tab{ top:calc(30% + 288px); } }
+
+/* 「註釋小考」邊籤外觀與其他邊籤統一（比照 v51-side-tabs-and-blue-close 的規格） */
+#note-quiz-tab{
+  width:38px; min-height:92px; box-sizing:border-box;
+  display:flex; align-items:center; justify-content:center;
+  padding:10px 7px; border-radius:10px 0 0 10px;
+  font-size:12px; font-weight:700; line-height:1.25; letter-spacing:2px;
+  text-orientation:mixed; opacity:.9; z-index:9802;
+  transition:background .2s, color .2s, opacity .2s;
+}
+#note-quiz-tab:hover{ background:#2c2218; color:#fff; opacity:1; }
+@media (max-width:820px){
+  #note-quiz-tab{ width:36px; min-height:84px; padding:9px 6px; font-size:11px; border-radius:9px 0 0 9px; top:calc(30% + 144px); }
+}
+
+/* 畫筆工具列：開啟後放在投影下方的黑色換頁列（左右兩組，中間留給 ← 頁碼 →），不擋投影畫面；
+   未開啟時整條隱藏（開關在右側「畫筆」邊籤）。 */
+#wk-ink-layer:not(.active) #wk-ink-toolbar{ display:none !important; }
+#wk-ink-layer.active #wk-ink-toolbar{
+  position:absolute !important; left:0 !important; right:0 !important; bottom:0 !important; top:auto !important;
+  height:var(--v56-foot-h, 77px); max-width:none !important; overflow:visible !important;
+  display:flex !important; align-items:center; justify-content:space-between; gap:10px;
+  padding:0 16px; border:0; border-radius:0; background:transparent; box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:none;
+}
+#wk-ink-layer.active #wk-ink-toolbar > *{ pointer-events:auto; }
+#wk-ink-grp-l, #wk-ink-layer.active #wk-ink-extra{ display:flex; align-items:center; gap:8px; }
+#wk-ink-toolbar .wk-ink-btn, #wk-ink-toolbar .wk-ink-size{ min-height:44px; font-size:14px; padding:8px 12px; }
+#wk-ink-toolbar .wk-ink-color{ width:32px; height:32px; min-width:32px; }
+#wk-ink-eraser.on{ background:#efe6d2; color:#14100a; border-color:#efe6d2; }
+/* 窄畫面（例：iPad 直放 834px）：工具列按鈕縮緊，畫筆開啟時換頁鈕間距也縮小，避免左右兩組蓋到 ← 頁碼 → */
+@media (max-width:1000px){
+  #wk-ink-layer.active #wk-ink-toolbar{ padding:0 10px; }
+  #wk-ink-grp-l, #wk-ink-layer.active #wk-ink-extra{ gap:5px; }
+  #wk-ink-toolbar .wk-ink-btn, #wk-ink-toolbar .wk-ink-size{ font-size:13px; padding:8px 8px; }
+  #wk-ink-toolbar .wk-ink-color{ width:28px; height:28px; min-width:28px; }
+  body.ink-on #wk-fullscreen .wkfs-footer{ gap:12px; }
+}
+/* 不需要的選項：粗筆（螢光筆保留）、✕浮框 */
+#wk-ink-toolbar .wk-ink-size[onclick="wkInkSetSize(8)"], #wk-ink-closepop{ display:none !important; }

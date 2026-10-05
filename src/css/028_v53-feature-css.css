@@ -1,0 +1,30 @@
+
+/* ── 課文 → 說明頁 的「詳解／完整辨析」連結 ── */
+.tp-more{ display:inline-block; margin-left:.5em; padding:0 .5em; cursor:pointer;
+  font-size:.82em; font-weight:700; white-space:nowrap; border-radius:999px;
+  color:var(--L-gloss,#1f6fb2); border:1px solid var(--L-gloss,#1f6fb2);
+  background:rgba(31,111,178,.08); text-decoration:none; }
+.tp-more:hover{ background:var(--L-gloss,#1f6fb2); color:#fff; }
+.tp-rhet .tp-more{ color:var(--L-rhet,#c0392b); border-color:var(--L-rhet,#c0392b); background:rgba(192,57,43,.08); }
+.tp-rhet .tp-more:hover{ background:var(--L-rhet,#c0392b); color:#fff; }
+/* ── 說明頁「⤺ 回課文」返回鍵 ── */
+.wk-return-text{ display:inline-flex; align-items:center; gap:.3em; margin:0 0 12px; padding:7px 16px;
+  font:inherit; font-weight:700; font-size:16px; cursor:pointer; border-radius:999px;
+  color:#fff; background:var(--L-gloss,#1f6fb2); border:none; box-shadow:0 1px 4px rgba(0,0,0,.18); }
+.wk-return-text:hover{ filter:brightness(1.08); }
+.wk-return-text:active{ transform:translateY(1px); }
+/* ── 回課文後，原句短暫高亮 ── */
+@keyframes tpLineFlash{ 0%{ background:rgba(255,193,7,.55);} 100%{ background:transparent;} }
+.tp-line-flash{ animation:tpLineFlash 1.6s ease-out; border-radius:6px; }
+/* ── 作者／題解 分層＋填空 ── */
+.wk-layerbar{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+.wk-layer-btn{ font:inherit; font-size:15px; font-weight:700; cursor:pointer; padding:5px 14px;
+  border-radius:999px; border:1px solid var(--mk-line,#cabb96); background:transparent; color:var(--ink,#3a2c1a); }
+.wk-layer-btn.on{ background:var(--L-book,#7a2e2e); color:#fff; border-color:var(--L-book,#7a2e2e); }
+body.dark-mode .wk-layer-btn{ color:var(--ink,#e9e2d2); }
+.wk-fill-panel{ margin-top:14px; padding:14px 16px; border:1px dashed var(--L-book,#7a2e2e);
+  border-radius:9px; background:rgba(122,46,46,.045); }
+body.dark-mode .wk-fill-panel{ background:rgba(226,166,166,.06); }
+.wk-fill-panel .wk-fill-h{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+.wk-fill-panel .wk-fill-title{ font-weight:700; color:var(--L-book,#7a2e2e); }
+.wk-fill-panel[hidden]{ display:none; }

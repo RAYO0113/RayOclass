@@ -1,0 +1,23 @@
+
+/* v62：題組題（A卷檢討、習作、基礎練習）題幹／題目／選項統一為宋體粗體（Noto Serif TC 700）。
+   原本：題目＝宋體粗體、題幹＝宋體細體、選項＝黑體細體。
+   題幹原與題目同為 base*1.02；投影時題幹仍 1.02、題目／選項 1.2（第 3356 行）。
+   老師指定：題幹比題目大一點 → 題幹 一般 1.1、投影 1.3。
+   解析（紫色 .aq-od／.wq-od／.iq-od）、語譯、字義浮框不動。 */
+.aq-psgb, .aq-stem, .aq-sub,
+.wk-q, .iq-q,
+.aq-oh, .wq-oh, .iq-oh{
+  font-family:"Noto Serif TC","Zen Old Mincho",serif !important;
+  font-weight:700 !important;
+}
+/* 題幹內的出處小字（aq-src）維持一般粗細 */
+.aq-psgb .aq-src{ font-weight:400 !important; }
+/* 選項字母圓標維持原樣 */
+.aq-ok, .wq-ok, .iq-ok{ font-family:"Noto Sans TC",sans-serif; }
+/* 題幹比題目大一點（老師指定） */
+.aq-psgb{ font-size:calc(var(--base-size)*1.1) !important; }
+#wk-fullscreen .aq-psgb{ font-size:calc(var(--base-size)*1.3) !important; }
+/* 習作選項（.wq-oh）原本漏在投影放大規則外（投影時比題目小）→ 與題目／A卷選項同為 1.2 */
+#wk-fullscreen .wq-oh{ font-size:calc(var(--base-size)*1.2) !important; }
+/* 題幹內直式注音（沿用課文 .tp-ruby；原本只在課文頁使用） */
+.aq-psgb .tp-ruby{ font-weight:700; }

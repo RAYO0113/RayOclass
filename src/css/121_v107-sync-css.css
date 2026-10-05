@@ -1,0 +1,43 @@
+
+/* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
+#v107-open { display:flex; align-items:center; justify-content:space-between; gap:6px; margin:8px 12px 0; padding:8px 10px; border:1px solid #3d7a4f;
+  border-radius:4px; background:#eef6f0; color:#2f6b40; font-family:"Noto Serif TC",serif; font-size:14px; font-weight:700; letter-spacing:1px;
+  cursor:pointer; flex-shrink:0; text-align:left; width:calc(100% - 24px); }
+#v107-open:hover { background:#3d7a4f; color:#fff; }
+#v107-open .v107-st { font-size:12px; font-weight:400; letter-spacing:0; white-space:nowrap; }
+#v107-open.err { border-color:#b3412e; background:#fbeeea; color:#9a3423; }
+#v107-sync { position:fixed; inset:0; z-index:9720; background:rgba(30,20,10,.45); display:none; align-items:center; justify-content:center; }
+#v107-sync.open { display:flex; }
+#v107-sync * { box-sizing:border-box; }
+#v107-sync .sy-box { background:var(--surface,#fff); color:var(--ink,#1a1209); width:min(760px,96vw); max-height:92vh; border-radius:8px;
+  box-shadow:0 10px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; overflow:hidden; font-size:15px; }
+#v107-sync .sy-top { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#3d7a4f; color:#fff; }
+#v107-sync .sy-top h3 { margin:0; flex:1; font-family:"Noto Serif TC",serif; font-size:18px; letter-spacing:2px; }
+#v107-sync .sy-x { border:0; background:transparent; color:#fff; font-size:22px; cursor:pointer; line-height:1; padding:0 4px; }
+#v107-sync .sy-body { padding:12px 16px 16px; overflow:auto; }
+#v107-sync .sy-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0; }
+#v107-sync .sy-btn { border:1px solid #3d7a4f; background:transparent; color:#2f6b40; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:14px; }
+#v107-sync .sy-btn.pri { background:#3d7a4f; color:#fff; }
+#v107-sync .sy-btn.warn { border-color:#b3412e; color:#9a3423; }
+#v107-sync .sy-btn:disabled { opacity:.5; cursor:default; }
+#v107-sync input[type=password] { font-size:15px; padding:6px 8px; border:1px solid var(--border,#d4c4a8); border-radius:4px; width:200px;
+  background:var(--surface,#fff); color:var(--ink,#1a1209); }
+#v107-sync table { width:100%; border-collapse:collapse; margin:8px 0; font-size:14px; }
+#v107-sync th, #v107-sync td { border-bottom:1px solid var(--border,#e2d6c2); padding:6px 6px; text-align:left; vertical-align:top; }
+#v107-sync th { font-weight:700; color:var(--muted,#7a6a55); font-size:13px; }
+#v107-sync .ok { color:#2f6b40; } #v107-sync .wait { color:#a0661c; } #v107-sync .bad { color:#b3412e; }
+#v107-sync .sy-muted { color:var(--muted,#7a6a55); font-size:13px; line-height:1.6; }
+#v107-sync .sy-msg { padding:8px 10px; border-radius:4px; background:#f6f1e6; margin:6px 0; line-height:1.6; }
+#v107-sync .sy-msg.bad { background:#fbeeea; }
+#v107-sync h4 { margin:14px 0 4px; font-size:15px; }
+#v107-toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:9730; background:#2f6b40; color:#fff; padding:9px 16px;
+  border-radius:6px; font-size:14px; box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; transition:opacity .3s; pointer-events:none; max-width:90vw; }
+#v107-toast.on { opacity:1; }
+#v107-toast.bad { background:#9a3423; }
+body.dark-mode #v107-open { background:#1f3326; color:#a8dcb6; border-color:#4f8f61; }
+body.dark-mode #v107-open.err { background:#3a1f1a; color:#f0b2a5; border-color:#b3412e; }
+body.dark-mode #v107-sync .sy-msg { background:#2a2620; }
+body.dark-mode #v107-sync .sy-msg.bad { background:#3a1f1a; }
+body.dark-mode #v107-sync .sy-btn { color:#a8dcb6; border-color:#4f8f61; }
+body.dark-mode #v107-sync .sy-btn.pri { background:#3d7a4f; color:#fff; }
+body.dark-mode #v107-sync .ok { color:#8fd0a0; } body.dark-mode #v107-sync .wait { color:#e8b46a; } body.dark-mode #v107-sync .bad { color:#f0a090; }

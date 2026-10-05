@@ -1,0 +1,27 @@
+
+/* v101：日曆學校行事（段考／放假／校慶）、補登過去考試與上課進度 */
+#v98-cal .v101-ev { font-size:11px; font-weight:700; border-radius:3px; padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#v98-cal .v101-ev.exam { background:#f6d7b5; color:#8a4200; }
+#v98-cal .v101-ev.off { background:#dcdcdc; color:#444; }
+#v98-cal .v101-ev.event { background:#f3e3a6; color:#6b5200; }
+#v98-cal .v98-d.v101-off { background:repeating-linear-gradient(135deg, rgba(0,0,0,.035) 0 6px, transparent 6px 12px); }
+#v98-cal .v98-d.v101-off .v98-dots { display:none; }
+#v98-cal .v98-d.v101-exam { background:rgba(246,215,181,.25); }
+#v98-cal .v101-edev { font-size:13px; margin:-2px 0 6px; font-weight:700; }
+#v98-cal .v101-edev.exam { color:#8a4200; } #v98-cal .v101-edev.off { color:#555; } #v98-cal .v101-edev.event { color:#6b5200; }
+#v98-cal label.v101-past { display:flex; align-items:center; gap:6px; margin:0 0 8px; font-size:14px; color:#1f6b3a; font-weight:700; cursor:pointer; }
+#v98-cal label.v101-past input { width:18px; height:18px; }
+#v101-entry { padding:8px 12px 10px; border-bottom:1px solid var(--border,#d4c4a8); font-size:13px; }
+#v101-entry .v101-h { font-weight:700; color:#7a2e2e; cursor:pointer; user-select:none; -webkit-user-select:none; display:flex; }
+#v101-entry .v101-h span { flex:1; }
+#v101-entry .v101-h i { font-style:normal; font-weight:400; color:var(--muted,#7a6a55); font-size:12px; }
+#v101-entry .v101-g { display:grid; grid-template-columns:auto 1fr; gap:6px 8px; align-items:center; margin-top:8px; }
+#v101-entry select, #v101-entry input { font-size:14px; padding:6px 6px; border:1px solid var(--border,#d4c4a8); border-radius:4px;
+  background:var(--surface,#fff); color:var(--ink,#1a1209); min-width:0; width:100%; box-sizing:border-box; }
+#v101-entry .v101-go { margin-top:8px; width:100%; border:none; background:#7a2e2e; color:#fff; border-radius:4px; padding:8px; font-size:14px;
+  font-family:"Noto Serif TC",serif; font-weight:700; cursor:pointer; }
+#v101-entry .v101-note { color:var(--muted,#7a6a55); font-size:11px; margin-top:5px; }
+body.dark-mode #v98-cal .v101-ev.exam { background:#5a3a1c; color:#ffd6a8; }
+body.dark-mode #v98-cal .v101-ev.off { background:#444; color:#ddd; }
+body.dark-mode #v98-cal .v101-ev.event { background:#4f4520; color:#f3e3a6; }
+body.dark-mode #v101-entry .v101-h { color:#e3a0a0; }

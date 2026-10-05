@@ -1,0 +1,19 @@
+
+/* v77 的「辨」小方塊不再顯示（位置改由「總」框承接） */
+.v77-bian { display:none !important; }
+#ss-anno-ov.v78-card .ss-c-ex { max-height:none; overflow:visible; }
+#ss-anno-ov.v78-card .ss-tbl { grid-template-columns:auto fit-content(calc(var(--rt) * 10 + 30px)) 1fr; }
+#ss-anno-ov .ss-c-yi .ss-rv { min-width:84px; }
+/* 同一列三格等高，橫線對齊（老師指示；所有「總」字卡） */
+#ss-anno-ov .ss-tbl { align-items:stretch !important; }
+#ss-anno-ov .ss-c { display:flex; flex-direction:column; justify-content:center; box-sizing:border-box; }
+#ss-anno-ov .ss-c-num { align-items:center; }
+#ss-anno-ov .ss-c-yi { align-items:flex-start; }
+#ss-anno-ov.v78-card .ss-c-yi .ss-rv { white-space:normal; text-align:left; justify-content:flex-start; }
+#ss-anno-ov.v78-card .ss-exs.v78-2col { columns:2; column-gap:1.6em; }
+#ss-anno-ov.v78-card .ss-exs.v78-2col li { break-inside:avoid; }
+#ss-anno-ov .v78-ext { display:inline-block; font-size:12px; padding:1px 6px; border-radius:4px; background:#132B50; color:#E8C874; white-space:nowrap; }
+#ss-anno-ov .v78-term { display:flex; flex-direction:column; align-items:center; gap:2px; }
+#ss-anno-ov .v78-bar { margin-left:auto; display:flex; gap:8px; }
+#ss-anno-ov .v78-bar button { font-family:inherit; font-size:14px; padding:5px 12px; border-radius:8px; cursor:pointer; border:1px solid #C9A227; background:#FBF8F0; color:#7A5E12; }
+#ss-anno-ov .v78-bar button.all { background:#132B50; color:#E8C874; }

@@ -1,0 +1,23 @@
+
+/* v60：註釋小考紀錄。考卷畫面加「記錄本次小考」；不按不存。原抽題／範圍／必考／排除邏輯不動。 */
+#nq2-v60rec{ white-space:nowrap; }
+#nq2-v60rec.done{ opacity:.6; cursor:default; }
+#nq2-v60dlg{ position:absolute; inset:0; z-index:5; display:none; align-items:center; justify-content:center;
+  background:rgba(20,15,8,.45); padding:16px; box-sizing:border-box; }
+#nq2-v60dlg.show{ display:flex; }
+#nq2-v60dlg .v60-bx{ width:min(94vw,640px); max-height:100%; overflow-y:auto; box-sizing:border-box;
+  background:var(--q-surface); color:var(--q-ink); border:1px solid var(--q-line); border-top:5px solid var(--q-gold);
+  border-radius:14px; padding:18px 22px; box-shadow:0 16px 44px rgba(0,0,0,.3); }
+#nq2-v60dlg h3{ margin:0 0 12px; font-size:22px; font-family:"Noto Serif TC",serif; }
+#nq2-v60dlg .v60-lb{ font-size:15px; color:var(--q-muted); margin:10px 0 6px; }
+#nq2-v60dlg .v60-cls{ display:flex; flex-wrap:wrap; gap:8px; }
+#nq2-v60dlg .v60-cls label{ display:flex; align-items:center; gap:6px; min-height:44px; padding:0 16px; font-size:18px;
+  border:1px solid var(--q-line); border-radius:10px; cursor:pointer; user-select:none; }
+#nq2-v60dlg .v60-cls label.on{ border-color:var(--q-gold); background:var(--q-gold-soft); font-weight:700; }
+#nq2-v60dlg .v60-cls input{ width:20px; height:20px; accent-color:var(--q-gold); }
+#nq2-v60dlg .v60-pv{ font-size:16px; line-height:1.75; padding:10px 12px; border-radius:8px; background:var(--q-paper); border:1px solid var(--q-line); }
+#nq2-v60dlg .v60-ft{ display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+#nq2-v60dlg .v60-ft button{ min-height:44px; padding:0 20px; font-size:17px; border-radius:10px; cursor:pointer;
+  border:1px solid var(--q-line); background:transparent; color:var(--q-ink); }
+#nq2-v60dlg .v60-ft .v60-ok{ background:var(--q-gold); border-color:var(--q-gold); color:#fff; font-weight:700; }
+#nq2-v60dlg .v60-ft .v60-ok:disabled{ opacity:.4; cursor:default; }

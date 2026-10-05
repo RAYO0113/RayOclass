@@ -1,0 +1,15 @@
+
+/* ⑤ 修辭頁：整頁內文同一字級（只保留修辭名稱標題與「本課／定義」小徽章不同） */
+.v73-kr, .v73-rt { --v74-rs: calc(var(--base-size) * 1.3); }
+#wk-fullscreen .v73-kr, #wk-fullscreen .v73-rt { --v74-rs: calc(var(--base-size) * 1.5); }
+.v73-kr .wks-kr-body, .v73-rt .v73-def, .v73-rt .rt-def, .v73-rt .rt-mine,
+.v73-kr .wks-kr-body *:not(.v73-own):not(.v73-def-tag):not(.rt-own):not(.rt-ref):not(rt):not(.v73-stage):not(.v73-stage *):not(.v73-tab),
+.v73-rt .jy-body *:not(.v73-own):not(.v73-def-tag):not(.rt-own):not(.rt-ref):not(rt),
+.v73-rt table.jy-table, .v73-rt table.jy-table *:not(.v73-own):not(.rt-own):not(.rt-ref):not(rt),
+.v73-rt .v73-def *:not(.v73-def-tag), .v73-rt .rt-def *, .v73-rt .rt-mine * {
+  font-size: var(--v74-rs) !important; }
+.v73-kr .v73-src, .v73-kr .v73-note, .v73-kr .v73-cap, .v73-kr .v73-tip { font-size: var(--v74-rs) !important; }
+.v73-kr .wks-kr-body,.v73-rt .v73-def, .v73-rt table.jy-table td { line-height: 1.9 !important; }
+.v73-kr .v73-def-body, .v73-rt .v73-def-body { max-height: 1.9em; }
+.v73-kr .v73-def.open .v73-def-body, .v73-rt .v73-def.open .v73-def-body { max-height: none; }
+.v73-kr .v73-def-tag, .v73-rt .v73-def-tag { top: .55em; }

@@ -1,0 +1,37 @@
+
+/* v92：〈身為魚販〉自學流程（老師 9/30–10/1：學生自己看；每 2～3 行原文：先引導題 → 讀原文 → 讀後提問，整合在課文頁，不再分成教案頁與課文頁）
+   引導／提問只取現成內容：老師教案（lesson 第 1、2 節）、老師 V50 頁層級提問、備課用書「教學問題引導」15 題；不自編。
+   作答存在學生自己的裝置（localStorage），不上傳。 */
+.v92-blk { margin:18px 0 22px; padding:14px 18px 12px; border-radius:8px; font-size:.92em;
+  border:1.5px solid rgba(210,105,30,.45); background:rgba(210,105,30,.045); }
+.v92-blk.v92-pre { border-color:rgba(45,122,79,.45); background:rgba(45,122,79,.05); }
+.v92-tag { display:inline-block; font-family:"Noto Sans TC",sans-serif; font-weight:800; font-size:.8em;
+  color:#fff; background:#d2691e; padding:2px 12px; border-radius:12px; margin-bottom:8px; letter-spacing:.08em; }
+.v92-pre > .v92-tag { background:#2d7a4f; }
+.v92-it { padding:6px 0 4px; }
+.v92-it + .v92-it { border-top:1px dashed rgba(120,100,80,.3); margin-top:8px; padding-top:12px; }
+.v92-blk .ls-title { font-size:1.12em !important; margin:2px 0 8px !important; }
+.v92-blk .ls-quote { font-size:.95em !important; margin:8px 0 !important; padding:12px 16px !important; }
+.v92-blk .ls-ask, .v92-blk .ls-task { font-size:1em !important; margin:4px 0 8px !important; }
+.v92-blk .ls-ln, .v92-blk .ls-bl { font-size:.98em !important; padding:10px 14px !important; }
+.v92-blk .ls-hint { margin-top:8px !important; font-size:.9em; }
+.v92-blk .ls-tbl { margin:8px 0 !important; }
+.v92-tbtn { float:right; font-size:.78em; border:1px solid #8a7a66; color:#6b5d4d; background:none; border-radius:50%;
+  width:2em; height:2em; cursor:pointer; }
+.v92-tbtn.on { background:#6b5d4d; color:#fff; }
+.v92-q { font-weight:700; margin:0 0 6px; line-height:1.7; }
+.v92-q .v92-qn { display:inline-block; min-width:1.6em; height:1.6em; line-height:1.6em; text-align:center; border-radius:50%;
+  background:#d2691e; color:#fff; font-size:.8em; margin-right:6px; font-family:"Noto Sans TC",sans-serif; }
+.v92-sq { font-family:"Noto Sans TC",sans-serif; font-size:.85em; color:#6b5d4d; margin:8px 0 4px; }
+.v92-ta { width:100%; box-sizing:border-box; min-height:3em; resize:vertical; padding:8px 10px; margin:2px 0 4px;
+  font:inherit; font-size:.95em; line-height:1.6; border:1px solid #cdbba0; border-radius:4px; background:#fffdf8; color:#2b2118; }
+.v92-ta:focus { outline:2px solid #d2691e; outline-offset:0; }
+.v92-blk .tp-abox { margin-top:6px; }
+.ls-tbl td.v92-cell { padding:4px !important; }
+.ls-tbl td.v92-cell .v92-ta { min-height:3.4em; }
+.v92-save { float:right; font-family:"Noto Sans TC",sans-serif; font-size:.72em; color:#8a7a66; margin-top:4px; }
+.v92-flow .tp-b-ask, .v92-flow .tp-b-ti { display:none !important; }
+body.dark-mode .v92-blk { background:rgba(210,105,30,.09); }
+body.dark-mode .v92-blk.v92-pre { background:rgba(45,122,79,.12); }
+body.dark-mode .v92-ta { background:#231c16; color:#eee3d3; border-color:#5a4a38; }
+body.dark-mode .v92-sq, body.dark-mode .v92-save { color:#b8a58c; }

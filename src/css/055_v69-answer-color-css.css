@@ -1,0 +1,24 @@
+
+/* ① 習作頁（JS 標上 .v69-wk；A卷手寫頁雖也用 .wks-work，但不標）：答案直接以綠色顯示 */
+.v69-wk .wk-a, .v69-wk td.v69-acol, .v69-wk b.v69-a { color:var(--L-mean,#2d7a4f) !important; font-weight:800; }
+.v69-wk .wk-tans { cursor:default; }
+.v69-wk .wk-tans .wk-tcov { display:none !important; }
+.v69-wk .wk-tans .wk-tval { display:inline !important; color:var(--L-mean,#2d7a4f) !important; font-weight:800; }
+.v69-wk .wq-reveal-btn { display:none !important; }
+.v69-wk .wq-av { color:var(--L-mean,#2d7a4f) !important; }
+.v69-wk .wq-item.ans-on .wq-opt.right { border:2px solid var(--L-mean,#2d7a4f); background:var(--L-mean-bg,rgba(45,122,79,0.09)); }
+.v69-wk .wq-item.ans-on .wq-opt.right .wq-ok { background:var(--L-mean,#2d7a4f); }
+
+/* ② A卷逐題檢討：與 A卷手寫／對答案一致改為紅色 */
+.wks-aq .aq-ansbox { background:rgba(192,57,43,0.08); border-left-color:var(--red,#c0392b); }
+.wks-aq .aq-ansbox .iq-ak { background:var(--red,#c0392b); }
+.wks-aq .aq-ansbox .iq-av { color:var(--red,#c0392b); }
+.wks-aq .aq-opt.right.on { border-color:var(--red,#c0392b); background:rgba(192,57,43,0.07); }
+.wks-aq .aq-opt.right.on .aq-ok { background:var(--red,#c0392b); }
+
+/* ③ 課本應用練習（基礎練習）：藍色 */
+.wks-iquiz .iq-ansbox { background:rgba(31,111,178,0.08); border-left-color:var(--L-gloss,#1f6fb2); }
+.wks-iquiz .iq-ak { background:var(--L-gloss,#1f6fb2); }
+.wks-iquiz .iq-av { color:var(--L-gloss,#1f6fb2); }
+.wks-iquiz .iq-opt.right.on { border-color:var(--L-gloss,#1f6fb2); background:rgba(31,111,178,0.08); }
+.wks-iquiz .iq-opt.right.on .iq-ok { background:var(--L-gloss,#1f6fb2); }

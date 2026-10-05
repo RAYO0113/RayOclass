@@ -1,0 +1,26 @@
+
+/* v109：註釋小考考卷編號（每班各自 L課次＋第幾次）、記錄時一併設訂正規則、訂正要抄什麼（考卷句／完整原句／只抄詞） */
+#nq2 .v109-code { display:inline-flex; align-items:center; gap:6px; margin-right:10px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+#nq2 .v109-code b { background:#7a2e2e; color:#fff; border-radius:6px; padding:2px 8px; font-size:calc(18px * var(--q-fs,1)); letter-spacing:1px; }
+#nq2 .v109-code small { font-family:"Noto Serif TC",serif; font-size:13px; opacity:.8; }
+#nq2 .v109-cls { display:inline-flex; gap:3px; margin-right:8px; }
+#nq2 .v109-cls button { border:1px solid currentColor; background:transparent; color:inherit; border-radius:10px; padding:0 7px; font-size:12px; cursor:pointer; opacity:.55; }
+#nq2 .v109-cls button.on { opacity:1; background:#7a2e2e; color:#fff; border-color:#7a2e2e; }
+#nq2 .v109-dlg { margin:10px 0 4px; padding:8px; border:1px dashed rgba(122,46,46,.4); border-radius:6px; font-size:14px; line-height:2; }
+#nq2 .v109-dlg input { width:50px; font-size:15px; text-align:center; padding:1px 3px; }
+#nq2 .v109-dlg .rw { display:inline-block; white-space:nowrap; margin-right:10px; }
+#nq2 .v109-dlg button { border:1px solid #7a2e2e; background:transparent; color:#7a2e2e; border-radius:10px; padding:0 8px; font-size:12px; cursor:pointer; }
+#nq2 .v109-dlg button.on { background:#7a2e2e; color:#fff; }
+#v108-nqr .v109-cd { font-family:ui-monospace,Menlo,Consolas,monospace; background:#7a2e2e; color:#fff; border-radius:5px; padding:0 6px; font-size:13px; margin-right:2px; }
+#v108-nqr .v109-cp { margin:2px 0 6px; font-size:13px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+#v108-nqr .v109-cp button, #v108-nqr .v109-qcp { border:1px solid var(--border,#d4c4a8); background:transparent; color:inherit; border-radius:10px; padding:0 8px; font-size:12px; cursor:pointer; }
+#v108-nqr .v109-cp button.on { background:#1f5a7a; color:#fff; border-color:#1f5a7a; }
+#v108-nqr .v109-qcp { flex:0 0 auto; border-color:#1f5a7a; color:#1f5a7a; }
+#v108-nqr .v109-qcp.ov { background:#1f5a7a; color:#fff; }
+#v108-nqr .v109-ordb { border-color:#7a2e2e !important; color:#7a2e2e; font-weight:700; margin-left:8px; }
+#v108-nqr .v109-ordh { margin-left:8px; color:#c0392b; font-weight:700; }
+#v108-nqr .v109-ordn { flex:0 0 auto; display:inline-block; min-width:22px; height:22px; line-height:22px; text-align:center; border-radius:50%; background:#7a2e2e; color:#fff; font-size:13px; font-weight:700; }
+#v108-nqr li.v109-pick { cursor:pointer; background:rgba(192,57,43,.06); }
+#v108-nqr li.v109-pick:hover { background:rgba(192,57,43,.14); }
+#v108-nqr li.v109-pick .v109-ordn { background:#bbb; }
+#v108-nqr li.v109-pick.done .v109-ordn { background:#c0392b; }
