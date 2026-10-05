@@ -128,42 +128,6 @@
 
 <!-- ══ v56：通用註釋小考產生器 ══ -->
 <div id="note-quiz-tab" onclick="nqToggle()">註釋小考</div>
-<div id="note-quiz-panel" aria-label="註釋小考產生器">
-  <div class="nq-panel-head">註釋小考產生器 <button type="button" onclick="nqToggle()">✕</button></div>
-  <div class="nq-field">
-    <label>課次</label>
-    <select id="nq-lesson"></select>
-  </div>
-  <div class="nq-row2">
-    <div class="nq-field"><label>起號</label><input id="nq-start" type="number" min="1" value="1"></div>
-    <div class="nq-field"><label>迄號</label><input id="nq-end" type="number" min="1" value="10"></div>
-  </div>
-  <div class="nq-row2">
-    <div class="nq-field"><label>題數</label><input id="nq-count" type="number" min="1" value="8"></div>
-    <div class="nq-field"><label>出題方式</label>
-      <select id="nq-mode"><option value="random">隨機</option><option value="seq">依序</option></select>
-    </div>
-  </div>
-  <button type="button" class="nq-start-btn" onclick="nqStart()">開始小考</button>
-  <div class="nq-hint">選好課次、範圍與題數後按「開始小考」。已抽出的題目不會因為切換答案而改變，要換題請再按一次。</div>
-</div>
-
-<div id="note-quiz-overlay">
-  <div class="nq-paper">
-    <div class="nq-paper-head">
-      <div>
-        <h2 class="nq-paper-title" id="nq-paper-title">註釋小考</h2>
-        <div class="nq-paper-sub" id="nq-paper-sub"></div>
-      </div>
-      <button type="button" class="nq-close-btn" onclick="nqClose()">✕</button>
-    </div>
-    <div class="nq-grid" id="nq-questions"></div>
-    <div class="nq-footer">
-      <button type="button" class="nq-btn-secondary" onclick="nqAll(this)">公布／隱藏答案</button>
-      <button type="button" class="nq-btn-primary" onclick="nqStart()">重新出題</button>
-    </div>
-  </div>
-</div>
 
 <div id="wk-fullscreen">
   <div class="wkfs-header">
@@ -249,7 +213,6 @@
 <script id="v49-first-meaning-fix" src="src/js/021_v49-first-meaning-fix.js"></script>
 
 
-<script id="v51-blue-close-js" src="src/js/022_v51-blue-close-js.js"></script>
 
 <link rel="stylesheet" id="v51-lunyu-addon" href="src/css/023_v51-lunyu-addon.css">
 <script id="v51-lunyu-js" src="src/js/024_v51-lunyu-js.js"></script>
@@ -377,7 +340,6 @@
 <!-- ════ v88：① 左下角版號（全螢幕投影隱藏）② 〈師說〉錯綜／回文動畫：去掉重複的「原句」列，原句直接拆開飛成動畫 ③ 交錯語次編號改 ①②③④→①③／②④（老師 9/30 指正）（只加不刪；v80 不動，本版包 wkRenderSlideHTML 接手 v80rx 頁） ════ -->
 <link rel="stylesheet" id="v88-css" href="src/css/082_v88-css.css">
 <script id="v88-js" src="src/js/083_v88-js.js"></script>
-<script id="v89-ver-js" src="src/js/084_v89-ver-js.js"></script>
 <link rel="stylesheet" id="v90-img-css" href="src/css/085_v90-img-css.css">
 <script id="v90-img-js" src="src/js/086_v90-img-js.js"></script>
 <link rel="stylesheet" id="v91-rhet-css" href="src/css/087_v91-rhet-css.css">
@@ -386,49 +348,32 @@
 <script id="v92-ver-js" src="src/js/090_v92-ver-js.js"></script>
 <script id="v93-imgpath-js" src="src/js/091_v93-imgpath-js.js"></script>
 <link rel="stylesheet" id="v94-fsimg-css" href="src/css/092_v94-fsimg-css.css">
-<script id="v94-ver-js" src="src/js/093_v94-ver-js.js"></script>
 <link rel="stylesheet" id="v95-credit-css" href="src/css/094_v95-credit-css.css">
 <script id="v95-credit-js" src="src/js/095_v95-credit-js.js"></script>
 <script id="v96-imgrev-js" src="src/js/096_v96-imgrev-js.js"></script>
 <link rel="stylesheet" id="v97-mobileimg-css" href="src/css/097_v97-mobileimg-css.css">
-<script id="v97-ver-js" src="src/js/098_v97-ver-js.js"></script>
 <link rel="stylesheet" id="v98-cal-css" href="src/css/099_v98-cal-css.css">
 <script id="v98-cal-js" src="src/js/100_v98-cal-js.js"></script>
-<script id="v98-ver-js" src="src/js/101_v98-ver-js.js"></script>
 <link rel="stylesheet" id="v99-link-css" href="src/css/102_v99-link-css.css">
 <script id="v99-link-js" src="src/js/103_v99-link-js.js"></script>
-<script id="v99-ver-js" src="src/js/104_v99-ver-js.js"></script>
 <link rel="stylesheet" id="v100-css" href="src/css/105_v100-css.css">
-<script id="v100-ver-js" src="src/js/106_v100-ver-js.js"></script>
 <link rel="stylesheet" id="v101-css" href="src/css/107_v101-css.css">
 <script id="v101-js" src="src/js/108_v101-js.js"></script>
-<script id="v101-ver-js" src="src/js/109_v101-ver-js.js"></script>
 <link rel="stylesheet" id="v102-css" href="src/css/110_v102-css.css">
-<script id="v102-ver-js" src="src/js/111_v102-ver-js.js"></script>
 <link rel="stylesheet" id="v103-css" href="src/css/112_v103-css.css">
-<script id="v103-ver-js" src="src/js/113_v103-ver-js.js"></script>
 <link rel="stylesheet" id="v104-css" href="src/css/114_v104-css.css">
 <script id="v104-keepscroll-js" src="src/js/115_v104-keepscroll-js.js"></script>
-<script id="v104-ver-js" src="src/js/116_v104-ver-js.js"></script>
-<script id="v105-ver-js" src="src/js/117_v105-ver-js.js"></script>
 <link rel="stylesheet" id="v106-grade-css" href="src/css/118_v106-grade-css.css">
 <script id="v106-grade-js" src="src/js/119_v106-grade-js.js"></script>
-<script id="v106-ver-js" src="src/js/120_v106-ver-js.js"></script>
 <link rel="stylesheet" id="v107-sync-css" href="src/css/121_v107-sync-css.css">
 <script id="v107-sync-js" src="src/js/122_v107-sync-js.js"></script>
-<script id="v107-ver-js" src="src/js/123_v107-ver-js.js"></script>
 <link rel="stylesheet" id="v108-css" href="src/css/124_v108-css.css">
 <script id="v108-js" src="src/js/125_v108-js.js"></script>
-<script id="v108-ver-js" src="src/js/126_v108-ver-js.js"></script>
 <link rel="stylesheet" id="v109-css" href="src/css/127_v109-css.css">
 <script id="v109-js" src="src/js/128_v109-js.js"></script>
-<script id="v109-ver-js" src="src/js/129_v109-ver-js.js"></script>
-<script id="v110-ver-js" src="src/js/130_v110-ver-js.js"></script>
 <link rel="stylesheet" id="v111-css" href="src/css/131_v111-css.css">
 <script id="v111-js" src="src/js/132_v111-js.js"></script>
-<script id="v111-ver-js" src="src/js/133_v111-ver-js.js"></script>
 <script id="v112-js" src="src/js/134_v112-js.js"></script>
-<script id="v112-ver-js" src="src/js/135_v112-ver-js.js"></script>
 <script id="v113-ver-js" src="src/js/136_v113-ver-js.js"></script>
 </body>
 </html>

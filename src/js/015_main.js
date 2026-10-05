@@ -11,31 +11,6 @@ const TEXTBOOK = (function () {
   return o;
 })();
 
-/* ═══ v36：師說習作補回（沿用既有 A卷手寫題＋選擇題資料，不另造題） ═══ */
-(function(){
-  const d = TEXTBOOK['師說'];
-  if (!d || d.workbook) return;
-  const answerSpan = function(v){
-    return '<span class="wk-tans" onclick="this.classList.toggle(\'show\')"><span class="wk-tcov">？</span><span class="wk-tval">' + String(v == null ? '' : v) + '</span></span>';
-  };
-  const handSecs = (d.aHand && d.aHand.secs) || [];
-  const sections = handSecs.map(function(sec){
-    return {
-      kind:'table',
-      head:sec.h,
-      cols:['題號','題目','答案'],
-      rows:(sec.items || []).map(function(it){ return [it[0], it[1], answerSpan(it[2])]; })
-    };
-  });
-  const qItems = (d.aQuiz || []).map(function(q){
-    return { n:q.n, q:q.stem, opts:q.opts, ans:q.ans };
-  });
-  if (qItems.length) {
-    sections.push({ kind:'quiz', head:'三、選擇題（逐題作答）', items:qItems });
-  }
-  if (sections.length) d.workbook = { title:'習作Ａ　第三課　師說', sections:sections };
-})();
-
 const WK_14 = ['師說','桃花源記','種樹郭橐駝傳','夢溪筆談選','郁離子選','庖丁解牛','燭之武退秦師','蘭亭集序','岳陽樓記','赤壁賦','天工開物','紅樓夢','臺煤減稅片','清代臺灣鐵路'];
 const WK_EXTRA = ["論語選—子路曾皙冉有公西華侍坐",'世說新語選','醉翁亭記','漁父','鴻門宴','始得西山宴遊記','勞山道士','出師表','詩經','大同與小康','晚由六橋待月記'];
 const WK_PROSE = ['身為魚販','散戲'];
@@ -751,93 +726,6 @@ function tpRestorePopup(el) {
   }
   delete el._tpPopup;
   delete el._tpPopupSlot;
-}
-function tpPlacePopup(el) {
-  if (!el || !el.classList.contains('show')) return;
-  const pop = tpDetachPopup(el);
-  if (!pop) return;
-
-  const anchor = el.getBoundingClientRect();
-  const bounds = tpPopupBounds(el);
-  const maxW = Math.max(96, Math.floor(bounds.right - bounds.left));
-  const fs = parseFloat(getComputedStyle(el).fontSize) || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--base-size')) || 16;
-
-  /* 真正的「浮框」：搬到 body 後用 fixed 定位，完全脫離課文排版流。 */
-  pop.style.position = 'fixed';
-  pop.style.display = 'block';
-  pop.style.visibility = 'hidden';
-  pop.style.transform = 'none';
-  pop.style.left = '0px';
-  pop.style.right = 'auto';
-  pop.style.top = '0px';
-  pop.style.bottom = 'auto';
-  pop.style.width = 'max-content';
-  pop.style.height = 'auto';
-  pop.style.minHeight = '0px';
-  pop.style.maxWidth = maxW + 'px';
-  pop.style.fontSize = fs + 'px';
-  pop.style.lineHeight = '1.5';
-  pop.style.boxSizing = 'border-box';
-  /* 仍維持四行上限；若內容超過，浮框本身保持可讀高度並在內部捲動。 */
-  pop.style.maxHeight = 'calc(6em + 14px)';
-  pop.style.overflowY = 'auto';
-  pop.style.overflowX = 'hidden';
-
-  let pr = pop.getBoundingClientRect();
-  if (!isFinite(pr.width) || pr.width <= 0) {
-    pop.style.width = Math.min(maxW, window.innerWidth - 16) + 'px';
-    pr = pop.getBoundingClientRect();
-  } else if (pr.width > maxW + 1) {
-    pop.style.width = maxW + 'px';
-    pr = pop.getBoundingClientRect();
-  }
-
-  const gap = 3;
-  const baseLeft = anchor.left + anchor.width / 2 - pr.width / 2;
-  const leftCandidates = [
-    baseLeft,
-    anchor.left,
-    anchor.right - pr.width,
-    baseLeft - Math.min(24, pr.width),
-    baseLeft + Math.min(24, pr.width)
-  ].map(x => Math.max(bounds.left, Math.min(x, bounds.right - pr.width)));
-
-  /*
-   * 核心修正：只調整左右，不用「往下推很多」來避開其他浮框。
-   * 因此浮框永遠緊貼原文的上方或下方；多個浮框同時存在時，優先橫向錯開。
-   */
-  const others = Array.from(document.querySelectorAll('.tp-g.show,.tp-p.show,.tp-z.show'))
-    .filter(x => x !== el && x.closest('.wk-slide') === el.closest('.wk-slide'))
-    .map(tpPopRect)
-    .filter(Boolean);
-
-  const yCandidates = [];
-  const aboveY = anchor.top - pr.height - gap;
-  const belowY = anchor.bottom + gap;
-  if (aboveY >= bounds.top && aboveY + pr.height <= bounds.bottom) yCandidates.push({y:aboveY, below:false});
-  if (belowY >= bounds.top && belowY + pr.height <= bounds.bottom) yCandidates.push({y:belowY, below:true});
-  if (!yCandidates.length) {
-    if (aboveY >= bounds.top) yCandidates.push({y:Math.max(bounds.top, aboveY), below:false});
-    else yCandidates.push({y:Math.min(bounds.bottom - pr.height, belowY), below:true});
-  }
-
-  let chosen = null;
-  for (const yc of yCandidates) {
-    for (const lx of leftCandidates) {
-      const test = {left:lx, right:lx + pr.width, top:yc.y, bottom:yc.y + pr.height};
-      if (!others.some(o => tpRectsOverlap(test, o))) {
-        chosen = {y:yc.y, below:yc.below, left:lx};
-        break;
-      }
-    }
-    if (chosen) break;
-  }
-  if (!chosen) chosen = {y:yCandidates[0].y, below:yCandidates[0].below, left:leftCandidates[0]};
-
-  pop.style.left = Math.round(chosen.left) + 'px';
-  pop.style.top = Math.round(chosen.y) + 'px';
-  pop.style.visibility = 'visible';
-  el.classList.toggle('tp-pop-below', !!chosen.below);
 }
 function tpTogglePop(el, ev) {
   if (ev && ev.stopPropagation) ev.stopPropagation();
