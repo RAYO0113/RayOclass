@@ -166,9 +166,12 @@
     var sx = slide.scrollLeft - slide.clientLeft, sy = slide.scrollTop - slide.clientTop;
     /* 說明框的左右邊界＝課文文字區（不是整個課文頁），避免伸進右側按鈕底下 */
     var TL = Infinity, TR = 0;
-    slide.querySelectorAll('.tp-text').forEach(function (t) { var r = t.getBoundingClientRect(); TL = Math.min(TL, r.left - base.left + sx); TR = Math.max(TR, r.right - base.left + sx); });
+    var kx0 = slide.offsetWidth ? base.width / slide.offsetWidth : 1;
+    slide.querySelectorAll('.tp-text').forEach(function (t) { var r = t.getBoundingClientRect(); TL = Math.min(TL, (r.left - base.left) / kx0 + sx); TR = Math.max(TR, (r.right - base.left) / kx0 + sx); });
     /* 課文頁本身會捲動：座標要加上已捲動的距離（疊加層跟著內容一起捲） */
-    var rel = function (r) { return { l: r.left - base.left + sx, r: r.right - base.left + sx, t: r.top - base.top + sy, b: r.bottom - base.top + sy }; };
+    /* 換頁淡入動畫會縮放課文頁（scale 0.99）：把縮放比例算回去，動畫中量也準 */
+    var kx = slide.offsetWidth ? base.width / slide.offsetWidth : 1, ky = slide.offsetHeight ? base.height / slide.offsetHeight : 1;
+    var rel = function (r) { return { l: (r.left - base.left) / kx + sx, r: (r.right - base.left) / kx + sx, t: (r.top - base.top) / ky + sy, b: (r.bottom - base.top) / ky + sy }; };
 
     /* 狀態上色 */
     var openR = st.rh.filter(function (it) { return it.ok && isOpen(it.id); });
@@ -228,9 +231,9 @@
       it.anchor = r;
     });
 
-    /* 障礙物：打開中的框、翻譯／提問按鈕 */
+    /* 障礙物：打開中的〔修〕〔句意〕框（說明框之間也互相避讓） */
     st.rh.concat(st.mn).forEach(function (it) { if (it.chip && isOpen(it.id)) placed.push(rel(it.chip.getBoundingClientRect())); });
-    slide.querySelectorAll('.tp-lb, .tp-trb').forEach(function (b) { if (b.offsetParent) placed.push(rel(b.getBoundingClientRect())); });
+    /* 不避開翻譯／提問按鈕（老師 10/6：避開會把說明框擠得離字太遠；按鈕被蓋住時收起說明即可） */
 
     /* 浮動說明框 */
     function box(it, up, html, cls) {
@@ -283,7 +286,17 @@
     try { layout(document.getElementById('wkfs-body')); } catch (e) { setTimeout(function () { throw e; }); }
   }
   var pend = 0;
-  function soon() { clearTimeout(pend); pend = setTimeout(relayoutAll, 90); }
+  /* 換頁有 0.55 秒淡入動畫（縮放 0.99→1）：動畫中量到的位置會偏 → 等動畫結束再排一次 */
+  function settle() {
+    var anims = [];
+    ['wk-slide-area', 'wkfs-body'].forEach(function (id) {
+      var sl = document.querySelector('#' + id + ' .wk-slide');
+      if (sl && sl.getAnimations) sl.getAnimations().forEach(function (a) { if (a.playState === 'running') anims.push(a.finished.catch(function () {})); });
+    });
+    relayoutAll();
+    if (anims.length) Promise.all(anims).then(function () { relayoutAll(); });
+  }
+  function soon() { clearTimeout(pend); pend = setTimeout(settle, 90); }
 
   /* 換頁後（等其他外掛跑完）再排；字級／視窗改變時重排 */
   if (typeof wkRenderCurrent === 'function') {

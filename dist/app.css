@@ -6611,7 +6611,8 @@ body.dark-mode .tm-on {
 /* 捲軸位置固定：說明框撐高頁面時，課文寬度不變、不會重新換行 */
 .wk-slide.tm-on { scrollbar-gutter:stable; }
 /* 行距（老師 10/6：用試作的寬行距，放得下〔修〕〔句意〕框） */
-.tm-on .tp-text { line-height:3.1 !important; position:relative; }
+.tm-on .tp-text,
+#wk-fullscreen .tm-on .tp-text, #wk-slide-area .tm-on .tp-text { line-height:3.1 !important; position:relative; }   /* 全螢幕原本強制 1.78（#wk-fullscreen 優先），要用同等以上的選擇器蓋過 */
 /* 拿掉修辭、句意按鈕與舊說明框；翻譯、提問照舊 */
 .tm-on .tp-lb-r, .tm-on .tp-lb-m, .tm-on .tp-box-r, .tm-on .tp-box-m { display:none !important; }
 /* 舊的引句上色停用，改由新標示控制 */
