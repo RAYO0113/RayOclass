@@ -19,7 +19,8 @@
     'tp_override_v1': '調課／停課',
     'tp_hist_v1': '上課自動紀錄',
     'hw_done_v1': '作業完成勾選',
-    'plan_v1': '教學進度（老師專用）'
+    'plan_v1': '教學進度（老師專用）',
+    'gr_seat_v1': '座位表（加減分用，只有座號）'
   };
   var PREFIX = { 'pian_': '講義補字圖片' };
   var M = 'sync_meta_v1', BAK = 'sync_bak_v1', BAK_MAX = 1.5e6;

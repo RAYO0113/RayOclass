@@ -5372,7 +5372,7 @@ try {
   /* ── 綁定 Google 後，把 Apps Script 網頁應用程式網址貼在這裡（或在「設定」貼上，存在本裝置）──
      網址本身不是秘密；寫入一律需要「登記密碼」（Apps Script 端驗證）。HTML 內不放任何學生資料。 */
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';
-  var K = { url: 'gr_url_v1', pw: 'gr_pw_v1', cls: 'gr_cls_v1', tab: 'gr_tab_v1', demo: 'gr_demo_v1' };
+  var K = { url: 'gr_url_v1', pw: 'gr_pw_v1', cls: 'gr_cls_v1', tab: 'gr_tab_v1', demo: 'gr_demo_v1', seat: 'gr_seat_v1' };   /* seat：座位表（只有座號，無姓名；雲端同步） */
   var TYPES = [
     { k: '註釋小考', cat: '考試', late: true }, { k: 'A卷', cat: '考試', late: true },
     { k: '習作', cat: '作業', late: true }, { k: '回家考卷', cat: '作業', late: true },
@@ -5585,7 +5585,7 @@ try {
   /* ── 狀態 ── */
   var S = { tab: get(K.tab, 'proj'), cls: get(K.cls, '') || classes()[0] || '', item: '', admin: false, loaded: false, loadedAt: 0, loading: false,
     st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false,
-    ptMode: '+', ptReason: '睡覺', ptView: 'grid', ptRange: 'today', undo: [], setCls: '', paste: '', preview: null, loadErr: '' };
+    ptMode: '+', ptReason: '睡覺', ptView: get('gr_ptview_v1', 'grid'), seatEdit: false, ptRange: 'today', undo: [], setCls: '', paste: '', preview: null, loadErr: '' };
 
   function load(force) {
     if (S.loading) return; if (S.loaded && !force && Date.now() - S.loadedAt < 60000) { render(); return; }
@@ -5617,6 +5617,10 @@ try {
     m.addEventListener('change', onChange);
     m.addEventListener('input', onInput);
     m.addEventListener('keydown', onKey);
+    m.addEventListener('pointerdown', seatDown);
+    window.addEventListener('pointermove', seatMove, { passive: false });
+    window.addEventListener('pointerup', seatUp);
+    window.addEventListener('pointercancel', function () { if (drag) { drag.g.remove(); drag = null; render(); } });
     return m;
   }
   function setSt(t, err) { S.st = t; S.stErr = !!err; var e = document.querySelector('#v106-gr .gr-st'); if (e) { e.textContent = t; e.className = 'gr-st' + (err ? ' err' : ''); } }
@@ -5889,6 +5893,7 @@ try {
   function ptsHTML() {
     var st = roster(S.cls), td = today();
     var h = '<div class="gr-main"><div class="gr-pane"><div class="gr-h">' +
+      '<button class="gr-chip' + (S.ptView === 'seat' ? ' on' : '') + '" data-g="ptv|seat">座位表</button>' +
       '<button class="gr-chip' + (S.ptView === 'grid' ? ' on' : '') + '" data-g="ptv|grid">座號方格</button>' +
       '<button class="gr-chip' + (S.ptView === 'stat' ? ' on' : '') + '" data-g="ptv|stat">統計</button><span style="width:14px"></span>';
     if (S.ptView === 'stat') {
@@ -5912,12 +5917,114 @@ try {
     h += '<p class="gr-muted">' + md(td) + (per ? ' 第' + per + '節' : '（現在不在課表節次內）') + '　點座號＝' + (S.ptMode === '+' ? '加 1 分' : '扣 1 分（' + esc(S.ptReason) + '）') + '　數字＝今天累計</p>';
     if (!st.length) return h + '<p class="late">這班還沒有學生名單。</p></div></div>';
     var tot = {}; D.points.forEach(function (p) { if (p.cls === S.cls && p.date === td) tot[p.seat] = (tot[p.seat] || 0) + p.delta; });
+    if (S.ptView === 'seat') return h + seatHTML(st, tot) + '</div></div>';
     h += '<div class="gr-seats ' + (S.ptMode === '+' ? 'plus' : 'minus') + '">' + st.map(function (s) {
       var t = tot[s.seat] || 0;
       return '<button class="gr-seat" data-g="pt|' + s.seat + '">' + s.seat + '<small class="' + (t > 0 ? 'pos' : t < 0 ? 'neg' : '') + '">' + (t ? (t > 0 ? '+' : '') + t : '') + '</small></button>';
     }).join('') + '</div></div></div>';
     return h;
   }
+  /* ── 座位表（老師 10/6：照教室座位排，老師視角＝最下排靠講台；預設 6×6；一次段考換一次座位 → 可拖拉調整） ──
+     資料：localStorage gr_seat_v1＝{ 班名:{ rows, cols, grid:[[座號或0…]…], at } }，grid[0]＝最上排（最後排），最後一列＝靠講台。 */
+  /* 預設座位：只記座號位置（不含姓名、照片）。冷一忠＝老師 10/6 提供的「115 學年度第一學期冷一忠座位表 A（1150831 啟用）」，7 排×每排 6 人 */
+  var SEAT_PRESET = {
+    '冷一忠': [[0, 0, 0, 0, 0, 34, 11], [16, 29, 31, 32, 33, 35, 15], [17, 30, 24, 4, 18, 27, 25], [1, 10, 26, 7, 21, 2, 6], [3, 9, 8, 12, 19, 20, 13], [0, 14, 28, 5, 22, 23, 0]]
+  };
+  function seatAll() { var a = get(K.seat, null); return a && typeof a === 'object' ? a : {}; }
+  function seatOf(cls, st) {
+    var L = seatAll()[cls];
+    if (L && L.grid && L.rows && L.cols) return L;
+    var P = SEAT_PRESET[cls]; if (P) return { rows: P.length, cols: P[0].length, grid: P.map(function (r) { return r.slice(); }), at: '', auto: true, preset: true };
+    var rows = 6, cols = 6, grid = [], seats = st.map(function (s) { return s.seat; }), i = 0;   /* 預設：從靠講台那排、由左到右依座號排 */
+    for (var r = 0; r < rows; r++) grid.push(new Array(cols).fill(0));
+    for (var rr = rows - 1; rr >= 0; rr--) for (var c = 0; c < cols; c++) grid[rr][c] = i < seats.length ? seats[i++] : 0;
+    return { rows: rows, cols: cols, grid: grid, at: '', auto: true };
+  }
+  function seatSave(cls, L) { var a = seatAll(); L = { rows: L.rows, cols: L.cols, grid: L.grid, at: new Date().toISOString() }; a[cls] = L; put(K.seat, a); }
+  function seatHTML(st, tot) {
+    var L = seatOf(S.cls, st), act = {}, placed = {};
+    st.forEach(function (s) { act[s.seat] = 1; });
+    var h = '<div class="gr-seatbar">' + (S.seatEdit
+      ? '<b>✎ 調整座位</b><span class="gr-muted">拖拉座號框：拖到別人身上＝兩人對調；拖到空位＝移過去；拖到下面「未安排」＝先拿出來。</span>' +
+        '<span style="flex:1"></span><span class="gr-muted">幾排（直）</span><button class="gr-btn" data-g="seatdim|c-">−</button><b>' + L.cols + '</b><button class="gr-btn" data-g="seatdim|c+">＋</button>' +
+        '<span class="gr-muted">每排幾人</span><button class="gr-btn" data-g="seatdim|r-">−</button><b>' + L.rows + '</b><button class="gr-btn" data-g="seatdim|r+">＋</button>' +
+        '<button class="gr-btn" data-g="seatreset">依座號重排</button><button class="gr-btn pri" data-g="seatedit|0">完成</button>'
+      : (L.auto ? '<span class="gr-muted">' + (L.preset ? '這是依老師提供的座位表排的；換座位時按右邊「調整座位」拖拉。' : '還沒設定座位表，先依座號排；按右邊「調整座位」拖拉成教室實際座位。') + '</span>' : '<span class="gr-muted">' + (L.at ? '座位表更新於 ' + md(L.at.slice(0, 10)) : '') + '</span>') +
+        '<span style="flex:1"></span><button class="gr-btn" data-g="seatedit|1">✎ 調整座位</button>') + '</div>';
+    h += '<div class="gr-room' + (S.seatEdit ? ' edit' : '') + '" style="grid-template-columns:repeat(' + L.cols + ',minmax(0,1fr))">';
+    for (var r = 0; r < L.rows; r++) for (var c = 0; c < L.cols; c++) {
+      var n = (L.grid[r] || [])[c] || 0;
+      if (n && act[n]) {
+        placed[n] = 1; var t = tot[n] || 0;
+        h += S.seatEdit
+          ? '<div class="gr-seat gr-cell" data-cell="' + r + ',' + c + '" data-seat="' + n + '">' + n + '<small></small></div>'
+          : '<button class="gr-seat gr-cell" data-g="pt|' + n + '">' + n + '<small class="' + (t > 0 ? 'pos' : t < 0 ? 'neg' : '') + '">' + (t ? (t > 0 ? '+' : '') + t : '') + '</small></button>';
+      } else h += '<div class="gr-cell gr-empty" data-cell="' + r + ',' + c + '"></div>';
+    }
+    h += '</div><div class="gr-cols" style="grid-template-columns:repeat(' + L.cols + ',minmax(0,1fr))">';
+    for (var k = 0; k < L.cols; k++) h += '<span>第' + '一二三四五六七八九十'.charAt(k) + '排</span>';
+    h += '</div><div class="gr-podium">講　台</div>';
+    var un = st.filter(function (s) { return !placed[s.seat]; });
+    if (S.seatEdit || un.length) h += '<div class="gr-tray"' + (S.seatEdit ? ' data-tray="1"' : '') + '><span class="gr-muted">未安排：</span>' + (un.length ? un.map(function (s) {
+      return S.seatEdit ? '<div class="gr-seat gr-tchip" data-seat="' + s.seat + '">' + s.seat + '</div>' : '<button class="gr-seat gr-tchip" data-g="pt|' + s.seat + '">' + s.seat + '</button>';
+    }).join('') : '<span class="gr-muted">（全部都排好了）</span>') + '</div>';
+    return h;
+  }
+  /* 拖拉（滑鼠、觸控都可以；Pointer Events） */
+  var drag = null;
+  function seatDown(e) {
+    if (!S.seatEdit) return;
+    var el = e.target.closest && e.target.closest('#v106-gr .gr-room .gr-seat[data-seat], #v106-gr .gr-tray .gr-seat[data-seat]'); if (!el) return;
+    e.preventDefault();
+    var r = el.getBoundingClientRect(), g = el.cloneNode(true);
+    g.className = 'gr-seat gr-ghost'; g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    document.getElementById('v106-gr').appendChild(g);
+    drag = { seat: +el.getAttribute('data-seat'), from: el.getAttribute('data-cell') || 'tray', el: el, g: g, dx: e.clientX - r.left, dy: e.clientY - r.top };
+    el.classList.add('gr-lift'); seatMove(e);
+  }
+  function seatMove(e) {
+    if (!drag) return; e.preventDefault();
+    drag.g.style.left = (e.clientX - drag.dx) + 'px'; drag.g.style.top = (e.clientY - drag.dy) + 'px';
+    var t = seatTarget(e); document.querySelectorAll('#v106-gr .gr-over').forEach(function (x) { x.classList.remove('gr-over'); });
+    if (t) t.classList.add('gr-over');
+  }
+  function seatTarget(e) {
+    drag.g.style.display = 'none'; var x = document.elementFromPoint(e.clientX, e.clientY); drag.g.style.display = '';
+    return x && x.closest ? x.closest('#v106-gr .gr-cell, #v106-gr .gr-tray') : null;
+  }
+  function seatUp(e) {
+    if (!drag) return;
+    var t = seatTarget(e), d = drag; drag = null; d.g.remove();
+    if (!t) { render(); return; }
+    var st = roster(S.cls), L = seatOf(S.cls, st), g = L.grid.map(function (row) { return row.slice(); });
+    var pos = function (k) { var a = k.split(','); return [+a[0], +a[1]]; };
+    if (t.classList.contains('gr-tray')) { if (d.from !== 'tray') { var f = pos(d.from); g[f[0]][f[1]] = 0; } }
+    else {
+      var to = pos(t.getAttribute('data-cell')), other = g[to[0]][to[1]] || 0;
+      if (d.from === 'tray') g[to[0]][to[1]] = d.seat;                        /* 原本坐那裡的人回到「未安排」 */
+      else { var fr = pos(d.from); g[fr[0]][fr[1]] = other; g[to[0]][to[1]] = d.seat; }   /* 對調（空位＝移過去） */
+    }
+    L.grid = g; seatSave(S.cls, L); render();
+  }
+  function seatDim(v) {
+    var st = roster(S.cls), L = seatOf(S.cls, st), g = L.grid.map(function (row) { return row.slice(); });
+    var lost = function (arr) { return arr.some(function (n) { return n; }); };
+    if (v === 'r+') { g.unshift(new Array(L.cols).fill(0)); L.rows++; }
+    else if (v === 'r-') { if (L.rows <= 1) return; if (lost(g[0]) && !confirm('最後面（最上面）那一列還有人，刪掉後他們會回到「未安排」。確定？')) return; g.shift(); L.rows--; }
+    else if (v === 'c+') { g.forEach(function (row) { row.push(0); }); L.cols++; }
+    else if (v === 'c-') { if (L.cols <= 1) return; if (lost(g.map(function (row) { return row[row.length - 1]; })) && !confirm('最右邊那一排還有人，刪掉後他們會回到「未安排」。確定？')) return; g.forEach(function (row) { row.pop(); }); L.cols--; }
+    L.grid = g; seatSave(S.cls, L); render();
+  }
+  function seatReset() {
+    if (!confirm('依座號重新排（從靠講台那一列、由左到右）？目前的座位安排會被取代。')) return;
+    var a = seatAll(), keep = a[S.cls]; delete a[S.cls]; put(K.seat, a);
+    var L = seatOf(S.cls, roster(S.cls)); if (keep) { L.rows = keep.rows; L.cols = keep.cols; }
+    var seats = roster(S.cls).map(function (s) { return s.seat; }), i = 0, grid = [];
+    for (var r = 0; r < L.rows; r++) grid.push(new Array(L.cols).fill(0));
+    for (var rr = L.rows - 1; rr >= 0; rr--) for (var c = 0; c < L.cols; c++) grid[rr][c] = i < seats.length ? seats[i++] : 0;
+    L.grid = grid; seatSave(S.cls, L); render();
+  }
+
   function addPoint(seat, btn) {
     var td = today(), p = { id: uid('p'), ts: new Date().toISOString(), date: td, period: curPeriod(S.cls), cls: S.cls, seat: seat,
       delta: S.ptMode === '+' ? 1 : -1, reason: S.ptMode === '+' ? '' : S.ptReason };
@@ -6081,7 +6188,10 @@ try {
     else if (t === 'pv') { S.projView = v; render(); }
     else if (t === 'rev') { S.reveal[v] = !S.reveal[v]; b.classList.toggle('m', !(S.revealAll || S.reveal[v])); }
     else if (t === 'revall') { S.revealAll = !S.revealAll; S.reveal = {}; render(); }
-    else if (t === 'ptv') { S.ptView = v; render(); }
+    else if (t === 'ptv') { S.ptView = v; put('gr_ptview_v1', v); S.seatEdit = false; render(); }
+    else if (t === 'seatedit') { S.seatEdit = v === '1'; render(); }
+    else if (t === 'seatdim') seatDim(v);
+    else if (t === 'seatreset') seatReset();
     else if (t === 'ptr') { S.ptRange = v; render(); }
     else if (t === 'ptm') { S.ptMode = v; render(); }
     else if (t === 'ptw') { S.ptReason = v; render(); }
@@ -6185,7 +6295,8 @@ try {
     'tp_override_v1': '調課／停課',
     'tp_hist_v1': '上課自動紀錄',
     'hw_done_v1': '作業完成勾選',
-    'plan_v1': '教學進度（老師專用）'
+    'plan_v1': '教學進度（老師專用）',
+    'gr_seat_v1': '座位表（加減分用，只有座號）'
   };
   var PREFIX = { 'pian_': '講義補字圖片' };
   var M = 'sync_meta_v1', BAK = 'sync_bak_v1', BAK_MAX = 1.5e6;
@@ -8187,7 +8298,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V115';
+  window.APP_VERSION = 'V116';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

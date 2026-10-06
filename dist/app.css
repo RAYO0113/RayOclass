@@ -6344,6 +6344,21 @@ body.dark-mode #v98-cal .v102-qsum { color:#d6c2f5; }
 #v106-gr .v110-lb { padding: 2px 7px; font-size: 13px; margin: 1px 2px; border-color: var(--border,#d4c4a8); color: var(--muted,#7a6a55); }
 #v106-gr .v110-lv { display: inline-block; padding: 0 6px; margin-right: 3px; border-radius: 8px; background: #2c6e91; color: #fff; font-size: 12px; white-space: nowrap; }
 #v106-gr .v110-lv.x { background: #6b4aa0; }
+/* 座位表（10/6）：照教室座位排，最下排靠講台；調整模式可拖拉 */
+#v106-gr .gr-seatbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 8px; }
+#v106-gr .gr-room { display:grid; gap:8px; max-width:760px; }
+#v106-gr .gr-cell { min-height:62px; box-sizing:border-box; }
+#v106-gr div.gr-seat { text-align:center; font-family:inherit; }   /* 調整模式的座號框（div）與按鈕同樣置中 */
+#v106-gr .gr-empty { border:2px dashed transparent; border-radius:10px; }
+#v106-gr .gr-room.edit .gr-empty { border-color:var(--border,#d4c4a8); }
+#v106-gr .gr-room.edit .gr-seat, #v106-gr .gr-tray .gr-seat[data-seat] { cursor:grab; touch-action:none; }
+#v106-gr .gr-podium { max-width:760px; margin:8px 0 4px; text-align:center; padding:6px; border-radius:8px; background:var(--warm,#f5ede0); color:var(--muted,#7a6a55); font-weight:700; letter-spacing:6px; }
+#v106-gr .gr-tray { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; padding:8px; border:2px dashed var(--border,#d4c4a8); border-radius:10px; max-width:760px; min-height:62px; }
+#v106-gr .gr-tray .gr-seat { width:72px; }
+#v106-gr .gr-ghost { position:fixed; z-index:9730; pointer-events:none; opacity:.9; box-shadow:0 6px 18px rgba(0,0,0,.25); transform:scale(1.06); }
+#v106-gr .gr-lift { opacity:.35; }
+#v106-gr .gr-over { outline:3px solid #1e4d8c; outline-offset:2px; }
+#v106-gr .gr-cols { display:grid; gap:8px; max-width:760px; margin-top:4px; text-align:center; font-size:12px; color:var(--muted,#7a6a55); }
 /* ════ src/css/121_v107-sync-css.css ════ */
 
 /* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
