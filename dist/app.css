@@ -6578,3 +6578,59 @@ body.dark-mode #v114-cls .v114-h button { color:#9cc0f0; border-color:#9cc0f0; }
 .v114-mk.auto { background:#e6f4ea; color:#1e6b3a; }
 .v114-bt button.on.auto { background:#2e8b57; border-color:#2e8b57; }
 body.dark-mode .v114-mk.auto { background:#1f3a29; color:#b7e4c7; }
+/* ════ src/css/139_textmark-css.css ════ */
+/* V115 課文修辭／句意新標示（只作用於 .wk-slide.tm-on，即啟用的課；其他課照舊） */
+.tm-on {
+  --tm-r1:#9D2933;            /* 胭脂 */
+  --tm-r2:#C83C23;            /* 緋紅（巢狀外層） */
+  --tm-faint:#E3B5B9;         /* 未點開的淡提示線 */
+  --tm-kwbg:rgba(200,60,35,.14);
+  --tm-g:#0F6E56;             /* 句意綠 */
+  --tm-gfaint:#8CCBB3;
+  --tm-boxbg:#fffdf8;
+}
+body.dark-mode .tm-on {
+  --tm-r1:#E8838C; --tm-r2:#F2967A; --tm-faint:#7a4a4e; --tm-kwbg:rgba(242,150,122,.2);
+  --tm-g:#6FD3AE; --tm-gfaint:#3f7a64; --tm-boxbg:#2b241c;
+}
+/* 捲軸位置固定：說明框撐高頁面時，課文寬度不變、不會重新換行 */
+.wk-slide.tm-on { scrollbar-gutter:stable; }
+/* 行距（老師 10/6：用試作的寬行距，放得下〔修〕〔句意〕框） */
+.tm-on .tp-text { line-height:3.1 !important; position:relative; }
+/* 拿掉修辭、句意按鈕與舊說明框；翻譯、提問照舊 */
+.tm-on .tp-lb-r, .tm-on .tp-lb-m, .tm-on .tp-box-r, .tm-on .tp-box-m { display:none !important; }
+/* 舊的引句上色停用，改由新標示控制 */
+.tm-on .tp-seg, .tm-on .tp-seg-rhet, .tm-on .tp-seg-mean {
+  background:none !important; color:inherit !important; font-weight:inherit !important; border-bottom:0 !important; padding:0 !important; box-shadow:none !important;
+}
+/* 點開：修辭（句子型）字變色加粗；句意字變綠加粗（描邊，不改字寬） */
+.tm-on .tp-seg.tm-r-on { color:var(--tmc,var(--tm-r1)) !important; -webkit-text-stroke:.03em var(--tmc,var(--tm-r1)); }
+.tm-on .tp-seg.tm-m-on { color:var(--tm-g) !important; -webkit-text-stroke:.03em var(--tm-g); }
+/* 跨句單詞型／單字單詞型：未點開淡底線；點開底色或圈字＋變色 */
+.tm-on .tm-kw { text-decoration:underline; text-decoration-thickness:.045em; text-decoration-color:var(--tm-faint); text-underline-offset:.22em; }
+.tm-on .tm-kw.on { color:var(--tm-r1) !important; -webkit-text-stroke:.03em var(--tm-r1); text-decoration-color:var(--tm-r1); }
+.tm-on .tm-b.on { background:var(--tm-kwbg); border-radius:.1em; }
+.tm-on .tm-c.on { outline:.07em solid var(--tm-r1); outline-offset:.03em; border-radius:999px; text-decoration:none; }
+/* 句意括號（佔位、左右對稱） */
+.tm-on .tm-par { color:var(--tm-gfaint); -webkit-text-stroke:0; font-weight:400; }
+.tm-on .tm-par.on { color:var(--tm-g); }
+/* 注釋虛線變淡；字義只用顏色（不要底線） */
+.tm-on .tp-n { border-bottom:1px dashed rgba(122,46,46,.28) !important; }
+body.dark-mode .tm-on .tp-n { border-bottom-color:rgba(232,180,170,.3) !important; }
+.tm-on .tp-g { border-bottom:0 !important; }
+/* 疊加層 */
+.tm-on > .tm-layer { position:absolute; left:0; top:0; height:0; overflow:visible; z-index:5; pointer-events:none; }
+.tm-layer > * { position:absolute; }
+.tm-line { pointer-events:none; }
+.tm-chip { pointer-events:auto; z-index:6; line-height:1; padding:.25em .35em; border:.12em solid var(--cc); border-radius:.3em; color:var(--cc);
+  background:var(--tm-boxbg); cursor:pointer; user-select:none; white-space:nowrap; font-family:inherit; }
+.tm-chip.on { background:var(--cc); color:var(--tm-boxbg); }
+.tm-box { pointer-events:auto; z-index:8; line-height:1.55; background:var(--tm-boxbg); border:1px solid; border-radius:6px; padding:.15em .45em;
+  box-shadow:0 2px 10px rgba(60,40,10,.18); cursor:pointer; box-sizing:border-box; }
+.tm-box b { font-weight:700; }
+.tm-box-r { color:var(--tm-r1); border-color:var(--tm-faint); }
+.tm-box-m { color:var(--tm-g); border-color:var(--tm-gfaint); }
+body.dark-mode .tm-box { box-shadow:0 2px 12px rgba(0,0,0,.5); }
+/* 「詳／短」：短版說明旁的小按鈕，點了展開備課用書長版（老師備課用） */
+.tm-more { display:inline-block; margin-left:.35em; font-size:.55em; line-height:1; padding:.2em .35em; border:1px solid currentColor; border-radius:.3em; vertical-align:.25em; opacity:.75; cursor:pointer; }
+.tm-more:hover { opacity:1; }
