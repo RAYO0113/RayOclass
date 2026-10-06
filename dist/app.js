@@ -5372,7 +5372,7 @@ try {
   /* ── 綁定 Google 後，把 Apps Script 網頁應用程式網址貼在這裡（或在「設定」貼上，存在本裝置）──
      網址本身不是秘密；寫入一律需要「登記密碼」（Apps Script 端驗證）。HTML 內不放任何學生資料。 */
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';
-  var TUTOR_G_URL = '';   /* gr-5：小老師「Google 登入」用的第二個部署（存取權＝網域內）網址；老師部署後填入 */
+  var TUTOR_G_URL = 'https://script.google.com/a/macros/mail2.ccvs.kh.edu.tw/s/AKfycbyW9KydiQ5kg8Mo7-JpBEHZVmmVg5Sgcor7nBO12lWU7zSBVQtle8bwEsdIK3VO2KsG/exec';   /* gr-5：小老師「Google 登入」用的第二個部署（存取權＝網域內）網址；老師部署後填入 */
   var K = { url: 'gr_url_v1', pw: 'gr_pw_v1', cls: 'gr_cls_v1', tab: 'gr_tab_v1', demo: 'gr_demo_v1', seat: 'gr_seat_v1' };   /* seat：座位表（只有座號，無姓名；雲端同步） */
   var TYPES = [
     { k: '註釋小考', cat: '考試', late: true }, { k: 'A卷', cat: '考試', late: true },
@@ -8579,7 +8579,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V120';
+  window.APP_VERSION = 'V121';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
