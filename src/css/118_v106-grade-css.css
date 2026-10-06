@@ -103,3 +103,14 @@
 #v106-gr .gr-lift { opacity:.35; }
 #v106-gr .gr-over { outline:3px solid #1e4d8c; outline-offset:2px; }
 #v106-gr .gr-cols { display:grid; gap:8px; max-width:760px; margin-top:4px; text-align:center; font-size:12px; color:var(--muted,#7a6a55); }
+/* gr-5 小老師：改過的成績紅字、修改紀錄視窗、小老師新增標籤 */
+#v106-gr td.gr-chg { background:#fde8e6; }
+#v106-gr td.gr-chg input, #v106-gr td.gr-chg select, #v106-gr td.gr-chg .v110-lv { color:#c0261b; font-weight:700; border-color:#c0261b; }
+#v106-gr .gr-chgb { color:#c0261b; border-color:#c0261b; font-weight:700; }
+#v106-gr .gr-chgt { display:inline-block; font-size:11px; color:#fff; background:#c0261b; border-radius:4px; padding:0 4px; vertical-align:1px; }
+#v106-gr .gr-tag.gr-tut { background:#efe8f7; color:#6a4c93; }
+#v106-gr tr.gr-chgr td { color:#c0261b; font-weight:700; }
+#v106-gr .gr-hist { position:fixed; inset:0; z-index:9740; background:rgba(30,20,10,.35); display:flex; align-items:center; justify-content:center; padding:16px; }
+#v106-gr .gr-hbox { background:var(--surface,#fff); border-radius:10px; padding:12px 14px; width:min(760px,100%); max-height:80vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+#v106-gr table.gr-t td.nm .gr-who { display:block; font-size:12px; line-height:1.2; }
+#v106-gr .gr-who .gr-x { padding:0 2px; }

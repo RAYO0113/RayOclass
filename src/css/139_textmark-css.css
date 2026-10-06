@@ -54,3 +54,12 @@ body.dark-mode .tm-box { box-shadow:0 2px 12px rgba(0,0,0,.5); }
 /* 「詳／短」：短版說明旁的小按鈕，點了展開備課用書長版（老師備課用） */
 .tm-more { display:inline-block; margin-left:.35em; font-size:.55em; line-height:1; padding:.2em .35em; border:1px solid currentColor; border-radius:.3em; vertical-align:.25em; opacity:.75; cursor:pointer; }
 .tm-more:hover { opacity:1; }
+/* V119：句意中引用《論語》其他篇章的原文＝紫色「補充・免抄」（資料以 <span class='tm-sup'> 包住引文） */
+.tm-sup { color:#6B3FA0; }
+.tm-sup::before { content:"補充・免抄"; display:inline-block; margin:0 .3em 0 .1em; font-size:.55em; line-height:1; padding:.2em .35em; border:1px solid currentColor; border-radius:.3em; vertical-align:.25em; font-weight:400; }
+body.dark-mode .tm-sup { color:#C9A8F0; }
+/* V119：句意／修辭說明框改用「源流明體」（SIL OFL；只取資料用到的字，tools/make_font_subset.py 產生）。
+   課文本身字型不變。JS 會在框上設 inline font-family（＝課文字型），所以這裡用 !important 蓋過；字型檔只在框出現時才下載。 */
+@font-face { font-family:"RayGenRyuMin"; src:url("../fonts/genryumin-r.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"RayGenRyuMin"; src:url("../fonts/genryumin-b.woff2") format("woff2"); font-weight:700; font-display:swap; }
+.tm-box { font-family:"RayGenRyuMin", "Noto Serif TC", serif !important; }

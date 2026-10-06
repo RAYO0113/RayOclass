@@ -6359,6 +6359,17 @@ body.dark-mode #v98-cal .v102-qsum { color:#d6c2f5; }
 #v106-gr .gr-lift { opacity:.35; }
 #v106-gr .gr-over { outline:3px solid #1e4d8c; outline-offset:2px; }
 #v106-gr .gr-cols { display:grid; gap:8px; max-width:760px; margin-top:4px; text-align:center; font-size:12px; color:var(--muted,#7a6a55); }
+/* gr-5 小老師：改過的成績紅字、修改紀錄視窗、小老師新增標籤 */
+#v106-gr td.gr-chg { background:#fde8e6; }
+#v106-gr td.gr-chg input, #v106-gr td.gr-chg select, #v106-gr td.gr-chg .v110-lv { color:#c0261b; font-weight:700; border-color:#c0261b; }
+#v106-gr .gr-chgb { color:#c0261b; border-color:#c0261b; font-weight:700; }
+#v106-gr .gr-chgt { display:inline-block; font-size:11px; color:#fff; background:#c0261b; border-radius:4px; padding:0 4px; vertical-align:1px; }
+#v106-gr .gr-tag.gr-tut { background:#efe8f7; color:#6a4c93; }
+#v106-gr tr.gr-chgr td { color:#c0261b; font-weight:700; }
+#v106-gr .gr-hist { position:fixed; inset:0; z-index:9740; background:rgba(30,20,10,.35); display:flex; align-items:center; justify-content:center; padding:16px; }
+#v106-gr .gr-hbox { background:var(--surface,#fff); border-radius:10px; padding:12px 14px; width:min(760px,100%); max-height:80vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+#v106-gr table.gr-t td.nm .gr-who { display:block; font-size:12px; line-height:1.2; }
+#v106-gr .gr-who .gr-x { padding:0 2px; }
 /* ════ src/css/121_v107-sync-css.css ════ */
 
 /* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
@@ -6650,3 +6661,12 @@ body.dark-mode .tm-box { box-shadow:0 2px 12px rgba(0,0,0,.5); }
 /* 「詳／短」：短版說明旁的小按鈕，點了展開備課用書長版（老師備課用） */
 .tm-more { display:inline-block; margin-left:.35em; font-size:.55em; line-height:1; padding:.2em .35em; border:1px solid currentColor; border-radius:.3em; vertical-align:.25em; opacity:.75; cursor:pointer; }
 .tm-more:hover { opacity:1; }
+/* V119：句意中引用《論語》其他篇章的原文＝紫色「補充・免抄」（資料以 <span class='tm-sup'> 包住引文） */
+.tm-sup { color:#6B3FA0; }
+.tm-sup::before { content:"補充・免抄"; display:inline-block; margin:0 .3em 0 .1em; font-size:.55em; line-height:1; padding:.2em .35em; border:1px solid currentColor; border-radius:.3em; vertical-align:.25em; font-weight:400; }
+body.dark-mode .tm-sup { color:#C9A8F0; }
+/* V119：句意／修辭說明框改用「源流明體」（SIL OFL；只取資料用到的字，tools/make_font_subset.py 產生）。
+   課文本身字型不變。JS 會在框上設 inline font-family（＝課文字型），所以這裡用 !important 蓋過；字型檔只在框出現時才下載。 */
+@font-face { font-family:"RayGenRyuMin"; src:url("../fonts/genryumin-r.woff2?v=875a1b6a") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"RayGenRyuMin"; src:url("../fonts/genryumin-b.woff2?v=3a427227") format("woff2"); font-weight:700; font-display:swap; }
+.tm-box { font-family:"RayGenRyuMin", "Noto Serif TC", serif !important; }

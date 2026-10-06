@@ -18,6 +18,12 @@ for m in links:
     if re.search(r'^\s*@import', css2, re.M): raise SystemExit('還有其他 @import：' + m.group(1))
     parts.append('/* ════ %s ════ */\n%s%s' % (m.group(1), css2, '' if css2.endswith('\n') else '\n'))
 app_css = ''.join(parts)
+# 字型檔（fonts/，給 dist/app.css 用的相對路徑 ../fonts/）帶內容雜湊（V119）
+def _font(m):
+    fp = os.path.join(ROOT, 'fonts', m.group(1))
+    if not os.path.exists(fp): raise SystemExit('找不到字型檔：fonts/' + m.group(1))
+    return 'url("../fonts/%s?v=%s")' % (m.group(1), hashlib.sha256(open(fp, 'rb').read()).hexdigest()[:8])
+app_css = re.sub(r'url\("\.\./fonts/([\w.-]+)"\)', _font, app_css)
 ver = hashlib.sha256(app_css.encode()).hexdigest()[:8]
 out = src
 first = True
@@ -45,6 +51,11 @@ for m in bund:
 for k in KEEP:
     out = out.replace('src="%s"' % k, 'src="%s?v=%s"' % (k, hashlib.sha256(rd(k).encode()).hexdigest()[:8]), 1)
 wr('dist/app.js', app_js)
+# 課文資料檔也帶內容雜湊，更新課文後平板不會吃到舊快取（V119）
+def _les(m):
+    return '<script src="%s?v=%s"></script>' % (m.group(1), hashlib.sha256(rd(m.group(1)).encode()).hexdigest()[:8])
+out, nles = re.subn(r'<script src="(data/lessons/\d+\.js)"></script>', _les, out)
+if nles == 0: raise SystemExit('找不到課文資料檔 <script>')
 print('JS：%d 檔 → dist/app.js（%d 位元組，v=%s）；獨立 %d 檔' % (len(bund), len(app_js.encode()), jver, len(KEEP)))
 wr('index.html', out)
 print('建置完成：CSS %d 檔 → dist/app.css（%d 位元組，v=%s）；index.html %d 位元組' % (len(links), len(app_css.encode()), ver, len(out.encode())))

@@ -4,6 +4,7 @@
   /* ── 綁定 Google 後，把 Apps Script 網頁應用程式網址貼在這裡（或在「設定」貼上，存在本裝置）──
      網址本身不是秘密；寫入一律需要「登記密碼」（Apps Script 端驗證）。HTML 內不放任何學生資料。 */
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';
+  var TUTOR_G_URL = '';   /* gr-5：小老師「Google 登入」用的第二個部署（存取權＝網域內）網址；老師部署後填入 */
   var K = { url: 'gr_url_v1', pw: 'gr_pw_v1', cls: 'gr_cls_v1', tab: 'gr_tab_v1', demo: 'gr_demo_v1', seat: 'gr_seat_v1' };   /* seat：座位表（只有座號，無姓名；雲端同步） */
   var TYPES = [
     { k: '註釋小考', cat: '考試', late: true }, { k: 'A卷', cat: '考試', late: true },
@@ -124,19 +125,26 @@
   }
 
   /* ── 資料 ── */
-  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [] };
+  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [] };
   var SCI = {};   /* scores 索引 item|seat */
   function norm(r) {
     D.students = (r.students || []).map(function (s) { return { cls: s.cls, seat: +s.seat, sid: s.sid || '', name: s.name || '', active: s.active === '' || s.active == null ? 1 : +s.active }; })
       .filter(function (s) { return s.cls && s.seat > 0; }).sort(function (a, b) { return a.seat - b.seat; });
     D.items = (r.items || []).map(function (i) { return { id: i.id, cls: i.cls, type: i.type, title: i.title || '', lessons: i.lessons || '', issued: i.issued || '',
-      due: i.due || '', late: String(i.late) === '1' || i.late === true, calId: i.calId || '', note: i.note || '', created: i.created || '' }; });
-    D.scores = (r.scores || []).map(function (s) { return { item: s.item, cls: s.cls, seat: +s.seat, raw: num(s.raw), sub: s.sub || '', leave: s.leave || '', bonus: num(s.bonus) || 0, upd: s.upd || '' }; });
+      due: i.due || '', late: String(i.late) === '1' || i.late === true, calId: i.calId || '', note: i.note || '', created: i.created || '', by: i.by || '' }; });   /* by：gr-5 小老師新增 */
+    D.scores = (r.scores || []).map(function (s) { return { item: s.item, cls: s.cls, seat: +s.seat, raw: num(s.raw), sub: s.sub || '', leave: s.leave || '', bonus: num(s.bonus) || 0, upd: s.upd || '', by: s.by || '', chk: s.chk || '' }; });    D.log = (r.log || []).map(function (l) { return { ts: l.ts, who: l.who, item: l.item, cls: l.cls, seat: +l.seat, field: l.field, old: l.old, 'new': l['new'] }; });   /* gr-5：修改紀錄（只有老師登入才有） */
+    D.tutors = r.tutors || [];
     D.weights = r.weights || []; D.points = (r.points || []).map(function (p) { return { id: p.id, ts: p.ts, date: p.date, period: p.period, cls: p.cls, seat: +p.seat, delta: +p.delta, reason: p.reason || '' }; });
     D.holidays = r.holidays || [];
     reindex();
   }
   function reindex() { SCI = {}; D.scores.forEach(function (s) { SCI[s.item + '|' + s.seat] = s; }); }
+  /* gr-5 修改紀錄：舊值不是空白的變動＝「改過」→ 紅字 */
+  function histOf(item, seat) { return D.log.filter(function (l) { return l.item === item && l.seat === seat; }).sort(function (a, b) { return a.ts < b.ts ? -1 : 1; }); }
+  function chgOf(item, seat, field) { return D.log.some(function (l) { return l.item === item && l.seat === seat && l.field === field && l.old !== ''; }); }
+  var LOG_NAME = { raw: '分數', sub: '繳交日', leave: '請假', bonus: '訂正加分' };
+  function logVal(f, v) { if (v === '' || v == null) return '（空白）'; if (f === 'leave') { var lo = leaveOf({ leave: v }); return (lo.k === '考' ? '考試請假 ' : lo.k === '交' ? '繳交請假 ' : '返校 ') + md(lo.d); } if (f === 'sub') return md(v); if (f === 'bonus') return '+' + v; return v; }
+  function tsText(ts) { var d = new Date(ts); return isNaN(d) ? esc(ts) : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
   function scoreOf(item, seat) { return SCI[item + '|' + seat] || null; }
   function roster(cls) { return D.students.filter(function (s) { return s.cls === cls && s.active !== 0; }); }
   function itemsOf(cls) {
@@ -285,6 +293,7 @@
     else if (S.tab === 'proj') h += projHTML();
     else if (S.tab === 'pts') h += ptsHTML();
     else h += setHTML();
+    if (S.hist && S.tab === 'reg' && S.admin) h += histHTML();   /* gr-5 */
     b.innerHTML = h;
     var np = m.querySelector('.gr-pane'); if (np && keep) np.scrollTop = keep;
   }
@@ -327,8 +336,9 @@
     its.forEach(function (it) {
       var got = roster(S.cls).filter(function (s) { var c = scoreOf(it.id, s.seat); return c && (c.raw != null || c.sub); }).length;
       var miss = it.late && it.due && it.due < td && got < n;
+      var chg = D.log.some(function (l) { return l.item === it.id && l.old !== ''; });   /* gr-5 */
       h += '<button class="gr-it' + (S.item === it.id && !S.edit && !S.imp ? ' on' : '') + '" data-g="item|' + it.id + '"><span class="gr-tag t-' + esc(it.type) + '">' + esc(it.type) + '</span>' +
-        esc(itemLabel(it)) + '<small>' + (it.issued ? md(it.issued) + ' 發　' : '') + (it.due ? '期限 ' + md(it.due) : '無期限') +
+        esc(itemLabel(it)) + (it.by ? ' <span class="gr-tag gr-tut">小老師新增</span>' : '') + (chg ? ' <span class="gr-chgt" title="有成績被改過">改過</span>' : '') + '<small>' + (it.issued ? md(it.issued) + ' 發　' : '') + (it.due ? '期限 ' + md(it.due) : '無期限') +
         '　<span class="' + (miss ? 'late' : '') + '">' + got + '/' + n + '</span></small></button>';
     });
     h += '</div><div class="gr-pane">';
@@ -345,7 +355,10 @@
       '<span class="gr-muted">' + (it.due ? '期限 ' + md(it.due) + (it.late ? '（遲交每上課日 −' + PEN + '）' : '（不扣遲交）') : '無期限') +
       '　已登記 ' + fins.length + '/' + st.length + (fins.length ? '　平均 ' + r1(avg(fins)) : '') + '</span>' +
       '<button class="gr-btn" data-g="b10|' + it.id + '" title="這份考卷已交（或有分數）的人，訂正加分一次設成 +10；其他分數再個別手動調整">已交的訂正 +10</button>' +   /* v110 */
+      (function () { var n = D.log.filter(function (l) { return l.item === it.id && l.old !== ''; }).length;   /* gr-5 */
+        return '<button class="gr-btn' + (n ? ' gr-chgb' : '') + '" data-g="hist|' + it.id + '|0">📜 修改紀錄' + (n ? '（' + n + '）' : '') + '</button>'; })() +
       '<button class="gr-btn" data-g="edit|' + it.id + '">編輯</button></div>' +
+      (it.by ? '<p class="gr-muted" style="margin:0 0 6px">這份是小老師 ' + esc(it.by) + ' 新增的' + (it.note && it.note !== '小老師新增' ? '（' + esc(it.note) + '）' : '') + '，請確認類型、期限。</p>' : '') +
       '<div class="gr-row"><label class="k">繳交日期</label><input type="date" id="gr-subdate" value="' + esc(S.subDate) + '">' +
       '<span class="gr-muted">按「已交」或輸入分數時記這天（補登時改這裡）</span></div>';
     if (!st.length) return h + '<p class="late">這班還沒有學生名單。</p>';
@@ -363,9 +376,30 @@
     var late = L ? '<span class="late">' + (c.sub ? '遲' : '逾期') + L + '天 −' + (L * PEN) + '</span>' : '';
     if (!late && lo.k === '考' && c.raw == null) late = '<span class="late">未補考</span>';   /* v110 */
     var bo = '<select data-g="bonus|' + id + '">' + [0,1,2,3,4,5,6,7,8,9,10].map(function (n) { return '<option value="' + n + '"' + ((c.bonus || 0) === n ? ' selected' : '') + '>' + (n ? '+' + n : '—') + '</option>'; }).join('') + '</select>';
-    return '<tr data-row="' + id + '" class="' + (c.raw != null || c.sub ? 'done' : '') + '"><td>' + s.seat + '</td><td class="nm">' + esc(s.name) + '</td>' +
-      '<td><input class="gr-sc" type="text" inputmode="decimal" data-g="raw|' + id + '" value="' + (c.raw == null ? '' : c.raw) + '"></td>' +
-      '<td>' + sub + '</td><td>' + lv + '</td><td>' + late + '</td><td>' + bo + '</td><td class="fin">' + (f == null ? '' : r1(f)) + '</td></tr>';
+    /* gr-5：改過的格子紅框紅字；姓名下方小字＝小老師登記者／✓檢查者／📜修改紀錄 */
+    var cg = function (f) { return chgOf(it.id, s.seat, f) ? ' gr-chg' : ''; }, hs = histOf(it.id, s.seat), anyChg = hs.some(function (l) { return l.old !== ''; });
+    var who = (c.by ? '<span class="gr-muted">' + esc(String(c.by).replace(it.cls, '')) + '</span>' : '') +
+      (c.chk ? ' <span class="pos" title="' + esc(c.chk) + '">✓' + esc(String(c.chk).split('@')[0].replace(it.cls, '')) + '</span>' : '') +
+      (hs.length ? ' <button class="gr-x' + (anyChg ? ' gr-chgb' : '') + '" data-g="hist|' + id + '" title="修改紀錄">📜</button>' : '');
+    return '<tr data-row="' + id + '" class="' + (c.raw != null || c.sub ? 'done' : '') + '"><td>' + s.seat + '</td><td class="nm">' + esc(s.name) + (who ? '<small class="gr-who">' + who + '</small>' : '') + '</td>' +
+      '<td class="' + cg('raw') + '"><input class="gr-sc" type="text" inputmode="decimal" data-g="raw|' + id + '" value="' + (c.raw == null ? '' : c.raw) + '"></td>' +
+      '<td class="' + cg('sub') + '">' + sub + '</td><td class="' + cg('leave') + '">' + lv + '</td><td>' + late + '</td><td class="' + cg('bonus') + '">' + bo + '</td><td class="fin">' + (f == null ? '' : r1(f)) + '</td></tr>';
+  }
+  /* gr-5：修改紀錄視窗（單一學生，或 seat 為 0＝整份考卷只列「改過」的） */
+  function histHTML() {
+    var q = S.hist, it = itemById(q.item); if (!it) return '';
+    var ls = q.seat ? histOf(q.item, q.seat) : D.log.filter(function (l) { return l.item === q.item && l.old !== ''; }).sort(function (a, b) { return a.ts < b.ts ? 1 : -1; });
+    var st = q.seat ? roster(it.cls).filter(function (s) { return s.seat === q.seat; })[0] : null;
+    var h = '<div class="gr-hist"><div class="gr-hbox"><div class="gr-h"><h4>📜 ' + esc(itemLabel(it)) + (q.seat ? '　' + q.seat + '號 ' + esc(st ? st.name : '') : '　改過的紀錄') + '</h4>' +
+      '<span class="gr-sp" style="flex:1"></span><button class="gr-btn" data-g="histx">關閉</button></div>';
+    if (!ls.length) return h + '<p class="gr-muted">' + (q.seat ? '沒有紀錄。' : '這份沒有被改過的成績。') + '</p></div></div>';
+    h += '<table class="gr-t"><thead><tr><th>時間</th>' + (q.seat ? '' : '<th>座號</th>') + '<th>誰</th><th>欄位</th><th>舊值</th><th></th><th>新值</th></tr></thead><tbody>';
+    ls.forEach(function (l) {
+      var chg = l.old !== '';
+      h += '<tr' + (chg ? ' class="gr-chgr"' : '') + '><td>' + tsText(l.ts) + '</td>' + (q.seat ? '' : '<td><b>' + l.seat + '</b></td>') + '<td>' + esc(l.who) + '</td><td>' + esc(LOG_NAME[l.field] || l.field) + '</td>' +
+        '<td>' + esc(logVal(l.field, l.old)) + '</td><td>' + (chg ? '→' : '新登記') + '</td><td>' + esc(logVal(l.field, l['new'])) + '</td></tr>';
+    });
+    return h + '</tbody></table><p class="gr-muted">紅色＝登記後又被改過。第一次登記（舊值空白）照常顯示。</p></div></div>';
   }
   function refreshRow(item, seat) {
     var it = itemById(item), s = roster(S.cls).filter(function (x) { return x.seat === seat; })[0];
@@ -377,9 +411,13 @@
   function patchScore(item, seat, p) {
     var it = itemById(item); if (!it) return;
     var c = scoreOf(item, seat);
-    if (!c) { c = { item: item, cls: it.cls, seat: seat, raw: null, sub: '', leave: '', bonus: 0, upd: '' }; D.scores.push(c); SCI[item + '|' + seat] = c; }
-    Object.keys(p).forEach(function (k) { c[k] = p[k]; });
-    c.upd = new Date().toISOString();
+    if (!c) { c = { item: item, cls: it.cls, seat: seat, raw: null, sub: '', leave: '', bonus: 0, upd: '', by: '', chk: '' }; D.scores.push(c); SCI[item + '|' + seat] = c; }
+    var ts = new Date().toISOString(), sv = function (f, v) { return v == null || (f === 'bonus' && !v) ? '' : String(v); };
+    Object.keys(p).forEach(function (k) {   /* gr-5：畫面先記一筆（後台也會記同樣的），紅字馬上出現 */
+      if (LOG_NAME[k] && sv(k, c[k]) !== sv(k, p[k])) D.log.push({ ts: ts, who: '老師', item: item, cls: it.cls, seat: seat, field: k, old: sv(k, c[k]), 'new': sv(k, p[k]) });
+      c[k] = p[k];
+    });
+    c.upd = ts;
     queueScore(c); refreshRow(item, seat);
   }
 
@@ -712,8 +750,50 @@
       '<div class="gr-row"><button class="gr-btn pri" data-g="wsave">儲存這班</button><button class="gr-btn" data-g="wsaveall">套用到全部班級</button><span class="gr-muted">比例數字不必加到 100，會自動換算；目前平均只算已有分數的項目。</span></div></div>';
     h += '<div class="gr-sec"><h5>④ 匯出 Excel</h5><div class="gr-row">' + classes().map(function (c) { return '<button class="gr-btn" data-g="csv|' + esc(c) + '">' + esc(c) + ' 成績總表</button>'; }).join('') +
       '<button class="gr-btn" data-g="csvpts">課堂加減分紀錄</button></div><p class="gr-muted">下載 CSV（Excel 可直接開，含姓名，請勿外流）。完整原始資料也在 Google 試算表裡。</p></div>';
+    h += tutorSecHTML();   /* gr-5 */
     if (isDemo()) h += '<div class="gr-sec"><h5>示範資料</h5><button class="gr-btn warn" data-g="demoreset">清除本機示範資料</button></div>';
     return h + '</div></div>';
+  }
+  /* ── gr-5：小老師（名單、密碼、網址） ── */
+  function tutorSecHTML() {
+    var h = '<div class="gr-sec"><h5>⑤ 小老師</h5>';
+    if (isDemo()) return h + '<p class="gr-muted">示範模式不支援（要綁定 Google 後台 gr-5）。</p></div>';
+    var pwUrl = url() + '?page=tutor';
+    h += '<div class="gr-row"><label class="k">帳密登入</label><input type="text" readonly value="' + esc(pwUrl) + '" style="flex:1;min-width:280px" onclick="this.select()"></div>' +
+      '<div class="gr-row"><label class="k">Google 登入</label>' + (TUTOR_G_URL ? '<input type="text" readonly value="' + esc(TUTOR_G_URL + '?page=tutor') + '" style="flex:1;min-width:280px" onclick="this.select()">'
+        : '<span class="gr-muted">還沒設定（Apps Script 要另外新增一個「網域內」部署，見 docs/成績系統_部署步驟.md §7）</span>') + '</div>';
+    var ts = D.tutors.slice().sort(function (a, b) { return a.cls === b.cls ? a.seat - b.seat : (classes().indexOf(a.cls) - classes().indexOf(b.cls)); });
+    if (!ts.length) h += '<p class="gr-muted">名單還沒建立（後台升到 gr-5 後，第一次有小老師登入或按「重新整理名單」就會自動建立預設名單）。</p>';
+    else {
+      h += '<table class="gr-t" style="max-width:640px"><thead><tr><th>班級</th><th>座號</th><th>姓名</th><th>帳號（學號）</th><th>密碼</th><th></th></tr></thead><tbody>';
+      ts.forEach(function (t) {
+        var s = D.students.filter(function (x) { return x.cls === t.cls && x.seat === +t.seat; })[0] || {}, k = esc(t.cls) + '|' + t.seat;
+        var on = String(t.active) !== '0';
+        if (t.cls === '全部') s = { name: '🧪 測試帳號（四班）', sid: t.sid || t.note || '' };   /* 老師的試用帳號：帳號打信箱或 @ 前面 */
+        h += '<tr' + (on ? '' : ' style="opacity:.5"') + '><td>' + esc(t.cls) + '</td><td><b>' + (+t.seat || '—') + '</b></td><td class="nm">' + esc(s.name || t.name || '（名單沒有）') + '</td><td>' + esc(s.sid || t.sid || '') + '</td>' +
+          '<td>' + (+t.hasPw ? '已設定' : '<span class="late">未設定</span>') + '</td><td><button class="gr-btn" data-g="tadm|pw|' + k + '">' + (+t.hasPw ? '重設密碼' : '產生密碼') + '</button>' +
+          '<button class="gr-btn" data-g="tadm|' + (on ? 'off' : 'on') + '|' + k + '">' + (on ? '停用' : '啟用') + '</button></td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+    h += '<div class="gr-row" style="margin-top:8px"><label class="k">新增</label><select id="gr-tcls">' + classes().map(function (c) { return '<option' + (c === S.setCls ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+      '<input type="number" id="gr-tseat" min="1" max="60" placeholder="座號" style="width:70px"><button class="gr-btn" data-g="tadm|add">新增小老師</button>' +
+      '<button class="gr-btn" data-g="tadm|list">重新整理名單</button></div>' +
+      '<p class="gr-muted">Google 登入＝用 學號@mail2.ccvs.kh.edu.tw 自動認人，不用密碼。密碼只有按下去那一次看得到，忘了就重設。小老師只看得到自己班、誰還沒交、當天自己登的分數；檢查時才看得到那一份的分數。</p></div>';
+    return h;
+  }
+  function tutorAdmin(v) {
+    var a = v.split('|'), op = a[0], cls = a[1] || '', seat = +a[2] || 0, nm = cls === '全部' ? '測試帳號' : cls + ' ' + seat + '號';
+    if (op === 'add') { cls = (document.getElementById('gr-tcls') || {}).value || ''; seat = +((document.getElementById('gr-tseat') || {}).value || 0); if (!cls || !seat) { alert('請選班級、輸入座號'); return; } }
+    if (op === 'pw' && !confirm(nm + '：產生新密碼？（舊密碼立刻失效）')) return;
+    if (op === 'off' && !confirm(nm + '：停用？（停用後不能登入）')) return;
+    setSt('處理中…');
+    call({ action: 'tAdmin', op: op, cls: cls, seat: seat }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '失敗');
+      D.tutors = r.tutors || D.tutors; setSt('✓ 完成'); render();
+      if (r.pw) { var t = (r.tutors || []).filter(function (x) { return x.cls === cls && +x.seat === seat; })[0] || {};
+        alert((cls === '全部' ? '' : cls + ' ' + seat + '號 ') + (t.name || '') + '\n\n帳號：' + (t.sid || '（學號）') + '\n密碼：' + r.pw + '\n\n請抄給小老師。這個密碼之後不會再顯示，忘了就重設。'); }
+    }).catch(function (e) { setSt('⚠ ' + e.message, true); alert('失敗：' + e.message + (/不明的動作/.test(e.message) ? '\n（Apps Script 還沒更新到 gr-5）' : '')); });
   }
   function parsePaste(txt) {
     var rows = [], skip = [], seen = {};
@@ -817,6 +897,9 @@
       if (!confirm('把這份考卷已交的 ' + who.length + ' 人，訂正加分設成 +10？\n（座號 ' + who.map(function (s) { return s.seat; }).join('、') + '）\n之後可以個別手動調整。')) return;
       who.forEach(function (s) { patchScore(v, s.seat, { bonus: 10 }); });
     }
+    else if (t === 'hist') { var hq = v.split('|'); S.hist = { item: hq[0], seat: +hq[1] || 0 }; render(); }   /* gr-5 */
+    else if (t === 'histx') { S.hist = null; render(); }
+    else if (t === 'tadm') tutorAdmin(v);
     else if (t === 'pv') { S.projView = v; render(); }
     else if (t === 'rev') { S.reveal[v] = !S.reveal[v]; b.classList.toggle('m', !(S.revealAll || S.reveal[v])); }
     else if (t === 'revall') { S.revealAll = !S.revealAll; S.reveal = {}; render(); }
@@ -876,7 +959,7 @@
   }
   function onInput(e) { if (e.target.id === 'gr-paste') S.paste = e.target.value; }
   function onKey(e) {
-    if (e.key === 'Escape') { close(); e.stopPropagation(); return; }
+    if (e.key === 'Escape') { if (S.hist) { S.hist = null; render(); } else close(); e.stopPropagation(); return; }
     var g = e.target.getAttribute && e.target.getAttribute('data-g');
     if (e.key === 'Enter' && g && g.indexOf('raw|') === 0) {
       e.preventDefault();
