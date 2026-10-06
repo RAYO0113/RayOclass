@@ -23,16 +23,16 @@ body.dark-mode .tm-on {
 .tm-on .tp-seg, .tm-on .tp-seg-rhet, .tm-on .tp-seg-mean {
   background:none !important; color:inherit !important; font-weight:inherit !important; border-bottom:0 !important; padding:0 !important; box-shadow:none !important;
 }
-/* 點開：修辭（句子型）字變色加粗；句意字變綠加粗（描邊，不改字寬） */
-.tm-on .tp-seg.tm-r-on { color:var(--tmc,var(--tm-r1)) !important; -webkit-text-stroke:.03em var(--tmc,var(--tm-r1)); }
-.tm-on .tp-seg.tm-m-on { color:var(--tm-g) !important; -webkit-text-stroke:.03em var(--tm-g); }
+/* 點開：修辭（句子型）字變色加粗；句意字變綠加粗（真粗體宋體；中文字等寬，加粗不會擠動課文） */
+.tm-on .tp-seg.tm-r-on { color:var(--tmc,var(--tm-r1)) !important; font-weight:700 !important; }
+.tm-on .tp-seg.tm-m-on { color:var(--tm-g) !important; font-weight:700 !important; }
 /* 跨句單詞型／單字單詞型：未點開淡底線；點開底色或圈字＋變色 */
 .tm-on .tm-kw { text-decoration:underline; text-decoration-thickness:.045em; text-decoration-color:var(--tm-faint); text-underline-offset:.22em; }
-.tm-on .tm-kw.on { color:var(--tm-r1) !important; -webkit-text-stroke:.03em var(--tm-r1); text-decoration-color:var(--tm-r1); }
+.tm-on .tm-kw.on { color:var(--tm-r1) !important; font-weight:700; text-decoration-color:var(--tm-r1); }
 .tm-on .tm-b.on { background:var(--tm-kwbg); border-radius:.1em; }
 .tm-on .tm-c.on { outline:.07em solid var(--tm-r1); outline-offset:.03em; border-radius:999px; text-decoration:none; }
 /* 句意括號（佔位、左右對稱） */
-.tm-on .tm-par { color:var(--tm-gfaint); -webkit-text-stroke:0; font-weight:400; }
+.tm-on .tm-par { color:var(--tm-gfaint); font-weight:400; }
 .tm-on .tm-par.on { color:var(--tm-g); }
 /* 注釋虛線變淡；字義只用顏色（不要底線） */
 .tm-on .tp-n { border-bottom:1px dashed rgba(122,46,46,.28) !important; }

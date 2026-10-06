@@ -8151,6 +8151,7 @@ try {
     var old = slide.querySelector(':scope > .tm-layer'); if (old) old.remove();
     if (!on() || !slide.querySelector('.tp-line')) { slide.classList.remove('tm-on'); return; }
     var st = prepare(slide);
+    if (window.__tmRO && !slide.__tmObs) { slide.__tmObs = 1; window.__tmRO.observe(slide); var t0 = slide.querySelector('.tp-text'); if (t0) window.__tmRO.observe(t0); }
     var cs = chars(slide);
     if (getComputedStyle(slide).position === 'static') slide.style.position = 'relative';
     var base = slide.getBoundingClientRect();
@@ -8244,7 +8245,7 @@ try {
       var x = it.anchor.l, minW = Math.min(10 * fsz, TR - TL); if (TR - x < minW) x = Math.max(TL, TR - minW);
       bx.style.left = x + 'px'; bx.style.maxWidth = (TR - x) + 'px';
       var h = bx.offsetHeight, w = bx.offsetWidth, ch = it.chip.getBoundingClientRect(), cr = rel(ch);
-      var t = up ? cr.t - h - fsz * 0.12 : cr.b + fsz * 0.12;
+      var t = up ? cr.t - h - fsz * 0.12 : Math.max(cr.b, it.lastB || 0) + fsz * 0.12;   /* 句意：在整句最後一行之下，不蓋住自己的原文 */
       var rc = { l: x, r: x + w, t: t, b: t + h };
       for (var g = 0; g < 14; g++) {
         var q = placed.filter(function (p) { return rc.l < p.r && p.l < rc.r && rc.t < p.b && p.t < rc.b; })[0];
@@ -8260,7 +8261,12 @@ try {
       return h;
     }
     openR.forEach(function (it) { if (it.chip) box(it, true, body(it, true), 'tm-box-r'); });
-    openM.forEach(function (it) { if (it.chip) box(it, false, body(it, false), 'tm-box-m'); });
+    openM.forEach(function (it) {
+      if (!it.chip) return;
+      var mc = charsById(slide, cs, it.id); it.lastB = 0;
+      mc.forEach(function (c) { it.lastB = Math.max(it.lastB, rel(rectOf(c)).b); });
+      box(it, false, body(it, false), 'tm-box-m');
+    });
   }
   function add(layer, cls, s) {
     var d = document.createElement('div'); d.className = cls;
@@ -8298,11 +8304,23 @@ try {
     wkRenderCurrent = function () { var r = _r.apply(this, arguments); soon(); return r; };
   }
   window.addEventListener('resize', soon);
+  /* 保險：課文頁內任何點擊（開關注釋欄等）或版面動畫結束後再排一次（不只靠 ResizeObserver） */
+  var late = 0;
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t || !t.closest || t.closest('.tm-chip, .tm-box')) return;
+    if (!t.closest('#wk-slide-area, #wkfs-body, #wk-fullscreen')) return;
+    clearTimeout(late); late = setTimeout(settle, 350);
+  }, true);
+  ['transitionend', 'animationend'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (e.target && e.target.closest && e.target.closest('#wk-slide-area, #wkfs-body')) soon(); }, true);
+  });
   if (window.ResizeObserver) {
     var ro = new ResizeObserver(soon);
     ['wk-slide-area', 'wkfs-body'].forEach(function (id) { var el = document.getElementById(id); if (el) ro.observe(el); });
+    window.__tmRO = ro;   /* 每次排版時也觀察該頁的 .wk-slide、第一個 .tp-text（注釋欄打開會讓課文區變窄、重新換行） */
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(soon);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', soon);   /* 第一次用到粗體時字型才下載，下載完重排 */
 
   window.V115TM = { relayout: relayoutAll, enabled: ENABLED, state: OPEN };
 })();
@@ -8311,7 +8329,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V117';
+  window.APP_VERSION = 'V118';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
