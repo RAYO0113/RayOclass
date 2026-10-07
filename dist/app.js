@@ -6385,7 +6385,8 @@ try {
     'tp_hist_v1': '上課自動紀錄',
     'hw_done_v1': '作業完成勾選',
     'plan_v1': '教學進度（老師專用）',
-    'gr_seat_v1': '座位表（加減分用，只有座號）'
+    'gr_seat_v1': '座位表（加減分用，只有座號）',
+    'stu_pw_v1': '學生班級網站密碼（老師專用）'   /* V124：學生端 stuGet 不讀這個鍵；舊站不認得，下載時略過 */
   };
   var PREFIX = { 'pian_': '講義補字圖片' };
   var M = 'sync_meta_v1', BAK = 'sync_bak_v1', BAK_MAX = 1.5e6;
@@ -8842,8 +8843,35 @@ try {
   var sheet = '', devOpen = false, schedEdit = false;
   var TOOLS = [
     ['cal', '📅', '日曆', '考試・作業'], ['gr', '📒', '成績', '登記・加減分'], ['nq', '📝', '小考紀錄', '訂正・給學生看'],
-    ['hw', '✅', '重要進度檢核', '交作業・檢討'], ['sched', '🔁', '課表／調課', '預先調課'], ['plan', '📘', '教學進度', '老師專用']];
-  var SHEETS = { hw: '✅ 重要進度檢核', sched: '🔁 課表／調課', plan: '📘 教學進度', sync: '☁ 同步／備份' };
+    ['hw', '✅', '重要進度檢核', '交作業・檢討'], ['sched', '🔁', '課表／調課', '預先調課'], ['plan', '📘', '教學進度', '老師專用'],
+    ['stu', '🎓', '班級網站', '學生版・小老師頁']];
+  var SHEETS = { hw: '✅ 重要進度檢核', sched: '🔁 課表／調課', plan: '📘 教學進度', stu: '🎓 班級網站／小老師頁', sync: '☁ 同步／備份' };
+
+  /* 10/7：學生班級網站（stu115）的密碼——老師輸入一次，存在 stu_pw_v1（雲端同步，學生端 stuGet 讀不到），
+     每台登入同步的老師裝置自動寫進解鎖頁「記住密碼」用的 stu_pw_<網址代碼>（同網域），點連結就直接打開。 */
+  var STU_BASE = 'https://rayo0113.github.io/stu115/';
+  var STU_SLUG = { '建一忠': 'c-ywkbbb', '建一孝': 'c-pnn3hs', '冷一忠': 'c-efexia', '冷一孝': 'c-g2jy3u' };   /* 同 scripts/stu_releases.json */
+  var TUTOR_URL = 'https://rayo0113.github.io/RayOclass/t';
+  function stuPw() { var o = get('stu_pw_v1', {}); return o && typeof o === 'object' ? o : {}; }
+  function applyStuPw() {
+    var o = stuPw();
+    Object.keys(STU_SLUG).forEach(function (c) {
+      if (!o[c]) return;
+      try { if (localStorage.getItem('stu_pw_' + STU_SLUG[c]) !== o[c]) localStorage.setItem('stu_pw_' + STU_SLUG[c], o[c]); } catch (e) {}
+    });
+  }
+  function renderStu(box) {
+    var o = stuPw();
+    box.innerHTML = '<div class="v123-card"><b>👩‍🏫 小老師登記頁</b><div class="v123-mut">用您的學校帳號開，會自動以「老師」身分登入，四個班都看得到。</div>' +
+      '<a class="v123-pri v123-link" href="' + TUTOR_URL + '" target="_blank" rel="noopener">打開小老師頁</a></div>' +
+      '<div class="v123-card"><b>🎓 學生班級網站</b><div class="v123-mut">密碼只要在任何一台輸入一次，雲端同步後每台老師裝置點下面的連結就直接打開（學生看不到這裡）。</div>' +
+      Object.keys(STU_SLUG).map(function (c) {
+        return '<div class="v123-stu"><span class="v123-stu-c">' + esc(c) + '</span>' +
+          '<a href="' + STU_BASE + STU_SLUG[c] + '/" target="_blank" rel="noopener">打開</a>' +
+          (o[c] ? '<span class="v123-ok">✓ 已記住</span><button type="button" data-v123p="clr|' + esc(c) + '">改</button>'
+            : '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="輸入密碼" data-v123pw="' + esc(c) + '"><button type="button" data-v123p="save|' + esc(c) + '">記住</button>') + '</div>';
+      }).join('') + '</div>';
+  }
 
   function el(id, tag, cls) { var x = $(id); if (!x) { x = document.createElement(tag || 'div'); x.id = id; if (cls) x.className = cls; } return x; }
   function place(parent, list) {   /* 依序放進 parent；已在正確位置的不動 */
@@ -8890,6 +8918,7 @@ try {
         h.innerHTML = '<button type="button" class="v123-back">← 返回</button><span>' + SHEETS[k] + '</span>';
         h.querySelector('.v123-back').addEventListener('click', closeSheet);
         s.addEventListener('click', onSheet); s.addEventListener('change', onSheetChange);
+        s.addEventListener('keydown', function (e) { e.stopPropagation(); });   /* 打字時不要觸發投影翻頁快捷鍵 */
       }
       place(s, [h, body]);
       if (s.parentNode !== P) P.appendChild(s);
@@ -8900,6 +8929,8 @@ try {
     place($('v123-sh-plan-b'), [pills, $('v114-cls')]);
     var sch = el('v123-sched'); renderSched(sch);
     place($('v123-sh-sched-b'), [$('v122-swap'), sch]);   /* 調課較常用，放上面 */
+    var stb = el('v123-stu'); renderStu(stb); applyStuPw();
+    place($('v123-sh-stu-b'), [stb]);
     var sy = el('v123-sync'); renderSync(sy);
     place($('v123-sh-sync-b'), [sy, P.querySelector('.cls-foot')]);
     if (sheet === 'sched' && window.V122SWAP) { var sw = $('v122-swap'); if (sw && sw.querySelector('[data-v122="tog"]') && !sw.querySelector('.v122-form')) sw.querySelector('[data-v122="tog"]').click(); }
@@ -9000,6 +9031,16 @@ try {
     if (s === 'reset' && window.V82) { V82.resetSched(); arrange(); return; }
     var y = b.getAttribute('data-v123y');
     if (y === 'cloud') { var o = $('v107-open'); if (o) o.click(); }
+    var pp = b.getAttribute('data-v123p');
+    if (pp) {
+      var a2 = pp.split('|'), m = stuPw();
+      if (a2[0] === 'save') {
+        var inp = b.parentNode.querySelector('input[data-v123pw]'), v = inp ? inp.value.trim() : '';
+        if (v.length < 10) { alert('密碼好像不完整（班級網站密碼是 12 碼，注意大小寫）。'); return; }
+        m[a2[1]] = v;
+      } else if (a2[0] === 'clr') { if (!confirm('要重新輸入「' + a2[1] + '」的密碼嗎？')) return; delete m[a2[1]]; try { localStorage.removeItem('stu_pw_' + STU_SLUG[a2[1]]); } catch (e) {} }
+      put('stu_pw_v1', m); arrange();
+    }
   }
   function onSheetChange(e) {
     var w = e.target.getAttribute('data-v123w'); if (!w || !window.V82) return;
@@ -9031,7 +9072,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V123';
+  window.APP_VERSION = 'V124';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

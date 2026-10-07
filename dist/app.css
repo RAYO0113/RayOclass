@@ -6842,3 +6842,11 @@ body.dark-mode #cls-panel.v123 #v84-hw button.v84-c.v84-fx.done { background:#3a
 .v123-card .v123-pri { justify-self:start; }
 #cls-panel.v123 .v123-sh-b .cls-foot { position:static; display:flex; gap:8px; align-items:center; background:var(--sx-paper); border:1px solid var(--sx-line); border-radius:10px; padding:10px 12px; margin-top:-6px; }
 #cls-panel.v123 .v123-sh-b .cls-foot button { border:1px solid var(--sx-line); background:var(--sx-paper); color:var(--sx-ink); border-radius:6px; padding:7px 12px; }
+/* V124 班級網站／小老師頁 */
+.v123-card .v123-link { display:inline-block; text-decoration:none; justify-self:start; }
+.v123-stu { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--sx-mist); }
+.v123-stu-c { min-width:3.6em; font-family:"Noto Serif TC",serif; font-weight:700; color:var(--sx-qing-d); }
+.v123-stu a { color:var(--sx-qing); font-weight:600; }
+.v123-stu input { flex:1; min-width:0; font-size:14px; padding:6px 8px; border:1px solid var(--sx-line); border-radius:6px; background:var(--sx-paper); color:var(--sx-ink); }
+.v123-stu button { border:1px solid var(--sx-line); background:var(--sx-paper); color:var(--sx-ink); border-radius:6px; padding:5px 10px; }
+.v123-stu .v123-ok { flex:1; color:var(--sx-lu); font-size:13px; }
