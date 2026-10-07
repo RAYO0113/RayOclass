@@ -11,6 +11,9 @@
   ];
   var ITEMS = ['課後習題', '習作', 'A卷'];
   var STAGES = ['考試', '檢討'];
+  /* V123 重要進度檢核：A卷多一格「訂正加分」（鍵 'A卷|訂正'）；課後習題／習作的「考試」格改叫「交作業」（鍵不變，舊紀錄照用） */
+  var STG = { '課後習題': ['考試', '檢討'], '習作': ['考試', '檢討'], 'A卷': ['考試', '檢討', '訂正'] };
+  function stLabel(it, st) { return st === '考試' ? (it === 'A卷' ? '考試' : '交作業') : st === '訂正' ? '訂正加分' : st; }
   var K = { data: 'hw_done_v1', les: 'hw_done_lesson_v1', fold: 'hw_done_fold_v1' };
   var exporting = false;
 
@@ -33,7 +36,7 @@
     var d = get(K.data, {}), key = item + '|' + stage;
     var row = ((d[lesson] = d[lesson] || {})[cls] = d[lesson][cls] || {});
     if (row[key]) {
-      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + item + ' ' + stage + '」的完成紀錄（' + md(row[key]) + '）？')) return;
+      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + item + ' ' + stLabel(item, stage) + '」的完成紀錄（' + md(row[key]) + '）？')) return;
       delete row[key];
     } else row[key] = today();
     put(K.data, d);
@@ -58,26 +61,26 @@
     }
     var fold = get(K.fold, false);
     var lk = picked || curLesson(), L = les(lk), d = (get(K.data, {})[lk]) || {};
-    var h = '<div class="v84-h"><span>習題／習作／A卷 完成紀錄</span><i>' + (fold ? '展開 ▸' : '收起 ▾') + '</i></div>';
+    var h = '<div class="v84-h"><span>重要進度檢核</span><i>' + (fold ? '展開 ▸' : '收起 ▾') + '</i></div>';
     if (!fold) {
       h += '<div class="v84-les">' + LESSONS.map(function (x) {
         return '<button type="button" data-v84="L|' + esc(x.k) + '"' + (x.k === lk ? ' class="on"' : '') + ' title="' + esc(x.k) + '"><b>' + x.no + '</b>' + esc(short(x)) + '</button>';
       }).join('') + '</div>';
       h += '<table><tr><th rowspan="2" style="width:58px">' + esc(L.no) + '</th>' +
-        ITEMS.map(function (it) { return '<th colspan="2" class="v84-g v84-gs">' + it + '</th>'; }).join('') + '</tr><tr>' +
-        ITEMS.map(function () { return STAGES.map(function (st, j) { return '<th class="v84-sub' + (j ? '' : ' v84-gs') + '">' + st + '</th>'; }).join(''); }).join('') + '</tr>';
+        ITEMS.map(function (it) { return '<th colspan="' + STG[it].length + '" class="v84-g v84-gs">' + it + '</th>'; }).join('') + '</tr><tr>' +
+        ITEMS.map(function (it) { return STG[it].map(function (st, j) { return '<th class="v84-sub' + (j ? '' : ' v84-gs') + '">' + stLabel(it, st) + '</th>'; }).join(''); }).join('') + '</tr>';
       classes().forEach(function (c) {
         var row = d[c] || {};
         h += '<tr><td class="v84-cls">' + esc(c) + '</td>' + ITEMS.map(function (it) {
-          return STAGES.map(function (st, j) {
+          return STG[it].map(function (st, j) {
             var v = row[it + '|' + st];
-            return '<td' + (j ? '' : ' class="v84-gs"') + '><button type="button" class="v84-c' + (j ? ' v84-rv' : '') + (v ? ' done' : '') + '" data-v84="C|' +
-              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + it + ' ' + st) + '">' +
+            return '<td' + (j ? '' : ' class="v84-gs"') + '><button type="button" class="v84-c' + (j ? (st === '訂正' ? ' v84-fx' : ' v84-rv') : '') + (v ? ' done' : '') + '" data-v84="C|' +
+              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + it + ' ' + stLabel(it, st)) + '">' +
               '<span class="v84-mk">' + (v ? '✓' : '○') + '</span>' + (v ? '<span class="v84-dt">' + md(v) + '</span>' : '') + '</button></td>';
           }).join('');
         }).join('') + '</tr>';
       });
-      h += '</table><div class="v84-note">點一下＝完成（自動記今天日期）；再點一下可取消。</div>';
+      h += '</table><div class="v84-note">點一下＝完成（自動記今天日期）；再點一下可取消。日曆排的考試／檢討日期到了、成績系統登記了繳交／訂正加分，會自動打勾。</div>';
     }
     el.innerHTML = h;
   }
@@ -114,5 +117,5 @@
     return _v84save.apply(this, arguments);
   };
 
-  window.V84HW = { data: function () { return get(K.data, {}); }, render: render };
+  window.V84HW = { data: function () { return get(K.data, {}); }, render: render, stages: STG, label: stLabel };
 })();

@@ -15,9 +15,10 @@
 
   /* 考試＋A卷／習作／課後習題＋課次都在 L1～L6 → 與 V84「考試」格連動 */
   /* v102：A卷檢討 → 完成紀錄「A卷｜檢討」格 */
-  function hwKey(e) { return e.item === 'A卷檢討' ? 'A卷|檢討' : e.item + '|考試'; }
+  function hwKey(e) { return RV.test(e.item) ? e.item.replace(/檢討$/, '') + '|檢討' : e.item + '|考試'; }
+  var RV = /^(A卷|習作|課後習題)檢討$/;   /* V123：習作檢討、課後習題檢討也連動 */
   function linked(e) {
-    return ((e.kind === '考試' && V84ITEMS.indexOf(e.item) >= 0) || e.item === 'A卷檢討') && e.lessons && e.lessons.length &&
+    return ((e.kind === '考試' && V84ITEMS.indexOf(e.item) >= 0) || RV.test(e.item)) && e.lessons && e.lessons.length &&
       e.lessons.every(function (n) { return LK[n]; });
   }
   function isDone(e, hw) {

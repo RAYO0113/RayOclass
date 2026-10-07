@@ -106,7 +106,7 @@
       box = document.createElement('div'); box.id = 'v122-swap';
       box.addEventListener('click', onClick); box.addEventListener('change', onChange);
     }
-    if (anchor.nextSibling !== box) anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    if (!box.parentNode || (anchor.nextSibling !== box && !box.closest('.v123-sheet'))) anchor.parentNode.insertBefore(box, anchor.nextSibling);   /* V123：已放進「課表／調課」工具頁就不搬 */
     var h = '<div class="v122-head"><button type="button" data-v122="tog">🔁 調課' + (F.open ? ' ▲' : ' ▼') + '</button>' +
       '<span class="v82-sub">預先設定某一節改到另一節上</span></div>';
     if (F.open) {
