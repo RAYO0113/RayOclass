@@ -9,7 +9,7 @@
    工具頁（.v123-sheet）蓋在面板上，「← 返回」回到面板；原本的入口按鈕藏在 #v123-hide 裡（點工具格＝點原按鈕）。
    自動打勾（重要進度檢核 hw_done_v1，鍵同 v84：{課名:{班:{'項目|階段':'日期'}}}）：
      - 日曆：A卷「考試」、A卷檢討／習作檢討／課後習題檢討，日期到了 → 該格記日曆日期
-     - 成績系統：習作（類型＝習作）、課後習題（名稱含「習題」）有人登記繳交日 → 「交作業」格；A卷有人訂正加分 → 「訂正加分」格
+     - 成績系統：習作（類型＝習作）、課本後習題（名稱含「習題／基礎練習／進階練習」）有人登記繳交日 → 「交作業」格；A卷有人訂正加分 → 「訂正加分」格
      - 每格自動打過一次就記 '_a:項目|階段'＝來源，老師手動取消後不會再自動打回去
      - 只在本機已從雲端拉過資料（或沒登入同步）時寫入，避免舊資料蓋掉別台（同 v108／v109） */
 (function () {
@@ -82,7 +82,7 @@
       if (!it || classes().indexOf(it.cls) < 0) return;
       var ls = String(it.lessons || '').split(',').map(Number).filter(function (n) { return LK[n]; }); if (!ls.length) return;
       var ss = by[it.id] || [], key = '', date = '';
-      if (it.type === '習作' || /習題/.test(it.title || '')) {
+      if (it.type === '習作' || /習題|基礎練習|進階練習/.test(it.title || '')) {   /* 課本後習題＝基礎練習＋進階練習 */
         key = (it.type === '習作' ? '習作' : '課後習題') + '|考試';
         ss.forEach(function (s) { var m = /^\d{4}-\d\d-\d\d/.exec(String(s.sub || '')); if (m && (!date || m[0] < date)) date = m[0]; });
       } else if (it.type === 'A卷') {
@@ -174,7 +174,7 @@
     cal.forEach(function (e) {
       if (!e || e.cls !== c || !e.date) return;
       var ls = (e.lessons || []).map(function (n) { return 'L' + n; }).join('、');
-      rows.push({ d: e.date, tag: e.kind === '考試' ? '考試' : /檢討$/.test(e.item) ? '檢討' : '作業', t: e.item + (ls ? ' ' + ls : '') + (e.note ? '（' + e.note + '）' : ''), cal: 1 });
+      rows.push({ d: e.date, tag: e.kind === '考試' ? '考試' : /檢討$/.test(e.item) ? '檢討' : '作業', t: String(e.item).replace('課後習題', '課本後習題') + (ls ? ' ' + ls : '') + (e.note ? '（' + e.note + '）' : ''), cal: 1 });
     });
     var mine = []; try { mine = (clsLoad() || {})[c] || []; } catch (e) {}
     mine.forEach(function (r, i) { if (r && r.d) rows.push({ d: r.d, tag: r.k || '紀錄', h: r.t, i: i }); });

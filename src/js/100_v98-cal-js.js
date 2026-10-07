@@ -4,6 +4,7 @@
   var LESSONS = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐' };
   var MAXL = 12;
   var KINDS = ['考試', '交作業'];
+  function disp(k) { return String(k).replace('課後習題', '課本後習題'); }   /* V123：畫面上叫「課本後習題」（基礎練習＋進階練習）；存的值仍是「課後習題」 */
   var ITEMS = ['A卷', 'A卷檢討', '習作', '習作檢討', '註釋小考', '課後習題', '課後習題檢討', '其他'];   /* V123：加習作檢討、課後習題檢討（重要進度檢核「檢討」格） */   /* v102：加 A卷檢討 */   /* v100：加註釋小考 */
   var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
   var CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];   /* 四班顏色，依 CLS_LIST 順序 */
@@ -52,8 +53,8 @@
       return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
         (!np && nm ? '（必考' + nm + '）' : '') + (e.note ? '（' + e.note + '）' : '');
     }
-    if (/檢討$/.test(e.item)) return e.item + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
-    var it = e.item === '其他' ? (e.note || '其他') : e.item;
+    if (/檢討$/.test(e.item)) return disp(e.item) + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
+    var it = e.item === '其他' ? (e.note || '其他') : disp(e.item);
     var s = it + (e.lessons && e.lessons.length ? ' ' + lesText(e.lessons) : '') + ' ' + (e.kind === '考試' ? '考' : '交');
     if (e.item !== '其他' && e.note) s += '（' + e.note + '）';
     return s;
@@ -286,7 +287,7 @@
         (mt[c] ? '<i class="v98-dot" style="background:' + ccol(c) + ';margin-right:3px"></i>' : '') + esc(c) + '</button>';
     }).join('') + '<button type="button" data-v98="fca">' + (form.cls.length === cs.length ? '全不選' : '四班') + '</button></div>';
     if (form.item !== '註釋小考' && !/檢討$/.test(form.item)) h += '<div class="v98-row"><span>類型</span>' + KINDS.map(function (k) { return '<button type="button" data-v98="fk|' + k + '"' + (form.kind === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
-    h += '<div class="v98-row"><span>項目</span>' + ITEMS.map(function (k) { return '<button type="button" data-v98="fi|' + k + '"' + (form.item === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
+    h += '<div class="v98-row"><span>項目</span>' + ITEMS.map(function (k) { return '<button type="button" data-v98="fi|' + k + '"' + (form.item === k ? ' class="on"' : '') + '>' + disp(k) + '</button>'; }).join('') + '</div>';
     h += '<div class="v98-row"><span>第幾課' + (form.item === '註釋小考' ? '（單選）' : '（可複選）') + '</span>';
     for (var n = 1; n <= MAXL; n++) h += '<button type="button" class="v98-l' + (form.les.indexOf(n) >= 0 ? ' on' : '') + '" data-v98="fl|' + n + '">L' + n + (LESSONS[n] ? '<small>' + esc(LESSONS[n]) + '</small>' : '') + '</button>';
     h += '</div>';

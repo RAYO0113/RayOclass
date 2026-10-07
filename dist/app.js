@@ -3593,6 +3593,7 @@ try {
   var STAGES = ['考試', '檢討'];
   /* V123 重要進度檢核：A卷多一格「訂正加分」（鍵 'A卷|訂正'）；課後習題／習作的「考試」格改叫「交作業」（鍵不變，舊紀錄照用） */
   var STG = { '課後習題': ['考試', '檢討'], '習作': ['考試', '檢討'], 'A卷': ['考試', '檢討', '訂正'] };
+  function itLabel(it) { return it === '課後習題' ? '課本後習題' : it; }   /* 畫面名稱（基礎練習＋進階練習）；資料鍵仍是「課後習題」 */
   function stLabel(it, st) { return st === '考試' ? (it === 'A卷' ? '考試' : '交作業') : st === '訂正' ? '訂正加分' : st; }
   var K = { data: 'hw_done_v1', les: 'hw_done_lesson_v1', fold: 'hw_done_fold_v1' };
   var exporting = false;
@@ -3616,7 +3617,7 @@ try {
     var d = get(K.data, {}), key = item + '|' + stage;
     var row = ((d[lesson] = d[lesson] || {})[cls] = d[lesson][cls] || {});
     if (row[key]) {
-      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + item + ' ' + stLabel(item, stage) + '」的完成紀錄（' + md(row[key]) + '）？')) return;
+      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + itLabel(item) + ' ' + stLabel(item, stage) + '」的完成紀錄（' + md(row[key]) + '）？')) return;
       delete row[key];
     } else row[key] = today();
     put(K.data, d);
@@ -3647,7 +3648,7 @@ try {
         return '<button type="button" data-v84="L|' + esc(x.k) + '"' + (x.k === lk ? ' class="on"' : '') + ' title="' + esc(x.k) + '"><b>' + x.no + '</b>' + esc(short(x)) + '</button>';
       }).join('') + '</div>';
       h += '<table><tr><th rowspan="2" style="width:58px">' + esc(L.no) + '</th>' +
-        ITEMS.map(function (it) { return '<th colspan="' + STG[it].length + '" class="v84-g v84-gs">' + it + '</th>'; }).join('') + '</tr><tr>' +
+        ITEMS.map(function (it) { return '<th colspan="' + STG[it].length + '" class="v84-g v84-gs">' + itLabel(it) + '</th>'; }).join('') + '</tr><tr>' +
         ITEMS.map(function (it) { return STG[it].map(function (st, j) { return '<th class="v84-sub' + (j ? '' : ' v84-gs') + '">' + stLabel(it, st) + '</th>'; }).join(''); }).join('') + '</tr>';
       classes().forEach(function (c) {
         var row = d[c] || {};
@@ -3655,7 +3656,7 @@ try {
           return STG[it].map(function (st, j) {
             var v = row[it + '|' + st];
             return '<td' + (j ? '' : ' class="v84-gs"') + '><button type="button" class="v84-c' + (j ? (st === '訂正' ? ' v84-fx' : ' v84-rv') : '') + (v ? ' done' : '') + '" data-v84="C|' +
-              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + it + ' ' + stLabel(it, st)) + '">' +
+              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + itLabel(it) + ' ' + stLabel(it, st)) + '">' +
               '<span class="v84-mk">' + (v ? '✓' : '○') + '</span>' + (v ? '<span class="v84-dt">' + md(v) + '</span>' : '') + '</button></td>';
           }).join('');
         }).join('') + '</tr>';
@@ -4711,6 +4712,7 @@ try {
   var LESSONS = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐' };
   var MAXL = 12;
   var KINDS = ['考試', '交作業'];
+  function disp(k) { return String(k).replace('課後習題', '課本後習題'); }   /* V123：畫面上叫「課本後習題」（基礎練習＋進階練習）；存的值仍是「課後習題」 */
   var ITEMS = ['A卷', 'A卷檢討', '習作', '習作檢討', '註釋小考', '課後習題', '課後習題檢討', '其他'];   /* V123：加習作檢討、課後習題檢討（重要進度檢核「檢討」格） */   /* v102：加 A卷檢討 */   /* v100：加註釋小考 */
   var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
   var CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];   /* 四班顏色，依 CLS_LIST 順序 */
@@ -4759,8 +4761,8 @@ try {
       return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
         (!np && nm ? '（必考' + nm + '）' : '') + (e.note ? '（' + e.note + '）' : '');
     }
-    if (/檢討$/.test(e.item)) return e.item + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
-    var it = e.item === '其他' ? (e.note || '其他') : e.item;
+    if (/檢討$/.test(e.item)) return disp(e.item) + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
+    var it = e.item === '其他' ? (e.note || '其他') : disp(e.item);
     var s = it + (e.lessons && e.lessons.length ? ' ' + lesText(e.lessons) : '') + ' ' + (e.kind === '考試' ? '考' : '交');
     if (e.item !== '其他' && e.note) s += '（' + e.note + '）';
     return s;
@@ -4993,7 +4995,7 @@ try {
         (mt[c] ? '<i class="v98-dot" style="background:' + ccol(c) + ';margin-right:3px"></i>' : '') + esc(c) + '</button>';
     }).join('') + '<button type="button" data-v98="fca">' + (form.cls.length === cs.length ? '全不選' : '四班') + '</button></div>';
     if (form.item !== '註釋小考' && !/檢討$/.test(form.item)) h += '<div class="v98-row"><span>類型</span>' + KINDS.map(function (k) { return '<button type="button" data-v98="fk|' + k + '"' + (form.kind === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
-    h += '<div class="v98-row"><span>項目</span>' + ITEMS.map(function (k) { return '<button type="button" data-v98="fi|' + k + '"' + (form.item === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
+    h += '<div class="v98-row"><span>項目</span>' + ITEMS.map(function (k) { return '<button type="button" data-v98="fi|' + k + '"' + (form.item === k ? ' class="on"' : '') + '>' + disp(k) + '</button>'; }).join('') + '</div>';
     h += '<div class="v98-row"><span>第幾課' + (form.item === '註釋小考' ? '（單選）' : '（可複選）') + '</span>';
     for (var n = 1; n <= MAXL; n++) h += '<button type="button" class="v98-l' + (form.les.indexOf(n) >= 0 ? ' on' : '') + '" data-v98="fl|' + n + '">L' + n + (LESSONS[n] ? '<small>' + esc(LESSONS[n]) + '</small>' : '') + '</button>';
     h += '</div>';
@@ -8744,7 +8746,7 @@ try {
    工具頁（.v123-sheet）蓋在面板上，「← 返回」回到面板；原本的入口按鈕藏在 #v123-hide 裡（點工具格＝點原按鈕）。
    自動打勾（重要進度檢核 hw_done_v1，鍵同 v84：{課名:{班:{'項目|階段':'日期'}}}）：
      - 日曆：A卷「考試」、A卷檢討／習作檢討／課後習題檢討，日期到了 → 該格記日曆日期
-     - 成績系統：習作（類型＝習作）、課後習題（名稱含「習題」）有人登記繳交日 → 「交作業」格；A卷有人訂正加分 → 「訂正加分」格
+     - 成績系統：習作（類型＝習作）、課本後習題（名稱含「習題／基礎練習／進階練習」）有人登記繳交日 → 「交作業」格；A卷有人訂正加分 → 「訂正加分」格
      - 每格自動打過一次就記 '_a:項目|階段'＝來源，老師手動取消後不會再自動打回去
      - 只在本機已從雲端拉過資料（或沒登入同步）時寫入，避免舊資料蓋掉別台（同 v108／v109） */
 (function () {
@@ -8817,7 +8819,7 @@ try {
       if (!it || classes().indexOf(it.cls) < 0) return;
       var ls = String(it.lessons || '').split(',').map(Number).filter(function (n) { return LK[n]; }); if (!ls.length) return;
       var ss = by[it.id] || [], key = '', date = '';
-      if (it.type === '習作' || /習題/.test(it.title || '')) {
+      if (it.type === '習作' || /習題|基礎練習|進階練習/.test(it.title || '')) {   /* 課本後習題＝基礎練習＋進階練習 */
         key = (it.type === '習作' ? '習作' : '課後習題') + '|考試';
         ss.forEach(function (s) { var m = /^\d{4}-\d\d-\d\d/.exec(String(s.sub || '')); if (m && (!date || m[0] < date)) date = m[0]; });
       } else if (it.type === 'A卷') {
@@ -8909,7 +8911,7 @@ try {
     cal.forEach(function (e) {
       if (!e || e.cls !== c || !e.date) return;
       var ls = (e.lessons || []).map(function (n) { return 'L' + n; }).join('、');
-      rows.push({ d: e.date, tag: e.kind === '考試' ? '考試' : /檢討$/.test(e.item) ? '檢討' : '作業', t: e.item + (ls ? ' ' + ls : '') + (e.note ? '（' + e.note + '）' : ''), cal: 1 });
+      rows.push({ d: e.date, tag: e.kind === '考試' ? '考試' : /檢討$/.test(e.item) ? '檢討' : '作業', t: String(e.item).replace('課後習題', '課本後習題') + (ls ? ' ' + ls : '') + (e.note ? '（' + e.note + '）' : ''), cal: 1 });
     });
     var mine = []; try { mine = (clsLoad() || {})[c] || []; } catch (e) {}
     mine.forEach(function (r, i) { if (r && r.d) rows.push({ d: r.d, tag: r.k || '紀錄', h: r.t, i: i }); });

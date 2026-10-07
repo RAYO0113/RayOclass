@@ -13,6 +13,7 @@
   var STAGES = ['考試', '檢討'];
   /* V123 重要進度檢核：A卷多一格「訂正加分」（鍵 'A卷|訂正'）；課後習題／習作的「考試」格改叫「交作業」（鍵不變，舊紀錄照用） */
   var STG = { '課後習題': ['考試', '檢討'], '習作': ['考試', '檢討'], 'A卷': ['考試', '檢討', '訂正'] };
+  function itLabel(it) { return it === '課後習題' ? '課本後習題' : it; }   /* 畫面名稱（基礎練習＋進階練習）；資料鍵仍是「課後習題」 */
   function stLabel(it, st) { return st === '考試' ? (it === 'A卷' ? '考試' : '交作業') : st === '訂正' ? '訂正加分' : st; }
   var K = { data: 'hw_done_v1', les: 'hw_done_lesson_v1', fold: 'hw_done_fold_v1' };
   var exporting = false;
@@ -36,7 +37,7 @@
     var d = get(K.data, {}), key = item + '|' + stage;
     var row = ((d[lesson] = d[lesson] || {})[cls] = d[lesson][cls] || {});
     if (row[key]) {
-      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + item + ' ' + stLabel(item, stage) + '」的完成紀錄（' + md(row[key]) + '）？')) return;
+      if (!confirm('取消「' + cls + '・' + short(les(lesson)) + '・' + itLabel(item) + ' ' + stLabel(item, stage) + '」的完成紀錄（' + md(row[key]) + '）？')) return;
       delete row[key];
     } else row[key] = today();
     put(K.data, d);
@@ -67,7 +68,7 @@
         return '<button type="button" data-v84="L|' + esc(x.k) + '"' + (x.k === lk ? ' class="on"' : '') + ' title="' + esc(x.k) + '"><b>' + x.no + '</b>' + esc(short(x)) + '</button>';
       }).join('') + '</div>';
       h += '<table><tr><th rowspan="2" style="width:58px">' + esc(L.no) + '</th>' +
-        ITEMS.map(function (it) { return '<th colspan="' + STG[it].length + '" class="v84-g v84-gs">' + it + '</th>'; }).join('') + '</tr><tr>' +
+        ITEMS.map(function (it) { return '<th colspan="' + STG[it].length + '" class="v84-g v84-gs">' + itLabel(it) + '</th>'; }).join('') + '</tr><tr>' +
         ITEMS.map(function (it) { return STG[it].map(function (st, j) { return '<th class="v84-sub' + (j ? '' : ' v84-gs') + '">' + stLabel(it, st) + '</th>'; }).join(''); }).join('') + '</tr>';
       classes().forEach(function (c) {
         var row = d[c] || {};
@@ -75,7 +76,7 @@
           return STG[it].map(function (st, j) {
             var v = row[it + '|' + st];
             return '<td' + (j ? '' : ' class="v84-gs"') + '><button type="button" class="v84-c' + (j ? (st === '訂正' ? ' v84-fx' : ' v84-rv') : '') + (v ? ' done' : '') + '" data-v84="C|' +
-              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + it + ' ' + stLabel(it, st)) + '">' +
+              esc(lk) + '|' + esc(c) + '|' + it + '|' + st + '" title="' + esc(c + '・' + itLabel(it) + ' ' + stLabel(it, st)) + '">' +
               '<span class="v84-mk">' + (v ? '✓' : '○') + '</span>' + (v ? '<span class="v84-dt">' + md(v) + '</span>' : '') + '</button></td>';
           }).join('');
         }).join('') + '</tr>';
