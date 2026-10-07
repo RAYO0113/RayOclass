@@ -71,7 +71,7 @@
       if (dayOff(ds)) continue;
       S.periods.forEach(function (P) {
         var key = ds + '|' + P.p, sl = S.slots.filter(function (x) { return x[0] === wd && x[1] === P.p; })[0];
-        var o = ovr[key], who = o && o.cls ? o.cls : (sl ? sl[2] : '');
+        var o = ovr[key], who = o ? (o.cls || '') : (sl ? sl[2] : '');   /* V122：調課 cls 空白＝這節不上課（原本會退回課表） */
         if (who === c) out.push({ key: key, date: ds, p: P.p, end: P.end, manual: !!(o && o.cls) });
       });
     }
