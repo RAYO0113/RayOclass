@@ -5453,15 +5453,15 @@ try {
   }
 
   /* ── 計分 ── */
-  /* v110：請假分兩種，存在 leave 欄前綴——「考:日期」考試請假（不計遲交，顯示未補考）；「交:日期」繳交請假（期限延到該班該日之後下一節國文課）；
+  /* v110：請假分兩種，存在 leave 欄前綴——「考:日期」考試請假（顯示未補考）；「交:日期」繳交請假；日期＝請假那天，期限都延到該班該日之後下一節國文課（10/7 起考試請假也算）；
      舊格式（只有日期）＝返校日（v106 原規則：期限延到返校隔日） */
   function leaveOf(sc) { var v = sc && sc.leave ? String(sc.leave) : '', m = /^(考|交):(\d{4}-\d{2}-\d{2})$/.exec(v); return m ? { k: m[1], d: m[2] } : { k: v ? '返' : '', d: v }; }
   function lateOf(it, sc, td) {
     if (!it.late || !it.due) return 0;
     var dl = it.due;
     var lo = leaveOf(sc);
-    if (lo.k === '考') return 0;   /* v110：考試請假＝等補考，不計遲交 */
-    if (lo.k === '交') { var nl = nextLesson(it.cls, lo.d) || nextSchoolDay(lo.d); if (nl > dl) dl = nl; }   /* v110：繳交請假＝延到下一節國文課 */
+    /* 10/7 老師：考試請假也一樣——請假那天之後的下一節國文課沒補考就開始扣（原 v110：考試請假不計遲交） */
+    if (lo.k === '考' || lo.k === '交') { var nl = nextLesson(it.cls, lo.d) || nextSchoolDay(lo.d); if (nl > dl) dl = nl; }   /* v110：請假＝延到請假日之後下一節國文課 */
     else if (lo.d) { var nx = nextSchoolDay(lo.d); if (nx > dl) dl = nx; }   /* 請假：補交期限＝返校隔日 */
     return schoolDaysBetween(dl, (sc && sc.sub) || td);
   }
@@ -9072,7 +9072,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V124';
+  window.APP_VERSION = 'V125';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
