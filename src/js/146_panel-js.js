@@ -11,7 +11,13 @@
      - 日曆：A卷「考試」、A卷檢討／習作檢討／課後習題檢討，日期到了 → 該格記日曆日期
      - 成績系統：習作（類型＝習作）、課本後習題（名稱含「習題／基礎練習／進階練習」）有人登記繳交日 → 「交作業」格；A卷有人訂正加分 → 「訂正加分」格
      - 每格自動打過一次就記 '_a:項目|階段'＝來源，老師手動取消後不會再自動打回去
-     - 只在本機已從雲端拉過資料（或沒登入同步）時寫入，避免舊資料蓋掉別台（同 v108／v109） */
+     - 只在本機已從雲端拉過資料（或沒登入同步）時寫入，避免舊資料蓋掉別台（同 v108／v109）
+   V126（2026-10-08，老師：日曆 0:00 就打勾是錯的，要看課表；下課時跳出今日待辦讓老師勾）：
+     - 日曆自動打勾只剩「A卷考試」，而且要等該班當天最後一節下課（課表＋調課 tp_override_v1；當天沒課的班＝當天最後一節有課的下課）；
+       「檢討」不再自動打勾，改由下課詢問；日曆項目標了「還沒」（e.miss）的不打。
+     - 下課詢問：每 30 秒＋回到分頁時檢查；某班下課後跳出「今天日曆上這班的待辦」→ ✅完成（e.done＋重要進度檢核格，來源 '_a:…'＝'ask:'+id）
+       ／還沒（e.miss＝今天，不再問）／稍後再問（10 分鐘）；一次問一班。問過記 v126_ask_v1、本裝置關閉記 v126_ask_off（兩個都不在同步清單）。
+     - 🎓 班級網站加「📤 推送檢核」：依重要進度檢核「檢討」格，有勾的習作／課本後習題／A卷才推；⚠＝舊版 0:00 自動勾的（'_a:' 來源 cal:）。 */
 (function () {
   'use strict';
   var HW = 'hw_done_v1', CAL = 'exam_cal_v1';
@@ -48,13 +54,30 @@
     r[key] = date; r['_a:' + key] = src;
     return true;
   }
+  /* V126：當天實際上課節次（課表＋調課；調課 cls 空白＝不上課，同 138_plan／144_swap） */
+  function toMin(t) { var a = String(t).split(':'); return (+a[0]) * 60 + (+a[1]); }
+  function ovr() { var o = get('tp_override_v1', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+  function periodsOf(ds) {
+    var S = sched(), O = ovr(), wd = parse(ds).getDay();
+    return S.periods.map(function (P) {
+      var o = O[ds + '|' + P.p], sl = S.slots.filter(function (x) { return x[0] === wd && x[1] === P.p; })[0];
+      return { p: P.p, end: P.end, cls: o ? (o.cls || '') : (sl ? sl[2] || '' : '') };
+    }).filter(function (x) { return x.cls; });
+  }
+  /* 該班當天最後一節的下課時間（分鐘）；當天沒這班的課 → 當天最後一節有課的下課；整天沒課 → 最後一節 */
+  function classEnd(ds, c) {
+    var ps = periodsOf(ds), mine = ps.filter(function (x) { return x.cls === c; }), use = mine.length ? mine : ps;
+    if (!use.length) { var P = sched().periods; return P.length ? toMin(P[P.length - 1].end) : 24 * 60; }
+    return Math.max.apply(null, use.map(function (x) { return toMin(x.end); }));
+  }
+  function ended(ds, c) { var n = now(), t = ymd(n); return ds < t || (ds === t && n.getHours() * 60 + n.getMinutes() >= classEnd(ds, c)); }
   function fromCal(hw) {
-    var t = ymd(now()), ch = false, a = get(CAL, []);
+    var ch = false, a = get(CAL, []);
     (Array.isArray(a) ? a : []).forEach(function (e) {
-      if (!e || !e.date || e.date > t || classes().indexOf(e.cls) < 0 || !e.lessons || !e.lessons.length) return;
-      var key = e.kind === '考試' && e.item === 'A卷' ? 'A卷|考試' : /^(A卷|習作|課後習題)檢討$/.test(e.item) ? e.item.replace(/檢討$/, '') + '|檢討' : '';
-      if (!key) return;
-      e.lessons.forEach(function (n) { if (LK[n] && mark(hw, LK[n], e.cls, key, e.date, 'cal:' + e.id)) ch = true; });
+      if (!e || !e.date || e.miss || classes().indexOf(e.cls) < 0 || !e.lessons || !e.lessons.length) return;
+      if (!(e.kind === '考試' && e.item === 'A卷')) return;   /* V126：檢討不再自動打勾（下課詢問老師） */
+      if (!ended(e.date, e.cls)) return;                      /* V126：等該班當天最後一節下課 */
+      e.lessons.forEach(function (n) { if (LK[n] && mark(hw, LK[n], e.cls, 'A卷|考試', e.date, 'cal:' + e.id)) ch = true; });
     });
     return ch;
   }
@@ -101,6 +124,76 @@
     if ((a || b) && put(HW, hw)) { try { if (window.V84HW) V84HW.render(); } catch (e) {} }
   }
 
+  /* ════════ V126 下課詢問 ════════ */
+  var ASK = 'v126_ask_v1', ASK_OFF = 'v126_ask_off', snooze = {}, askCls = '';
+  function askOff() { return get(ASK_OFF, '') === '1'; }
+  function asked() { var o = get(ASK, {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+  function calList() { var a = get(CAL, []); return Array.isArray(a) ? a : []; }
+  function isDoneE(e, hw) { try { if (window.V99LINK) return V99LINK.isDone(e, hw); } catch (x) {} return !!e.done; }
+  function pending(c) {
+    var t = ymd(now()), A = asked(), hw = get(HW, {});
+    return calList().filter(function (e) { return e && e.id && e.cls === c && e.date === t && !e.miss && !A[e.id] && !isDoneE(e, hw); });
+  }
+  function eLabel(e) {
+    var ls = (e.lessons || []).map(function (n) { return 'L' + n; }).join('、');
+    return String(e.item).replace('課後習題', '課本後習題') + (e.kind === '考試' && !/檢討$/.test(e.item) && e.item !== '註釋小考' ? '（考試）' : e.kind === '交作業' ? '（交作業）' : '') + (ls ? ' ' + ls : '') + (e.note ? '・' + e.note : '');
+  }
+  function markAsked(id) { var A = asked(); A[id] = ymd(now()); var keep = {}, lim = ymd(new Date(now().getTime() - 30 * 864e5)); Object.keys(A).forEach(function (k) { if (A[k] >= lim) keep[k] = A[k]; }); put(ASK, keep); }
+  function answer(id, ok) {
+    if (!safe()) { alert('雲端同步還沒拉完資料，請稍等幾秒再按（避免舊資料蓋掉別台）。'); return; }
+    var a = calList(), e = a.filter(function (x) { return x && x.id === id; })[0];
+    if (e) {
+      if (ok) {
+        e.done = e.date; delete e.miss;
+        var linked = false; try { linked = !!(window.V99LINK && V99LINK.linked(e)); } catch (x) {}
+        if (linked) {
+          var hw = get(HW, {}); if (!hw || typeof hw !== 'object') hw = {};
+          var key = /^(A卷|習作|課後習題)檢討$/.test(e.item) ? e.item.replace(/檢討$/, '') + '|檢討' : e.item + '|考試';   /* 同 V99 hwKey */
+          e.lessons.forEach(function (n) { if (!LK[n]) return; var r = ((hw[LK[n]] = hw[LK[n]] || {})[e.cls] = hw[LK[n]][e.cls] || {}); if (!r[key]) r[key] = e.date; r['_a:' + key] = 'ask:' + e.id; });
+          put(HW, hw);
+        }
+      } else e.miss = ymd(now());
+      put(CAL, a);
+    }
+    markAsked(id);
+    try { if (window.V84HW) V84HW.render(); } catch (x) {}
+    try { var P = $('cls-panel'); if (P && P.classList.contains('open') && typeof clsRender === 'function') clsRender(); } catch (x) {}
+    renderAsk();
+  }
+  function closeAsk() { askCls = ''; var b = $('v126-ask'); if (b) b.remove(); }
+  function renderAsk() {
+    var list = askCls ? pending(askCls) : [];
+    if (!list.length) { closeAsk(); setTimeout(checkAsk, 300); return; }   /* 這班問完 → 看下一班 */
+    var box = $('v126-ask');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'v126-ask';
+      box.addEventListener('click', function (ev) {
+        var b = ev.target.closest('button[data-v126]'); if (!b) return;
+        var x = b.getAttribute('data-v126').split('|');
+        if (x[0] === 'ok' || x[0] === 'no') answer(x[1], x[0] === 'ok');
+        else if (x[0] === 'later') { snooze[askCls] = Date.now() + 600000; closeAsk(); setTimeout(checkAsk, 300); }
+      });
+      box.addEventListener('keydown', function (ev) { ev.stopPropagation(); });
+      document.body.appendChild(box);
+    }
+    box.innerHTML = '<div class="v126-card"><div class="v126-h">🔔 ' + esc(askCls) + ' 下課了</div>' +
+      '<div class="v126-sub">今天日曆上這班的待辦，做完了嗎？</div><ul>' + list.map(function (e) {
+        return '<li><span class="v126-t">' + esc(eLabel(e)) + '</span><span class="v126-b"><button type="button" class="v126-ok" data-v126="ok|' + esc(e.id) + '">✅ 完成</button>' +
+          '<button type="button" data-v126="no|' + esc(e.id) + '">還沒</button></span></li>';
+      }).join('') + '</ul><div class="v126-f"><button type="button" data-v126="later">稍後再問（10 分鐘）</button>' +
+      '<span class="v126-mut">「還沒」的不會再問；本裝置不想被問可到 班級進度 → ⚙ 本裝置設定 關閉</span></div></div>';
+  }
+  function checkAsk() {
+    if (askCls || askOff() || !safe() || document.hidden) return;
+    var t = ymd(now()), cs = classes();
+    for (var i = 0; i < cs.length; i++) {
+      var c = cs[i];
+      if (snooze[c] && Date.now() < snooze[c]) continue;
+      if (!ended(t, c)) continue;
+      if (pending(c).length) { askCls = c; renderAsk(); return; }
+    }
+  }
+
   /* ════════ 版面 ════════ */
   var sheet = '', devOpen = false, schedEdit = false;
   var TOOLS = [
@@ -132,7 +225,42 @@
           '<a href="' + STU_BASE + STU_SLUG[c] + '/" target="_blank" rel="noopener">打開</a>' +
           (o[c] ? '<span class="v123-ok">✓ 已記住</span><button type="button" data-v123p="clr|' + esc(c) + '">改</button>'
             : '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="輸入密碼" data-v123pw="' + esc(c) + '"><button type="button" data-v123p="save|' + esc(c) + '">記住</button>') + '</div>';
-      }).join('') + '</div>';
+      }).join('') + '</div>' + pushHTML();
+  }
+  /* V126 📤 推送檢核：重要進度檢核「檢討」格有勾的才推（老師 10/8：沒勾檢討 → 整份不放） */
+  var PUSH = [['習作', '習作'], ['課後習題', '課本後習題'], ['A卷', 'A卷']];
+  function pushData() {
+    var hw = get(HW, {}), out = {}, les = {};
+    classes().forEach(function (c) {
+      out[c] = [];
+      Object.keys(LK).forEach(function (n) {
+        var r = ((hw || {})[LK[n]] || {})[c] || {}, its = [];
+        PUSH.forEach(function (p) { var k = p[0] + '|檢討'; if (r[k]) its.push({ t: p[1], warn: String(r['_a:' + k] || '').indexOf('cal:') === 0 }); });
+        if (its.length) { out[c].push({ n: +n, its: its }); les[n] = 1; }
+      });
+    });
+    return { by: out, les: Object.keys(les).map(Number).sort(function (a, b) { return a - b; }) };
+  }
+  function pushText() {
+    var D = pushData(), warn = false;
+    var s = classes().map(function (c) {
+      return c + '：' + (D.by[c].length ? D.by[c].map(function (x) { return 'L' + x.n + ' ' + x.its.map(function (i) { if (i.warn) warn = true; return i.t + (i.warn ? '⚠' : ''); }).join('、'); }).join('；') : '（沒有）');
+    }).join('\n');
+    return s + (warn ? '\n⚠＝舊版在日曆那天 0:00 自動打勾的，請確認真的檢討過' : '');
+  }
+  function pushHTML() {
+    var D = pushData(), warn = false;
+    var h = '<div class="v123-card v126-push"><b>📤 推送檢核</b><div class="v123-mut">學生班級網站只放「重要進度檢核」裡<b>檢討格有勾</b>的習作、課本後習題、A卷（沒勾檢討＝整份不放）。推送前先看這張表。</div>';
+    if (!D.les.length) return h + '<div class="v123-mut">目前沒有任何一班勾了檢討。</div></div>';
+    h += '<table><tr><th></th>' + D.les.map(function (n) { return '<th>L' + n + '</th>'; }).join('') + '</tr>';
+    classes().forEach(function (c) {
+      h += '<tr><th>' + esc(c) + '</th>' + D.les.map(function (n) {
+        var x = D.by[c].filter(function (y) { return y.n === n; })[0];
+        return '<td>' + (x ? x.its.map(function (i) { if (i.warn) warn = true; return (i.warn ? '<span class="v126-warn" title="舊版 0:00 自動勾的，請確認">⚠</span>' : '') + esc(i.t); }).join('<br>') : '<span class="v123-mut">—</span>') + '</td>';
+      }).join('') + '</tr>';
+    });
+    return h + '</table>' + (warn ? '<div class="v123-mut">⚠＝舊版在日曆那天 0:00 自動打勾的，不一定真的檢討過，請確認；確認沒問題可在檢核表取消再重勾。</div>' : '') +
+      '<button type="button" class="v123-pri" data-v123p="copy|">複製文字</button></div>';
   }
 
   function el(id, tag, cls) { var x = $(id); if (!x) { x = document.createElement(tag || 'div'); x.id = id; if (cls) x.className = cls; } return x; }
@@ -233,6 +361,8 @@
     box.innerHTML = '<button type="button" class="v123-devh" data-v123d="tog">⚙ 本裝置設定 ' + (devOpen ? '▲' : '▼') + '</button>' +
       (devOpen ? '<div class="v123-devb"><div>自動記錄上課進度：<b>' + (on ? '開' : '關') + '</b></div>' +
         '<button type="button" data-v123d="' + (on ? 'off' : 'on') + '">' + (on ? '本裝置停用' : '啟用（本裝置）') + '</button>' +
+        '<div style="margin-top:8px">下課詢問今日待辦：<b>' + (askOff() ? '關' : '開') + '</b></div>' +
+        '<button type="button" data-v123d="' + (askOff() ? 'askon' : 'askoff') + '">' + (askOff() ? '開啟（本裝置）' : '本裝置不要問') + '</button>' +
         '<div class="v123-mut">只影響這台裝置的這個瀏覽器。</div></div>' : '');
   }
   function sched() {
@@ -284,6 +414,7 @@
     if (a === 'tog') { devOpen = !devOpen; arrange(); }
     else if (a === 'off' && window.V82) V82.disable();
     else if (a === 'on' && window.V82) V82.enable();
+    else if (a === 'askoff' || a === 'askon') { put(ASK_OFF, a === 'askoff' ? '1' : '0'); if (a === 'askoff') closeAsk(); arrange(); }
   }
   function onSheet(e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -296,6 +427,12 @@
     var pp = b.getAttribute('data-v123p');
     if (pp) {
       var a2 = pp.split('|'), m = stuPw();
+      if (a2[0] === 'copy') {   /* V126 推送檢核 → 複製文字 */
+        var txt = pushText(), done = function () { b.textContent = '已複製 ✓'; setTimeout(function () { b.textContent = '複製文字'; }, 1500); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { prompt('請手動複製：', txt); });
+        else prompt('請手動複製：', txt);
+        return;
+      }
       if (a2[0] === 'save') {
         var inp = b.parentNode.querySelector('input[data-v123pw]'), v = inp ? inp.value.trim() : '';
         if (v.length < 10) { alert('密碼好像不完整（班級網站密碼是 12 碼，注意大小寫）。'); return; }
@@ -325,7 +462,11 @@
     new MutationObserver(function () { var x = $('v123-syncbtn'); if (x) { var st = syncState(); x.innerHTML = '☁ 同步／備份' + (st ? '<small>' + esc(st) + '</small>' : ''); } })
       .observe(b, { childList: true, subtree: true, characterData: true });
   })(0);
-  window.V123PANEL = { arrange: arrange, open: openSheet, autoCheck: autoCheck };
-  function init() { try { arrange(); autoCheck(); } catch (e) { setTimeout(function () { throw e; }); } }
+  window.V123PANEL = { arrange: arrange, open: openSheet, autoCheck: autoCheck, checkAsk: checkAsk, classEnd: classEnd };
+  /* V126：每 30 秒＋回到分頁時：自動打勾（A卷考試要等下課）＋下課詢問 */
+  function tick() { try { autoCheck(); checkAsk(); } catch (e) { setTimeout(function () { throw e; }); } }
+  setInterval(tick, 30000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+  function init() { try { arrange(); autoCheck(); setTimeout(checkAsk, 3000); } catch (e) { setTimeout(function () { throw e; }); } }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
 })();

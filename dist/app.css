@@ -6850,3 +6850,28 @@ body.dark-mode #cls-panel.v123 #v84-hw button.v84-c.v84-fx.done { background:#3a
 .v123-stu input { flex:1; min-width:0; font-size:14px; padding:6px 8px; border:1px solid var(--sx-line); border-radius:6px; background:var(--sx-paper); color:var(--sx-ink); }
 .v123-stu button { border:1px solid var(--sx-line); background:var(--sx-paper); color:var(--sx-ink); border-radius:6px; padding:5px 10px; }
 .v123-stu .v123-ok { flex:1; color:var(--sx-lu); font-size:13px; }
+/* V126 推送檢核表 */
+.v126-push table { border-collapse:collapse; width:100%; font-size:13px; }
+.v126-push th, .v126-push td { border:1px solid var(--sx-line); padding:5px 6px; text-align:center; vertical-align:top; line-height:1.5; }
+.v126-push tr > th:first-child { font-family:"Noto Serif TC",serif; color:var(--sx-qing-d); white-space:nowrap; }
+.v126-warn { color:var(--sx-warn); font-weight:700; margin-right:2px; }
+/* V126 下課詢問（面板外、蓋在全螢幕投影 9550 與工具頁 9605 之上） */
+#v126-ask { position:fixed; inset:0; z-index:9700; background:rgba(20,32,36,.38); display:flex; align-items:center; justify-content:center; padding:16px; }
+#v126-ask .v126-card { background:#fff; color:#1f3036; border:1px solid #c9d9d4; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.25); width:min(460px,100%); max-height:86vh; overflow:auto; padding:16px 18px; }
+#v126-ask .v126-h { font-family:"Noto Serif TC",serif; font-size:20px; font-weight:700; color:#22495a; }
+#v126-ask .v126-sub { color:#5a6f75; font-size:14px; margin:2px 0 10px; }
+#v126-ask ul { list-style:none; margin:0; padding:0; }
+#v126-ask li { display:flex; align-items:center; gap:8px; padding:9px 0; border-top:1px solid #e3ece9; }
+#v126-ask .v126-t { flex:1; font-size:16px; }
+#v126-ask .v126-b { display:flex; gap:6px; flex-shrink:0; }
+#v126-ask button { font:inherit; font-size:15px; border:1px solid #c9d9d4; background:#fff; color:#1f3036; border-radius:8px; padding:7px 12px; cursor:pointer; }
+#v126-ask button.v126-ok { background:#4f8a78; border-color:#4f8a78; color:#fff; }
+#v126-ask .v126-f { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid #e3ece9; }
+#v126-ask .v126-mut { color:#5a6f75; font-size:12px; flex:1; min-width:180px; }
+body.dark-mode #v126-ask { background:rgba(0,0,0,.55); }
+body.dark-mode #v126-ask .v126-card { background:#1e2a2d; color:#dfe9e6; border-color:#38494d; }
+body.dark-mode #v126-ask .v126-h { color:#9ccbe0; }
+body.dark-mode #v126-ask .v126-sub, body.dark-mode #v126-ask .v126-mut { color:#9fb3b0; }
+body.dark-mode #v126-ask li, body.dark-mode #v126-ask .v126-f { border-color:#33433f; }
+body.dark-mode #v126-ask button { background:#26353a; color:#dfe9e6; border-color:#3f5257; }
+body.dark-mode #v126-ask button.v126-ok { background:#3f7a68; border-color:#3f7a68; color:#fff; }
