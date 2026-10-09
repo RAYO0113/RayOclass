@@ -1,5 +1,5 @@
 /* 聚光燈（2026-10-09 老師）：畫面變暗，只留手指／滑鼠所在處一個圓形亮區，當雷射筆用。
-   - 開關：畫面上浮動的朱紅圓鈕（手電筒圖；老師說像 iPad 小白點會搞混 → 改朱紅金邊）——點一下開／關；按住拖曳可移到任何地方放著（位置記在這台裝置）。
+   - 開關：畫面上浮動的朱紅圓鈕（手電筒圖；老師說像 iPad 小白點會搞混 → 改半透明火炬圓鈕）——點一下開／關；按住拖曳可移到任何地方放著（位置記在這台裝置）。
      一般畫面、全螢幕都在；手機不顯示（手機用不到）。鍵盤 L 也可開關。
    - 開著時：手指拖曳／滑鼠移動，亮圈跟著走；手放開亮圈停原處。Esc 只關聚光燈、不關全螢幕。換頁鍵 ←／→ 照常。
      開著時畫面上其他按鈕暫時按不到（同畫筆），小圓點仍在最上層可按。
@@ -22,17 +22,18 @@
     '#spot-layer.idle #spot-ring{display:none}' +
     '#spot-hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;font-size:14px;' +
       'padding:6px 14px;border-radius:20px;pointer-events:none;white-space:nowrap;transition:opacity .6s}' +
-    /* 浮動圓鈕：朱紅底、泥金邊、手電筒圖（刻意不像 iPad 的灰白小白點） */
+    /* 浮動圓鈕：半透明暗朱紅底、泥金細邊、火炬圖（刻意不像 iPad 的灰白小白點） */
     '#spot-dot{position:fixed;left:0;top:0;width:' + SIZE + 'px;height:' + SIZE + 'px;border-radius:50%;z-index:2147483001;touch-action:none;cursor:pointer;' +
       'display:flex;align-items:center;justify-content:center;box-sizing:border-box;' +
-      'background:radial-gradient(circle at 35% 30%,#c8473a,#8e2a22 70%);border:2px solid #d4ad5a;' +
-      'box-shadow:0 3px 10px rgba(0,0,0,.35);opacity:.82;transition:opacity .25s,box-shadow .25s,scale .15s;' +
+      'background:rgba(120,32,24,.42);border:1.5px solid rgba(212,173,90,.6);' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.18);opacity:.6;transition:opacity .25s,box-shadow .25s,background .25s,scale .15s;' +
       '-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}' +
-    '#spot-dot svg{width:28px;height:28px;pointer-events:none}' +
-    '#spot-dot:hover,#spot-dot.drag{opacity:1}' +
+    '#spot-dot svg{width:32px;height:32px;pointer-events:none}' +
+    '#spot-dot:hover,#spot-dot.drag{opacity:.95}' +
     '#spot-dot.drag{scale:1.12}' +
-    '#spot-dot.on{opacity:1;background:radial-gradient(circle at 35% 30%,#f3d98a,#c99a3c 70%);border-color:#fff3cf;box-shadow:0 0 0 4px rgba(243,217,138,.35),0 0 18px 6px rgba(255,226,140,.55)}' +
-    '#spot-dot.on svg .beam{fill:#fffbe8}#spot-dot.on svg .body{fill:#7a2a1e}' +
+    '#spot-dot.on{opacity:.9;background:rgba(150,40,28,.55);border-color:rgba(255,226,140,.85);box-shadow:0 0 16px 6px rgba(255,170,60,.45)}' +
+    '#spot-dot.on .fl{animation:spot-flk .5s ease-in-out infinite alternate;transform-origin:16px 14px}' +
+    '@keyframes spot-flk{from{transform:scale(1,1)}to{transform:scale(.92,1.08)}}' +
     '@media (max-width:600px){#spot-dot{display:none !important}}';
   document.head.appendChild(st);
 
@@ -41,12 +42,13 @@
   var ring = L.firstChild, hint = L.lastChild, hintT = 0;
   var dot = document.createElement('div'); dot.id = 'spot-dot'; dot.setAttribute('role', 'button');
   dot.setAttribute('aria-label', '聚光燈開關（按住可拖曳移動）');
-  /* 手電筒：左下握柄、右上光束 */
+  /* 火炬：上面火焰、中間金色火炬碗、下面木柄 */
   dot.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true">' +
-    '<path class="beam" d="M17 8 L28 2 L30 4 L24 15 Z" fill="#ffe9a8" opacity=".95"/>' +
-    '<g transform="rotate(45 16 16)"><rect class="body" x="12" y="11" width="8" height="16" rx="2" fill="#fff6dc"/>' +
-    '<rect class="body" x="10.5" y="7" width="11" height="5" rx="1.5" fill="#fff6dc"/>' +
-    '<circle cx="16" cy="19" r="1.6" fill="#8e2a22"/></g></svg>'; dot.title = '聚光燈：點一下開關，按住拖曳移動（鍵盤 L）';
+    '<g class="fl"><path d="M16 2 C19 6 22 8 21 12.5 C20.5 15 18.5 16 16 16 C13.5 16 11.5 15 11 12.5 C10.5 9.5 13 8 13.5 5.5 C14.5 7.5 15.5 8 15.5 8 C16.5 6 16.5 4 16 2 Z" fill="#f08a24"/>' +
+    '<path d="M16 7.5 C17.8 10 19 11.5 18.4 13.4 C18 14.7 17 15.2 16 15.2 C15 15.2 14 14.7 13.6 13.4 C13.2 12 14.6 11 15 9.5 C15.6 10.6 16.2 10.6 16 7.5 Z" fill="#ffe27a"/></g>' +
+    '<path d="M10 16 H22 L20.5 19.5 H11.5 Z" fill="#d4ad5a"/>' +
+    '<path d="M12.5 19.5 H19.5 L17.6 30 H14.4 Z" fill="#8a5a32"/>' +
+    '<path d="M13.2 22.5 H18.8" stroke="#d4ad5a" stroke-width="1"/></svg>'; dot.title = '聚光燈：點一下開關，按住拖曳移動（鍵盤 L）';
 
   function isOn() { return L.classList.contains('on'); }
   function move(x, y) {
