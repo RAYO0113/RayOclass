@@ -1,9 +1,9 @@
-/* 投影畫筆只留細筆（2026-10-09 老師）：紅藍綠紫只要「細」，拿掉「中」（「粗」v56 已藏）；螢光筆只留黃色一支（本來就只有一支）。
+/* 投影畫筆只留細筆（2026-10-09 老師；同日再拿掉「清除本頁」——關掉畫筆本來就會全部清除）：紅藍綠紫只要「細」，拿掉「中」（「粗」v56 已藏）；螢光筆只留黃色一支（本來就只有一支）。
    - 細／中按鈕都藏起來（不刪 DOM），從螢光筆換回顏色時粗細一律回到細（3）。
    - 包裝 wkInkColor（實際生效版本＝本段包在 v56 036_v56-nq2-js.js 包裝版的外層）。 */
 (function () {
   var st = document.createElement('style'); st.id = 'inkthin-css';
-  st.textContent = '#wk-ink-toolbar .wk-ink-size{display:none !important}';
+  st.textContent = '#wk-ink-toolbar .wk-ink-size,#wk-ink-toolbar button[onclick="wkInkClear()"]{display:none !important}';   /* 「清除本頁」也藏：關掉畫筆就會清除 */
   document.head.appendChild(st);
   function wrap() {
     var orig = window.wkInkColor;

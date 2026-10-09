@@ -9304,14 +9304,16 @@ try {
 /* ════ src/js/162_spot-js.js ════ */
 try {
 /* 聚光燈（2026-10-09 老師）：畫面變暗，只留手指／滑鼠所在處一個圓形亮區，當雷射筆用。
-   - 開關：一般畫面「🖥 投影全螢幕」旁的「🔦 聚光燈」；全螢幕上方 A−／A+／🌙 那排的「🔦」；鍵盤 L。
-   - 開著時再點同一顆按鈕（變暗了也點得到）、或按 Esc（只關聚光燈、不關全螢幕）就關。
-   - 手放開後亮圈停在原處；換頁鍵 ←／→ 照常可用。開著時畫面上其他按鈕暫時按不到（同畫筆）。
+   - 開關：畫面上浮動的朱紅圓鈕（手電筒圖；老師說像 iPad 小白點會搞混 → 改朱紅金邊）——點一下開／關；按住拖曳可移到任何地方放著（位置記在這台裝置）。
+     一般畫面、全螢幕都在；手機不顯示（手機用不到）。鍵盤 L 也可開關。
+   - 開著時：手指拖曳／滑鼠移動，亮圈跟著走；手放開亮圈停原處。Esc 只關聚光燈、不關全螢幕。換頁鍵 ←／→ 照常。
+     開著時畫面上其他按鈕暫時按不到（同畫筆），小圓點仍在最上層可按。
    - 試做頁另有雷射點、大小、暗度選項，老師 10/9 說雷射不需要 → 只做聚光燈，大小、暗度用試做頁的「中」。
+     原本放在工具列的「🔦」按鈕太小難按 → 改成浮動圓點（同日）。
    自帶 <style id="spot-css">，不改任何既有模組。 */
 (function () {
   if (window.spotToggle) return;
-  var R = 120, DIM = 0.62;
+  var R = 120, DIM = 0.62, SIZE = 52, POS_KEY = 'spot_dot_pos_v1';
 
   var st = document.createElement('style'); st.id = 'spot-css';
   st.textContent =
@@ -9325,13 +9327,31 @@ try {
     '#spot-layer.idle #spot-ring{display:none}' +
     '#spot-hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;font-size:14px;' +
       'padding:6px 14px;border-radius:20px;pointer-events:none;white-space:nowrap;transition:opacity .6s}' +
-    '.spot-btn.on{background:#c0392b !important;color:#fff !important;border-color:#c0392b !important}';
+    /* 浮動圓鈕：朱紅底、泥金邊、手電筒圖（刻意不像 iPad 的灰白小白點） */
+    '#spot-dot{position:fixed;left:0;top:0;width:' + SIZE + 'px;height:' + SIZE + 'px;border-radius:50%;z-index:2147483001;touch-action:none;cursor:pointer;' +
+      'display:flex;align-items:center;justify-content:center;box-sizing:border-box;' +
+      'background:radial-gradient(circle at 35% 30%,#c8473a,#8e2a22 70%);border:2px solid #d4ad5a;' +
+      'box-shadow:0 3px 10px rgba(0,0,0,.35);opacity:.82;transition:opacity .25s,box-shadow .25s,scale .15s;' +
+      '-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}' +
+    '#spot-dot svg{width:28px;height:28px;pointer-events:none}' +
+    '#spot-dot:hover,#spot-dot.drag{opacity:1}' +
+    '#spot-dot.drag{scale:1.12}' +
+    '#spot-dot.on{opacity:1;background:radial-gradient(circle at 35% 30%,#f3d98a,#c99a3c 70%);border-color:#fff3cf;box-shadow:0 0 0 4px rgba(243,217,138,.35),0 0 18px 6px rgba(255,226,140,.55)}' +
+    '#spot-dot.on svg .beam{fill:#fffbe8}#spot-dot.on svg .body{fill:#7a2a1e}' +
+    '@media (max-width:600px){#spot-dot{display:none !important}}';
   document.head.appendChild(st);
 
   var L = document.createElement('div'); L.id = 'spot-layer'; L.className = 'idle';
-  L.innerHTML = '<div id="spot-ring"></div><div id="spot-hint">手指拖曳／滑鼠移動　·　再按「🔦」或 Esc 關閉</div>';
-  document.body.appendChild(L);
+  L.innerHTML = '<div id="spot-ring"></div><div id="spot-hint">手指拖曳／滑鼠移動　·　再點小圓點或 Esc 關閉</div>';
   var ring = L.firstChild, hint = L.lastChild, hintT = 0;
+  var dot = document.createElement('div'); dot.id = 'spot-dot'; dot.setAttribute('role', 'button');
+  dot.setAttribute('aria-label', '聚光燈開關（按住可拖曳移動）');
+  /* 手電筒：左下握柄、右上光束 */
+  dot.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true">' +
+    '<path class="beam" d="M17 8 L28 2 L30 4 L24 15 Z" fill="#ffe9a8" opacity=".95"/>' +
+    '<g transform="rotate(45 16 16)"><rect class="body" x="12" y="11" width="8" height="16" rx="2" fill="#fff6dc"/>' +
+    '<rect class="body" x="10.5" y="7" width="11" height="5" rx="1.5" fill="#fff6dc"/>' +
+    '<circle cx="16" cy="19" r="1.6" fill="#8e2a22"/></g></svg>'; dot.title = '聚光燈：點一下開關，按住拖曳移動（鍵盤 L）';
 
   function isOn() { return L.classList.contains('on'); }
   function move(x, y) {
@@ -9341,27 +9361,60 @@ try {
   }
   function toggle(on) {
     on = on === undefined ? !isOn() : !!on;
-    L.classList.toggle('on', on); L.classList.add('idle');
-    document.querySelectorAll('.spot-btn').forEach(function (b) { b.classList.toggle('on', on); });
+    L.classList.toggle('on', on); L.classList.add('idle'); dot.classList.toggle('on', on);
     if (on) { hint.style.opacity = 1; clearTimeout(hintT); hintT = setTimeout(function () { hint.style.opacity = 0; }, 2500); }
   }
   window.spotToggle = toggle;
 
-  /* 變暗後還要能點到開關按鈕：看底下是不是 .spot-btn */
-  function btnUnder(x, y) {
-    L.style.pointerEvents = 'none';
-    var el = document.elementFromPoint(x, y);
-    L.style.pointerEvents = '';
-    return el && el.closest ? el.closest('.spot-btn') : null;
-  }
-  L.addEventListener('pointerdown', function (e) {
-    if (btnUnder(e.clientX, e.clientY)) { e.preventDefault(); toggle(false); return; }
-    move(e.clientX, e.clientY); e.preventDefault();
-  });
-  L.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'mouse' || e.buttons) move(e.clientX, e.clientY);
-  });
+  L.addEventListener('pointerdown', function (e) { move(e.clientX, e.clientY); e.preventDefault(); });
+  L.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' || e.buttons) move(e.clientX, e.clientY); });
   L.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); });
+
+  /* ── 小圓點：點一下開關；拖曳（或按住後拖曳）移動 ── */
+  var pos = null;
+  try { pos = JSON.parse(localStorage.getItem(POS_KEY) || 'null'); } catch (e) { }
+  function clampPos() {
+    var W = document.documentElement.clientWidth, H = innerHeight;
+    var p = pos || { rx: 1, y: H - SIZE - 140 };                    /* 預設：右下（側邊分頁下方、換頁列上方） */
+    var x = p.rx !== undefined ? p.rx * (W - SIZE) : p.x;              /* 水平存比例，換螢幕寬度還在同一側 */
+    x = Math.max(4, Math.min(W - SIZE - 4, x));
+    var y = Math.max(4, Math.min(H - SIZE - 4, p.y));
+    dot.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    dot.dataset.x = x; dot.dataset.y = y;
+  }
+  var dr = null;
+  dot.addEventListener('pointerdown', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    try { dot.setPointerCapture(e.pointerId); } catch (er) { }
+    dr = { id: e.pointerId, sx: e.clientX, sy: e.clientY, x0: +dot.dataset.x, y0: +dot.dataset.y, moving: false,
+           hold: setTimeout(function () { if (dr) { dr.moving = true; dot.classList.add('drag'); } }, 350) };
+  });
+  dot.addEventListener('pointermove', function (e) {
+    if (!dr || e.pointerId !== dr.id) return;
+    var dx = e.clientX - dr.sx, dy = e.clientY - dr.sy;
+    if (!dr.moving && Math.abs(dx) + Math.abs(dy) > 8) { dr.moving = true; dot.classList.add('drag'); }
+    if (dr.moving) {
+      var W = document.documentElement.clientWidth, H = innerHeight;
+      var x = Math.max(4, Math.min(W - SIZE - 4, dr.x0 + dx)), y = Math.max(4, Math.min(H - SIZE - 4, dr.y0 + dy));
+      dot.style.transform = 'translate(' + x + 'px,' + y + 'px)'; dot.dataset.x = x; dot.dataset.y = y;
+    }
+    e.preventDefault(); e.stopPropagation();
+  });
+  function endDrag(e, cancel) {
+    if (!dr || e.pointerId !== dr.id) return;
+    clearTimeout(dr.hold);
+    var moved = dr.moving; dr = null; dot.classList.remove('drag');
+    if (moved) {
+      var W = document.documentElement.clientWidth;
+      pos = { rx: +dot.dataset.x / Math.max(1, W - SIZE), y: +dot.dataset.y };
+      try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch (er) { }
+    } else if (!cancel) toggle();
+    e.preventDefault(); e.stopPropagation();
+  }
+  dot.addEventListener('pointerup', function (e) { endDrag(e, false); });
+  dot.addEventListener('pointercancel', function (e) { endDrag(e, true); });
+  dot.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); });
+  addEventListener('resize', clampPos);
 
   document.addEventListener('keydown', function (e) {
     var t = e.target;
@@ -9370,33 +9423,18 @@ try {
     if ((e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey && !e.altKey) { toggle(); e.preventDefault(); }
   }, true);
 
-  function addBtns() {
-    var pj = document.querySelector('.wk-proj-btn');
-    if (pj && !document.getElementById('spot-btn-n')) {
-      var b = document.createElement('button'); b.type = 'button'; b.id = 'spot-btn-n';
-      b.className = 'wk-proj-btn spot-btn'; b.textContent = '🔦 聚光燈'; b.title = '聚光燈（鍵盤 L）';
-      b.onclick = function () { toggle(); };
-      pj.parentNode.insertBefore(b, pj.nextSibling);
-    }
-    var cb = document.querySelector('#wk-fullscreen .wkfs-ctrl-btns');
-    if (cb && !document.getElementById('spot-btn-f')) {
-      var f = document.createElement('button'); f.type = 'button'; f.id = 'spot-btn-f';
-      f.className = 'wkfs-ctrl-btn spot-btn'; f.textContent = '🔦'; f.title = '聚光燈（鍵盤 L）';
-      f.onclick = function () { toggle(); };
-      cb.appendChild(f);
-    }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addBtns); else addBtns();
+  function boot() { document.body.appendChild(L); document.body.appendChild(dot); clampPos(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
 /* ════ src/js/163_inkthin-js.js ════ */
 try {
-/* 投影畫筆只留細筆（2026-10-09 老師）：紅藍綠紫只要「細」，拿掉「中」（「粗」v56 已藏）；螢光筆只留黃色一支（本來就只有一支）。
+/* 投影畫筆只留細筆（2026-10-09 老師；同日再拿掉「清除本頁」——關掉畫筆本來就會全部清除）：紅藍綠紫只要「細」，拿掉「中」（「粗」v56 已藏）；螢光筆只留黃色一支（本來就只有一支）。
    - 細／中按鈕都藏起來（不刪 DOM），從螢光筆換回顏色時粗細一律回到細（3）。
    - 包裝 wkInkColor（實際生效版本＝本段包在 v56 036_v56-nq2-js.js 包裝版的外層）。 */
 (function () {
   var st = document.createElement('style'); st.id = 'inkthin-css';
-  st.textContent = '#wk-ink-toolbar .wk-ink-size{display:none !important}';
+  st.textContent = '#wk-ink-toolbar .wk-ink-size,#wk-ink-toolbar button[onclick="wkInkClear()"]{display:none !important}';   /* 「清除本頁」也藏：關掉畫筆就會清除 */
   document.head.appendChild(st);
   function wrap() {
     var orig = window.wkInkColor;
@@ -9737,6 +9775,85 @@ try {
     ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'contextmenu'].forEach(function (t) { document.addEventListener(t, swallow, { capture: true, passive: false }); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && on) { toggle(false); e.preventDefault(); e.stopImmediatePropagation(); } }, true);
     document.addEventListener('pointerdown', function (e) { if (pop && popId && !(e.target.closest && e.target.closest('#hm-pop'))) { if (!on || !activeSlideAt(e.target)) hidePop(); } }, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+} catch (e) { setTimeout(function () { throw e; }); }
+/* ════ src/js/165_layoutfix-js.js ════ */
+try {
+/* 版面小修（2026-10-09 老師）
+   ① 頁碼浮框（.tp-page「課本 P.44」）一般畫面捲到最上面時壓到右上「高職／高中」切換鍵：
+      標題列還看得到、而且跟頁碼同高時 → 寬畫面移到切換鍵左邊；窄畫面（≤820）移到標題列下方。全螢幕不動。
+   ② 左下角版本號（#v88-ver，fixed）在手機壓到投影框 → 改放標題列副標後面的小字（不再浮動）。
+   ③ 側欄課次（部定14篇／選讀古文／白話文）字級固定小字，不跟著 A−／A+ 變（不用給學生看）。
+   ④ 手機（寬 ≤600）：投影框內的寬表格把整頁撐寬（例：〈師說〉辨字頁 429px）→ 手機瀏覽器整頁縮小、
+      固定位置的面板跟著變大、關閉鍵跑到螢幕外拉不到 → 讓課文欄與投影框不超過畫面寬；還是比畫面寬的內容改成可左右滑動；
+      面板高度不超過螢幕、可捲動。
+   ⑤ 手機不提供字級調整（A−／A+、顯示設定的字體大小、全螢幕 A−／A+ 都藏），字級固定 15px；平板、電腦照舊。
+   自帶 <style id="layoutfix-css">，不改任何既有模組。 */
+(function () {
+  var PHONE = '(max-width:600px)';
+  var st = document.createElement('style'); st.id = 'layoutfix-css';
+  st.textContent =
+    /* ① */
+    '#tab-wenxue .tp-page,#tab-wenxue .wks-book-page{top:var(--lf-tp-top,58px) !important;right:var(--lf-tp-right,24px) !important}' +
+    '@media (max-width:820px){#tab-wenxue .tp-page,#tab-wenxue .wks-book-page{top:var(--lf-tp-top,52px) !important;right:var(--lf-tp-right,12px) !important}}' +
+    /* ② */
+    '#v88-ver.lf-inline{position:static !important;display:inline-block !important;margin-left:10px;font-size:11px !important;opacity:.6;' +
+      'left:auto !important;bottom:auto !important;background:none !important;border:0 !important;padding:0 !important;box-shadow:none !important;color:inherit !important}' +
+    /* ③ */
+    '.wenxue-sidebar .wenxue-nav-item{font-size:13px !important}' +
+    '.wenxue-sidebar .wenxue-sidebar-title{font-size:10px !important}' +
+    /* ④ */
+    '@media ' + PHONE + '{' +
+      '.wenxue-layout>*,#wk-slide-area,#wk-slide-area>.wk-slide{min-width:0 !important;max-width:100% !important;box-sizing:border-box}' +
+      '#wk-slide-area>.wk-slide{flex:1 1 auto}' +
+      /* 還是比畫面寬的內容（義辨表、結構表、動畫頁、答案頁…）→ 可左右滑動看完，不再被切掉 */
+      '#wk-slide-area>.wk-slide,#wk-slide-area .jy-scroll,#wk-slide-area .v75-rv,#wk-slide-area .v74-rv{overflow-x:auto !important;-webkit-overflow-scrolling:touch}' +
+      '#cls-panel,#display-panel,#nq2{max-width:100vw !important;max-height:100dvh !important;overflow-y:auto !important;box-sizing:border-box}' +
+    '}' +
+    /* ⑤ */
+    '@media ' + PHONE + '{' +
+      ':root{--base-size:15px !important;--slider-base-size:15px !important}' +
+      '.site-font-ctrl,#wk-fullscreen .wkfs-ctrl-btn[onclick^="wkFont"],#display-panel .lf-font-row{display:none !important}' +
+    '}';
+  document.head.appendChild(st);
+
+  /* ① 頁碼避開標題列 */
+  var raf = 0;
+  function placePage() {
+    raf = 0;
+    var root = document.documentElement, ctl = document.querySelector('.site-controls'), hd = document.querySelector('.site-header');
+    var top = '', right = '';
+    if (ctl && hd) {
+      var narrow = innerWidth <= 820, pTop = narrow ? 52 : 58, pH = 30;
+      var c = ctl.getBoundingClientRect(), h = hd.getBoundingClientRect();
+      if (c.bottom > pTop - 4 && c.top < pTop + pH) {                 /* 標題列的按鈕還在頁碼那一帶 */
+        if (narrow) top = Math.round(h.bottom + 6) + 'px';
+        else right = Math.round(innerWidth - c.left + 10) + 'px';
+      }
+    }
+    root.style.setProperty('--lf-tp-top', top || (innerWidth <= 820 ? '52px' : '58px'));
+    root.style.setProperty('--lf-tp-right', right || (innerWidth <= 820 ? '12px' : '24px'));
+  }
+  function sched() { if (!raf) raf = requestAnimationFrame(placePage); }
+  addEventListener('scroll', sched, { passive: true });
+  addEventListener('resize', sched);
+
+  /* ② 版本號移到標題列 */
+  function moveVer() {
+    var v = document.getElementById('v88-ver'), sub = document.querySelector('.site-header .site-sub');
+    if (v && sub && v.parentNode !== sub) { sub.appendChild(v); v.classList.add('lf-inline'); }
+  }
+  /* ⑤ 顯示設定裡「字體大小」那一列加記號（手機藏起來） */
+  function markFontRow() {
+    document.querySelectorAll('#display-panel .display-setting').forEach(function (d) {
+      if (/字體大小/.test(d.textContent)) d.classList.add('lf-font-row');
+    });
+  }
+  function boot() {
+    moveVer(); markFontRow(); placePage();
+    setTimeout(moveVer, 500); setTimeout(moveVer, 2000);   /* 版本號是別的外掛晚一點才建的 */
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
