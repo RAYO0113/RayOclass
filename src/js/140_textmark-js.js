@@ -133,6 +133,7 @@
         while ((p = text.indexOf(kw, from)) >= 0) {
           wrapRun(rc.slice(p, p + kw.length), function () { var s = document.createElement('span'); s.className = 'tm-kw tm-' + it.type.toLowerCase(); s.setAttribute('data-r', it.id); return s; });
           from = p + kw.length;
+          rc = charsById(slide, chars(slide), it.id);   /* V126：包過一段後文字節點已被切開，要重新取字元位置（同一修辭有兩個以上關鍵詞時原本會出錯） */
         }
       });
       cs = chars(slide);
