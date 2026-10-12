@@ -993,7 +993,9 @@ function wkBuildSections(slides) {
     else if (s.type === 'info' && s.kind === 'appreciation' && (map.length===0 || map[map.length-1].label!=='賞析')) map.push({ label:'賞析', idx:i });
     else if (s.type === 'info' && s.kind === 'supp') {
       const isGd = (s.label||'').indexOf('教學引導') >= 0;
-      const lb = isGd ? '✦教學引導' : '補充';
+      /* V126：「統整·…」「課後引導·…」「課後統整」（世說）頁獨立成「統整」頁籤（老師要求，不和補充混在一起） */
+      const isSum = /^(統整|課後引導|課後統整)/.test(s.label || '');
+      const lb = isGd ? '✦教學引導' : isSum ? '統整' : '補充';
       if (map.length===0 || map[map.length-1].label!==lb) map.push({ label:lb, idx:i });
     }
     else if (s.type === 'charbian' && s.first) map.push({ label:'字·'+s.name, idx:i });
@@ -1852,6 +1854,13 @@ function wkRenderSlideHTML(slide) {
              '<div class="tp-abox" onclick="this.classList.toggle(\'show\')"><div class="tp-acov">點此顯示參考答案</div>' +
              '<div class="tp-a"><span class="tp-ak">答</span><div class="tp-atext">' + q[1] + '</div></div></div></div>';
     }).join('');
+    const mkAsk = function(ask, askT) { return '<ol class="tp-askl">' + ask.map(function(q){return '<li>'+q+'</li>';}).join('') + '</ol>' +
+      (askT ? '<div class="tp-askt"><button class="tp-askb" onclick="this.parentNode.classList.toggle(\'show\')">師</button>' +
+        '<div class="tp-asktin">' + askT + '</div></div>' : ''); };
+    const askIn = P.ask ? mkAsk(P.ask, P.askT) : '';
+    /* V126：段落最後可再接其他統整框（如第六段之後的「全課統整」）：P.boxes = [{label, ask, askT}] */
+    const boxes = (P.boxes || []).map(function(b) {
+      return '<div class="tp-sumbox tp-sumall"><span class="tp-pk">' + b.label + '</span>' + mkAsk(b.ask || [], b.askT) + '</div>'; }).join('');
     return '<div class="wk-slide wks-textpage">' +
       '<div class="tp-top"><div class="tp-title">' + P.title + tong +
         '<span class="tp-sub">' + (P.sub || '') + '</span></div>' +
@@ -1860,20 +1869,19 @@ function wkRenderSlideHTML(slide) {
           '<button class="tp-b tp-b-duan" onclick="tpPanel(this,\'pian\')">段旨</button>' +
           '<button class="tp-b tp-b-xi" onclick="tpPanel(this,\'xi\')">段析</button>' +
           '<button class="tp-b tp-b-fan" onclick="tpPanel(this,\'fan\')">翻譯</button>' +
-          (P.ask ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
-          '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' +
+          (P.ask && !P.askLabel ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
+          ((P.qa || []).length ? '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' : '') +   /* V126：沒有題目就不放按鈕 */
         '</div><div class="tp-page">' + P.book + '</div></div>' +
       '<div class="tp-wrap">' +
         '<div class="tp-main">' +
           '<div class="tp-panel" data-k="pian"><span class="tp-pk">段旨</span>' + (P.pian||'') + '</div>' +
           '<div class="tp-panel" data-k="xi"><span class="tp-pk">段析</span>' + (P.xi||'') + '</div>' +
           '<div class="tp-panel" data-k="fan"><span class="tp-pk">翻譯</span>' + (P.fan||'') + '</div>' +
-          (P.ask ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' +
-            '<ol class="tp-askl">' + P.ask.map(function(q){return '<li>'+q+'</li>';}).join('') + '</ol>' +
-            (P.askT ? '<div class="tp-askt"><button class="tp-askb" onclick="this.parentNode.classList.toggle(\'show\')">師</button>' +
-              '<div class="tp-asktin">' + P.askT + '</div></div>' : '') + '</div>' : '') +
+          (P.ask && !P.askLabel ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' + askIn + '</div>' : '') +
           '<div class="tp-panel tp-qapanel" data-k="qa"><span class="tp-pk">課堂提問</span>' + qa + '</div>' +
-          '<div class="tp-body">' + lines + yun + '</div>' +
+          '<div class="tp-body">' + lines + yun +
+            /* V126：有 askLabel（如「本段統整」）時放在該段課文最下面、直接顯示，不放上方按鈕 */
+            (P.ask && P.askLabel ? '<div class="tp-sumbox"><span class="tp-pk">' + P.askLabel + '</span>' + askIn + '</div>' : '') + boxes + '</div>' +
         '</div>' +
         '<aside class="tp-side"><div class="tp-side-h">注　釋</div><div class="tp-side-b">' + notes + '</div></aside>' +
       '</div></div>';

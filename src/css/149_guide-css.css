@@ -1,0 +1,57 @@
+/* V126 追問引導（148_guide-js）：提問裡一題一題追問，點一下看答案並出現下一問；全部問完出現「小結論」（學生抄）。
+   資料是 ask 陣列裡的 HTML：.gd > .gd-q（主問題）＋ .gd-s×N（追問，.gd-sq 問／.gd-sa 答）＋ .gd-end（小結論）＋ .gd-all（全部展開） */
+.gd { margin:2px 0 14px; }
+.tp-askl li:has(> .gd) { list-style:none; margin-left:-1.5em; }
+.gd-q { font-weight:700; color:var(--mk-ink-deep,#211710); }
+.gd-tag { display:inline-block; margin-right:.45em; padding:0 .5em; border-radius:4px; font-size:.95em; line-height:1.45;
+  background:var(--L-supp,#7c4da0); color:#fff; font-weight:700; letter-spacing:.05em; }
+.gd-s { display:none; margin:6px 0 0 1.2em; padding:4px 10px; border-radius:6px; cursor:pointer;
+  background:rgba(255,255,255,.55); border:1px solid rgba(124,77,160,.22); line-height:1.8; }
+.gd-s.vis { display:block; }
+.gd-sq { display:block; }
+.gd-sq::before { content:"追問"; display:inline-block; margin-right:.5em; padding:0 .4em; border-radius:3px; font-size:.68em; vertical-align:.15em;
+  border:1px solid var(--L-supp,#7c4da0); color:var(--L-supp,#7c4da0); font-weight:700; }
+.gd-sa { display:none; margin-top:2px; color:#8a3a1c; font-weight:600; }
+.gd-sa::before { content:"→ "; }
+.gd-s:not(.show) .gd-sq::after { content:"（點開）"; margin-left:.4em; font-size:.7em; color:var(--mk-ink-soft,#6b5a42); font-weight:400; }
+.gd-s.show .gd-sa { display:block; }
+.gd-end { display:none; margin:10px 0 2px 1.2em; padding:8px 14px; border-radius:6px; cursor:pointer;
+  background:#fff8e1; border:2px solid #c9a227; line-height:1.85; }
+.gd-end.vis { display:block; }
+.gd-ek { display:inline-block; margin-right:.5em; padding:0 .55em; border-radius:3px; background:#c9a227; color:#fff;
+  font-size:.78em; font-weight:700; letter-spacing:.1em; }
+.gd-et { display:none; color:#3d2b05; font-weight:700; }
+.gd-end:not(.show)::after { content:"（點開，學生抄）"; font-size:.72em; color:#8a6d10; }
+.gd-end.show .gd-et { display:inline; }
+.gd-all { margin:6px 0 0 1.2em; padding:1px 10px; border-radius:12px; cursor:pointer; font-size:.68em;
+  border:1px solid var(--mk-ink-soft,#6b5a42); background:transparent; color:var(--mk-ink-soft,#6b5a42); }
+.gd table.ly-table { margin:4px 0; font-size:.92em; }
+/* 深色模式 */
+body.dark-mode .gd-q { color:#eadfcb; }
+body.dark-mode .gd-s { background:rgba(255,255,255,.05); border-color:rgba(190,150,230,.3); }
+body.dark-mode .gd-sa { color:#f0a27a; }
+body.dark-mode .gd-end { background:#2e2610; border-color:#a8871f; }
+body.dark-mode .gd-et { color:#f6e3a6; }
+/* 板書：小結論之後出現，點開顯示（黑板＋粉筆字） */
+.gd-board { display:none; margin:10px 0 2px 1.2em; padding:10px 16px 12px; border-radius:6px; cursor:pointer;
+  background:#2f4a3a; border:6px solid #8a6a43; box-shadow:inset 0 0 18px rgba(0,0,0,.35); color:#f4f1e6;
+  font-family:"Noto Serif TC","Zen Old Mincho",serif; line-height:1.9; }
+.gd-board.vis { display:block; }
+.gd-bh { font-weight:700; letter-spacing:.05em; }
+.gd-board:not(.show) .gd-bh::after { content:"（點開）"; margin-left:.4em; font-size:.72em; font-weight:400; opacity:.75; }
+.gd-bt { display:none; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(244,241,230,.35); }
+.gd-board.show .gd-bt { display:block; }
+.gd-bt b { color:#ffe27a; }
+.gd-bar { padding-left:2.2em; color:#cfe3d3; line-height:1.3; }
+.gd-bcols { display:grid; grid-template-columns:1fr 1fr; gap:4px 18px; padding:3px 0; border-bottom:1px solid rgba(244,241,230,.15); }
+.gd-bcols:first-child { font-weight:700; color:#cfe3d3; }
+/* 本段統整：放在該段課文最下面，直接顯示（015_main：P.askLabel） */
+.tp-sumbox { margin:26px 0 6px; padding:12px 16px 10px; border-radius:6px;
+  background:var(--L-supp-bg,rgba(124,77,160,0.09)); border:2px solid var(--L-supp,#7c4da0); }
+.tp-sumbox > .tp-pk { display:inline-block; padding:1px 12px; border-radius:3px; background:var(--L-supp,#7c4da0); color:#fff;
+  font-family:"Noto Serif TC",serif; font-weight:700; letter-spacing:.15em; }
+/* 全課統整（P.boxes）：和本段統整區別，用深一點的框 */
+.tp-sumbox.tp-sumall { border-width:3px; border-color:#8a3a1c; background:rgba(138,58,28,.06); }
+.tp-sumbox.tp-sumall > .tp-pk { background:#8a3a1c; }
+body.dark-mode .tp-sumbox.tp-sumall { border-color:#d98a5f; background:rgba(217,138,95,.08); }
+body.dark-mode .tp-sumbox.tp-sumall > .tp-pk { background:#b0623a; }
