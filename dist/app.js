@@ -8093,7 +8093,7 @@ try {
    - 一般畫面（#wk-slide-area）與全螢幕（#wkfs-body）各自處理；字級／視窗改變時重新排版。 */
 (function () {
   'use strict';
-  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐'];
+  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐', '珍珠奶茶'];  /* V128 加〈珍珠奶茶〉 */
   var B_TYPES = ['頂真', '映襯'];                 /* 跨句單詞型 */
   var C_TYPES = ['轉品', '借代'];                 /* 單字單詞型 */
   var GENERIC = ['回文', '頂真'];                 /* 說明只是基本概念 → 只顯示名稱 */
@@ -9965,7 +9965,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V127';
+  window.APP_VERSION = 'V128';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
