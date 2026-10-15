@@ -7009,3 +7009,6 @@ body.dark-mode .ah-fill { background:#1f1c17; }
 /* 連到補充講義（取代重複的補充頁） */
 .ah-link { display:inline-block; margin-top:12px; padding:6px 18px; border-radius:20px; cursor:pointer; border:2px solid #2c5f73; background:#fff; color:#2c5f73; font:inherit; font-weight:700; }
 .ah-back { display:inline-block; margin:0 0 8px; padding:3px 14px; border-radius:16px; cursor:pointer; border:1px solid #2c5f73; background:#eef4f2; color:#2c5f73; font:inherit; font-size:.85em; }
+/* ════ src/css/153_notefs-scale-css.css ════ */
+/* V129：注釋側欄字級跟著課文等比例（見 166_notefs-scale-js.js）。--v129-nfs 由 JS 寫在 #wk-slide-area／#wkfs-body 上；沒算出來時退回滑桿原值。 */
+#wk-slide-area .tp-note, #wkfs-body .tp-note, #wk-fullscreen #wkfs-body .tp-note{ font-size:var(--v129-nfs, var(--v61-nfs)) !important; }
