@@ -16,7 +16,8 @@
   /* 配分預設值是「暫定」，老師尚未提供（規格 §8）；請在「設定 → 配分」改 */
   var DEF_W = { 一段: 20, 二段: 20, 三段: 20, 筆記: 10, 態度: 10, 作業: 10, 考試: 10, 習作: 1, 回家考卷: 1, zeroMissing: false, tentative: true };
   var REASONS = ['睡覺', '吵鬧', '遲到', '其他'];
-  var PEN = 10;                       /* 遲交每一上課日扣 10 分 */
+  var PEN = 0;                        /* 遲交每一上課日扣幾分；10/16 老師：暫時全部不扣（原 10）。恢復扣分改回 10，並同步 Code.gs ME_PEN */
+  function penTxt(L) { return PEN ? ' −' + L * PEN : '（暫不扣）'; }
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐' };
   var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'] };
   var DEF_SLOTS = [[1,1,'冷一孝'],[1,2,'冷一忠'],[1,3,'建一忠'],[1,5,'建一孝'],[2,5,'建一孝'],[3,2,'冷一孝'],[3,3,'冷一孝'],[3,4,'冷一忠'],
@@ -352,7 +353,7 @@
     var td = today(), st = roster(S.cls), fins = [];
     st.forEach(function (s) { var f = finalOf(it, scoreOf(it.id, s.seat), td); if (f != null) fins.push(f); });
     var h = '<div class="gr-h"><h4><span class="gr-tag t-' + esc(it.type) + '">' + esc(it.type) + '</span>' + esc(itemLabel(it)) + '</h4>' +
-      '<span class="gr-muted">' + (it.due ? '期限 ' + md(it.due) + (it.late ? '（遲交每上課日 −' + PEN + '）' : '（不扣遲交）') : '無期限') +
+      '<span class="gr-muted">' + (it.due ? '期限 ' + md(it.due) + (it.late ? (PEN ? '（遲交每上課日 −' + PEN + '）' : '（遲交暫不扣分）') : '（不扣遲交）') : '無期限') +
       '　已登記 ' + fins.length + '/' + st.length + (fins.length ? '　平均 ' + r1(avg(fins)) : '') + '</span>' +
       '<button class="gr-btn" data-g="b10|' + it.id + '" title="這份考卷已交（或有分數）的人，訂正加分一次設成 +10；其他分數再個別手動調整">已交的訂正 +10</button>' +   /* v110 */
       (function () { var n = D.log.filter(function (l) { return l.item === it.id && l.old !== ''; }).length;   /* gr-5 */
@@ -373,7 +374,7 @@
     var lo = leaveOf(c);   /* v110 */
     var lv = lo.k ? '<span class="v110-lv' + (lo.k === '考' ? ' x' : '') + '">' + (lo.k === '考' ? '考試請假' : lo.k === '交' ? '繳交請假' : '返校') + '</span><input type="date" data-g="leave|' + id + '" value="' + esc(lo.d) + '"><button class="gr-x" data-g="unleave|' + id + '" title="取消請假">✕</button>'
       : '<button class="gr-btn v110-lb" data-g="lvx|' + id + '">考試請假</button><button class="gr-btn v110-lb" data-g="lvs|' + id + '">繳交請假</button>';
-    var late = L ? '<span class="late">' + (c.sub ? '遲' : '逾期') + L + '天 −' + (L * PEN) + '</span>' : '';
+    var late = L ? '<span class="late">' + (c.sub ? '遲' : '逾期') + L + '天' + penTxt(L) + '</span>' : '';
     if (!late && lo.k === '考' && c.raw == null) late = '<span class="late">未補考</span>';   /* v110 */
     var bo = '<select data-g="bonus|' + id + '">' + [0,1,2,3,4,5,6,7,8,9,10].map(function (n) { return '<option value="' + n + '"' + ((c.bonus || 0) === n ? ' selected' : '') + '>' + (n ? '+' + n : '—') + '</option>'; }).join('') + '</select>';
     /* gr-5：改過的格子紅框紅字；姓名下方小字＝小老師登記者／✓檢查者／📜修改紀錄 */
@@ -537,10 +538,10 @@
         var c = scoreOf(it.id, s.seat), L = lateOf(it, c, td), f = finalOf(it, c, td), has = c && (c.raw != null || c.sub);
         if (!has) {
           if (L) miss.push(s.seat);
-          cards += '<div class="gr-card' + (L ? ' miss' : '') + '"><b>' + s.seat + '</b><div class="v">' + (L ? '未交' : (leaveOf(c).k === '考' ? '未補考' : '—')) + '</div><div class="s">' + (L ? '<span class="late">逾期' + L + '天 −' + L * PEN + '</span>' : (c && c.leave ? (leaveOf(c).k === '考' ? '考試請假' : '請假') : '')) + '</div></div>';
+          cards += '<div class="gr-card' + (L ? ' miss' : '') + '"><b>' + s.seat + '</b><div class="v">' + (L ? '未交' : (leaveOf(c).k === '考' ? '未補考' : '—')) + '</div><div class="s">' + (L ? '<span class="late">逾期' + L + '天' + penTxt(L) + '</span>' : (c && c.leave ? (leaveOf(c).k === '考' ? '考試請假' : '請假') : '')) + '</div></div>';
         } else {
           cards += '<div class="gr-card"><b>' + s.seat + '</b><div class="v">✓</div><div class="s">' +   /* v110：投影不顯示分數 */
-            (L ? '<span class="late">遲' + L + '天 −' + L * PEN + '</span>' : '') + (c.bonus ? ' <span class="pos">訂正+' + c.bonus + '</span>' : '') + '</div></div>';
+            (L ? '<span class="late">遲' + L + '天' + penTxt(L) + '</span>' : '') + (c.bonus ? ' <span class="pos">訂正+' + c.bonus + '</span>' : '') + '</div></div>';
         }
       });
       h += '<p style="font-size:17px;margin:4px 0 10px">' + (it.due ? '期限 <b>' + md(it.due) + '</b>　' : '') +
