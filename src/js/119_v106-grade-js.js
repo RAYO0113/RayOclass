@@ -92,8 +92,12 @@
     else if (lo.d) { var nx = nextSchoolDay(lo.d); if (nx > dl) dl = nx; }   /* 請假：補交期限＝返校隔日 */
     return schoolDaysBetween(dl, (sc && sc.sub) || td);
   }
+  /* 10/16 老師：段考＝選擇（raw，滿分 76）＋作文（ess，滿分 24）；作文還沒登＝段考還沒完成，不算最後成績 */
+  var EXAM_MAX = { raw: 76, ess: 24 };
+  function isExam(it) { return /^[一二三]段$/.test(it && it.type); }
   function finalOf(it, sc, td) {
     if (!sc || sc.raw == null) return null;
+    if (/^[一二三]段$/.test(it.type)) return sc.ess == null ? null : sc.raw + sc.ess + (sc.bonus || 0);
     return Math.max(0, sc.raw - PEN * lateOf(it, sc, td)) + (sc.bonus || 0);
   }
   function weights(cls) {
@@ -133,7 +137,7 @@
       .filter(function (s) { return s.cls && s.seat > 0; }).sort(function (a, b) { return a.seat - b.seat; });
     D.items = (r.items || []).map(function (i) { return { id: i.id, cls: i.cls, type: i.type, title: i.title || '', lessons: i.lessons || '', issued: i.issued || '',
       due: i.due || '', late: String(i.late) === '1' || i.late === true, calId: i.calId || '', note: i.note || '', created: i.created || '', by: i.by || '' }; });   /* by：gr-5 小老師新增 */
-    D.scores = (r.scores || []).map(function (s) { return { item: s.item, cls: s.cls, seat: +s.seat, raw: num(s.raw), sub: s.sub || '', leave: s.leave || '', bonus: num(s.bonus) || 0, upd: s.upd || '', by: s.by || '', chk: s.chk || '' }; });    D.log = (r.log || []).map(function (l) { return { ts: l.ts, who: l.who, item: l.item, cls: l.cls, seat: +l.seat, field: l.field, old: l.old, 'new': l['new'] }; });   /* gr-5：修改紀錄（只有老師登入才有） */
+    D.scores = (r.scores || []).map(function (s) { return { item: s.item, cls: s.cls, seat: +s.seat, raw: num(s.raw), ess: num(s.ess), sub: s.sub || '', leave: s.leave || '', bonus: num(s.bonus) || 0, upd: s.upd || '', by: s.by || '', chk: s.chk || '' }; });    D.log = (r.log || []).map(function (l) { return { ts: l.ts, who: l.who, item: l.item, cls: l.cls, seat: +l.seat, field: l.field, old: l.old, 'new': l['new'] }; });   /* gr-5：修改紀錄（只有老師登入才有） */
     D.tutors = r.tutors || [];
     D.weights = r.weights || []; D.points = (r.points || []).map(function (p) { return { id: p.id, ts: p.ts, date: p.date, period: p.period, cls: p.cls, seat: +p.seat, delta: +p.delta, reason: p.reason || '' }; });
     D.holidays = r.holidays || [];
@@ -143,7 +147,7 @@
   /* gr-5 修改紀錄：舊值不是空白的變動＝「改過」→ 紅字 */
   function histOf(item, seat) { return D.log.filter(function (l) { return l.item === item && l.seat === seat; }).sort(function (a, b) { return a.ts < b.ts ? -1 : 1; }); }
   function chgOf(item, seat, field) { return D.log.some(function (l) { return l.item === item && l.seat === seat && l.field === field && l.old !== ''; }); }
-  var LOG_NAME = { raw: '分數', sub: '繳交日', leave: '請假', bonus: '訂正加分' };
+  var LOG_NAME = { raw: '分數', ess: '段考作文', sub: '繳交日', leave: '請假', bonus: '訂正加分' };
   function logVal(f, v) { if (v === '' || v == null) return '（空白）'; if (f === 'leave') { var lo = leaveOf({ leave: v }); return (lo.k === '考' ? '考試請假 ' : lo.k === '交' ? '繳交請假 ' : '返校 ') + md(lo.d); } if (f === 'sub') return md(v); if (f === 'bonus') return '+' + v; return v; }
   function tsText(ts) { var d = new Date(ts); return isNaN(d) ? esc(ts) : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
   function scoreOf(item, seat) { return SCI[item + '|' + seat] || null; }
@@ -153,7 +157,7 @@
       var x = a.issued || a.due || '', y = b.issued || b.due || ''; return x === y ? (a.created < b.created ? 1 : -1) : (x < y ? 1 : -1); });
   }
   function itemById(id) { return D.items.filter(function (i) { return i.id === id; })[0] || null; }
-  function wireScore(s) { return { item: s.item, cls: s.cls, seat: s.seat, raw: s.raw == null ? '' : s.raw, sub: s.sub, leave: s.leave, bonus: s.bonus || '', upd: s.upd }; }
+  function wireScore(s) { return { item: s.item, cls: s.cls, seat: s.seat, raw: s.raw == null ? '' : s.raw, ess: s.ess == null ? '' : s.ess, sub: s.sub, leave: s.leave, bonus: s.bonus || '', upd: s.upd }; }
   function wireItem(i) { return { id: i.id, cls: i.cls, type: i.type, title: i.title, lessons: i.lessons, issued: i.issued, due: i.due, late: i.late ? '1' : '0', calId: i.calId, note: i.note, created: i.created }; }
 
   /* ── 後台連線：Apps Script（正式）／本機示範 ── */
@@ -363,7 +367,7 @@
       '<div class="gr-row"><label class="k">繳交日期</label><input type="date" id="gr-subdate" value="' + esc(S.subDate) + '">' +
       '<span class="gr-muted">按「已交」或輸入分數時記這天（補登時改這裡）</span></div>';
     if (!st.length) return h + '<p class="late">這班還沒有學生名單。</p>';
-    h += '<table class="gr-t"><thead><tr><th>座號</th><th>姓名</th><th>分數</th><th>繳交</th><th>請假</th><th>遲交</th><th>訂正</th><th>最後成績</th></tr></thead><tbody>';
+    h += '<table class="gr-t"><thead><tr><th>座號</th><th>姓名</th>' + (isExam(it) ? '<th>選擇（' + EXAM_MAX.raw + '）</th><th>作文（' + EXAM_MAX.ess + '）</th>' : '<th>分數</th>') + '<th>繳交</th><th>請假</th><th>遲交</th><th>訂正</th><th>最後成績</th></tr></thead><tbody>';
     st.forEach(function (s) { h += rowHTML(it, s, td); });
     return h + '</tbody></table>';
   }
@@ -384,7 +388,8 @@
       (hs.length ? ' <button class="gr-x' + (anyChg ? ' gr-chgb' : '') + '" data-g="hist|' + id + '" title="修改紀錄">📜</button>' : '');
     return '<tr data-row="' + id + '" class="' + (c.raw != null || c.sub ? 'done' : '') + '"><td>' + s.seat + '</td><td class="nm">' + esc(s.name) + (who ? '<small class="gr-who">' + who + '</small>' : '') + '</td>' +
       '<td class="' + cg('raw') + '"><input class="gr-sc" type="text" inputmode="decimal" data-g="raw|' + id + '" value="' + (c.raw == null ? '' : c.raw) + '"></td>' +
-      '<td class="' + cg('sub') + '">' + sub + '</td><td class="' + cg('leave') + '">' + lv + '</td><td>' + late + '</td><td class="' + cg('bonus') + '">' + bo + '</td><td class="fin">' + (f == null ? '' : r1(f)) + '</td></tr>';
+      (isExam(it) ? '<td class="' + cg('ess') + '"><input class="gr-sc" type="text" inputmode="decimal" data-g="ess|' + id + '" value="' + (c.ess == null ? '' : c.ess) + '"></td>' : '') +
+      '<td class="' + cg('sub') + '">' + sub + '</td><td class="' + cg('leave') + '">' + lv + '</td><td>' + late + '</td><td class="' + cg('bonus') + '">' + bo + '</td><td class="fin">' + (f == null ? (isExam(it) && c.raw != null ? '<span class="gr-muted">作文待登</span>' : '') : r1(f)) + '</td></tr>';
   }
   /* gr-5：修改紀錄視窗（單一學生，或 seat 為 0＝整份考卷只列「改過」的） */
   function histHTML() {
@@ -412,7 +417,7 @@
   function patchScore(item, seat, p) {
     var it = itemById(item); if (!it) return;
     var c = scoreOf(item, seat);
-    if (!c) { c = { item: item, cls: it.cls, seat: seat, raw: null, sub: '', leave: '', bonus: 0, upd: '', by: '', chk: '' }; D.scores.push(c); SCI[item + '|' + seat] = c; }
+    if (!c) { c = { item: item, cls: it.cls, seat: seat, raw: null, ess: null, sub: '', leave: '', bonus: 0, upd: '', by: '', chk: '' }; D.scores.push(c); SCI[item + '|' + seat] = c; }
     var ts = new Date().toISOString(), sv = function (f, v) { return v == null || (f === 'bonus' && !v) ? '' : String(v); };
     Object.keys(p).forEach(function (k) {   /* gr-5：畫面先記一筆（後台也會記同樣的），紅字馬上出現 */
       if (LOG_NAME[k] && sv(k, c[k]) !== sv(k, p[k])) D.log.push({ ts: ts, who: '老師', item: item, cls: it.cls, seat: seat, field: k, old: sv(k, c[k]), 'new': sv(k, p[k]) });
@@ -843,7 +848,7 @@
     D.students.filter(function (s) { return s.cls === c && s.active !== 0; }).forEach(function (s) {
       var sm = summary(c, s.seat, td);
       rows.push([s.seat, s.sid, s.name].concat(its.map(function (i) { var sc = scoreOf(i.id, s.seat), f = finalOf(i, sc, td), L = lateOf(i, sc, td);
-        return f != null ? r1(f) : (sc && sc.sub ? '已交' : (L ? '未交(逾' + L + '天)' : '')); }), CATS.map(function (k) { return r1(sm[k]); }), [r1(sm.total)]));
+        return f != null ? r1(f) : (isExam(i) && sc && sc.raw != null ? '選擇' + sc.raw + '(作文待登)' : sc && sc.sub ? '已交' : (L ? '未交(逾' + L + '天)' : '')); }), CATS.map(function (k) { return r1(sm[k]); }), [r1(sm.total)]));
     });
     rows.push([]); rows.push(['配分', '', ''].concat(its.map(function () { return ''; }), CATS.map(function (k) { return w[k]; }), [w.tentative ? '暫定' : '']));
     download(c + '_成績總表_' + td + '.csv', rows);
@@ -943,18 +948,18 @@
     var a = g.split('|'), t = a[0];
     if (t === 'itype') { S.imp.type[a[1]] = e.target.value; render(); return; }
     var item = a[1], seat = +a[2];
-    if (t === 'raw') commitRaw(e.target);
+    if (t === 'raw' || t === 'ess') commitRaw(e.target);
     else if (t === 'sub') patchScore(item, seat, { sub: e.target.value });
     else if (t === 'leave') { var lo0 = leaveOf(scoreOf(item, seat)); patchScore(item, seat, { leave: e.target.value ? ((lo0.k === '考' || lo0.k === '交') ? lo0.k + ':' : '') + e.target.value : '' }); }   /* v110：改日期時保留請假種類 */
     else if (t === 'bonus') patchScore(item, seat, { bonus: +e.target.value || 0 });
   }
   function commitRaw(inp) {
-    var a = inp.getAttribute('data-g').split('|'), item = a[1], seat = +a[2], v = inp.value.trim();
-    var n = v === '' ? null : num(v);
-    if (v !== '' && (n == null || n < 0 || n > 200)) { alert('分數請輸入 0～200 的數字'); inp.value = ''; return false; }
+    var a = inp.getAttribute('data-g').split('|'), fd = a[0], item = a[1], seat = +a[2], v = inp.value.trim();
+    var n = v === '' ? null : num(v), mx = isExam(itemById(item)) ? EXAM_MAX[fd] : 200;
+    if (v !== '' && (n == null || n < 0 || n > mx)) { alert((fd === 'ess' ? '作文' : isExam(itemById(item)) ? '選擇' : '分數') + '請輸入 0～' + mx + ' 的數字'); inp.value = ''; return false; }
     var c = scoreOf(item, seat);
-    if ((c ? c.raw : null) === n) return true;
-    var p = { raw: n }; if (n != null && !(c && c.sub)) p.sub = (document.getElementById('gr-subdate') || {}).value || today();
+    if ((c ? c[fd] : null) === n) return true;
+    var p = {}; p[fd] = n; if (n != null && !(c && c.sub)) p.sub = (document.getElementById('gr-subdate') || {}).value || today();
     patchScore(item, seat, p);
     return true;
   }
@@ -962,10 +967,10 @@
   function onKey(e) {
     if (e.key === 'Escape') { if (S.hist) { S.hist = null; render(); } else close(); e.stopPropagation(); return; }
     var g = e.target.getAttribute && e.target.getAttribute('data-g');
-    if (e.key === 'Enter' && g && g.indexOf('raw|') === 0) {
+    if (e.key === 'Enter' && g && (g.indexOf('raw|') === 0 || g.indexOf('ess|') === 0)) {
       e.preventDefault();
       var a = g.split('|'), st = roster(S.cls), i = st.map(function (s) { return s.seat; }).indexOf(+a[2]);
-      if (commitRaw(e.target) && st[i + 1]) { var nx = document.querySelector('#v106-gr [data-g="raw|' + a[1] + '|' + st[i + 1].seat + '"]'); if (nx) { nx.focus(); nx.select(); } }
+      if (commitRaw(e.target) && st[i + 1]) { var nx = document.querySelector('#v106-gr [data-g="' + a[0] + '|' + a[1] + '|' + st[i + 1].seat + '"]'); if (nx) { nx.focus(); nx.select(); } }
     }
     if (e.key === 'Enter' && e.target.id === 'gr-pw') { var p = e.target.value; login(p, (document.getElementById('gr-rem') || {}).checked); }
     e.stopPropagation();   /* 不讓 ←→ 觸發課文換頁 */
