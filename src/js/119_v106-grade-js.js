@@ -523,6 +523,26 @@
     if (!rows.length) return;
     save('items', rows.map(wireItem), '已匯入 ' + rows.length + ' 份').then(function () { rows.forEach(function (r) { D.items.push(r); }); S.imp = null; S.item = rows[0].id; render(); });
   }
+  /* V135：教學進度表按「轉考試／作業」時，日曆加一筆後直接建成績項目（同「從日曆匯入」的規則，已建過的 calId 不重建）。
+     回傳 Promise：{ok:true,n} 建好 n 份；{ok:false,why:'login'} 沒登入成績系統（日曆那筆仍在，之後可用「從日曆匯入」）。 */
+  function addFromCal(es) {
+    if (!isDemo() && !pw()) return Promise.resolve({ ok: false, why: 'login' });
+    var ready = S.loaded ? Promise.resolve() : call({ action: 'load' }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '讀取失敗');
+      norm(r); S.admin = !!r.admin; S.loaded = true; S.loadedAt = Date.now();
+    });
+    return ready.then(function () {
+      if (!S.admin) return { ok: false, why: 'login' };
+      var have = {}; D.items.forEach(function (i) { if (i.calId) have[i.calId] = 1; });
+      var rows = (es || []).filter(function (e) { return e && CAL_MAP[e.item] && e.kind !== '檢討' && !have[e.id]; }).map(function (e) {
+        var ty = CAL_MAP[e.item];
+        return { id: uid('i'), cls: e.cls, type: ty, title: calTitle(e), lessons: (e.lessons || []).join(','), issued: e.kind === '考試' ? e.date : '',
+          due: ty === '註釋小考' ? nextLesson(e.cls, e.date) : e.date, late: typeOf(ty).late, calId: e.id, note: '', created: new Date().toISOString() };
+      });
+      if (!rows.length) return { ok: true, n: 0 };
+      return save('items', rows.map(wireItem), '已建立 ' + rows.length + ' 份').then(function () { rows.forEach(function (r) { D.items.push(r); }); return { ok: true, n: rows.length }; });
+    });
+  }
 
   /* ── 投影（v110：只顯示座號、已交／未交逾期扣分／請假、訂正加分；不顯示分數） ── */
   function projHTML() {
@@ -990,5 +1010,5 @@
 
   /* 測試／除錯用介面（不含任何學生資料） */
   window.V106GR = { open: open, close: close, data: function () { return D; }, summary: summary, lateOf: lateOf, finalOf: finalOf,
-    nextLesson: nextLesson, schoolDaysBetween: schoolDaysBetween, parsePaste: parsePaste, isDemo: isDemo };
+    nextLesson: nextLesson, schoolDaysBetween: schoolDaysBetween, parsePaste: parsePaste, isDemo: isDemo, addFromCal: addFromCal };
 })();

@@ -343,5 +343,20 @@
     return _v98save.apply(this, arguments);
   };
 
-  window.V98CAL = { open: open, close: close, data: list };
+  /* V135：教學進度表「轉考試／作業」用：加入整理好的日曆項目（{date,cls,kind,item,lessons,note}），回傳加入後的項目；remove 依 id 刪（不問） */
+  function addEntries(es) {
+    var a = list(), out = (es || []).map(function (e) {
+      var o = { id: uid(), date: e.date, cls: e.cls, kind: e.kind, item: e.item, lessons: (e.lessons || []).slice(), note: e.note || '' };
+      a.push(o); return o;
+    });
+    if (out.length) put(K.data, a);
+    return out;
+  }
+  function removeEntries(ids) {
+    var kill = {}; (ids || []).forEach(function (i) { kill[i] = 1; });
+    var a = list(), b = a.filter(function (x) { return !kill[x.id]; });
+    if (b.length !== a.length) put(K.data, b);
+    return a.length - b.length;
+  }
+  window.V98CAL = { open: open, close: close, data: list, addEntries: addEntries, removeEntries: removeEntries };
 })();

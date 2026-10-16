@@ -71,3 +71,20 @@ body.dark-mode #v114-cls .v114-h button { color:#9cc0f0; border-color:#9cc0f0; }
 .v114-mk.auto { background:#e6f4ea; color:#1e6b3a; }
 .v114-bt button.on.auto { background:#2e8b57; border-color:#2e8b57; }
 body.dark-mode .v114-mk.auto { background:#1f3a29; color:#b7e4c7; }
+
+/* V135：快速加一項、拖曳排序、轉考試／作業 */
+#v114-ed .v114-grip { cursor:grab; touch-action:none; user-select:none; font-size:12px; color:var(--muted,#7a6a55); white-space:nowrap; }
+#v114-ed .v114-it.drag { opacity:.45; }
+#v114-ed .v114-it.drop { box-shadow:inset 0 3px 0 #1e4d8c; }
+#v114-ed .v114-cvw { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; }
+#v114-ed .v114-cv { border:1px solid #c0662a; color:#c0662a; background:transparent; border-radius:10px; padding:1px 8px; font-size:12px; cursor:pointer; }
+#v114-ed .v114-cv.ok { background:#3d8a3d; border-color:#3d8a3d; color:#fff; }
+#v114-ed .v114-cv:disabled { opacity:.4; cursor:default; }
+#v114-ed .v114-cvs { font-size:12px !important; padding:1px 2px !important; }
+#v114-ed .v114-pal { margin-top:10px; padding:8px; border:1px solid var(--border,#e4d8c4); border-radius:6px; display:flex; flex-direction:column; gap:6px; font-size:13px; }
+#v114-ed .v114-pal button { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#1a1209); border-radius:4px; padding:3px 9px; margin:2px; cursor:pointer; font-size:13px; }
+#v114-ed .v114-pal button.on { background:#1e4d8c; border-color:#1e4d8c; color:#fff; }
+#v114-ed .v114-pal .v114-pi { border-style:dashed; border-color:#1e4d8c; color:#1e4d8c; }
+#v114-ed .v114-msg:empty { display:none; }
+#v114-ed .v114-msg { color:#3d8a3d; font-weight:700; }
+#v114-ed .v114-q { margin-left:8px; white-space:nowrap; }

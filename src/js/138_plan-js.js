@@ -322,9 +322,10 @@
       var b = e.target.closest && e.target.closest('[data-pe]'); if (!b) return;
       var a = b.getAttribute('data-pe').split('|'), p = load(), x = plan(p, ed.c), i = +a[1];
       if (a[0] === 'x') { closeEd(); return; }
-      if (a[0] === 'c') { ed.c = a[1]; renderEd(); return; }
+      if (a[0] === 'c') { ed.c = a[1]; ed.msg = ''; renderEd(); return; }
       if (a[0] === 'tpl') { applyTpl(+a[1]); return; }
       if (a[0] === 'copy') { copyFrom(a[1]); return; }
+      if (a[0] === 'pal' && !x) x = p.cls[ed.c] = { start: '', until: '', items: [], log: {} };
       if (!x) return;
       if (a[0] === 'split') lessonsIn(x.items).forEach(function (k) { autoSplit(x.items, k); });
       else if (a[0] === 'up' && i > 0) x.items.splice(i - 1, 0, x.items.splice(i, 1)[0]);
@@ -332,6 +333,10 @@
       else if (a[0] === 'ins') x.items.splice(i, 0, { id: uid(), t: '（新項目）' });
       else if (a[0] === 'add') x.items.push({ id: uid(), t: '（新項目）' });
       else if (a[0] === 'del') { if (!confirm('刪除「' + x.items[i].t + '」？後面的項目會往前補。')) return; x.items.splice(i, 1); }
+      else if (a[0] === 'pl') { ed.pl = a[1]; renderEd(); return; }
+      else if (a[0] === 'pal') { palAdd(x, a[1]); }
+      else if (a[0] === 'cv') { convert(p, x, i, a[2]); return; }
+      else if (a[0] === 'uncv') { unconvert(p, x, i, a[2]); return; }
       else return;
       save(p); renderEd(); refresh();
     });
@@ -347,6 +352,29 @@
       save(p); renderEd(); refresh();
     });
     m.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeEd(); e.stopPropagation(); });
+    /* V135：按住「⠿」上下拖曳排順序（滑鼠、觸控筆、手指都可以） */
+    var dr = null;
+    function rowAt(ev) { var el = document.elementFromPoint(ev.clientX, ev.clientY); return el && el.closest ? el.closest('#v114-ed .v114-it') : null; }
+    m.addEventListener('pointerdown', function (ev) {
+      var g = ev.target.closest && ev.target.closest('.v114-grip'); if (!g) return;
+      var row = g.closest('.v114-it'); if (!row) return;
+      ev.preventDefault(); dr = { from: +row.getAttribute('data-i'), to: +row.getAttribute('data-i'), row: row };
+      row.classList.add('drag');
+    });
+    window.addEventListener('pointermove', function (ev) {
+      if (!dr) return; ev.preventDefault();
+      var r = rowAt(ev); m.querySelectorAll('.v114-it.drop').forEach(function (x) { x.classList.remove('drop'); });
+      if (r && r !== dr.row) { r.classList.add('drop'); dr.to = +r.getAttribute('data-i'); } else if (r === dr.row) dr.to = dr.from;
+    }, { passive: false });
+    function endDrag() {
+      if (!dr) return; var d = dr; dr = null;
+      if (d.to === d.from || isNaN(d.to)) { renderEd(); return; }
+      var p = load(), x = plan(p, ed.c); if (!x) return;
+      x.items.splice(d.to, 0, x.items.splice(d.from, 1)[0]);
+      save(p); renderEd(); refresh();
+    }
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', function () { dr = null; renderEd(); });
     return m;
   }
   function applyTpl(k) {
@@ -389,16 +417,96 @@
       x.items.forEach(function (it, i) {
         var ds = dates[i] || [], done = ds.length && ds.every(function (o) { return o.past; }) && !(ds[ds.length - 1].r.part);
         var when = ds.length ? ds.map(function (o) { return md(o.r.date) + '（' + WD[parse(o.r.date).getDay()] + '）' + o.r.p + (o.r.part ? '⏸' : ''); }).join('、') : '<b class="v114-bad">排不下</b>';
-        h += '<div class="v114-it' + (done ? ' done' : '') + '"><span>' + (i + 1) + '</span><span class="v114-when">' + when + '</span>' +
-          '<span class="v114-tc"><input type="text" data-pf="t|' + i + '" value="' + esc(it.t) + '">' + rangeSel(x.items, i) + '</span>' +
+        h += '<div class="v114-it' + (done ? ' done' : '') + '" data-i="' + i + '"><span class="v114-grip" title="按住拖曳排順序">⠿' + (i + 1) + '</span><span class="v114-when">' + when + '</span>' +
+          '<span class="v114-tc"><input type="text" data-pf="t|' + i + '" value="' + esc(it.t) + '">' + rangeSel(x.items, i) + cvChips(it, i, ds) + '</span>' +
           '<select data-pf="q|' + i + '"><option value="">—</option>' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (it.q === n ? ' selected' : '') + '>小考' + n + '</option>'; }).join('') + '</select>' +
           '<span class="v114-ops"><button type="button" data-pe="up|' + i + '" title="上移">↑</button><button type="button" data-pe="dn|' + i + '" title="下移">↓</button>' +
           '<button type="button" data-pe="ins|' + i + '" title="在這項前面插入">＋插入</button><button type="button" data-pe="del|' + i + '" title="刪除" class="v114-del">✕</button></span></div>';
       });
     }
-    h += '<button type="button" class="v114-add" data-pe="add">＋ 新增一項</button>';
-    h += '<div class="v114-help">一項＝一節課。日期由課表自動推算：放假、段考、調課、標記「沒上完／多上一項／沒上課」都會讓後面的項目自動順延或提前。灰色＝已經上過。</div></div>';
+    h += palHTML();
+    h += '<button type="button" class="v114-add" data-pe="add">＋ 新增一項（自己打字）</button>';
+    h += '<div class="v114-help">一項＝一節課。日期由課表自動推算：放假、段考、調課、標記「沒上完／多上一項／沒上課」都會讓後面的項目自動順延或提前。灰色＝已經上過。<br>' +
+      '按住「⠿」可以上下拖曳排順序。「→ A卷」這類按鈕＝在那天那班的考試日曆加一筆，並直接建好成績項目；轉過之後如果進度順延，日曆日期不會跟著動，要自己改。</div></div>';
     box.innerHTML = h;
+    if (ed.msg) { var mb = box.querySelector('.v114-msg'); if (mb) mb.textContent = ed.msg; }
+  }
+
+  /* ── V135：常用項目按鈕（先選課，再點項目，加到最後面；之後用「⠿」拖到想要的位置） ── */
+  var PL = [['火車線', HC], ['論語', LY], ['珍奶', '珍珠奶茶'], ['師說', '師說'], ['世說', '世說新語選'], ['魚販', '身為魚販'], ['不指定', '']];
+  var PAL = [['txt', '課文'], ['sup', '補充講義＋題解'], ['hw', '習題＋習作檢討'], ['a', 'A卷'], ['ar', 'A卷檢討'],
+    ['g|作文說明', '作文說明'], ['g|作文檢討', '作文檢討'], ['g|公佈成績＋劃卡', '公佈成績＋劃卡'], ['g|段考總複習', '段考總複習'], ['g|彈性節', '彈性節']];
+  function plName(k) { var r = PL.filter(function (x) { return x[1] === k; })[0]; return r ? r[0] : ''; }
+  function palHTML() {
+    if (ed.pl == null) ed.pl = HC;
+    return '<div class="v114-pal"><div class="v114-msg"></div><div><b>快速加一項</b>　課：' + PL.map(function (x) {
+      return '<button type="button" data-pe="pl|' + esc(x[1]) + '"' + (ed.pl === x[1] ? ' class="on"' : '') + '>' + esc(x[0]) + '</button>';
+    }).join('') + '</div><div>' + PAL.map(function (x) {
+      var les = x[0].indexOf('g|') === 0 ? '' : plName(ed.pl);
+      if (!les && x[0].indexOf('g|') !== 0) return '';
+      return '<button type="button" class="v114-pi" data-pe="pal|' + esc(x[0]) + '">＋ ' + esc(les ? les + (x[0] === 'a' || x[0] === 'ar' ? ' ' : '') + x[1] : x[1]) + '</button>';
+    }).join('') + '<label class="v114-q"><input type="checkbox" id="v114-palq"' + (window.__v114palq ? ' checked' : '') + ' onchange="window.__v114palq = this.checked"> 加的這節課前有小考</label></div></div>';
+  }
+  function palAdd(x, k) {
+    var nm = plName(ed.pl), it = { id: uid() }, q = !!window.__v114palq;
+    if (k.indexOf('g|') === 0) it.t = k.slice(2);
+    else if (!nm) return;
+    else if (k === 'txt') {
+      var n = x.items.filter(function (o) { return o.t.indexOf(nm + '課文') === 0; }).length + 1;
+      it.t = nm + '課文 ' + n; if (ed.pl && sentences(ed.pl).length) it.les = ed.pl;
+    }
+    else it.t = nm + { sup: '補充講義＋題解', hw: '習題＋習作檢討', a: ' A卷', ar: ' A卷檢討' }[k];
+    if (q) { it.t += /小考/.test(it.t) ? '' : '（小考）'; it.q = x.items.filter(function (o) { return o.q; }).length + 1; }
+    x.items.push(it);
+    if (it.les) autoSplit(x.items, it.les);
+    ed.msg = '已加到第 ' + x.items.length + ' 項：' + it.t + '（按住 ⠿ 可以拖到別的位置）';
+  }
+
+  /* ── V135：轉考試／作業（日曆＋成績項目） ── */
+  var CV = { 'A卷': ['考試', '📝 A卷'], '註釋小考': ['考試', '✎ 注釋小考'], '習作': ['交作業', '📒 習作'], '課後習題': ['交作業', '📄 課本習題'], '其他': ['交作業', '其他作業'] };
+  var LESNO = [[/魚販/, 1], [/世說/, 2], [/師說/, 3], [/珍奶|珍珠奶茶/, 4], [/火車線/, 5], [/論語|侍坐/, 6]];
+  function lesNo(it) { var s = (it.les || '') + ' ' + it.t, r = LESNO.filter(function (x) { return x[0].test(s); })[0]; return r ? r[1] : 0; }
+  function guess(it) {
+    var t = it.t, o = [];
+    if (/A卷/.test(t) && !/檢討/.test(t)) o.push('A卷');
+    if (it.q || /小考/.test(t)) o.push('註釋小考');
+    if (/習作/.test(t)) o.push('習作');
+    if (/習題/.test(t)) o.push('課後習題');
+    Object.keys(it.cal || {}).forEach(function (k) { if (o.indexOf(k) < 0) o.push(k); });
+    return o;
+  }
+  function cvChips(it, i, ds) {
+    var d = ds && ds.length ? ds[0].r.date : '', g = guess(it), cal = it.cal || {};
+    var h = g.map(function (k) {
+      return cal[k] ? '<button type="button" class="v114-cv ok" data-pe="uncv|' + i + '|' + k + '" title="已在 ' + md(d || '') + ' 的日曆；按一下可以撤銷日曆那筆">✓ ' + CV[k][1] + '</button>'
+        : '<button type="button" class="v114-cv" data-pe="cv|' + i + '|' + k + '"' + (d ? '' : ' disabled') + ' title="' + (d ? md(d) + ' 加到日曆＋建成績項目' : '排不下，沒有日期') + '">→ ' + CV[k][1] + '</button>';
+    }).join('');
+    var more = Object.keys(CV).filter(function (k) { return g.indexOf(k) < 0; });
+    if (d) h += '<select class="v114-cvs" onchange="if(this.value){var b=document.createElement(\'button\');b.setAttribute(\'data-pe\',\'cv|' + i + '|\'+this.value);this.parentNode.appendChild(b);b.click();}">' +
+      '<option value="">→ 其他…</option>' + more.map(function (k) { return '<option value="' + k + '">' + CV[k][1] + '</option>'; }).join('') + '</select>';
+    return '<span class="v114-cvw">' + h + '</span>';
+  }
+  function convert(p, x, i, k) {
+    var it = x.items[i], P = placed(ed.c), r = P && P.rows.filter(function (r) { return r.its.indexOf(i) >= 0; })[0];
+    if (!it || !CV[k] || !r || !window.V98CAL || !V98CAL.addEntries) return;
+    if (it.cal && it.cal[k]) return;
+    var n = lesNo(it), e = V98CAL.addEntries([{ date: r.date, cls: ed.c, kind: CV[k][0], item: k, lessons: n ? [n] : [], note: k === '其他' ? it.t : '' }])[0];
+    it.cal = it.cal || {}; it.cal[k] = e.id;
+    save(p);
+    var head = md(r.date) + ' ' + ed.c + '・' + CV[k][1] + ' 已加到日曆';
+    ed.msg = head + '；建立成績項目中…'; renderEd(); refresh();
+    if (!window.V106GR || !V106GR.addFromCal) { ed.msg = head + '（成績系統沒有載入，之後到成績「從日曆匯入」）'; renderEd(); return; }
+    V106GR.addFromCal([e]).then(function (res) {
+      ed.msg = head + (res.ok ? (res.n ? '，成績項目也建好了 ✓' : '（這類不建成績項目）') : '。成績系統還沒登入，登入後到成績「📅 從日曆匯入」就會出現。');
+      if (ed.open) renderEd();
+    }).catch(function (err) { ed.msg = head + '。成績項目沒建成功（' + err.message + '），之後可到成績「從日曆匯入」。'; if (ed.open) renderEd(); });
+  }
+  function unconvert(p, x, i, k) {
+    var it = x.items[i]; if (!it || !it.cal || !it.cal[k]) return;
+    if (!confirm('撤銷「' + it.t + '」的' + CV[k][1] + '？\n會刪掉日曆上那一筆。成績項目如果已經建了，要到成績系統自己刪（裡面可能已經有分數）。')) return;
+    if (window.V98CAL && V98CAL.removeEntries) V98CAL.removeEntries([it.cal[k]]);
+    delete it.cal[k]; if (!Object.keys(it.cal).length) delete it.cal;
+    save(p); ed.msg = '已撤銷日曆那一筆'; renderEd(); refresh();
   }
   function rangeSel(items, i) {
     var it = items[i], h = '<span class="v114-rg"><select data-pf="les|' + i + '"><option value="">（不是課文）</option>' +
