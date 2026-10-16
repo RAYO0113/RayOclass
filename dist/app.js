@@ -7694,6 +7694,18 @@ try {
       ['樂府① 詩的流變'], ['樂府② 長干行', 1], ['樂府③ 長干行', 2], ['樂府④ 長干行', 3],   /* 長干行課文資料建好後再補課名 */
       ['樂府 習作（交換改＋檢討）'], ['樂府 A卷'], ['樂府 A卷檢討']]
   }];
+  /* 老師 10/16 改：火車線 → 作文說明 → 論語 → 珍奶。四班順序相同（日期由課表推算，已對過老師的表）；
+     冷一忠多一節（10/21 三 7 調課，要在調課裡設定），最後一項是彈性節。q＝第幾次小考 */
+  var ZN = '珍珠奶茶';
+  var ITEMS_1016 = [['公佈成績＋劃卡＋劉克襄＋自然書寫＋題解'],
+    ['火車線課文 1', 0, HC], ['火車線課文 2（注釋小考）', 1, HC], ['火車線習題＋習作檢討'], ['火車線 A卷'], ['火車線 A卷檢討'],
+    ['作文說明'], ['儒家＆孔子'], ['論語補充講義＋題解（小考）', 2],
+    ['論語課文 1', 0, LY], ['論語課文 2', 0, LY], ['論語課文 3', 0, LY], ['論語課文 4（注釋小考）', 3, LY],
+    ['論語習題＋習作檢討'], ['論語 A卷'], ['論語 A卷檢討'],
+    ['珍珠奶茶', 0, ZN], ['珍奶習作檢討＋A卷'], ['珍奶 A卷檢討']];
+  TEMPLATES.unshift(
+    { name: '10/16 版（建一忠、建一孝、冷一孝）', start: '2026-10-19', until: '2026-11-23', items: ITEMS_1016 },
+    { name: '10/16 版（冷一忠，多一節彈性）', start: '2026-10-19', until: '2026-11-23', items: ITEMS_1016.concat([['彈性節／段考總複習']]) });
   var MARK = { ok: '✓ 照預定', part: '⏸ 沒上完', more: '⏭ 多上', skip: '🚫 沒上課' };
 
   function get(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -10073,7 +10085,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V134';
+  window.APP_VERSION = 'V135';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
