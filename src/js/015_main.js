@@ -454,6 +454,11 @@ function freezeAdaptiveTableWidths(root){
       }
     });
     if (!fullRow) { cloneHost.remove(); return; }
+    /* 有合併儲存格（rowspan）的表格可能找不到涵蓋全部欄位的列；欄數不足就維持 auto，不凍結。 */
+    const colCount = Math.max.apply(null, Array.from(clone.rows).map(function(row){
+      return Array.from(row.cells).reduce(function(n, c){ return n + (parseInt(c.getAttribute('colspan'), 10) || 1); }, 0);
+    }));
+    if (fullRow.cells.length < colCount) { cloneHost.remove(); return; }
 
     const widthsPx = Array.from(fullRow.cells).map(function(cell){ return Math.max(1, cell.getBoundingClientRect().width); });
     const totalPx = widthsPx.reduce(function(a,b){ return a+b; },0);
@@ -2117,6 +2122,8 @@ function wkRenderSlideHTML(slide) {
         return { part: 'psg', html: '<div class="hd-tw"><table class="' + tableClass + ' hd-table">' + rows + '</table></div>' };
       }
       const k = b[1], t = b[2];
+      /* 'html'：需要合併儲存格的表格，直接放整段 HTML（資料內附 data-merged，不再自動合併） */
+      if (k === 'html')  return { part: 'psg', html: t };
       if (k === 'sub')   return { part: 'psg', html: '<div class="hd-sub">' + t + '</div>' };
       if (k === 'mj')    return { part: 'psg', html: '<div class="hd-mj">' + t + '</div>' };
       if (k === 'q')     return { part: 'q', html: '<div class="hd-q">' + t.replace(/^【\s*\(?([A-D])\)?\s*】/,
