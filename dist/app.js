@@ -10022,6 +10022,24 @@ try {
     }, 0);
   }, true);
 
+  /* ② 段落頁籤水波＋③ 大按鈕下陷：pointerdown 加 .v130-press，放開／取消／滑出就拿掉。手指、滑鼠、Apple Pencil 都會觸發。 */
+  var PRESS = '.wk-sec-btn, .wk-control-bar .wk-proj-btn';
+  document.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest(PRESS);
+    if (!b) return;
+    b.classList.add('v130-press');
+    if (b.classList.contains('wk-sec-btn')) {
+      var r = b.getBoundingClientRect(), w = document.createElement('span');
+      w.className = 'v130-wave'; w.style.left = (e.clientX - r.left) + 'px'; w.style.top = (e.clientY - r.top) + 'px';
+      b.appendChild(w); setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); }, 600);
+    }
+    var up = function () {
+      setTimeout(function () { b.classList.remove('v130-press'); }, 60);
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { b.removeEventListener(t, up); });
+    };
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { b.addEventListener(t, up); });
+  }, true);
+
   var SEL = '.v107-st, .sy-row > b', queued = false;
   function ink() {
     queued = false;

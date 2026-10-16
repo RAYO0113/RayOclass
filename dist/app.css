@@ -7013,7 +7013,7 @@ body.dark-mode .ah-fill { background:#1f1c17; }
 /* V129：注釋側欄字級跟著課文等比例（見 166_notefs-scale-js.js）。--v129-nfs 由 JS 寫在 #wk-slide-area／#wkfs-body 上；沒算出來時退回滑桿原值。 */
 #wk-slide-area .tp-note, #wkfs-body .tp-note, #wk-fullscreen #wkfs-body .tp-note{ font-size:var(--v129-nfs, var(--v61-nfs)) !important; }
 /* ════ src/css/155_galaxy-ui-css.css ════ */
-/* V130：介面零件（老師 10/16 從試做頁選 ①④⑤）。零件改寫自 github.com/uiverse-io/galaxy（MIT 授權），配網站色。
+/* V130：介面零件（老師 10/16 從試做頁選 ①④⑤，②③ 換平板版後選 2乙、3甲）。零件改寫自 github.com/uiverse-io/galaxy（MIT 授權），配網站色。
    只加不改：原 001 的 .mode-switch、080 的作業格、122 的同步狀態都沒動；動畫由 167_galaxy-ui-js.js 加 class 觸發。 */
 
 /* ① 高職／高中：金色圓塊滑動（改自 JaydipPrajapati1910 splendid-panda-57）。
@@ -7053,7 +7053,23 @@ body.mode-senior .mode-switch::before { transform: translateX(100%); }
   100% { box-shadow: inset 0 0 0 1px currentColor; transform: scale(1); }
 }
 
+/* ②（老師選 2乙）段落頁籤：按下縮一下＋從點的位置泛水波（改自 cssbuttons-io weak-firefox-5）。
+   .v130-press 與水波 <span class="v130-wave"> 由 JS 在 pointerdown 加，手指點也看得到。頁籤內原本沒有子元素，overflow:hidden 不會裁到東西。 */
+.wk-sec-btn { position: relative; overflow: hidden; }
+.wk-sec-btn.v130-press { transform: scale(.92); transition: transform .1s; }
+.v130-wave { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: rgba(178,34,34,.3); pointer-events: none; animation: v130-wave .55s ease-out forwards; }
+.wk-sec-btn.wk-sec-active .v130-wave { background: rgba(255,255,255,.45); }
+@keyframes v130-wave { from { transform: scale(0); opacity: 1; } to { transform: scale(16); opacity: 0; } }
+
+/* ③（老師選 3甲）投影全螢幕、標記筆：底下朱紅厚邊，按下去往下陷（改自 TanimMahbub selfish-goat-90）。
+   紅底狀態（滑鼠移上、標記筆開著）厚邊改深紅，才看得出立體。 */
+.wk-control-bar .wk-proj-btn { box-shadow: 0 4px 0 var(--mk-cinnabar, #b22222); margin-bottom: 4px; }
+.wk-control-bar .wk-proj-btn:hover, .wk-control-bar .wk-proj-btn.on { box-shadow: 0 4px 0 #7a1414; }
+.wk-control-bar .wk-proj-btn.v130-press { transform: translateY(3px); box-shadow: 0 1px 0 #7a1414; transition: transform .08s, box-shadow .08s; }
+
 @media (prefers-reduced-motion: reduce) {
   .mode-switch::before { transition: none; }
+  .v130-wave { display: none; }
   #v84-hw button.v84-c .v84-mk::before, .v130-ink i { animation: none !important; }
 }
