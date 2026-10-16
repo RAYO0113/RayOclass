@@ -7012,3 +7012,48 @@ body.dark-mode .ah-fill { background:#1f1c17; }
 /* ════ src/css/153_notefs-scale-css.css ════ */
 /* V129：注釋側欄字級跟著課文等比例（見 166_notefs-scale-js.js）。--v129-nfs 由 JS 寫在 #wk-slide-area／#wkfs-body 上；沒算出來時退回滑桿原值。 */
 #wk-slide-area .tp-note, #wkfs-body .tp-note, #wk-fullscreen #wkfs-body .tp-note{ font-size:var(--v129-nfs, var(--v61-nfs)) !important; }
+/* ════ src/css/155_galaxy-ui-css.css ════ */
+/* V130：介面零件（老師 10/16 從試做頁選 ①④⑤）。零件改寫自 github.com/uiverse-io/galaxy（MIT 授權），配網站色。
+   只加不改：原 001 的 .mode-switch、080 的作業格、122 的同步狀態都沒動；動畫由 167_galaxy-ui-js.js 加 class 觸發。 */
+
+/* ① 高職／高中：金色圓塊滑動（改自 JaydipPrajapati1910 splendid-panda-57）。
+   setMode() 本來就會切 body.mode-senior，圓塊直接跟著它走。 */
+.mode-switch { position: relative; border-radius: 18px; padding: 2px; background: rgba(0,0,0,.25); }
+.mode-switch::before { content: ""; position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px);
+  border-radius: 16px; background: var(--gold); box-shadow: 0 1px 4px rgba(0,0,0,.45); transition: transform .3s ease; }
+body.mode-senior .mode-switch::before { transform: translateX(100%); }
+.mode-switch button { position: relative; z-index: 1; flex: 1 1 0; border-radius: 16px; padding: 5px 16px; transition: color .3s; }
+.mode-switch button.active { background: transparent; color: #1a1209; }
+
+/* ④ 作業完成格：方框 → 勾勾（改自 G4b413l smooth-duck-62）。
+   原本的 ✓／○ 字藏起來，改用框線畫；顏色沿用原本的完成色（綠＝完成、藍＝檢討）。只有剛點的那格（.v130-just）播動畫。 */
+#v84-hw button.v84-c .v84-mk { font-size: 0; height: 20px; display: flex; align-items: center; justify-content: center; }
+#v84-hw button.v84-c .v84-mk::before { content: ""; box-sizing: border-box; display: block;
+  width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 3px; }
+#v84-hw button.v84-c.done .v84-mk::before { width: 9px; height: 16px; border-width: 0 4px 4px 0; border-radius: 0;
+  transform: translateY(-2px) rotate(45deg); }
+#v84-hw button.v84-c.done.v130-just .v84-mk::before { animation: v130-check .38s ease; }
+#v84-hw button.v84-c.v130-just:not(.done) .v84-mk::before { animation: v130-uncheck .3s ease; }
+@keyframes v130-check {
+  0%   { width: 16px; height: 16px; border-width: 2px; border-radius: 3px; transform: rotate(0); }
+  100% { width: 9px; height: 16px; border-width: 0 4px 4px 0; border-radius: 0; transform: translateY(-2px) rotate(45deg); }
+}
+@keyframes v130-uncheck { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+
+/* ⑤ 同步中：墨點輪流暈開（改自 Diox221 silent-termite-64）。點點由 JS 插在「同步中…」字的旁邊。 */
+.v130-ink { display: inline-flex; align-items: center; gap: 3px; margin-left: 5px; vertical-align: middle; }
+.v130-ink i { display: block; width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1px currentColor;
+  animation: v130-ink 1.5s ease-in-out infinite; }
+.v130-ink i:nth-child(2) { animation-delay: -.4s; }
+.v130-ink i:nth-child(3) { animation-delay: -.8s; }
+.v130-ink i:nth-child(4) { animation-delay: -1.2s; }
+@keyframes v130-ink {
+  0%   { transform: scale(1); }
+  50%  { box-shadow: inset 0 0 0 1px currentColor, inset 0 0 0 4px currentColor; transform: scale(1.35); }
+  100% { box-shadow: inset 0 0 0 1px currentColor; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-switch::before { transition: none; }
+  #v84-hw button.v84-c .v84-mk::before, .v130-ink i { animation: none !important; }
+}
