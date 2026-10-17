@@ -60,7 +60,7 @@ body.dark-mode .tp-sumbox.tp-sumall > .tp-pk { background:#b0623a; }
 .gd-q[onclick]:not(.show)::after { content:"（點開）"; margin-left:.4em; font-size:.7em; color:var(--mk-ink-soft,#6b5a42); font-weight:400; }
 /* V136：〈火車線〉這類（主問題可點）提問引導，字級和課文一樣（一般 1.42、投影全螢幕 1.72、手機 1.15，同 .tp-text） */
 .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.42); }
-#wk-fullscreen .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.72); }
+#wk-fullscreen .gd:has(> .gd-q[onclick]) { font-size:var(--student-read-size) !important; }   /* 全螢幕課文實際用 023 的 --student-read-size */
 @media (max-width:700px) { .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.15); } }
 /* V136：〈火車線〉這類（主問題可點）追問標籤改成「那」（老師 10/18） */
 .gd:has(> .gd-q[onclick]) .gd-sq::before { content:"那"; }
