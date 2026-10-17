@@ -55,3 +55,10 @@ body.dark-mode .gd-et { color:#f6e3a6; }
 .tp-sumbox.tp-sumall > .tp-pk { background:#8a3a1c; }
 body.dark-mode .tp-sumbox.tp-sumall { border-color:#d98a5f; background:rgba(217,138,95,.08); }
 body.dark-mode .tp-sumbox.tp-sumall > .tp-pk { background:#b0623a; }
+/* V136：主問題可點（資料裡 .gd-q 有 onclick，如〈火車線〉）→ 一開始只顯示主問題，點了才出現第一個追問 */
+.gd-q[onclick] { cursor:pointer; }
+.gd-q[onclick]:not(.show)::after { content:"（點開）"; margin-left:.4em; font-size:.7em; color:var(--mk-ink-soft,#6b5a42); font-weight:400; }
+/* V136：〈火車線〉這類（主問題可點）提問引導，字級和課文一樣（一般 1.42、投影全螢幕 1.72、手機 1.15，同 .tp-text） */
+.gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.42); }
+#wk-fullscreen .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.72); }
+@media (max-width:700px) { .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.15); } }
