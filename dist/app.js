@@ -8396,9 +8396,16 @@ try {
   function soon() { clearTimeout(pend); pend = setTimeout(settle, 90); }
 
   /* 換頁後（等其他外掛跑完）再排；字級／視窗改變時重排 */
+  /* V136：換到別頁（上一頁／下一頁／跳頁）時，句意、修辭全部收起恢復原樣（老師 10/18）；同一頁重畫（字級、視窗）不收 */
+  var lastPage = null;
+  function resetOnPageChange() {
+    var cur = (typeof wkKey !== 'undefined' ? wkKey : '') + '|' + (typeof wkIdx !== 'undefined' ? wkIdx : '');
+    if (lastPage !== null && cur !== lastPage) Object.keys(OPEN).forEach(function (k) { delete OPEN[k]; });
+    lastPage = cur;
+  }
   if (typeof wkRenderCurrent === 'function') {
     var _r = wkRenderCurrent;
-    wkRenderCurrent = function () { var r = _r.apply(this, arguments); soon(); return r; };
+    wkRenderCurrent = function () { resetOnPageChange(); var r = _r.apply(this, arguments); soon(); return r; };
   }
   window.addEventListener('resize', soon);
   /* 保險：課文頁內任何點擊（開關注釋欄等）或版面動畫結束後再排一次（不只靠 ResizeObserver） */
