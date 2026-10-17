@@ -5961,6 +5961,12 @@ body.dark-mode .v90-fig img, body.dark-mode .v90-grow img { box-shadow: 0 2px 12
   align-items: center; justify-content: center; gap: 12px; cursor: zoom-out; }
 #v90-lb img { max-width: 94vw; max-height: 86vh; border-radius: 6px; box-shadow: 0 4px 30px rgba(0,0,0,.6); }
 #v90-lb div { color: #f3e9d8; font-size: 20px; letter-spacing: .1em; }
+/* V136（老師 10/18）：課文配圖一列放不下時換行、單張不超過版面寬，全螢幕與打開注釋欄時都不能左右拉動 */
+.v90-grow { flex-wrap: wrap; row-gap: 12px; }
+.v90-grow figure { min-width: 0; }   /* 一般模式仍是 max-width 250px */
+.v90-grow img { max-width: 100%; }
+.v90-natural .v90-grow img { object-fit: contain; }   /* 只有原比例模式；一般模式維持 cover 裁切 */
+.v90-natural .v90-grow figure { max-width: 100%; }
 /* ════ src/css/087_v91-rhet-css.css ════ */
 
 /* v91：修辭呈現改版（老師 9/30：學生不知道「抄在哪、抄什麼」）
