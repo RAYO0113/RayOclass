@@ -1844,7 +1844,9 @@ function wkRenderSlideHTML(slide) {
             '<div class="tp-asktin">' + L.askT + '</div></div>' : '') + '</div>' : '') + '</div></div></div>' : '';
 
       return '<div class="tp-line" data-li="' + li + '">' +
-        styleBefore + '<div class="tp-text">' + txt + nt + '</div>' + exAfter + '</div>';
+        styleBefore + '<div class="tp-text">' + txt + nt + '</div>' +
+        (L.tongT ? '<div class="tp-tongt"><span class="tp-tongk">統測</span>' + L.tongT + '</div>' : '') +   /* V136：句子下方的統測提醒（直接顯示） */
+        exAfter + '</div>';
     }).join('');
     const st0 = (P.noteStart || 1) - 1;
     const notes = (P.notes || []).map(function(n, i) {
