@@ -1845,7 +1845,8 @@ function wkRenderSlideHTML(slide) {
 
       return '<div class="tp-line" data-li="' + li + '">' +
         styleBefore + '<div class="tp-text">' + txt + nt + '</div>' +
-        (L.tongT ? '<div class="tp-tongt"><span class="tp-tongk">統測</span>' + L.tongT + '</div>' : '') +   /* V136：句子下方的統測提醒（直接顯示） */
+        (L.tongT ? '<div class="tp-tongw"><button type="button" class="tp-tongb" onclick="this.parentNode.classList.toggle(\'show\')">統</button>' +
+          '<div class="tp-tongt"><span class="tp-tongk">統測</span>' + L.tongT + '</div></div>' : '') +   /* V136：句子下方的統測提醒（老師：用「統」鈕收起來，點了才展開） */
         exAfter + '</div>';
     }).join('');
     const st0 = (P.noteStart || 1) - 1;
