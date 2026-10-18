@@ -1,0 +1,22 @@
+/* V137 投影畫筆改版（老師 10/18，程式見 170_v137-ink-js）：全螢幕時工具列一直在下方換頁列，預設觸控筆。
+   body.v137-fs＝全螢幕開著。工具列左組：觸控筆／撤銷／橡皮擦／清除；右組：紅藍綠紫＋螢光筆；中間留給 ← 頁碼 → ✕浮框。 */
+body.v137-fs #wk-ink-tab { display:none !important; }                       /* 右側「畫筆」邊籤不用了 */
+body.v137-fs #wk-ink-toggle { display:none !important; }                    /* 舊的開關鈕（開關會清除本頁）改由觸控筆取代 */
+body.v137-fs #wk-ink-layer #wk-ink-toolbar {
+  display:flex !important; position:absolute !important; left:0 !important; right:0 !important; bottom:0 !important; top:auto !important;
+  height:var(--v56-foot-h, 39px); max-width:none !important; overflow:visible !important;
+  align-items:center; justify-content:space-between; gap:8px; padding:0 12px; border:0; border-radius:0;
+  background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:none;
+}
+body.v137-fs #wk-ink-layer #wk-ink-toolbar > * { pointer-events:auto; }
+body.v137-fs #wk-ink-layer #wk-ink-extra, body.v137-fs #wk-ink-grp-l { display:flex !important; align-items:center; gap:6px; }
+body.v137-fs #wk-ink-toolbar .wk-ink-btn { min-height:0 !important; height:30px; padding:0 10px !important; font-size:13px !important; line-height:1; }
+body.v137-fs #wk-ink-toolbar .wk-ink-color { width:26px !important; height:26px !important; min-width:26px !important; }
+body.v137-fs #v137-touch.on { background:#efe6d2 !important; color:#14100a !important; border-color:#efe6d2 !important; }
+body.v137-fs #wk-ink-canvas { display:block !important; }                  /* 觸控筆模式也看得到筆跡（畫布不攔觸控） */
+body.v137-fs #wk-ink-layer:not(.active) #wk-ink-canvas { pointer-events:none !important; }
+body.v137-fs #wk-ink-layer:not(.active), body.v137-fs #wk-ink-layer:not(.active) * { -webkit-user-select:auto; user-select:auto; }
+@media (max-width:1000px){
+  body.v137-fs #wk-ink-toolbar .wk-ink-btn { padding:0 7px !important; font-size:12px !important; }
+  body.v137-fs #wk-ink-toolbar .wk-ink-color { width:22px !important; height:22px !important; min-width:22px !important; }
+}
