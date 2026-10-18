@@ -74,3 +74,6 @@ body.dark-mode .aq-float { background:var(--mk-paper,#1c1917); color:#9cc0f0; }
 .hg-m.show .hg-md { display:block; }
 body.dark-mode .hg-m.show, body.dark-mode .hg-m .hg-md, body.dark-mode .hg-m .hg-mk { color:#6FD3AE; border-color:#6FD3AE; }
 body.dark-mode .hg-m .hg-md { background:#2b241c; }
+/* 盍各言爾志原文框：補充頁不用綠底（老師 10/18）→ 用網站「補充」的紫色系：米白底＋紫色左線，不和綠色句意框撞色 */
+.sp-anc:has(.hg-m) { --sp-color:#7c4da0; --sp-bg:#faf7f0; background:#faf7f0 !important; }
+body.dark-mode .sp-anc:has(.hg-m) { background:color-mix(in srgb, #7c4da0 10%, var(--mk-paper,#1c1917)) !important; }
