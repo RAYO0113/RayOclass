@@ -7118,7 +7118,7 @@ body.dark-mode .rd-fsbtn { background:transparent; color:#9cc0f0; border-color:#
   font-family:"Noto Sans TC",sans-serif; font-size:calc(var(--base-size)*0.95); cursor:pointer; }
 #rd-fs .rd-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:28px 3vw 60px; }   /* V136 二改：滿版 */
 #rd-fs .rd-txt { max-width:none; margin:0; font-family:"RayGenRyuRead","Noto Serif TC",serif;   /* 源流明體（老師：宋體比較好看） */
-  font-size:calc(var(--student-read-size, calc(var(--base-size)*2)) * var(--rd-scale, 1)); line-height:2.6; letter-spacing:.08em; }
+  font-size:calc(var(--student-read-size, calc(var(--base-size)*2)) * var(--rd-scale, 1)); line-height:2.6; letter-spacing:.08em; font-weight:700; }   /* 老師：粗體比較好看 */
 #rd-fs .rd-txt img { max-width:100%; height:auto; }
 #rd-fs .rd-txt .rd-fsbtn, #rd-fs .rd-txt .aq-psgh { display:none !important; }
 body.dark-mode #rd-fs { background:#16130f; color:#eadfcb; }
