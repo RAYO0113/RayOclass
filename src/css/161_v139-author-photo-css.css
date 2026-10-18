@@ -8,13 +8,8 @@
 .au-pop img{ position:absolute; left:50%; bottom:0; transform:translateX(-50%);
   height:7.2em; max-width:7.4em; object-fit:contain; object-position:bottom center;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); pointer-events:none; }
-/* 沒照片：同色框，放姓氏 */
-.au-pop.au-none{ height:5em; }
-.au-pop.au-none .au-frame{ display:flex; align-items:center; justify-content:center;
-  font-size:1.8em; height:2.8em; color:#4f7d40; font-weight:700; opacity:.8; }
 /* 全螢幕表格字級約 56px，照片縮小免得一列太高 */
 #wk-fullscreen .au-pop{ font-size:.55em; }
 /* 深色模式 */
 body.dark-mode .au-pop .au-frame{
   background:linear-gradient(160deg, #3d5a36 0%, #2c4427 100%); border-color:#6f9a60; }
-body.dark-mode .au-pop.au-none .au-frame{ color:#cfe6c4; }
