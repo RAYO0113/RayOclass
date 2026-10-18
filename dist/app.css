@@ -7169,6 +7169,19 @@ body.dark-mode .aq-float { background:var(--mk-paper,#1c1917); color:#9cc0f0; }
 .hg-o { font-family:"Noto Serif TC",serif; font-weight:700; font-size:1.08em; margin-bottom:4px; }
 .hg-line .tp-abox { margin:4px 0; }
 .hg-sum { margin-top:10px; }
+/* 〈論語選〉盍各言爾志：綠色句意框（仿課文頁 textmark 句意：淡綠括號＋〔句意〕標籤，點開文字變綠加粗、說明出現在下方） */
+.hg-m { cursor:pointer; }
+.hg-m .hg-p { color:#8CCBB3; font-weight:400; }
+.hg-m .hg-mk { display:inline-block; margin-left:.25em; padding:.15em .35em; line-height:1; vertical-align:.15em;
+  border:.12em solid #0F6E56; border-radius:.3em; color:#0F6E56; font-size:.55em; font-family:"Noto Sans TC",sans-serif; font-weight:700; }
+.hg-m .hg-md { display:none; margin:.35em 0 .2em; padding:.5em .8em; border:1.5px solid #8CCBB3; border-radius:6px; background:var(--mk-paper,#fffdf8);
+  color:#0F6E56; font-size:.8em; line-height:1.8; font-weight:500; font-family:"Noto Sans TC",sans-serif; }
+.hg-m.show { color:#0F6E56; font-weight:700; }
+.hg-m.show .hg-p { color:#0F6E56; }
+.hg-m.show .hg-mk { background:#0F6E56; color:#fff; }
+.hg-m.show .hg-md { display:block; }
+body.dark-mode .hg-m.show, body.dark-mode .hg-m .hg-md, body.dark-mode .hg-m .hg-mk { color:#6FD3AE; border-color:#6FD3AE; }
+body.dark-mode .hg-m .hg-md { background:#2b241c; }
 /* ════ src/css/158_v136-noscroll-css.css ════ */
 /* V136 全螢幕不左右拉動（老師 10/18：「全螢幕課文不要能左右拉動，點開注釋也一樣；檢查其他課」）。
    全 29 課投影全螢幕逐頁掃（注釋開關各一次，1157 頁）找到的另外兩處：
