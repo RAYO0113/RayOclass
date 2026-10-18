@@ -7,7 +7,7 @@
   box-shadow:0 2px 6px rgba(60,90,50,.18); }
 .au-pop img{ position:absolute; left:50%; bottom:0; transform:translateX(-50%);
   height:7.2em; max-width:7.4em; object-fit:contain; object-position:bottom center;
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); pointer-events:none; }
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); }
 /* 全螢幕表格字級約 56px，照片縮小免得一列太高 */
 #wk-fullscreen .au-pop{ font-size:.55em; }
 /* 深色模式 */
