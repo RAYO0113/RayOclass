@@ -18,10 +18,14 @@ body.dark-mode .rd-fsbtn { background:transparent; color:#9cc0f0; border-color:#
 #rd-fs .rd-sp { flex:1; }
 #rd-fs .rd-bar button { padding:4px 14px; border-radius:16px; border:1.5px solid #1e4d8c; background:#fff; color:#1e4d8c;
   font-family:"Noto Sans TC",sans-serif; font-size:calc(var(--base-size)*0.95); cursor:pointer; }
-#rd-fs .rd-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:28px 7vw 60px; }
-#rd-fs .rd-txt { max-width:1100px; margin:0 auto; font-family:"Noto Serif TC","Zen Old Mincho",serif;
-  font-size:calc(var(--student-read-size, calc(var(--base-size)*2)) * var(--rd-scale, 1)); line-height:2.05; letter-spacing:.06em; }
+#rd-fs .rd-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:28px 3vw 60px; }   /* V136 二改：滿版 */
+#rd-fs .rd-txt { max-width:none; margin:0; font-family:"RayGenRyuRead","Noto Serif TC",serif;   /* 源流明體（老師：宋體比較好看） */
+  font-size:calc(var(--student-read-size, calc(var(--base-size)*2)) * var(--rd-scale, 1)); line-height:2.6; letter-spacing:.08em; }
 #rd-fs .rd-txt img { max-width:100%; height:auto; }
 #rd-fs .rd-txt .rd-fsbtn, #rd-fs .rd-txt .aq-psgh { display:none !important; }
 body.dark-mode #rd-fs { background:#16130f; color:#eadfcb; }
 body.dark-mode #rd-fs .rd-bar button { background:transparent; color:#9cc0f0; border-color:#9cc0f0; }
+#rd-fs .rd-txt * { font-family:inherit; }   /* 注釋、出處也用同一字型 */
+/* 原文頁字型：源流明體 GenRyuMin2 TW（SIL OFL 1.1），字集＝全部課文資料用到的字（tools/make_font_subset_read.py）；只有原文頁用到，打開時才下載 */
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-r.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-b.woff2") format("woff2"); font-weight:700; font-display:swap; }
