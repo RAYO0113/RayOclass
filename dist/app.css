@@ -7264,3 +7264,24 @@ body.v137-fs #wk-ink-layer:not(.active), body.v137-fs #wk-ink-layer:not(.active)
   body.v137-fs #wk-ink-toolbar .wk-ink-btn { padding:0 7px !important; font-size:12px !important; }
   body.v137-fs #wk-ink-toolbar .wk-ink-color { width:22px !important; height:22px !important; min-width:22px !important; }
 }
+/* ════ src/css/161_v139-author-photo-css.css ════ */
+/* V139 作家去背破框照片（〈火車線〉作者·課本「自然寫作作家比較」表名欄）
+   人像底部貼齊色框底、頭部超出色框上緣（破框）；尺寸用 em，跟著表格字級（一般／全螢幕）一起縮放。 */
+.ly-table td.au-td{ padding-top:10px; vertical-align:middle; }
+.au-pop{ position:relative; display:block; width:6.4em; height:7.2em; margin:0 auto 4px; }
+.au-pop .au-frame{ position:absolute; left:0; right:0; bottom:0; height:5em; border-radius:.8em;
+  background:linear-gradient(160deg, #d8ecd0 0%, #a9cf9c 100%); border:2px solid #7aa86a;
+  box-shadow:0 2px 6px rgba(60,90,50,.18); }
+.au-pop img{ position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+  height:7.2em; max-width:7.4em; object-fit:contain; object-position:bottom center;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); pointer-events:none; }
+/* 沒照片：同色框，放姓氏 */
+.au-pop.au-none{ height:5em; }
+.au-pop.au-none .au-frame{ display:flex; align-items:center; justify-content:center;
+  font-size:1.8em; height:2.8em; color:#4f7d40; font-weight:700; opacity:.8; }
+/* 全螢幕表格字級約 56px，照片縮小免得一列太高 */
+#wk-fullscreen .au-pop{ font-size:.55em; }
+/* 深色模式 */
+body.dark-mode .au-pop .au-frame{
+  background:linear-gradient(160deg, #3d5a36 0%, #2c4427 100%); border-color:#6f9a60; }
+body.dark-mode .au-pop.au-none .au-frame{ color:#cfe6c4; }
