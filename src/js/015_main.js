@@ -285,6 +285,8 @@ function spFormatBody(html){
     if (part.indexOf('class="sp-anc"') >= 0 || part.indexOf("class='sp-anc'") >= 0) {
       out.push(part); return;
     }
+    /* V136：點開才顯示的框（參考答案、語譯 .tp-abox）裡的引文不自動框成古文（老師 10/18：語譯裡怎麼還有個框） */
+    if (part.indexOf('tp-abox') >= 0) { out.push(part); return; }
     const m = part.match(/「([^」]{18,})」/);
     if (m) {
       const quote = m[1];
