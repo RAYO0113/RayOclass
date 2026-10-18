@@ -77,3 +77,12 @@ body.dark-mode .hg-m .hg-md { background:#2b241c; }
 /* 盍各言爾志原文框：補充頁不用綠底（老師 10/18）→ 用網站「補充」的紫色系：米白底＋紫色左線，不和綠色句意框撞色 */
 .sp-anc:has(.hg-m) { --sp-color:#7c4da0; --sp-bg:#faf7f0; background:#faf7f0 !important; }
 body.dark-mode .sp-anc:has(.hg-m) { background:color-mix(in srgb, #7c4da0 10%, var(--mk-paper,#1c1917)) !important; }
+/* 盍各言爾志：出處放進原文框、靠右 */
+.sp-anc .hg-src { text-align:right; font-size:.68em; font-weight:400; opacity:.75; margin-top:.2em; }
+/* 全螢幕字級統一（老師 10/18：「全螢幕字體大小不一樣」）：原文、語譯、參考答案、句意說明都用投影閱讀字級；「點此顯示…」提示、句意標籤、出處較小 */
+#wk-fullscreen .wks-info-body:has(.hg-m) .sp-anc { font-size:var(--student-read-size) !important; line-height:2.05 !important; }
+#wk-fullscreen .wks-info-body:has(.hg-m) .tp-atext,
+#wk-fullscreen .wks-info-body:has(.hg-m) .hg-m .hg-md { font-size:var(--student-read-size) !important; line-height:1.8 !important; }
+#wk-fullscreen .wks-info-body:has(.hg-m) .hg-m .hg-md { font-size:calc(var(--student-read-size) * .85) !important; }
+#wk-fullscreen .wks-info-body:has(.hg-m) .tp-acov { font-size:calc(var(--student-read-size) * .6) !important; }
+#wk-fullscreen .wks-info-body:has(.hg-m) .sp-anc .tp-gd { font-size:calc(var(--student-read-size) * .7) !important; }
