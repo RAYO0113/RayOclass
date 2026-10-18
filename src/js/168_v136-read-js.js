@@ -168,8 +168,37 @@
       var f = document.createElement('div'); f.className = 'aq-float';
       f.textContent = 'A卷　' + no.textContent.replace(/\s*\/.*$/, '').trim();
       sl.insertBefore(f, sl.firstChild);
+      dragable(f);
     });
     placeFloat(); updFloat();
+  }
+  /* 老師 10/18：題號浮框可以拖到任何位置；一般畫面、全螢幕各記一個位置（只存在這台瀏覽器，鍵名 v136_aqf_pos） */
+  function posKey(f) { return f.closest('#wkfs-body') ? 'fs' : 'n'; }
+  function loadPos() { try { return JSON.parse(localStorage.getItem('v136_aqf_pos') || '{}') || {}; } catch (e) { return {}; } }
+  function savePos(o) { try { localStorage.setItem('v136_aqf_pos', JSON.stringify(o)); } catch (e) {} }
+  function applyPos(f) {
+    var p = loadPos()[posKey(f)]; if (!p) return;
+    f.style.left = Math.max(0, Math.min(innerWidth - 60, p.x)) + 'px'; f.style.top = Math.max(0, Math.min(innerHeight - 30, p.y)) + 'px';
+  }
+  function dragable(f) {
+    applyPos(f);
+    var sx, sy, ox, oy, on = false;
+    f.addEventListener('pointerdown', function (e) {
+      on = true; f.classList.add('drag'); f.setPointerCapture(e.pointerId);
+      var r = f.getBoundingClientRect(); sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top; e.preventDefault(); e.stopPropagation();
+    });
+    f.addEventListener('pointermove', function (e) {
+      if (!on) return;
+      f.style.left = Math.max(0, Math.min(innerWidth - f.offsetWidth, ox + e.clientX - sx)) + 'px';
+      f.style.top = Math.max(0, Math.min(innerHeight - f.offsetHeight, oy + e.clientY - sy)) + 'px';
+    });
+    function end(e) {
+      if (!on) return; on = false; f.classList.remove('drag');
+      var o = loadPos(); o[posKey(f)] = { x: parseFloat(f.style.left) || 0, y: parseFloat(f.style.top) || 0 }; savePos(o);
+      document.querySelectorAll('.aq-float').forEach(function (g) { if (g !== f) applyPos(g); });
+    }
+    f.addEventListener('pointerup', end); f.addEventListener('pointercancel', end);
+    f.addEventListener('click', function (e) { e.stopPropagation(); });
   }
   /* 一般畫面：浮框對齊投影框左緣（側欄寬度會變）；全螢幕固定左上 */
   function placeFloat() {

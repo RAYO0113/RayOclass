@@ -55,3 +55,9 @@ body.dark-mode .aq-float { background:var(--mk-paper,#1c1917); color:#9cc0f0; }
 .aq-float { display:none; font-size:calc(var(--slider-base-size, 15px) * 0.95) !important; }
 .aq-float.on { display:block; }
 #wk-fullscreen .aq-float { font-size:calc(var(--slider-base-size, 15px) * 1.1) !important; }
+/* 〈論語選〉盍各言爾志：逐句字義、句意 */
+.hg-lines { margin:6px 0 4px; }
+.hg-line { margin:10px 0; padding:8px 12px; border-left:4px solid var(--L-supp,#7c4da0); background:rgba(124,77,160,.05); border-radius:0 6px 6px 0; }
+.hg-o { font-family:"Noto Serif TC",serif; font-weight:700; font-size:1.08em; margin-bottom:4px; }
+.hg-line .tp-abox { margin:4px 0; }
+.hg-sum { margin-top:10px; }

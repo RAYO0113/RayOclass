@@ -7163,6 +7163,12 @@ body.dark-mode .aq-float { background:var(--mk-paper,#1c1917); color:#9cc0f0; }
 .aq-float { display:none; font-size:calc(var(--slider-base-size, 15px) * 0.95) !important; }
 .aq-float.on { display:block; }
 #wk-fullscreen .aq-float { font-size:calc(var(--slider-base-size, 15px) * 1.1) !important; }
+/* 〈論語選〉盍各言爾志：逐句字義、句意 */
+.hg-lines { margin:6px 0 4px; }
+.hg-line { margin:10px 0; padding:8px 12px; border-left:4px solid var(--L-supp,#7c4da0); background:rgba(124,77,160,.05); border-radius:0 6px 6px 0; }
+.hg-o { font-family:"Noto Serif TC",serif; font-weight:700; font-size:1.08em; margin-bottom:4px; }
+.hg-line .tp-abox { margin:4px 0; }
+.hg-sum { margin-top:10px; }
 /* ════ src/css/158_v136-noscroll-css.css ════ */
 /* V136 全螢幕不左右拉動（老師 10/18：「全螢幕課文不要能左右拉動，點開注釋也一樣；檢查其他課」）。
    全 29 課投影全螢幕逐頁掃（注釋開關各一次，1157 頁）找到的另外兩處：
@@ -7173,3 +7179,23 @@ body.dark-mode .aq-float { background:var(--mk-paper,#1c1917); color:#9cc0f0; }
 #wk-fullscreen .ft-lv { max-width: 100%; }
 #wk-fullscreen .ft-lv > .ft-col { min-width: 0; flex: 0 1 auto; }
 #wk-fullscreen .ft-node { min-width: 0; max-width: 100%; box-sizing: border-box; }
+/* ════ src/css/159_v136-ui-css.css ════ */
+/* V136 介面調整（老師 10/18，程式見 169_v136-ui-js）
+   ② 右側「註釋小考」邊籤收進「班級進度」面板 → 邊籤隱藏，面板標題列多一顆鈕。
+   ③ 全螢幕「關閉浮框」移到下方換頁列；換頁列變矮，多留空間給課文。 */
+#note-quiz-tab { display:none !important; }
+#cls-panel .cls-head .v136-nq { margin-left:auto; margin-right:8px; padding:3px 12px; border-radius:14px; cursor:pointer;
+  border:1.5px solid var(--L-supp,#7c4da0); background:transparent; color:var(--L-supp,#7c4da0);
+  font-family:"Noto Sans TC",sans-serif; font-size:13px; font-weight:700; }
+#cls-panel .cls-head .v136-nq:hover { background:var(--L-supp,#7c4da0); color:#fff; }
+
+#wk-fullscreen .wkfs-footer { padding:3px 16px !important; gap:18px !important; min-height:0 !important; }
+#wk-fullscreen .wkfs-footer .wkfs-nav { min-width:52px !important; min-height:32px !important; height:32px !important; font-size:20px !important; padding:0 10px !important; line-height:1 !important; }
+#wk-fullscreen .wkfs-footer #tp-close-blue-tab { position:static !important; transform:none !important; writing-mode:horizontal-tb !important;
+  top:auto !important; right:auto !important; left:auto !important; width:auto !important; height:32px !important; min-height:0 !important;
+  margin:0 0 0 8px !important; padding:0 12px !important; border-radius:6px !important; font-size:14px !important; line-height:1 !important;
+  display:inline-flex !important; align-items:center !important; letter-spacing:.05em !important; }
+
+/* A卷題號浮框：可以拖曳（168 處理），游標提示 */
+.aq-float { pointer-events:auto !important; cursor:grab; touch-action:none; user-select:none; }
+.aq-float.drag { cursor:grabbing; opacity:.9; }

@@ -1000,7 +1000,7 @@ function wkBuildSections(slides) {
       const isGd = (s.label||'').indexOf('教學引導') >= 0;
       /* V126：「統整·…」「課後引導·…」「課後統整」（世說）頁獨立成「統整」頁籤（老師要求，不和補充混在一起） */
       const isSum = /^(統整|課後引導|課後統整)/.test(s.label || '');
-      const lb = isGd ? '✦教學引導' : isSum ? '統整' : '補充';
+      const lb = isGd ? '✦教學引導' : isSum ? '統整' : /盍各言爾志/.test(s.label || '') ? '盍各言爾志' : '補充';   /* V136：〈論語選〉盍各言爾志另成小籤頁（老師 10/18） */
       if (map.length===0 || map[map.length-1].label!==lb) map.push({ label:lb, idx:i });
     }
     else if (s.type === 'charbian' && s.first) map.push({ label:'字·'+s.name, idx:i });
