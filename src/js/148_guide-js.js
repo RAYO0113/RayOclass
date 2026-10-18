@@ -16,8 +16,10 @@
     var box = btn.closest('.gd'); if (!box) return;
     var open = !box.classList.contains('gd-open');
     box.classList.toggle('gd-open', open);
+    var q = box.querySelector('.gd-q'), qTap = q && q.hasAttribute('onclick');   /* V136：主問題可點的（〈火車線〉），收起時連第一問也收 */
+    if (qTap) q.classList.toggle('show', open);
     box.querySelectorAll('.gd-s, .gd-end, .gd-board').forEach(function (x, i) {
-      x.classList.toggle('vis', open || i === 0);
+      x.classList.toggle('vis', open || (i === 0 && !qTap));
       x.classList.toggle('show', open);
     });
     btn.textContent = open ? '收起' : '全部展開';

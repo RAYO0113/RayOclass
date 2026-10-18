@@ -4152,3 +4152,20 @@ body.dark-mode .hd-table td[rowspan], body.dark-mode .jy-table td[rowspan] { bac
   .wk-ink-btn, .wk-ink-size { min-height:42px; }
 }
 
+/* V136：句子下方的統測提醒（行欄位 tongT，015_main） */
+.tp-tongt { margin:2px 0 8px; padding:4px 10px; border-left:4px solid var(--red,#c0392b); background:rgba(192,57,43,.07);
+  font-family:"Noto Sans TC",sans-serif; font-size:calc(var(--base-size)*0.98); line-height:1.75; color:var(--mk-ink,#33271a); }
+.tp-tongk { display:inline-block; margin-right:.5em; padding:0 .45em; border-radius:3px; background:var(--red,#c0392b); color:#fff;
+  font-size:.8em; font-weight:700; vertical-align:.08em; }
+#wk-fullscreen .tp-tongt { font-size:calc(var(--base-size)*1.15); }
+body.dark-mode .tp-tongt { background:rgba(240,120,100,.10); color:#eadfcb; }
+/* V136 二改：統測提醒收在「統」鈕裡（老師 10/18），點了才展開 */
+.tp-tongw { margin:2px 0 8px; }
+.tp-tongb { width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid var(--red,#c0392b); background:transparent;
+  color:var(--red,#c0392b); font-family:"Noto Serif TC",serif; font-weight:700; font-size:calc(var(--base-size)*0.95); }
+.tp-tongw.show .tp-tongb { background:var(--red,#c0392b); color:#fff; }
+.tp-tongw .tp-tongt { display:none; margin-top:6px; }
+.tp-tongw.show .tp-tongt { display:block; }
+#wk-fullscreen .tp-tongb { width:44px; height:44px; font-size:calc(var(--base-size)*1.2); }
+.tp-tongb { width:1.8em; height:1.8em; padding:0; line-height:1; font-size:calc(var(--base-size)*0.62); }   /* 圓圈跟著字級，字不擠 */
+#wk-fullscreen .tp-tongb { width:1.8em; height:1.8em; font-size:calc(var(--base-size)*0.8); }

@@ -285,6 +285,8 @@ function spFormatBody(html){
     if (part.indexOf('class="sp-anc"') >= 0 || part.indexOf("class='sp-anc'") >= 0) {
       out.push(part); return;
     }
+    /* V136：點開才顯示的框（參考答案、語譯 .tp-abox）裡的引文不自動框成古文（老師 10/18：語譯裡怎麼還有個框） */
+    if (part.indexOf('tp-abox') >= 0) { out.push(part); return; }
     const m = part.match(/「([^」]{18,})」/);
     if (m) {
       const quote = m[1];
@@ -1000,7 +1002,7 @@ function wkBuildSections(slides) {
       const isGd = (s.label||'').indexOf('教學引導') >= 0;
       /* V126：「統整·…」「課後引導·…」「課後統整」（世說）頁獨立成「統整」頁籤（老師要求，不和補充混在一起） */
       const isSum = /^(統整|課後引導|課後統整)/.test(s.label || '');
-      const lb = isGd ? '✦教學引導' : isSum ? '統整' : '補充';
+      const lb = isGd ? '✦教學引導' : isSum ? '統整' : /盍各言爾志/.test(s.label || '') ? '盍各言爾志' : '補充';   /* V136：〈論語選〉盍各言爾志另成小籤頁（老師 10/18） */
       if (map.length===0 || map[map.length-1].label!==lb) map.push({ label:lb, idx:i });
     }
     else if (s.type === 'charbian' && s.first) map.push({ label:'字·'+s.name, idx:i });
@@ -1844,7 +1846,10 @@ function wkRenderSlideHTML(slide) {
             '<div class="tp-asktin">' + L.askT + '</div></div>' : '') + '</div>' : '') + '</div></div></div>' : '';
 
       return '<div class="tp-line" data-li="' + li + '">' +
-        styleBefore + '<div class="tp-text">' + txt + nt + '</div>' + exAfter + '</div>';
+        styleBefore + '<div class="tp-text">' + txt + nt + '</div>' +
+        (L.tongT ? '<div class="tp-tongw"><button type="button" class="tp-tongb" onclick="this.parentNode.classList.toggle(\'show\')">統</button>' +
+          '<div class="tp-tongt"><span class="tp-tongk">統測</span>' + L.tongT + '</div></div>' : '') +   /* V136：句子下方的統測提醒（老師：用「統」鈕收起來，點了才展開） */
+        exAfter + '</div>';
     }).join('');
     const st0 = (P.noteStart || 1) - 1;
     const notes = (P.notes || []).map(function(n, i) {
@@ -1875,7 +1880,7 @@ function wkRenderSlideHTML(slide) {
           '<button class="tp-b tp-b-xi" onclick="tpPanel(this,\'xi\')">段析</button>' +
           '<button class="tp-b tp-b-fan" onclick="tpPanel(this,\'fan\')">翻譯</button>' +
           (P.ask && !P.askLabel ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
-          ((P.qa || []).length ? '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' : '') +   /* V126：沒有題目就不放按鈕 */
+          ((P.qa || []).length && !P.qaHide ? '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' : '') +   /* V126：沒有題目就不放按鈕；V136：qaHide＝題目已併入提問引導的「師」，資料保留、不顯示 */
         '</div><div class="tp-page">' + P.book + '</div></div>' +
       '<div class="tp-wrap">' +
         '<div class="tp-main">' +
@@ -1883,7 +1888,7 @@ function wkRenderSlideHTML(slide) {
           '<div class="tp-panel" data-k="xi"><span class="tp-pk">段析</span>' + (P.xi||'') + '</div>' +
           '<div class="tp-panel" data-k="fan"><span class="tp-pk">翻譯</span>' + (P.fan||'') + '</div>' +
           (P.ask && !P.askLabel ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' + askIn + '</div>' : '') +
-          '<div class="tp-panel tp-qapanel" data-k="qa"><span class="tp-pk">課堂提問</span>' + qa + '</div>' +
+          (P.qaHide ? '' : '<div class="tp-panel tp-qapanel" data-k="qa"><span class="tp-pk">課堂提問</span>' + qa + '</div>') +
           '<div class="tp-body">' + lines + yun +
             /* V126：有 askLabel（如「本段統整」）時放在該段課文最下面、直接顯示，不放上方按鈕 */
             (P.ask && P.askLabel ? '<div class="tp-sumbox"><span class="tp-pk">' + P.askLabel + '</span>' + askIn + '</div>' : '') + boxes + '</div>' +

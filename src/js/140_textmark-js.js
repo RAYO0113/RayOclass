@@ -9,7 +9,7 @@
    - 一般畫面（#wk-slide-area）與全螢幕（#wkfs-body）各自處理；字級／視窗改變時重新排版。 */
 (function () {
   'use strict';
-  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐', '珍珠奶茶'];  /* V128 加〈珍珠奶茶〉 */
+  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐', '珍珠奶茶', '臺灣最美麗的火車線'];  /* V128 加〈珍珠奶茶〉；V136 加〈火車線〉 */
   var B_TYPES = ['頂真', '映襯'];                 /* 跨句單詞型 */
   var C_TYPES = ['轉品', '借代'];                 /* 單字單詞型 */
   var GENERIC = ['回文', '頂真'];                 /* 說明只是基本概念 → 只顯示名稱 */
@@ -306,9 +306,16 @@
   function soon() { clearTimeout(pend); pend = setTimeout(settle, 90); }
 
   /* 換頁後（等其他外掛跑完）再排；字級／視窗改變時重排 */
+  /* V136：換到別頁（上一頁／下一頁／跳頁）時，句意、修辭全部收起恢復原樣（老師 10/18）；同一頁重畫（字級、視窗）不收 */
+  var lastPage = null;
+  function resetOnPageChange() {
+    var cur = (typeof wkKey !== 'undefined' ? wkKey : '') + '|' + (typeof wkIdx !== 'undefined' ? wkIdx : '');
+    if (lastPage !== null && cur !== lastPage) Object.keys(OPEN).forEach(function (k) { delete OPEN[k]; });
+    lastPage = cur;
+  }
   if (typeof wkRenderCurrent === 'function') {
     var _r = wkRenderCurrent;
-    wkRenderCurrent = function () { var r = _r.apply(this, arguments); soon(); return r; };
+    wkRenderCurrent = function () { resetOnPageChange(); var r = _r.apply(this, arguments); soon(); return r; };
   }
   window.addEventListener('resize', soon);
   /* 保險：課文頁內任何點擊（開關注釋欄等）或版面動畫結束後再排一次（不只靠 ResizeObserver） */
