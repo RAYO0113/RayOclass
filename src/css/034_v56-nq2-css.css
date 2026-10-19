@@ -90,3 +90,32 @@ body.dark-mode #nq2 .qhead button{border-color:rgba(0,0,0,.3)}
 #nq2 .qc.open .qa-body{display:block}
 #nq2 .qc .src{font-size:calc(16px*var(--q-fs));color:var(--q-muted);margin-left:.6em;font-weight:400}
 #nq2 .qend{padding:26px;text-align:center;color:var(--q-muted);font-size:18px}
+
+/* V142：指定小字詞（必考／不考） */
+#nq2 .seg button.on.vr{background:var(--q-gold);color:#fff}
+#nq2 .grid.vr-mode .chip:not(:has(.vc)){opacity:.45}
+#nq2 .chip .vc.vmu{background:var(--q-must)}
+#nq2 .chip .vc.vex{background:var(--q-ex)}
+#nq2-vp{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px}
+#nq2-vp.show{display:flex}
+#nq2-vp .vp-bx{width:min(96vw,760px);max-height:100%;overflow-y:auto;background:var(--q-surface);border-radius:16px;padding:18px 20px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#nq2-vp .vp-top{display:flex;align-items:center;gap:10px}
+#nq2-vp .vp-h{flex:1;margin:0;font-size:24px}
+#nq2-vp .vp-tag{font-size:14px;margin-left:10px;padding:2px 8px;border-radius:6px;color:#fff;vertical-align:middle}
+#nq2-vp .vp-tag.mu{background:var(--q-must)}
+#nq2-vp .vp-tag.ex{background:var(--q-ex)}
+#nq2-vp .vp-x{font-size:18px;padding:8px 18px;border-radius:10px;border:0;background:var(--q-ink);color:var(--q-paper);cursor:pointer;font-weight:700}
+#nq2-vp .vp-note{color:var(--q-muted);font-size:15px;margin:8px 0 12px}
+#nq2-vp .vp-row{border:2px solid var(--q-line);border-radius:12px;padding:8px 12px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:2px 14px;align-items:center}
+#nq2-vp .vp-row .vp-seg{grid-column:2;grid-row:1 / span 2}
+#nq2-vp .vp-row.must{border-color:var(--q-must);border-width:3px}
+#nq2-vp .vp-row.ex{background:var(--q-ex-bg);border-style:dashed}
+#nq2-vp .vp-row.ex .vp-q,#nq2-vp .vp-row.ex .vp-a{opacity:.55}
+#nq2-vp .vp-q{font-size:22px;line-height:1.45}
+#nq2-vp .vp-q mark{background:var(--q-hl-bg);color:var(--q-hl);font-weight:700;padding:0 2px;border-radius:4px}
+#nq2-vp .vp-a{font-size:16px;color:var(--q-muted)}
+#nq2-vp .vp-seg{display:inline-flex;border:2px solid var(--q-ink);border-radius:10px;overflow:hidden}
+#nq2-vp .vp-seg button{font-size:17px;padding:7px 16px;border:0;background:transparent;cursor:pointer;font-weight:700;min-height:40px}
+#nq2-vp .vp-seg button.on.rnd{background:var(--q-ink);color:var(--q-paper)}
+#nq2-vp .vp-seg button.on.must{background:var(--q-must);color:#fff}
+#nq2-vp .vp-seg button.on.ex{background:var(--q-ex);color:#fff}

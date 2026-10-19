@@ -714,12 +714,24 @@ try {
 
   var LESSONS = [], D = null;   // D = 目前課次 buildLesson() 結果
   var sel = [], excl = new Set(), must = new Set(), mode = 'pick';
+  // V142：拆題註釋的小字詞標記 vmark[i] = { 選項字詞: 'must'|'ex' }（一條註釋最多一個必考小字詞；至少留一個可考）
+  var vmark = {};
   function items(){ return D ? D.items : []; }
   function itemKey(it){ return it[0] + '|' + it[1]; }
   function exKey(){ return 'nq-excl:' + D.lesson; }
   function muKey(){ return 'nq-must:' + D.lesson; }
+  function vmKey(){ return 'nq-vmark:' + D.lesson; }
   function varCount(i){ return (D.vars[i] || []).length; }
   function chipLabel(i){ return varCount(i) ? D.vars[i][0][0] : items()[i][1]; }
+  function vName(v){ return v[4] === 'whole' ? '整句' : v[0]; }
+  function vMust(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] === 'must'; })[0] || null; }
+  function vOk(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] !== 'ex'; }); }
+  function vBadge(i){
+    var n = varCount(i); if (!n) return '';
+    var mu = vMust(i); if (mu) return '<span class="vc vmu">考「' + esc(vName(mu)) + '」</span>';
+    var ok = vOk(i).length;
+    return '<span class="vc' + (ok < n ? ' vex' : '') + '">' + ok + '選1' + (ok < n ? '・' + (n - ok) + '不考' : '') + '</span>';
+  }
 
   function loadMarks(){
     var ex = new Set(LS.get(exKey(), [])), mu = new Set(LS.get(muKey(), []));
@@ -728,10 +740,20 @@ try {
       if (ex.has(itemKey(it))) excl.add(i);
       else if (mu.has(itemKey(it))) must.add(i);
     });
+    var vm = LS.get(vmKey(), {}); vmark = {};
+    items().forEach(function(it, i){
+      var m = vm[itemKey(it)]; if (!m || !D.vars[i]) return;
+      var o = {}, n = 0;
+      D.vars[i].forEach(function(v){ if (m[v[0]] === 'must' || m[v[0]] === 'ex'){ o[v[0]] = m[v[0]]; n++; } });
+      if (n) vmark[i] = o;
+    });
   }
   function saveMarks(){
     LS.set(exKey(), Array.from(excl).map(function(i){ return itemKey(items()[i]); }));
     LS.set(muKey(), Array.from(must).map(function(i){ return itemKey(items()[i]); }));
+    var vm = {};
+    Object.keys(vmark).forEach(function(i){ if (Object.keys(vmark[i]).length) vm[itemKey(items()[i])] = vmark[i]; });
+    LS.set(vmKey(), vm);
   }
   function withMust(arr){ return Array.from(new Set(Array.from(must).concat(arr))).sort(byIdx); }
 
@@ -749,7 +771,8 @@ try {
   var HINTS = {
     pick: '點題目＝選入／取消；也可以用上方「範圍全選」或「隨機抽」。必考題一定會在裡面，排除題一定不會被抽到。',
     must: '必考模式：點題目＝設為必考／取消。隨機抽題時必考題一定抽到，剩下的名額才隨機補。標記會自動記住。',
-    ex:   '排除模式：點題目＝排除／恢復（例如已經考過的）。排除紀錄會自動記住，下次打開還在。'
+    ex:   '排除模式：點題目＝排除／恢復（例如已經考過的）。排除紀錄會自動記住，下次打開還在。',
+    vr:   '指定小字詞：點有「N選1」的題目，可以把其中一個小字詞（或整句）設為必考，或把幾個設為不考。設必考的那條註釋會一起變成必考題。標記會自動記住。'
   };
   function render(){
     if (!items().length){
@@ -759,15 +782,15 @@ try {
         var on = sel.indexOf(i) >= 0, ex = excl.has(i), mu = must.has(i);
         return '<button type="button" class="chip' + (on ? ' on' : '') + (ex ? ' ex' : '') + (mu ? ' must' : '') + '" data-i="' + i + '">' +
           '<span class="no">' + it[0] + '</span><span class="w serif">' + esc(chipLabel(i)) + '</span>' +
-          (varCount(i) ? '<span class="vc">' + varCount(i) + '選1</span>' : '') + '</button>';
+          vBadge(i) + '</button>';
       }).join('');
     }
-    var nEx = excl.size, nMu = must.size;
-    var tags = [nMu ? '必考 ' + nMu : '', nEx ? '排除 ' + nEx : ''].filter(Boolean).join('・');
+    var nEx = excl.size, nMu = must.size, nV = Object.keys(vmark).length;
+    var tags = [nMu ? '必考 ' + nMu : '', nEx ? '排除 ' + nEx : '', nV ? '指定小字詞 ' + nV : ''].filter(Boolean).join('・');
     $('cnt').textContent = '已選 ' + sel.length + ' 題' + (tags ? '（' + tags + '）' : '');
     $('bGo').disabled = !sel.length;
     $('bGo').style.opacity = sel.length ? 1 : .4;
-    $('bUnex').style.display = (nEx || nMu) ? '' : 'none';
+    $('bUnex').style.display = (nEx || nMu || nV) ? '' : 'none';
     $('hint').textContent = HINTS[mode];
   }
   function setMode(m){
@@ -775,12 +798,68 @@ try {
     $('mPick').className = m === 'pick' ? 'on' : '';
     $('mMust').className = m === 'must' ? 'on mu' : '';
     $('mEx').className = m === 'ex' ? 'on ex' : '';
+    $('mVar').className = m === 'vr' ? 'on vr' : '';
+    $('grid').classList.toggle('vr-mode', m === 'vr');
     render();
   }
   function rangePool(){
     var a = +$('ra').value || 1, b = +$('rb').value || a;
     var lo = Math.min(a, b), hi = Math.max(a, b);
     return items().map(function(it, i){ return i; }).filter(function(i){ return items()[i][0] >= lo && items()[i][0] <= hi && !excl.has(i); });
+  }
+
+  /* ───────── V142：指定小字詞（必考／不考）小視窗 ───────── */
+  var vpI = -1;
+  function clearVMust(i){
+    var m = vmark[i]; if (!m) return;
+    Object.keys(m).forEach(function(w){ if (m[w] === 'must') delete m[w]; });
+    if (!Object.keys(m).length) delete vmark[i];
+  }
+  function setV(i, w, st){
+    var vs = D.vars[i] || [], m = vmark[i] || {};
+    if (st === 'ex' && vs.filter(function(v){ return v[0] !== w && m[v[0]] !== 'ex'; }).length === 0){
+      alert('至少要留一個可以考的。整條註釋都不考的話，請用「點＝排除」。'); return;
+    }
+    if (st === 'must'){
+      Object.keys(m).forEach(function(k){ if (m[k] === 'must') delete m[k]; });
+      m[w] = 'must';
+      must.add(i); excl.delete(i); if (sel.indexOf(i) < 0) sel = sel.concat(i);
+    } else if (st === 'ex') m[w] = 'ex';
+    else delete m[w];
+    if (Object.keys(m).length) vmark[i] = m; else delete vmark[i];
+    saveMarks(); render(); paintVp();
+  }
+  function paintVp(){
+    var i = vpI, it = items()[i], vs = D.vars[i]; if (!it || !vs) return;
+    var m = vmark[i] || {}, s = it[2];
+    $('vp').querySelector('.vp-h').innerHTML = '註' + it[0] + (must.has(i) ? '<span class="vp-tag mu">必考題</span>' : '') + (excl.has(i) ? '<span class="vp-tag ex">整條排除中</span>' : '');
+    $('vp').querySelector('.vp-rows').innerHTML = vs.map(function(v, j){
+      var st = m[v[0]] || 'rnd', x = excerpt(s, v[1], v[2]);
+      return '<div class="vp-row ' + st + '"><div class="vp-q serif">' + (x.cutL ? '…' : '') + esc(x.pre) + '<mark>' + esc(x.w) + '</mark>' + esc(x.post) + (x.cutR ? '…' : '') + '</div>' +
+        '<div class="vp-a"><b>' + esc(vName(v)) + '：</b>' + noBk(v[3]) + '</div>' +
+        '<div class="vp-seg">' + [['rnd', '隨機'], ['must', '必考'], ['ex', '不考']].map(function(o){
+          return '<button type="button" data-j="' + j + '" data-st="' + o[0] + '"' + (st === o[0] ? ' class="on ' + o[0] + '"' : '') + '>' + o[1] + '</button>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+  function openVp(i){
+    if (!D.vars[i]){ $('hint').textContent = '註' + items()[i][0] + ' 沒有拆成小字詞，只能整條設必考或排除（用「點＝必考」「點＝排除」）。'; return; }
+    vpI = i; paintVp(); $('vp').classList.add('show');
+  }
+  function closeVp(){ $('vp').classList.remove('show'); vpI = -1; }
+  function initVp(){
+    var d = document.createElement('div');
+    d.id = 'nq2-vp';
+    d.innerHTML = '<div class="vp-bx" role="dialog" aria-modal="true" aria-label="指定小字詞"><div class="vp-top"><h3 class="vp-h"></h3>' +
+      '<button type="button" class="vp-x">完成</button></div>' +
+      '<div class="vp-note">隨機＝可能抽到；必考＝這條註釋一定考這一個（只能指定一個）；不考＝不會抽到。</div><div class="vp-rows"></div></div>';
+    document.getElementById('nq2').appendChild(d);
+    d.addEventListener('click', function(e){
+      if (e.target === d || e.target.closest('.vp-x')){ closeVp(); return; }
+      var b = e.target.closest('[data-st]'); if (!b || vpI < 0) return;
+      setV(vpI, D.vars[vpI][+b.dataset.j][0], b.dataset.st);
+    });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && d.classList.contains('show')){ closeVp(); e.stopPropagation(); } }, true);
   }
 
   /* ───────── 考卷畫面 ───────── */
@@ -807,7 +886,18 @@ try {
   }
   function pickVariant(i){
     var it = items()[i], vs = D.vars[i];
-    if (vs){ var v = vs[Math.floor(Math.random() * vs.length)]; return { w: v[0], a: v[1], b: v[2], ans: noBk(v[3]), whole: v[4] === 'whole' }; }
+    if (vs){
+      // V142：必考小字詞優先；不考的不抽；其餘依「拆題」設定（v108 nq-varmode）挑，挑不到就從可考的隨機
+      var v = vMust(i);
+      if (!v){
+        var ok = vOk(i), vm = LS.get('nq-varmode', 'mix'), pref = ok;
+        if (vm === 'whole') pref = ok.filter(function(x){ return x[4] === 'whole'; });
+        else if (vm === 'sub') pref = ok.filter(function(x){ return x[4] === 'sub'; });
+        if (!pref.length) pref = ok.length ? ok : vs;
+        v = pref[Math.floor(Math.random() * pref.length)];
+      }
+      return { w: v[0], a: v[1], b: v[2], ans: noBk(v[3]), whole: v[4] === 'whole' };
+    }
     var at = D.pos[i];
     return { w: it[1], a: at, b: at < 0 ? -1 : at + it[1].length, ans: noBk(it[3]), whole: false };
   }
@@ -817,7 +907,8 @@ try {
     $('qlist').innerHTML = q.map(function(i, k){
       var it = items()[i], s = it[2], v = pickVariant(i);
       var x = v.a < 0 ? { pre: s, w: '', post: '', cutL: false, cutR: false } : excerpt(s, v.a, v.b);
-      return '<article class="qc">' +
+      // V142：拆題註釋已在這裡依標記與拆題設定挑好，標上 data-v108 讓 v108 applyVmode 不再改寫
+      return '<article class="qc"' + (D.vars[i] ? ' data-v108="' + esc(LS.get('nq-varmode', 'mix')) + '"' : '') + '>' +
         '<div class="qn">' + (k + 1) + '</div>' +
         '<div class="qb">' +
           '<div class="qs serif">' + (x.cutL ? '<span class="el">…</span>' : '') + esc(x.pre) +
@@ -861,15 +952,16 @@ try {
     $('grid').addEventListener('click', function(e){
       var b = e.target.closest('.chip'); if (!b) return;
       var i = +b.dataset.i;
+      if (mode === 'vr'){ openVp(i); return; }
       if (mode === 'pick'){
         if (excl.has(i) || must.has(i)) return;   // 必考／排除題要到各自模式才能改
         sel = sel.indexOf(i) >= 0 ? sel.filter(function(x){ return x !== i; }) : sel.concat(i);
       } else if (mode === 'must'){
-        if (must.has(i)){ must.delete(i); sel = sel.filter(function(x){ return x !== i; }); }
+        if (must.has(i)){ must.delete(i); clearVMust(i); sel = sel.filter(function(x){ return x !== i; }); }
         else { must.add(i); excl.delete(i); if (sel.indexOf(i) < 0) sel = sel.concat(i); }
         saveMarks();
       } else {
-        if (excl.has(i)) excl.delete(i); else { excl.add(i); must.delete(i); sel = sel.filter(function(x){ return x !== i; }); }
+        if (excl.has(i)) excl.delete(i); else { excl.add(i); must.delete(i); clearVMust(i); sel = sel.filter(function(x){ return x !== i; }); }
         saveMarks();
       }
       render();
@@ -877,6 +969,8 @@ try {
     $('mPick').onclick = function(){ setMode('pick'); };
     $('mMust').onclick = function(){ setMode('must'); };
     $('mEx').onclick = function(){ setMode('ex'); };
+    $('mVar').onclick = function(){ setMode('vr'); };
+    initVp();
     $('bRange').onclick = function(){ sel = withMust(rangePool()); render(); };
     $('bRand').onclick = function(){
       var n = Math.max(1, +$('rn').value || 5);
@@ -887,7 +981,7 @@ try {
     };
     $('bClear').onclick = function(){ sel = Array.from(must).sort(byIdx); render(); };
     $('bUnex').onclick = function(){
-      if (confirm('清除這一課所有「必考」和「排除」標記？')){ excl.clear(); must.clear(); saveMarks(); render(); }
+      if (confirm('清除這一課所有「必考」和「排除」標記（含指定的小字詞）？')){ excl.clear(); must.clear(); vmark = {}; saveMarks(); render(); }
     };
     $('lesson').onchange = function(e){ setLesson(LESSONS[+e.target.value]); };
     $('bGo').onclick = function(){ if (sel.length) startQuiz(); };
@@ -10661,7 +10755,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V141';
+  window.APP_VERSION = 'V142';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
