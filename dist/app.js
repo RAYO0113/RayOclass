@@ -716,6 +716,9 @@ try {
   var sel = [], excl = new Set(), must = new Set(), mode = 'pick';
   // V142：拆題註釋的小字詞標記 vmark[i] = { 選項字詞: 'must'|'ex' }（一條註釋最多一個必考小字詞；至少留一個可考）
   var vmark = {};
+  // V143：日曆預排小考帶入的小字詞標記（只用在這一次，不存；同一條註釋以日曆為準）
+  var vOver = {};
+  function vmOf(i){ return vOver[i] || vmark[i] || {}; }
   function items(){ return D ? D.items : []; }
   function itemKey(it){ return it[0] + '|' + it[1]; }
   function exKey(){ return 'nq-excl:' + D.lesson; }
@@ -724,8 +727,8 @@ try {
   function varCount(i){ return (D.vars[i] || []).length; }
   function chipLabel(i){ return varCount(i) ? D.vars[i][0][0] : items()[i][1]; }
   function vName(v){ return v[4] === 'whole' ? '整句' : v[0]; }
-  function vMust(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] === 'must'; })[0] || null; }
-  function vOk(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] !== 'ex'; }); }
+  function vMust(i){ var m = vmOf(i); return (D.vars[i] || []).filter(function(v){ return m[v[0]] === 'must'; })[0] || null; }
+  function vOk(i){ var m = vmOf(i); return (D.vars[i] || []).filter(function(v){ return m[v[0]] !== 'ex'; }); }
   function vBadge(i){
     var n = varCount(i); if (!n) return '';
     var mu = vMust(i); if (mu) return '<span class="vc vmu">考「' + esc(vName(mu)) + '」</span>';
@@ -760,7 +763,7 @@ try {
   /* ───────── 選題畫面 ───────── */
   function setLesson(L){
     D = buildLesson(L);
-    loadMarks();
+    loadMarks(); vOver = {};
     sel = Array.from(must).sort(byIdx);
     var nos = items().map(function(it){ return it[0]; });
     $('ra').value = nos.length ? Math.min.apply(null, nos) : 1;
@@ -785,7 +788,7 @@ try {
           vBadge(i) + '</button>';
       }).join('');
     }
-    var nEx = excl.size, nMu = must.size, nV = Object.keys(vmark).length;
+    var nEx = excl.size, nMu = must.size, nV = Object.keys(Object.assign({}, vmark, vOver)).length;
     var tags = [nMu ? '必考 ' + nMu : '', nEx ? '排除 ' + nEx : '', nV ? '指定小字詞 ' + nV : ''].filter(Boolean).join('・');
     $('cnt').textContent = '已選 ' + sel.length + ' 題' + (tags ? '（' + tags + '）' : '');
     $('bGo').disabled = !sel.length;
@@ -816,6 +819,7 @@ try {
     if (!Object.keys(m).length) delete vmark[i];
   }
   function setV(i, w, st){
+    if (vOver[i]){ vmark[i] = Object.assign({}, vOver[i]); delete vOver[i]; }
     var vs = D.vars[i] || [], m = vmark[i] || {};
     if (st === 'ex' && vs.filter(function(v){ return v[0] !== w && m[v[0]] !== 'ex'; }).length === 0){
       alert('至少要留一個可以考的。整條註釋都不考的話，請用「點＝排除」。'); return;
@@ -831,7 +835,7 @@ try {
   }
   function paintVp(){
     var i = vpI, it = items()[i], vs = D.vars[i]; if (!it || !vs) return;
-    var m = vmark[i] || {}, s = it[2];
+    var m = vmOf(i), s = it[2];
     $('vp').querySelector('.vp-h').innerHTML = '註' + it[0] + (must.has(i) ? '<span class="vp-tag mu">必考題</span>' : '') + (excl.has(i) ? '<span class="vp-tag ex">整條排除中</span>' : '');
     $('vp').querySelector('.vp-rows').innerHTML = vs.map(function(v, j){
       var st = m[v[0]] || 'rnd', x = excerpt(s, v[1], v[2]);
@@ -981,7 +985,7 @@ try {
     };
     $('bClear').onclick = function(){ sel = Array.from(must).sort(byIdx); render(); };
     $('bUnex').onclick = function(){
-      if (confirm('清除這一課所有「必考」和「排除」標記（含指定的小字詞）？')){ excl.clear(); must.clear(); vmark = {}; saveMarks(); render(); }
+      if (confirm('清除這一課所有「必考」和「排除」標記（含指定的小字詞）？')){ excl.clear(); must.clear(); vmark = {}; vOver = {}; saveMarks(); render(); }
     };
     $('lesson').onchange = function(e){ setLesson(LESSONS[+e.target.value]); };
     $('bGo').onclick = function(){ if (sel.length) startQuiz(); };
@@ -1150,6 +1154,17 @@ try {
   window.nq2Close = nq2Close;
   window.nqToggle = nq2Open;          // 覆蓋 v55 的 nqToggle（實際生效版本＝本段）
   window.nq2BuildLesson = buildLesson;
+  // V143：日曆「開始小考」用。map = { "註號|詞": { 選項字詞: "must"|"ex" } }，套在目前課次，直到換課或重開
+  window.nq2SetVOverlay = function(map){
+    vOver = {};
+    if (D && map) items().forEach(function(it, i){
+      var m = map[itemKey(it)]; if (!m || !D.vars[i]) return;
+      var o = {}, n = 0;
+      D.vars[i].forEach(function(v){ if (m[v[0]] === 'must' || m[v[0]] === 'ex'){ o[v[0]] = m[v[0]]; n++; } });
+      if (n) vOver[i] = o;
+    });
+    if (D) render();
+  };
 
   function boot(){ init(); initSideTabHide(); initInk(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
@@ -4853,7 +4868,7 @@ try {
     if (e.item === '註釋小考') {
       var q = e.quiz || {}, np = (q.pick || []).length, nm = (q.must || []).length;
       return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
-        (!np && nm ? '（必考' + nm + '）' : '') + (e.note ? '（' + e.note + '）' : '');
+        (!np && nm ? '（必考' + nm + '）' : '') + (q.vm && Object.keys(q.vm).length ? '（指定小字詞' + Object.keys(q.vm).length + '）' : '') + (e.note ? '（' + e.note + '）' : '');
     }
     if (/檢討$/.test(e.item)) return disp(e.item) + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
     var it = e.item === '其他' ? (e.note || '其他') : disp(e.item);
@@ -4866,7 +4881,7 @@ try {
   var view = null;           /* 目前月份第一天 */
   var sel = null;            /* 選取的日期字串 */
   var fCls = get(K.cls, '');  /* 篩選班級，空＝全部 */
-  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {} };
+  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {}, qvm: {}, qv: -1 };   /* V143：qvm＝小字詞標記 { "註號|詞": { 字詞: must|ex } }，qv＝正在設定的題 */
 
   function ensure() {
     var m = document.getElementById('v98-cal'); if (m) return m;
@@ -4886,13 +4901,15 @@ try {
       else if (t === 'fca') { form.cls = form.cls.length === classes().length ? [] : classes().slice(); render(); }
       else if (t === 'fk') { form.kind = a[1]; render(); }
       else if (t === 'fi') { form.item = a[1]; if (a[1] === '註釋小考') { form.kind = '考試'; form.les = form.les.slice(0, 1); qDefault(); } render(); }
-      else if (t === 'fl') { if (form.item === '註釋小考') { form.les = form.les[0] === +a[1] ? [] : [+a[1]]; form.qa = form.qb = ''; form.qs = {}; form.qmode = 'pick'; qDefault(); } else tog(form.les, +a[1]); render(); }
+      else if (t === 'fl') { if (form.item === '註釋小考') { form.les = form.les[0] === +a[1] ? [] : [+a[1]]; form.qa = form.qb = ''; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; qDefault(); } else tog(form.les, +a[1]); render(); }
       else if (t === 'add') add();
       else if (t === 'del') del(a[1]);
       else if (t === 'quiz') startQuiz(a[1]);
-      else if (t === 'qm') { form.qmode = a[1]; render(); }
+      else if (t === 'qm') { form.qmode = a[1]; form.qv = -1; render(); }
       else if (t === 'qc') { qTog(+a[1]); render(); }
-      else if (t === 'qx') { form.qs = {}; render(); }
+      else if (t === 'qx') { form.qs = {}; form.qvm = {}; form.qv = -1; render(); }
+      else if (t === 'qvs') { qvSet(+a[1], a[2]); render(); }
+      else if (t === 'qvx') { form.qv = -1; render(); }
     });
     m.addEventListener('input', function (e) { if (e.target.id === 'v98-note') { form.note = e.target.value; syncAdd(); }
       else if (/^v98-q[abn]$/.test(e.target.id)) { form[e.target.id.slice(4)] = e.target.value; syncAdd(); } });
@@ -4942,22 +4959,62 @@ try {
   function qTog(i) {
     var it = quizItems(form.les[0])[i]; if (!it) return;
     var k = qKey(it);
+    if (form.qmode === 'vr') { form.qv = (quizVars(form.les[0])[i] && form.qv !== i) ? i : -1; return; }
     if (form.qs[k] === form.qmode) delete form.qs[k]; else form.qs[k] = form.qmode;
+    if (form.qs[k] !== 'must') qvClearMust(k);
+  }
+  /* V143：小字詞（同註釋小考「點＝指定小字詞」）：必考＝這條一定考這一個（自動設為必考題）；不考＝不會抽到；至少留一個 */
+  function quizVars(n) { var k = QK[n]; try { return (k && typeof window.nq2BuildLesson === 'function') ? window.nq2BuildLesson(k).vars : {}; } catch (e) { return {}; } }
+  function vName(v) { return v[4] === 'whole' ? '整句' : v[0]; }
+  function qvClearMust(k) {
+    var m = form.qvm[k]; if (!m) return;
+    Object.keys(m).forEach(function (w) { if (m[w] === 'must') delete m[w]; });
+    if (!Object.keys(m).length) delete form.qvm[k];
+  }
+  function qvSet(j, st) {
+    var i = form.qv, it = quizItems(form.les[0])[i], vs = quizVars(form.les[0])[i]; if (!it || !vs || !vs[j]) return;
+    var k = qKey(it), w = vs[j][0], m = form.qvm[k] || {};
+    if (st === 'ex' && vs.filter(function (v) { return v[0] !== w && m[v[0]] !== 'ex'; }).length === 0) { alert('至少要留一個可以考的。整條都不考請用「不考」模式點題目。'); return; }
+    if (st === 'must') { Object.keys(m).forEach(function (x) { if (m[x] === 'must') delete m[x]; }); m[w] = 'must'; form.qs[k] = 'must'; }
+    else if (st === 'ex') m[w] = 'ex';
+    else delete m[w];
+    if (Object.keys(m).length) form.qvm[k] = m; else delete form.qvm[k];
+  }
+  function qvBadge(it, vs) {
+    if (!vs) return '';
+    var m = form.qvm[qKey(it)] || {}, mu = vs.filter(function (v) { return m[v[0]] === 'must'; })[0];
+    if (mu) return '<i class="v143-vb mu">考「' + esc(vName(mu)) + '」</i>';
+    var nx = vs.filter(function (v) { return m[v[0]] === 'ex'; }).length;
+    return '<i class="v143-vb' + (nx ? ' ex' : '') + '">' + (vs.length - nx) + '選1' + (nx ? '・' + nx + '不考' : '') + '</i>';
+  }
+  function qvPanel(its, vars) {
+    var i = form.qv, it = its[i], vs = vars[i]; if (!it || !vs) return '';
+    var m = form.qvm[qKey(it)] || {};
+    return '<div class="v143-vp"><div class="v143-vh"><b>註' + it[0] + ' 指定小字詞</b>' +
+      '<button type="button" data-v98="qvx">完成</button></div><div class="v143-vn">隨機＝可能抽到；必考＝一定考這一個（只能一個）；不考＝不會抽到</div>' + vs.map(function (v, j) {
+        var st = m[v[0]] || 'rnd';
+        return '<div class="v143-vr ' + st + '"><span class="w">' + esc(vName(v)) + '</span>' + [['rnd', '隨機'], ['must', '必考'], ['ex', '不考']].map(function (o) {
+          return '<button type="button" data-v98="qvs|' + j + '|' + o[0] + '"' + (st === o[0] ? ' class="on ' + o[0] + '"' : '') + '>' + o[1] + '</button>';
+        }).join('') + '</div>';
+      }).join('') + '</div>';
   }
   function chooser() {
     if (!form.les.length) return '';
     var its = quizItems(form.les[0]); if (!its.length) return '';
     var a = +form.qa || 0, b = +form.qb || 9999, np = qKeys('pick').length, nm = qKeys('must').length, nx = qKeys('ex').length;
-    var h = '<div class="v98-row v102-qm"><span>點題目＝（可不點，直接隨機抽）</span>' + [['pick', '選題'], ['must', '必考'], ['ex', '不考']].map(function (m) {
+    var vars = quizVars(form.les[0]), nv = Object.keys(form.qvm).length;
+    var h = '<div class="v98-row v102-qm"><span>點題目＝（可不點，直接隨機抽）</span>' + [['pick', '選題'], ['must', '必考'], ['ex', '不考'], ['vr', '小字詞']].map(function (m) {
       return '<button type="button" class="v102-m-' + m[0] + (form.qmode === m[0] ? ' on' : '') + '" data-v98="qm|' + m[0] + '">' + m[1] + '</button>';
-    }).join('') + (np + nm + nx ? '<button type="button" data-v98="qx">全部清除</button>' : '') + '</div>';
-    h += '<div class="v102-qgrid">' + its.map(function (it, i) {
+    }).join('') + (np + nm + nx + nv ? '<button type="button" data-v98="qx">全部清除</button>' : '') + '</div>';
+    if (form.qmode === 'vr') h += '<div class="v143-hint">點有「N選1」的題目，指定其中一個小字詞必考，或幾個不考。</div>';
+    h += '<div class="v102-qgrid' + (form.qmode === 'vr' ? ' v143-vrm' : '') + '">' + its.map(function (it, i) {
       var st = form.qs[qKey(it)] || '', out = it[0] < a || it[0] > b;
-      return '<button type="button" class="v102-qc' + (st ? ' ' + st : '') + (out && !st ? ' out' : '') + '" data-v98="qc|' + i + '" title="' + esc(it[0] + ' ' + it[1]) + '"><b>' + it[0] + '</b>' + esc(it[1]) + '</button>';
+      return '<button type="button" class="v102-qc' + (st ? ' ' + st : '') + (out && !st ? ' out' : '') + (vars[i] ? ' hv' : '') + (form.qv === i ? ' cur' : '') + '" data-v98="qc|' + i + '" title="' + esc(it[0] + ' ' + it[1]) + '"><b>' + it[0] + '</b><span class="t">' + esc(it[1]) + '</span>' + qvBadge(it, vars[i]) + '</button>';
     }).join('') + '</div>';
+    h += qvPanel(its, vars);
     h += '<div class="v102-qsum">' + (np
       ? '自己選了 ' + np + ' 題' + (nm ? '＋必考 ' + nm + ' 題' : '') + '：只考這些題，不再隨機抽。'
-      : '從註' + (form.qa || '?') + '～' + (form.qb || '?') + ' 隨機抽 ' + (form.qn || '?') + ' 題' + (nm ? '，必考 ' + nm + ' 題一定在內' : '') + (nx ? '，不考 ' + nx + ' 題不會抽到' : '') + '。') + '</div>';
+      : '從註' + (form.qa || '?') + '～' + (form.qb || '?') + ' 隨機抽 ' + (form.qn || '?') + ' 題' + (nm ? '，必考 ' + nm + ' 題一定在內' : '') + (nx ? '，不考 ' + nx + ' 題不會抽到' : '') + '。') + (nv ? '指定小字詞 ' + nv + ' 題。' : '') + '</div>';
     return h;
   }
   function qBtn(e) { return e.item === '註釋小考' && e.quiz ? '<button type="button" class="v100-qgo" data-v98="quiz|' + e.id + '">開始小考</button>' : ''; }
@@ -4991,6 +5048,7 @@ try {
       var c = document.querySelector('#nq2-grid .chip[data-i="' + i + '"]'); if (!c) return;
       if (!!want[qKey(it)] !== c.classList.contains('on')) c.click();
     });
+    if (typeof window.nq2SetVOverlay === 'function') window.nq2SetVOverlay(q.vm || null);   /* V143：這一筆指定的小字詞 */
     pend = [e.cls]; hookDlg();
   }
   /* 從日曆開的小考：「記錄本次小考」視窗自動勾好該班 */
@@ -5028,10 +5086,10 @@ try {
     form.cls.forEach(function (c) {
       var q = form.item === '註釋小考';
       a.push({ id: uid(), date: sel, cls: c, kind: q ? '考試' : (/檢討$/.test(form.item) ? '檢討' : form.kind), item: form.item, lessons: form.les.slice(), note: form.note.trim(),
-        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex') } : undefined });
+        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined } : undefined });
     });
     put(K.data, a);
-    form.note = ''; form.les = []; form.qs = {}; form.qmode = 'pick';
+    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick';
     render();
   }
   function del(id) {
@@ -10755,7 +10813,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V142';
+  window.APP_VERSION = 'V143';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

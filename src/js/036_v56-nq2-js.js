@@ -155,6 +155,9 @@
   var sel = [], excl = new Set(), must = new Set(), mode = 'pick';
   // V142：拆題註釋的小字詞標記 vmark[i] = { 選項字詞: 'must'|'ex' }（一條註釋最多一個必考小字詞；至少留一個可考）
   var vmark = {};
+  // V143：日曆預排小考帶入的小字詞標記（只用在這一次，不存；同一條註釋以日曆為準）
+  var vOver = {};
+  function vmOf(i){ return vOver[i] || vmark[i] || {}; }
   function items(){ return D ? D.items : []; }
   function itemKey(it){ return it[0] + '|' + it[1]; }
   function exKey(){ return 'nq-excl:' + D.lesson; }
@@ -163,8 +166,8 @@
   function varCount(i){ return (D.vars[i] || []).length; }
   function chipLabel(i){ return varCount(i) ? D.vars[i][0][0] : items()[i][1]; }
   function vName(v){ return v[4] === 'whole' ? '整句' : v[0]; }
-  function vMust(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] === 'must'; })[0] || null; }
-  function vOk(i){ var m = vmark[i] || {}; return (D.vars[i] || []).filter(function(v){ return m[v[0]] !== 'ex'; }); }
+  function vMust(i){ var m = vmOf(i); return (D.vars[i] || []).filter(function(v){ return m[v[0]] === 'must'; })[0] || null; }
+  function vOk(i){ var m = vmOf(i); return (D.vars[i] || []).filter(function(v){ return m[v[0]] !== 'ex'; }); }
   function vBadge(i){
     var n = varCount(i); if (!n) return '';
     var mu = vMust(i); if (mu) return '<span class="vc vmu">考「' + esc(vName(mu)) + '」</span>';
@@ -199,7 +202,7 @@
   /* ───────── 選題畫面 ───────── */
   function setLesson(L){
     D = buildLesson(L);
-    loadMarks();
+    loadMarks(); vOver = {};
     sel = Array.from(must).sort(byIdx);
     var nos = items().map(function(it){ return it[0]; });
     $('ra').value = nos.length ? Math.min.apply(null, nos) : 1;
@@ -224,7 +227,7 @@
           vBadge(i) + '</button>';
       }).join('');
     }
-    var nEx = excl.size, nMu = must.size, nV = Object.keys(vmark).length;
+    var nEx = excl.size, nMu = must.size, nV = Object.keys(Object.assign({}, vmark, vOver)).length;
     var tags = [nMu ? '必考 ' + nMu : '', nEx ? '排除 ' + nEx : '', nV ? '指定小字詞 ' + nV : ''].filter(Boolean).join('・');
     $('cnt').textContent = '已選 ' + sel.length + ' 題' + (tags ? '（' + tags + '）' : '');
     $('bGo').disabled = !sel.length;
@@ -255,6 +258,7 @@
     if (!Object.keys(m).length) delete vmark[i];
   }
   function setV(i, w, st){
+    if (vOver[i]){ vmark[i] = Object.assign({}, vOver[i]); delete vOver[i]; }
     var vs = D.vars[i] || [], m = vmark[i] || {};
     if (st === 'ex' && vs.filter(function(v){ return v[0] !== w && m[v[0]] !== 'ex'; }).length === 0){
       alert('至少要留一個可以考的。整條註釋都不考的話，請用「點＝排除」。'); return;
@@ -270,7 +274,7 @@
   }
   function paintVp(){
     var i = vpI, it = items()[i], vs = D.vars[i]; if (!it || !vs) return;
-    var m = vmark[i] || {}, s = it[2];
+    var m = vmOf(i), s = it[2];
     $('vp').querySelector('.vp-h').innerHTML = '註' + it[0] + (must.has(i) ? '<span class="vp-tag mu">必考題</span>' : '') + (excl.has(i) ? '<span class="vp-tag ex">整條排除中</span>' : '');
     $('vp').querySelector('.vp-rows').innerHTML = vs.map(function(v, j){
       var st = m[v[0]] || 'rnd', x = excerpt(s, v[1], v[2]);
@@ -420,7 +424,7 @@
     };
     $('bClear').onclick = function(){ sel = Array.from(must).sort(byIdx); render(); };
     $('bUnex').onclick = function(){
-      if (confirm('清除這一課所有「必考」和「排除」標記（含指定的小字詞）？')){ excl.clear(); must.clear(); vmark = {}; saveMarks(); render(); }
+      if (confirm('清除這一課所有「必考」和「排除」標記（含指定的小字詞）？')){ excl.clear(); must.clear(); vmark = {}; vOver = {}; saveMarks(); render(); }
     };
     $('lesson').onchange = function(e){ setLesson(LESSONS[+e.target.value]); };
     $('bGo').onclick = function(){ if (sel.length) startQuiz(); };
@@ -589,6 +593,17 @@
   window.nq2Close = nq2Close;
   window.nqToggle = nq2Open;          // 覆蓋 v55 的 nqToggle（實際生效版本＝本段）
   window.nq2BuildLesson = buildLesson;
+  // V143：日曆「開始小考」用。map = { "註號|詞": { 選項字詞: "must"|"ex" } }，套在目前課次，直到換課或重開
+  window.nq2SetVOverlay = function(map){
+    vOver = {};
+    if (D && map) items().forEach(function(it, i){
+      var m = map[itemKey(it)]; if (!m || !D.vars[i]) return;
+      var o = {}, n = 0;
+      D.vars[i].forEach(function(v){ if (m[v[0]] === 'must' || m[v[0]] === 'ex'){ o[v[0]] = m[v[0]]; n++; } });
+      if (n) vOver[i] = o;
+    });
+    if (D) render();
+  };
 
   function boot(){ init(); initSideTabHide(); initInk(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

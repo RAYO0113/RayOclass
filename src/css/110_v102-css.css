@@ -24,3 +24,29 @@ body.dark-mode #v98-cal .v98-pill.rvw { background:#1f4436; color:#a8e6cc; }
 body.dark-mode #v98-cal .v102-qc.must { background:#5a2420; color:#ffc9c2; }
 body.dark-mode #v98-cal .v102-qc.ex { background:#333; color:#888; }
 body.dark-mode #v98-cal .v102-qsum { color:#d6c2f5; }
+
+/* V143：日曆預排小考可指定小字詞（必考／不考） */
+#v98-cal .v102-qm button.v102-m-vr.on { background:#b8861b; border-color:#b8861b; }
+#v98-cal .v102-qc { position:relative; }
+#v98-cal .v102-qc .t { overflow:hidden; text-overflow:ellipsis; }
+#v98-cal .v143-vrm .v102-qc:not(.hv) { opacity:.35; }
+#v98-cal .v102-qc.cur { outline:3px solid #b8861b; outline-offset:-1px; }
+#v98-cal .v143-vb { margin-left:auto; flex:none; font-style:normal; font-size:11px; padding:0 5px; border-radius:4px; background:#5a4a35; color:#fff; }
+#v98-cal .v143-vb.mu { background:#c0392b; }
+#v98-cal .v143-vb.ex { background:#8a8a8a; }
+#v98-cal .v102-qc.must:has(.v143-vb.mu)::after { content:none; }
+#v98-cal .v143-hint { font-size:13px; color:#8a6512; margin:0 0 4px; }
+#v98-cal .v143-vp { border:2px solid #b8861b; border-radius:6px; padding:6px 8px; margin:0 0 8px; background:var(--card,#fffdf8); }
+#v98-cal .v143-vh { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted,#7a6a55); margin-bottom:4px; }
+#v98-cal .v143-vh b { font-size:15px; color:var(--ink,#1a1209); white-space:nowrap; }
+#v98-cal .v143-vn { font-size:12px; color:var(--muted,#7a6a55); margin:0 0 4px; }
+#v98-cal .v143-vh button { margin-left:auto; flex:none; }
+#v98-cal .v143-vr { display:flex; align-items:center; gap:4px; padding:3px 0; border-top:1px dashed var(--border,#e4d8c4); }
+#v98-cal .v143-vr .w { flex:1; min-width:0; font-family:"Noto Serif TC",serif; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#v98-cal .v143-vr.ex .w { color:#999; text-decoration:line-through; }
+#v98-cal .v143-vr.must .w { color:#c0392b; font-weight:700; }
+#v98-cal .v143-vr button { flex:none; padding:4px 9px; min-height:32px; }
+#v98-cal .v143-vr button.on.rnd { background:#5a4a35; color:#fff; border-color:#5a4a35; }
+#v98-cal .v143-vr button.on.must { background:#c0392b; color:#fff; border-color:#c0392b; }
+#v98-cal .v143-vr button.on.ex { background:#8a8a8a; color:#fff; border-color:#8a8a8a; }
+body.dark-mode #v98-cal .v143-vp { background:#221c15; }
