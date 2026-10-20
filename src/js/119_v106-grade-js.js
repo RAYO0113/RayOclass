@@ -496,9 +496,26 @@
     return a.filter(function (e) { return e.cls === S.cls && CAL_MAP[e.item] && e.kind !== '檢討' && !have[e.id]; })
       .sort(function (x, y) { return x.date < y.date ? 1 : -1; });
   }
+  /* 10/20 老師：日曆的註釋小考預先給編號（L＋課次2碼＋該班第幾次2碼，同 v109 小考紀錄的規則）：
+     已考過的取小考紀錄（nq-records）該班該課最大號，之後的依日曆日期排下去。日曆上還沒考的若刪了／改了日期，號碼會重排。 */
+  function quizCode(e) {
+    var n = (e.lessons || [])[0]; if (!n) return '';
+    var pre = 'L' + pad(n), base = 0, lastD = '', rs = [], all = [];
+    try { rs = JSON.parse(localStorage.getItem('nq-records-v1') || '[]') || []; } catch (x) {}
+    (Array.isArray(rs) ? rs : []).forEach(function (r) {
+      var c = r && r.codes && r.codes[e.cls]; if (!c || String(c).indexOf(pre) !== 0) return;
+      base = Math.max(base, +String(c).slice(pre.length) || 0);
+      var d = new Date(r.createdAt); if (!isNaN(d) && ymd(d) > lastD) lastD = ymd(d);
+    });
+    try { all = (window.V98CAL && V98CAL.data()) || []; } catch (x) {}
+    var pend = all.filter(function (x) { return x && x.item === '註釋小考' && x.kind !== '檢討' && x.cls === e.cls && (x.lessons || [])[0] === n && x.date > lastD; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id < b.id ? -1 : 1); });
+    var i = pend.map(function (x) { return x.id; }).indexOf(e.id);
+    return i < 0 ? '' : pre + pad(base + i + 1);
+  }
   function calTitle(e) {
     var L = (e.lessons || []).slice().sort(function (a, b) { return a - b; }).map(function (n) { return 'L' + n; }).join('、');
-    if (e.item === '註釋小考') { var q = e.quiz || {}; return '註釋小考 ' + L + (q.a ? '（註' + q.a + '–' + q.b + '）' : ''); }
+    if (e.item === '註釋小考') { var q = e.quiz || {}, cd = quizCode(e); return (cd ? cd + ' 註釋小考' : '註釋小考 ' + L) + (q.a ? '（註' + q.a + '–' + q.b + '）' : ''); }
     var it = e.item === '其他' ? (e.note || '其他') : e.item;
     return it + (L ? ' ' + L : '') + (e.item !== '其他' && e.note ? '（' + e.note + '）' : '');
   }
@@ -527,7 +544,7 @@
   }
   /* V135：教學進度表按「轉考試／作業」時，日曆加一筆後直接建成績項目（同「從日曆匯入」的規則，已建過的 calId 不重建）。
      回傳 Promise：{ok:true,n} 建好 n 份；{ok:false,why:'login'} 沒登入成績系統（日曆那筆仍在，之後可用「從日曆匯入」）。 */
-  function addFromCal(es) {
+  function addFromCal(es, quiet) {   /* quiet：背景自動建（10/20），失敗不跳視窗 */
     if (!isDemo() && !pw()) return Promise.resolve({ ok: false, why: 'login' });
     var ready = S.loaded ? Promise.resolve() : call({ action: 'load' }).then(function (r) {
       if (!r.ok) throw new Error(r.error || '讀取失敗');
@@ -542,7 +559,7 @@
           due: ty === '註釋小考' ? nextLesson(e.cls, e.date) : e.date, late: typeOf(ty).late, calId: e.id, note: '', created: new Date().toISOString() };
       });
       if (!rows.length) return { ok: true, n: 0 };
-      return save('items', rows.map(wireItem), '已建立 ' + rows.length + ' 份').then(function () { rows.forEach(function (r) { D.items.push(r); }); return { ok: true, n: rows.length }; });
+      return (quiet ? putQuiet('items', rows.map(wireItem)) : save('items', rows.map(wireItem), '已建立 ' + rows.length + ' 份')).then(function () { rows.forEach(function (r) { D.items.push(r); }); return { ok: true, n: rows.length }; });
     });
   }
   /* 10/20 老師：今天起日曆上的註釋小考／A卷／習作／課後習題／其他，自動建成成績考卷（日期照日曆），小老師頁就看得到（後台 gr-14）。
@@ -553,18 +570,44 @@
     if (autoBusy || isDemo() || !pw()) return;
     var a = []; try { a = (window.V98CAL && V98CAL.data()) || []; } catch (e) {}
     var es = a.filter(function (e) { return e && e.date >= CAL_AUTO_FROM && CAL_MAP[e.item] && e.kind !== '檢討'; });
-    var sig = es.map(function (e) { return e.id; }).sort().join(',');
+    var sig = es.map(function (e) { return e.id + '@' + e.date + (e.quiz ? '#' + e.quiz.a + '-' + e.quiz.b : ''); }).sort().join(',');
     if (!es.length || sig === autoSeen) return;
-    if (S.loaded) { var have = {}; D.items.forEach(function (i) { if (i.calId) have[i.calId] = 1; }); if (es.every(function (e) { return have[e.id]; })) { autoSeen = sig; return; } }
+    if (S.loaded && !renames().length) { var have = {}; D.items.forEach(function (i) { if (i.calId) have[i.calId] = 1; }); if (es.every(function (e) { return have[e.id]; })) { autoSeen = sig; return; } }
     autoBusy = true;
+    var made = 0;
     call({ action: 'load' }).then(function (r) {
       if (!r.ok || !r.admin) throw new Error(r.error || '沒有登入');
       norm(r); S.admin = true; S.loaded = true; S.loadedAt = Date.now();
-      return addFromCal(es);
+      return addFromCal(es, true);
     }).then(function (res) {
+      made = res && res.n || 0;
+      var rn = renames();   /* 還沒考的日曆考卷：編號／範圍／日期跟日曆對不上就更新（日曆刪了的只標名稱、不刪） */
+      if (!rn.length) return 0;
+      return putQuiet('items', rn).then(function () { rn.forEach(function (x) { var it = itemById(x.id); if (it) Object.keys(x).forEach(function (k) { it[k] = x[k]; }); }); return rn.length; });
+    }).then(function (nr) {
       autoBusy = false; autoSeen = sig;
-      if (res && res.n) { setSt('📅 日曆自動建了 ' + res.n + ' 份考卷'); var m = document.getElementById('v106-gr'); if (m && m.classList.contains('open')) render(); }
+      if (made || nr) { setSt('📅 日曆自動' + (made ? '建了 ' + made + ' 份' : '') + (made && nr ? '、' : '') + (nr ? '更新 ' + nr + ' 份（編號／日期）' : '')); var m = document.getElementById('v106-gr'); if (m && m.classList.contains('open')) render(); }
     }).catch(function () { autoBusy = false; });   /* 連不上就下一分鐘再試 */
+  }
+  function putQuiet(table, rows) { return call({ action: 'put', table: table, rows: rows }).then(function (r) { if (!r.ok) throw new Error(r.error || '儲存失敗'); return r; }); }
+  function renames() {
+    var cal = {}, td = today(); try { ((window.V98CAL && V98CAL.data()) || []).forEach(function (e) { if (e && e.id) cal[e.id] = e; }); } catch (x) {}
+    var out = [], DEL = '（日曆已刪除）', synced = false;
+    try { synced = !!(window.V107SYNC && V107SYNC.state().pulled); } catch (x) {}   /* 這次開網頁已經從雲端拿過日曆，才判斷「已刪除」 */
+    D.items.forEach(function (it) {
+      if (!it.calId || (it.issued || it.due || '') < td || (it.issued || it.due || '') < CAL_AUTO_FROM) return;
+      var e = cal[it.calId], t;
+      if (!e) { if (synced && String(it.title).indexOf(DEL) !== 0) out.push({ id: it.id, title: DEL + it.title }); return; }   /* 只改名、不刪（可能另一台還沒同步） */
+      t = it.type === '註釋小考' && e.item === '註釋小考' ? calTitle(e) : String(it.title).replace(DEL, '');
+      var p = { id: it.id }, ch = false;
+      if (t && t !== it.title) { p.title = t; ch = true; }
+      /* 日曆用 📅 改了日期：還沒有人登分的考卷，考試日／期限跟著改（規則同 addFromCal）；已有分數的不動 */
+      var iss = e.kind === '考試' ? e.date : '', due = it.type === '註釋小考' ? (nextLesson(it.cls, e.date) || e.date) : e.date;
+      var scored = D.scores.some(function (s) { return s.item === it.id && (s.raw != null || s.sub); });
+      if (!scored && (iss !== (it.issued || '') || due !== (it.due || ''))) { p.issued = iss; p.due = due; ch = true; }
+      if (ch) out.push(p);
+    });
+    return out;
   }
   setTimeout(autoCal, 4000); setInterval(autoCal, 60000);
 
