@@ -5674,7 +5674,7 @@ try {
   var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [] };
   var SCI = {};   /* scores 索引 item|seat */
   function norm(r) {
-    D.students = (r.students || []).map(function (s) { return { cls: s.cls, seat: +s.seat, sid: s.sid || '', name: s.name || '', active: s.active === '' || s.active == null ? 1 : +s.active }; })
+    D.students = (r.students || []).map(function (s) { return { cls: s.cls, seat: +s.seat, sid: s.sid || '', name: s.name || '', active: s.active === '' || s.active == null ? 1 : +s.active, idt: /^[AFTK]$/.test(s.idt || '') ? s.idt : '' }; })
       .filter(function (s) { return s.cls && s.seat > 0; }).sort(function (a, b) { return a.seat - b.seat; });
     D.items = (r.items || []).map(function (i) { return { id: i.id, cls: i.cls, type: i.type, title: i.title || '', lessons: i.lessons || '', issued: i.issued || '',
       due: i.due || '', late: String(i.late) === '1' || i.late === true, calId: i.calId || '', note: i.note || '', created: i.created || '', by: i.by || '' }; });   /* by：gr-5 小老師新增 */
@@ -5824,6 +5824,7 @@ try {
     var m = box(), b = m.querySelector('.gr-box'), sc = m.querySelector('.gr-pane');
     var keep = sc ? sc.scrollTop : 0;
     var tabs = [['reg', '✏️ 登記'], ['proj', '📽 投影'], ['pts', '⭐ 課堂加減分'], ['set', '⚙ 設定']];
+    if (S.admin || isDemo()) tabs.splice(3, 0, ['dash', '📊 後台']);   /* 10/20：含身份別、姓名，登入才出現 */
     var h = '<div class="gr-top"><h3>📒 成績</h3>' +
       tabs.map(function (t) { return '<button data-g="tab|' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') +
       '<span class="gr-sp"></span><span class="gr-st' + (S.stErr ? ' err' : '') + '" data-g="retry">' + esc(S.st) + '</span>' +
@@ -5838,6 +5839,7 @@ try {
     else if (S.tab === 'reg') h += regHTML();
     else if (S.tab === 'proj') h += projHTML();
     else if (S.tab === 'pts') h += ptsHTML();
+    else if (S.tab === 'dash') h += (S.admin || isDemo()) ? dashHTML() : needLogin('後台有成績與身份別，需要登入');
     else h += setHTML();
     if (S.hist && S.tab === 'reg' && S.admin) h += histHTML();   /* gr-5 */
     b.innerHTML = h;
@@ -6318,6 +6320,7 @@ try {
     h += '<div class="gr-sec"><h5>④ 匯出 Excel</h5><div class="gr-row">' + classes().map(function (c) { return '<button class="gr-btn" data-g="csv|' + esc(c) + '">' + esc(c) + ' 成績總表</button>'; }).join('') +
       '<button class="gr-btn" data-g="csvpts">課堂加減分紀錄</button></div><p class="gr-muted">下載 CSV（Excel 可直接開，含姓名，請勿外流）。完整原始資料也在 Google 試算表裡。</p></div>';
     h += tutorSecHTML();   /* gr-5 */
+    h += idtSecHTML();     /* 10/20 */
     if (isDemo()) h += '<div class="gr-sec"><h5>示範資料</h5><button class="gr-btn warn" data-g="demoreset">清除本機示範資料</button></div>';
     return h + '</div></div>';
   }
@@ -6420,6 +6423,177 @@ try {
     download('課堂加減分_' + today() + '.csv', rows);
   }
 
+  /* ── 10/20 成績身份別（學校 xls「成績身份別」欄）：只存在試算表學生名單 idt 欄、只在老師登入後顯示 ──
+     及格線：A 一般 60、F 原住民 40、T 技優 50、K 身障 60（身障生不及格時提醒老師可放過關）。
+     學校系統四捨五入：總分先四捨五入成整數再比（59.5→60 及格、39.5→40 可補考）；39 以下死當；補考＝40～及格線−1（原住民沒有補考區間）。 */
+  var IDT = { A: { n: '一般生', s: '一般', line: 60 }, F: { n: '原住民', s: '原民', line: 40 }, T: { n: '技優生', s: '技優', line: 50 }, K: { n: '身心障礙生', s: '身障', line: 60 } };
+  var FAIL_BELOW = 40;
+  function lineOf(idt) { return (IDT[idt] || IDT.A).line; }
+  function judge(total, idt) {
+    if (total == null) return null;
+    var n = Math.round(total), L = lineOf(idt);
+    return n >= L ? 'pass' : n >= FAIL_BELOW ? 'makeup' : 'fail';
+  }
+  var JUDGE = { pass: ['及格', '#2f7d43'], makeup: ['補考', '#c08a1e'], fail: ['死當', '#b03a2e'], none: ['還沒有成績', '#9a8f80'] };
+  /* 還沒考（或作文待登）的段考全部考 x 分，學期總分會到 target；回傳 x（不需要＝≤0；不可能＝>100） */
+  function needFor(cls, sm, target) {
+    var w = weights(cls), s = 0, W = 0, Wr = 0;
+    CATS.forEach(function (k) { var wk = +w[k] || 0; if (wk <= 0) return; if (sm[k] != null) { s += sm[k] * wk; W += wk; } else if (/^[一二三]段$/.test(k)) Wr += wk; });
+    if (!Wr) return null;
+    return (target * (W + Wr) - s) / Wr;
+  }
+  function needTxt(x) { return x == null ? '' : x <= 0 ? '<span class="pos">已穩</span>' : x > 100 ? '<span class="late">滿分也不夠</span>' : Math.ceil(x) + ' 分'; }
+
+  function loadXLSX() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    return new Promise(function (ok, no) {
+      var s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = function () { window.XLSX ? ok(window.XLSX) : no(new Error('Excel 工具載入失敗')); };
+      s.onerror = function () { no(new Error('Excel 工具載入失敗（要連網）')); };
+      document.head.appendChild(s);
+    });
+  }
+  /* 讀老師選的學校 xls：每張工作表找「學號」「成績身份別」兩欄。檔案只在這台瀏覽器讀，送到試算表的只有 班級／座號／身份別代碼 */
+  function readIdFile(f) {
+    if (!f) return;
+    setSt('讀取 ' + f.name + '…');
+    loadXLSX().then(function (X) {
+      return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(X.read(new Uint8Array(r.result), { type: 'array' })); }; r.onerror = function () { no(new Error('讀不到檔案')); }; r.readAsArrayBuffer(f); });
+    }).then(function (wb) {
+      var map = {}, clash = 0, sheets = 0;
+      wb.SheetNames.forEach(function (n) {
+        var rows = window.XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: '' }), hi = -1, cs = -1, ci = -1;
+        for (var i = 0; i < Math.min(rows.length, 10) && hi < 0; i++) { var r = rows[i].map(function (v) { return String(v).trim(); }); cs = r.indexOf('學號'); ci = r.indexOf('成績身份別'); if (cs >= 0 && ci >= 0) hi = i; }
+        if (hi < 0) return;
+        sheets++;
+        rows.slice(hi + 1).forEach(function (r) {
+          var sid = String(r[cs] || '').trim().toLowerCase(), m = /^\s*([AFTK])/i.exec(String(r[ci] || ''));
+          if (!sid || !m) return;
+          var c = m[1].toUpperCase();
+          if (map[sid] && map[sid] !== c) clash++;
+          map[sid] = c;
+        });
+      });
+      if (!sheets) throw new Error('檔案裡找不到「學號」和「成績身份別」兩欄');
+      var rows = [], by = {}, hit = {};
+      D.students.filter(function (s) { return s.active !== 0; }).forEach(function (s) {
+        var b = by[s.cls] = by[s.cls] || { A: 0, F: 0, T: 0, K: 0, miss: 0, chg: 0 }, c = map[String(s.sid).toLowerCase()];
+        if (!c) { b.miss++; return; }
+        hit[String(s.sid).toLowerCase()] = 1; b[c]++; if (s.idt && s.idt !== c) b.chg++;
+        rows.push({ cls: s.cls, seat: s.seat, idt: c });
+      });
+      S.idPrev = { name: f.name, rows: rows, by: by, extra: Object.keys(map).filter(function (k) { return !hit[k]; }).length, clash: clash };
+      setSt(''); render();
+    }).catch(function (e) { setSt('⚠ ' + e.message, true); alert(e.message); });
+  }
+  function importIdt() {
+    var p = S.idPrev; if (!p || !p.rows.length) return;
+    if (!confirm('把 ' + p.rows.length + ' 人的成績身份別存到試算表？\n（只存身份別代碼，學生看不到）')) return;
+    save('students', p.rows, '身份別已匯入').then(function () { S.idPrev = null; S.loaded = false; load(true); });
+  }
+  function idtSecHTML() {
+    var h = '<div class="gr-sec"><h5>⑥ 成績身份別（及格線）</h5>' +
+      '<p class="gr-muted">選學校的成績 xls（例如「1151_t0018_…全部分項.xls」）。用學號對名單，只存身份別代碼；姓名、成績不會上傳。學生、小老師、投影都看不到。</p>';
+    var cnt = { A: 0, F: 0, T: 0, K: 0, '': 0 };
+    D.students.filter(function (s) { return s.active !== 0; }).forEach(function (s) { cnt[s.idt || '']++; });
+    h += '<div class="gr-row"><span>目前：' + ['A', 'F', 'T', 'K'].map(function (k) { return IDT[k].n + ' ' + cnt[k]; }).join('、') + (cnt[''] ? '　<span class="late">未設定 ' + cnt[''] + ' 人（先當一般生算）</span>' : '') + '</span></div>' +
+      '<div class="gr-row"><input type="file" id="gr-idfile" accept=".xls,.xlsx"></div>';
+    var p = S.idPrev;
+    if (p) {
+      h += '<table class="gr-t" style="max-width:640px"><thead><tr><th>班級</th><th>一般</th><th>原住民</th><th>技優</th><th>身障</th><th>名單對不到</th><th>和目前不同</th></tr></thead><tbody>' +
+        Object.keys(p.by).map(function (c) { var b = p.by[c]; return '<tr><td>' + esc(c) + '</td><td>' + b.A + '</td><td>' + b.F + '</td><td>' + b.T + '</td><td>' + b.K + '</td><td' + (b.miss ? ' class="late"' : '') + '>' + b.miss + '</td><td>' + b.chg + '</td></tr>'; }).join('') + '</tbody></table>' +
+        '<p class="gr-muted">' + esc(p.name) + (p.extra ? '｜檔案裡有 ' + p.extra + ' 個學號不在名單' : '') + (p.clash ? '｜<span class="late">' + p.clash + ' 個學號在不同工作表身份別不一致（以最後一張為準）</span>' : '') + '</p>' +
+        '<div class="gr-row"><button class="gr-btn pri" data-g="idgo">存入 ' + p.rows.length + ' 人</button><button class="gr-btn" data-g="idx">取消</button></div>';
+    }
+    return h + '</div>';
+  }
+
+  /* ── 10/20 後台（老師專用）：學期總成績試算、及格／補考／死當、還沒考的段考要考幾分、個別學生走勢 ── */
+  function svgPie(parts, size) {
+    var tot = parts.reduce(function (s, p) { return s + p[1]; }, 0), r = size / 2, ri = r * 0.58, a0 = -Math.PI / 2, h = '';
+    if (!tot) return '';
+    parts.forEach(function (p) {
+      if (!p[1]) return;
+      var a1 = a0 + p[1] / tot * Math.PI * 2;
+      if (p[1] === tot) { h += '<circle cx="' + r + '" cy="' + r + '" r="' + ((r + ri) / 2) + '" fill="none" stroke="' + p[2] + '" stroke-width="' + (r - ri) + '"/>'; a0 = a1; return; }
+      var L = a1 - a0 > Math.PI ? 1 : 0, f = function (rr, a) { return (r + rr * Math.cos(a)).toFixed(2) + ' ' + (r + rr * Math.sin(a)).toFixed(2); };
+      h += '<path d="M' + f(r, a0) + ' A' + r + ' ' + r + ' 0 ' + L + ' 1 ' + f(r, a1) + ' L' + f(ri, a1) + ' A' + ri + ' ' + ri + ' 0 ' + L + ' 0 ' + f(ri, a0) + 'Z" fill="' + p[2] + '"><title>' + esc(p[0]) + ' ' + p[1] + ' 人</title></path>';
+      a0 = a1;
+    });
+    return '<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '" role="img">' + h +
+      '<text x="' + r + '" y="' + (r + 6) + '" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor">' + tot + ' 人</text></svg>';
+  }
+  /* 個別學生走勢：每份有分數的考卷（依期限／發下日排），本人分數 vs 全班平均 */
+  function svgTrend(pts) {
+    var W = 860, H = 260, l = 38, r = 64, t = 14, b = 58, n = pts.length;   /* 右邊留給斜放的最後一個標籤 */
+    if (!n) return '<p class="gr-muted">這位同學還沒有分數。</p>';
+    var mx = Math.max(100, Math.max.apply(null, pts.map(function (p) { return Math.max(p.me == null ? 0 : p.me, p.avg == null ? 0 : p.avg); })));
+    var X = function (i) { return l + (n === 1 ? (W - l - r) / 2 : i * (W - l - r) / (n - 1)); }, Y = function (v) { return t + (1 - v / mx) * (H - t - b); };
+    var h = '';
+    [0, 20, 40, 60, 80, 100].forEach(function (v) { h += '<line x1="' + l + '" x2="' + (W - r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="currentColor" stroke-opacity="' + (v === 60 ? .35 : .12) + '"' + (v === 60 ? ' stroke-dasharray="4 4"' : '') + '/>' +
+      '<text x="' + (l - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="11" fill="currentColor" fill-opacity=".6">' + v + '</text>'; });
+    function line(key, col, dash) {
+      var d = '', on = false;
+      pts.forEach(function (p, i) { if (p[key] == null) { on = false; return; } d += (on ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[key]).toFixed(1); on = true; });
+      return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="2.4"' + (dash ? ' stroke-dasharray="6 4"' : '') + '/>';
+    }
+    h += line('avg', '#9a8f80', true) + line('me', '#2e5a7a');
+    pts.forEach(function (p, i) {
+      if (p.avg != null) h += '<circle cx="' + X(i) + '" cy="' + Y(p.avg) + '" r="3" fill="#9a8f80"><title>' + esc(p.lab) + '　全班平均 ' + r1(p.avg) + '</title></circle>';
+      if (p.me != null) h += '<circle cx="' + X(i) + '" cy="' + Y(p.me) + '" r="4.5" fill="#2e5a7a"><title>' + esc(p.lab) + '　本人 ' + r1(p.me) + '</title></circle>';
+      h += '<text transform="translate(' + X(i) + ',' + (H - b + 14) + ') rotate(35)" font-size="11" fill="currentColor" fill-opacity=".75">' + esc(p.lab.length > 9 ? p.lab.slice(0, 9) + '…' : p.lab) + '</text>';
+    });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;max-width:' + W + 'px;height:auto" role="img">' + h + '</svg>' +
+      '<div class="gr-muted"><span style="color:#2e5a7a">●━ 本人</span>　<span>●┅ 全班平均</span>　虛線橫線＝60 分</div>';
+  }
+  function dashRows(cls, td) {
+    return roster(cls).map(function (s) {
+      var sm = summary(cls, s.seat, td), j = judge(sm.total, s.idt), L = lineOf(s.idt);
+      return { s: s, sm: sm, j: j || 'none', line: L, nPass: needFor(cls, sm, L - 0.5), nMk: L > FAIL_BELOW ? needFor(cls, sm, FAIL_BELOW - 0.5) : null };
+    });
+  }
+  function dashHTML() {
+    var cls = S.cls, td = today(), rows = dashRows(cls, td), w = weights(cls);
+    if (!rows.length) return '<div class="gr-main"><div class="gr-pane"><p class="gr-muted">這班還沒有學生名單。</p></div></div>';
+    var cnt = { pass: 0, makeup: 0, fail: 0, none: 0 }; rows.forEach(function (x) { cnt[x.j]++; });
+    var noIdt = rows.filter(function (x) { return !x.s.idt; }).length;
+    var h = '<div class="gr-main"><div class="gr-pane">' +
+      '<div class="gr-banner" style="margin:-4px -4px 10px;border-radius:4px;background:#fde8e6;color:#8a2a20;border-color:#f3c4bd">🔒 這頁有姓名、成績、身份別：<b>不要投影</b>。</div>';
+    h += '<div class="gr-dash-top"><div class="gr-sec gr-dash-pie"><h5>' + esc(cls) + '　目前學期成績</h5><div class="gr-row" style="align-items:center;gap:16px">' +
+      svgPie(['pass', 'makeup', 'fail', 'none'].map(function (k) { return [JUDGE[k][0], cnt[k], JUDGE[k][1]]; }), 150) +
+      '<div>' + ['pass', 'makeup', 'fail', 'none'].map(function (k) { return '<button class="gr-chip' + (S.dashFil === k ? ' on' : '') + '" data-g="dfil|' + (S.dashFil === k ? '' : k) + '" style="display:block;margin:4px 0"><span style="color:' + JUDGE[k][1] + '">■</span> ' + JUDGE[k][0] + ' ' + cnt[k] + ' 人</button>'; }).join('') + '</div></div>' +
+      '<p class="gr-muted">依目前已有的成績與配分換算（還沒考的段考、沒有分數的項目先不算）。總分四捨五入後比及格線。</p></div>' +
+      '<div class="gr-sec" style="flex:1;min-width:260px"><h5>配分（' + esc(cls) + '）</h5><div class="gr-row">' + CATS.map(function (k) { return '<span>' + k + ' <b>' + esc(w[k]) + '</b></span>'; }).join('　') + '</div>' +
+      (w.tentative ? '<p class="late">這班配分還沒設定，現在用暫定值，請到「⚙ 設定 → ③ 配分」設定。</p>' : '') +
+      (noIdt ? '<p class="late">' + noIdt + ' 人還沒有身份別，先當一般生（60 分）算。到「⚙ 設定 → ⑥」匯入學校 xls。</p>' : '') +
+      '<p class="gr-muted">及格線：一般 60、技優 50、原住民 40、身障 60。39 以下死當；補考＝40～及格線−1。</p></div></div>';
+    var list = rows.filter(function (x) { return !S.dashFil || x.j === S.dashFil; });
+    h += '<div class="gr-sec"><h5>學生一覽' + (S.dashFil ? '（只看' + JUDGE[S.dashFil][0] + '）' : '') + '<span class="gr-muted" style="font-weight:400">　點一列看成績走勢</span></h5>' +
+      '<div style="overflow:auto"><table class="gr-t gr-dash-t"><thead><tr><th>座號</th><th>姓名</th><th>身份</th>' + CATS.map(function (k) { return '<th>' + k + '</th>'; }).join('') +
+      '<th>目前總分</th><th>狀態</th><th>剩下段考要考<br>才及格</th><th>才能補考</th></tr></thead><tbody>';
+    list.forEach(function (x) {
+      var s = x.s, on = S.dashSeat === s.seat, J = JUDGE[x.j];
+      var kNote = s.idt === 'K' && (x.j === 'makeup' || x.j === 'fail') ? ' <span title="身障生：可考慮放過關">💬</span>' : '';
+      h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td><td>' + (s.idt ? IDT[s.idt].s :'<span class="gr-muted">—</span>') + '</td>' +
+        CATS.map(function (k) { return '<td>' + (x.sm[k] == null ? '<span class="gr-muted">—</span>' : r1(x.sm[k])) + '</td>'; }).join('') +
+        '<td><b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b></td><td><span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span>' + kNote + '</td>' +
+        '<td>' + needTxt(x.nPass) + '</td><td>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</td></tr>';
+      if (on) h += '<tr class="gr-dash-x"><td colspan="' + (CATS.length + 7) + '">' + trendHTML(cls, s, td) + '</td></tr>';
+    });
+    h += '</tbody></table></div><p class="gr-muted">「剩下段考要考」＝還沒考（或作文還沒登）的段考每一次都考這個分數，其他項目維持現在的平均。💬＝身障生不及格，可考慮放過關。</p></div>';
+    return h + '</div></div>';
+  }
+  function trendHTML(cls, s, td) {
+    var its = itemsOf(cls).filter(function (it) { return it.type !== '態度'; }).slice().sort(function (a, b) { var x = a.due || a.issued || '', y = b.due || b.issued || ''; return x < y ? -1 : x > y ? 1 : 0; });
+    var pts = [];
+    its.forEach(function (it) {
+      var fins = []; roster(cls).forEach(function (o) { var f = finalOf(it, scoreOf(it.id, o.seat), td); if (f != null) fins.push(f); });
+      if (!fins.length) return;
+      pts.push({ lab: itemLabel0(it), me: finalOf(it, scoreOf(it.id, s.seat), td), avg: avg(fins) });
+    });
+    return '<div style="padding:6px 4px"><b>' + s.seat + ' 號 ' + esc(s.name) + '</b>　各次成績（' + pts.length + ' 份）' + svgTrend(pts) + '</div>';
+  }
+
   /* ── 事件 ── */
   function onClick(e) {
     var m = document.getElementById('v106-gr');
@@ -6488,6 +6662,10 @@ try {
     else if (t === 'csvpts') exportPoints();
     else if (t === 'urlsave') saveUrl();
     else if (t === 'urlclear') { if (confirm('清除本裝置的網址？（回到' + (GS_URL ? '網頁內建網址' : '示範模式') + '）')) { put(K.url, null); S.loaded = false; S.admin = false; load(true); } }
+    else if (t === 'idgo') importIdt();
+    else if (t === 'idx') { S.idPrev = null; render(); }
+    else if (t === 'dseat') { S.dashSeat = +v || 0; render(); }
+    else if (t === 'dfil') { S.dashFil = v; render(); }
     else if (t === 'demoreset') { if (confirm('清除本機示範資料？')) { put(K.demo, null); S.loaded = false; load(true); } }
   }
   function saveUrl() {
@@ -6505,6 +6683,7 @@ try {
     if (id === 'gr-subdate') { S.subDate = e.target.value || today(); return; }
     if (id === 'gr-pitem') { S.projItem = e.target.value; render(); return; }
     if (id === 'gr-eissued' && S.edit) { readEdit(); render(); return; }
+    if (id === 'gr-idfile') { readIdFile(e.target.files && e.target.files[0]); return; }
     if (!g) return;
     var a = g.split('|'), t = a[0];
     if (t === 'itype') { S.imp.type[a[1]] = e.target.value; render(); return; }
@@ -10813,7 +10992,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V143';
+  window.APP_VERSION = 'V144';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

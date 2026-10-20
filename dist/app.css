@@ -6448,6 +6448,15 @@ body.dark-mode #v98-cal .v143-vp { background:#221c15; }
 #v106-gr .gr-hbox { background:var(--surface,#fff); border-radius:10px; padding:12px 14px; width:min(760px,100%); max-height:80vh; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,.3); }
 #v106-gr table.gr-t td.nm .gr-who { display:block; font-size:12px; line-height:1.2; }
 #v106-gr .gr-who .gr-x { padding:0 2px; }
+/* 10/20 後台（老師專用）：學期成績試算、身份別 */
+#v106-gr .gr-dash-top { display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; }
+#v106-gr .gr-dash-top .gr-sec { margin-bottom:12px; }
+#v106-gr .gr-dash-pie svg { flex-shrink:0; }
+#v106-gr .gr-tag { display:inline-block; color:#fff; border-radius:10px; padding:1px 9px; font-size:13px; font-weight:700; }
+#v106-gr tr.gr-dash-r { cursor:pointer; }
+#v106-gr tr.gr-dash-r:hover td { background:rgba(46,90,122,.06); }
+#v106-gr tr.gr-dash-r.on td { background:rgba(46,90,122,.12); }
+#v106-gr tr.gr-dash-x td { text-align:left; white-space:normal; background:rgba(46,90,122,.04); }
 /* ════ src/css/121_v107-sync-css.css ════ */
 
 /* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
