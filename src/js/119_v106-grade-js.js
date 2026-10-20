@@ -545,6 +545,28 @@
       return save('items', rows.map(wireItem), '已建立 ' + rows.length + ' 份').then(function () { rows.forEach(function (r) { D.items.push(r); }); return { ok: true, n: rows.length }; });
     });
   }
+  /* 10/20 老師：今天起日曆上的註釋小考／A卷／習作／課後習題／其他，自動建成成績考卷（日期照日曆），小老師頁就看得到（後台 gr-14）。
+     這台有記住登記密碼才會做；開網頁 4 秒後一次，之後每分鐘看日曆有沒有新項目（只比對本機，有新的才連後台）。
+     建之前一定重新讀一次後台（另一台可能已經建了），後台也擋同一個日曆項目建兩份。日曆改日期不會跟著改（之後再做）。 */
+  var CAL_AUTO_FROM = '2026-10-20', autoBusy = false, autoSeen = '';
+  function autoCal() {
+    if (autoBusy || isDemo() || !pw()) return;
+    var a = []; try { a = (window.V98CAL && V98CAL.data()) || []; } catch (e) {}
+    var es = a.filter(function (e) { return e && e.date >= CAL_AUTO_FROM && CAL_MAP[e.item] && e.kind !== '檢討'; });
+    var sig = es.map(function (e) { return e.id; }).sort().join(',');
+    if (!es.length || sig === autoSeen) return;
+    if (S.loaded) { var have = {}; D.items.forEach(function (i) { if (i.calId) have[i.calId] = 1; }); if (es.every(function (e) { return have[e.id]; })) { autoSeen = sig; return; } }
+    autoBusy = true;
+    call({ action: 'load' }).then(function (r) {
+      if (!r.ok || !r.admin) throw new Error(r.error || '沒有登入');
+      norm(r); S.admin = true; S.loaded = true; S.loadedAt = Date.now();
+      return addFromCal(es);
+    }).then(function (res) {
+      autoBusy = false; autoSeen = sig;
+      if (res && res.n) { setSt('📅 日曆自動建了 ' + res.n + ' 份考卷'); var m = document.getElementById('v106-gr'); if (m && m.classList.contains('open')) render(); }
+    }).catch(function () { autoBusy = false; });   /* 連不上就下一分鐘再試 */
+  }
+  setTimeout(autoCal, 4000); setInterval(autoCal, 60000);
 
   /* ── 投影（v110：只顯示座號、已交／未交逾期扣分／請假、訂正加分；不顯示分數） ── */
   function projHTML() {
