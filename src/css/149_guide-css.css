@@ -64,3 +64,11 @@ body.dark-mode .tp-sumbox.tp-sumall > .tp-pk { background:#b0623a; }
 @media (max-width:700px) { .gd:has(> .gd-q[onclick]) { font-size:calc(var(--base-size)*1.15); } }
 /* V136：〈火車線〉這類（主問題可點）追問標籤改成「那」（老師 10/18） */
 .gd:has(> .gd-q[onclick]) .gd-sq::before { content:"那"; }
+/* V151：主問題的答案（.gd-q 裡的 .gd-qa）：點主問題才出現；（點開）提示在還沒出現答案時才顯示 */
+.gd-qa { display:none; margin-top:2px; color:#8a3a1c; font-weight:600; }
+.gd-qa::before { content:"→ "; }
+.gd-q.show .gd-qa { display:block; }
+body.dark-mode .gd-qa { color:#f0a27a; }
+/* V151：主問題可點的提問，追問答案出現後，提示「再點出現下一題」（下一題還沒出現時） */
+.gd:has(> .gd-q[onclick]) .gd-s.show:has(+ .gd-s:not(.vis), + .gd-end:not(.vis)) .gd-sa::after,
+.gd-q[onclick].show:has(+ .gd-s:not(.vis)) .gd-qa::after { content:"（再點，下一題）"; margin-left:.4em; font-size:.7em; color:var(--mk-ink-soft,#6b5a42); font-weight:400; }
