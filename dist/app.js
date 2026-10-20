@@ -6569,7 +6569,7 @@ try {
       '<p class="gr-muted">及格線：一般 60、技優 50、原住民 40、身障 60。39 以下死當；補考＝40～及格線−1。</p></div></div>';
     var list = rows.filter(function (x) { return !S.dashFil || x.j === S.dashFil; });
     /* 10/20 老師：身份、成績欄（各類平均、總分、要考幾分）預設遮住，點格子才顯示；狀態（及格／補考／死當）直接顯示；可一鍵全部顯示／隱藏（與投影頁的遮罩各自獨立） */
-    var M = function (k, seat, html) { var key = seat + '|' + k, shown = S.dRevAll || S.dRev[key];
+    var M = function (k, seat, html) { var key = seat + '|' + k, shown = dShown(key);
       return '<td class="gr-mask' + (shown ? '' : ' m') + '" data-g="drev|' + key + '">' + html + '</td>'; };
     h += '<div class="gr-sec"><h5>學生一覽' + (S.dashFil ? '（只看' + JUDGE[S.dashFil][0] + '）' : '') + '<span class="gr-muted" style="font-weight:400">　點座號／姓名看成績走勢，點成績格子才顯示</span>' +
       '<button class="gr-btn" data-g="drevall" style="margin-left:10px;font-weight:400">' + (S.dRevAll ? '🙈 全部隱藏' : '👁 全部顯示') + '</button></h5>' +
@@ -6589,6 +6589,8 @@ try {
     h += '</tbody></table></div><p class="gr-muted">段考格「選擇 xx／76 作文待登」＝作文還沒登，這次段考先不算進總分。「剩下段考要考」＝還沒考（或作文還沒登）的段考每一次都考這個分數，其他項目維持現在的平均。💬＝身障生不及格，可考慮放過關。</p></div>';
     return h + '</div></div>';
   }
+  /* 10/20 老師：「全部顯示」不含身份別；身份只能一格一格點開（要確認） */
+  function dShown(key) { return key in S.dRev ? !!S.dRev[key] : (S.dRevAll && !/\|idt$/.test(key)); }   /* 單格點過＝照單格；沒點過＝跟全部顯示 */
   /* 段考已登選擇、作文還沒登：回傳選擇分數（同類有好幾份取最後一份），沒有就 null */
   function essPending(cls, type, seat) {
     var v = null;
@@ -6678,13 +6680,10 @@ try {
     else if (t === 'idx') { S.idPrev = null; render(); }
     else if (t === 'dseat') { S.dashSeat = +v || 0; render(); }
     else if (t === 'drev') {   /* 10/20 老師：要打開身份格先跳窗確認（個資） */
-      if (/\|idt$/.test(v) && !S.dRevAll && !S.dRev[v] && !confirm('身份別是個資（含身心障礙、原住民等）。\n確定要顯示 ' + v.split('|')[0] + ' 號的身份？\n（請確認畫面沒有在投影）')) return;
-      S.dRev[v] = !S.dRev[v]; b.classList.toggle('m', !(S.dRevAll || S.dRev[v]));
+      if (/\|idt$/.test(v) && !dShown(v) && !confirm('身份別是個資（含身心障礙、原住民等）。\n確定要顯示 ' + v.split('|')[0] + ' 號的身份？\n（請確認畫面沒有在投影）')) return;
+      S.dRev[v] = !dShown(v); b.classList.toggle('m', !dShown(v));
     }
-    else if (t === 'drevall') {
-      if (!S.dRevAll && !confirm('「全部顯示」會連身份別（個資）一起打開。\n確定要全部顯示？\n（請確認畫面沒有在投影）')) return;
-      S.dRevAll = !S.dRevAll; S.dRev = {}; render();
-    }
+    else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }   /* 10/20：不含身份別，不必確認 */
     else if (t === 'dfil') { S.dashFil = v; render(); }
     else if (t === 'demoreset') { if (confirm('清除本機示範資料？')) { put(K.demo, null); S.loaded = false; load(true); } }
   }
@@ -11012,7 +11011,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V145';
+  window.APP_VERSION = 'V146';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
