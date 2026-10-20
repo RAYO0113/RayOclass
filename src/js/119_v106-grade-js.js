@@ -1129,8 +1129,14 @@
     else if (t === 'idgo') importIdt();
     else if (t === 'idx') { S.idPrev = null; render(); }
     else if (t === 'dseat') { S.dashSeat = +v || 0; render(); }
-    else if (t === 'drev') { S.dRev[v] = !S.dRev[v]; b.classList.toggle('m', !(S.dRevAll || S.dRev[v])); }
-    else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }
+    else if (t === 'drev') {   /* 10/20 老師：要打開身份格先跳窗確認（個資） */
+      if (/\|idt$/.test(v) && !S.dRevAll && !S.dRev[v] && !confirm('身份別是個資（含身心障礙、原住民等）。\n確定要顯示 ' + v.split('|')[0] + ' 號的身份？\n（請確認畫面沒有在投影）')) return;
+      S.dRev[v] = !S.dRev[v]; b.classList.toggle('m', !(S.dRevAll || S.dRev[v]));
+    }
+    else if (t === 'drevall') {
+      if (!S.dRevAll && !confirm('「全部顯示」會連身份別（個資）一起打開。\n確定要全部顯示？\n（請確認畫面沒有在投影）')) return;
+      S.dRevAll = !S.dRevAll; S.dRev = {}; render();
+    }
     else if (t === 'dfil') { S.dashFil = v; render(); }
     else if (t === 'demoreset') { if (confirm('清除本機示範資料？')) { put(K.demo, null); S.loaded = false; load(true); } }
   }
