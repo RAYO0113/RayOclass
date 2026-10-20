@@ -123,3 +123,9 @@
 #v106-gr tr.gr-dash-r:hover td { background:rgba(46,90,122,.06); }
 #v106-gr tr.gr-dash-r.on td { background:rgba(46,90,122,.12); }
 #v106-gr tr.gr-dash-x td { text-align:left; white-space:normal; background:rgba(46,90,122,.04); }
+/* V154 合併重複考卷（119_v106-grade-js：mgHTML） */
+#v106-gr .gr-mg { border:1px solid var(--border,#d4c4a8); border-radius:8px; padding:8px 10px; margin:0 0 10px; background:var(--surface,#fff); }
+#v106-gr .gr-mg.on { border-color:#2e5a7a; box-shadow:0 0 0 2px rgba(46,90,122,.18); }
+#v106-gr .gr-mg-h { display:block; cursor:pointer; margin-bottom:6px; font-size:15px; }
+#v106-gr table.gr-mg-t { margin:4px 0 6px; }
+#v106-gr .gr-mg-cf td { background:rgba(176,58,46,.07); }

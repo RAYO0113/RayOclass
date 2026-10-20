@@ -340,17 +340,19 @@
     var h = '<div class="gr-main"><div class="gr-side">' +
       '<div class="gr-row"><button class="gr-btn pri" data-g="new">＋ 新增</button><button class="gr-btn" data-g="imp">📅 從日曆匯入</button></div>';
     var dz = calDeleted(); if (dz.length) h += '<div class="gr-row"><button class="gr-btn warn" data-g="calclean">🧹 清掉日曆已刪除的考卷（' + dz.length + ' 份）</button></div>';
+    var mp = mgPairs(); if (mp.length || S.mg) h += '<div class="gr-row"><button class="gr-btn' + (S.mg ? ' pri' : '') + '" data-g="mg">🔗 合併重複考卷（' + mp.length + ' 組）</button></div>';   /* V154 */
     if (!its.length) h += '<p class="gr-muted">這班還沒有考卷。按「＋ 新增」或「從日曆匯入」。</p>';
     its.forEach(function (it) {
       var got = roster(S.cls).filter(function (s) { var c = scoreOf(it.id, s.seat); return c && (c.raw != null || c.sub); }).length;
       var miss = it.late && it.due && it.due < td && got < n;
       var chg = D.log.some(function (l) { return l.item === it.id && l.old !== ''; });   /* gr-5 */
-      h += '<button class="gr-it' + (S.item === it.id && !S.edit && !S.imp ? ' on' : '') + '" data-g="item|' + it.id + '"><span class="gr-tag t-' + esc(it.type) + '">' + esc(it.type) + '</span>' +
+      h += '<button class="gr-it' + (S.item === it.id && !S.edit && !S.imp && !S.mg ? ' on' : '') + '" data-g="item|' + it.id + '"><span class="gr-tag t-' + esc(it.type) + '">' + esc(it.type) + '</span>' +
         esc(itemLabel(it)) + (it.by ? ' <span class="gr-tag gr-tut">小老師新增</span>' : '') + (chg ? ' <span class="gr-chgt" title="有成績被改過">改過</span>' : '') + '<small>' + (it.issued ? md(it.issued) + ' 發　' : '') + (it.due ? '期限 ' + md(it.due) : '無期限') +
         '　<span class="' + (miss ? 'late' : '') + '">' + got + '/' + n + '</span></small></button>';
     });
     h += '</div><div class="gr-pane">';
-    if (S.imp) h += impHTML();
+    if (S.mg) h += mgHTML();   /* V154 */
+    else if (S.imp) h += impHTML();
     else if (S.edit) h += editHTML();
     else if (S.item) h += sheetHTML(itemById(S.item));
     else h += '<p class="gr-muted">← 選一份考卷開始登記。</p>' + (n ? '' : '<p class="late">這班還沒有學生名單，請到「⚙ 設定 → 學生名單」匯入。</p>');
@@ -486,6 +488,134 @@
     if (!confirm('刪除這 ' + dz.length + ' 份（日曆已刪除、都沒有分數）？\n' + dz.map(function (i) { return i.cls + '・' + i.title; }).join('\n'))) return;
     var ids = dz.map(function (i) { return i.id; });
     remove('items', ids).then(function () { D.items = D.items.filter(function (i) { return ids.indexOf(i.id) < 0; }); if (ids.indexOf(S.item) >= 0) S.item = ''; setSt('✓ 已清掉 ' + ids.length + ' 份'); render(); });
+  }
+  /* V154：合併 10/19 以前「老師建」和「小老師建」的同一次考試（老師 10/20）
+     配對：同班同類型、都在 10/20 以前、課次相同；小老師那張有「第一題：X」→ 老師那張名稱要有「X」（X＝「：」前的關鍵詞）；
+     沒有第一題（A卷等）→ 同課次 ±14 天內只有一張才配。老師逐組勾選才合併。
+     合併：保留老師那張，名稱改「編號｜第一題：X」（老師那張沒編號就不改名）；小老師那張的分數搬過來（兩張分數不同 → 老師逐人選），再刪小老師那張（後台刪考卷會連分數一起刪）。 */
+  var MG_BEFORE = '2026-10-20';
+  function mgDay(it) { return it.issued || it.due || String(it.created || '').slice(0, 10); }
+  function mgOld(it) { var d = String(it.created || '').slice(0, 10) || mgDay(it); return !!d && d < MG_BEFORE; }
+  function mgLes(it) { var L = lessonsOf(it.lessons), m = /L(\d+)/.exec(it.title || ''); return L.length ? L : (m ? [+m[1]] : []); }
+  function mgQ1(it) { var m = /第一題：(.*)$/.exec(String(it.note || '')) || /第一題：(.*)$/.exec(String(it.title || '')); return m ? m[1].trim() : ''; }
+  function mgNorm(t) { return String(t || '').replace(/[\s「」『』（）()、，。：:？?！!…．.｜|]/g, ''); }
+  function mgGap(a, b) { return a && b ? Math.abs((parse(a) - parse(b)) / 864e5) : 99; }
+  function mgHas(c) { return !!c && (c.raw != null || c.ess != null || !!c.sub || !!c.leave || !!c.bonus); }
+  function mgCnt(id) { return D.scores.filter(function (c) { return c.item === id && mgHas(c); }).length; }
+  function mgPairs() {
+    var used = {}, out = [];
+    D.items.filter(function (t) { return t.by && mgOld(t); }).sort(function (a, b) { return mgDay(a) < mgDay(b) ? -1 : 1; }).forEach(function (t) {
+      var q = mgQ1(t), key = q.split(/[：:]/)[0].trim(), tl = mgLes(t);
+      var c = D.items.filter(function (k) {
+        if (k.by || used[k.id] || k.cls !== t.cls || k.type !== t.type || !mgOld(k)) return false;
+        var kl = mgLes(k);
+        if (tl.length && kl.length && !tl.some(function (n) { return kl.indexOf(n) >= 0; })) return false;
+        if (key) return String(k.title).indexOf('「' + key + '」') >= 0 || (mgNorm(key).length >= 2 && mgNorm(k.title).indexOf(mgNorm(key)) >= 0);
+        return tl.length > 0 && kl.length > 0 && mgGap(mgDay(k), mgDay(t)) <= 14;
+      }).sort(function (a, b) { return mgGap(mgDay(a), mgDay(t)) - mgGap(mgDay(b), mgDay(t)); });
+      if (!c.length || (!key && c.length !== 1)) return;
+      used[c[0].id] = 1; out.push({ k: c[0].id, t: t.id, q1: q });
+    });
+    return out;
+  }
+  function mgTitle(k, q1) { var m = /^(L?\d{3,4})(?=[（(｜\s]|$)/.exec(k.title || ''); return m && q1 ? m[1] + '｜第一題：' + q1 : k.title; }
+  function mgSame(a, b) { return a.raw === b.raw && a.ess === b.ess && (a.bonus || 0) === (b.bonus || 0); }
+  function mgSeats(p) {   /* 這組每個有分數的座號：{seat, a(老師那張), b(小老師那張), conflict} */
+    var seats = {};
+    D.scores.forEach(function (c) { if ((c.item === p.k || c.item === p.t) && mgHas(c)) seats[c.seat] = 1; });
+    return Object.keys(seats).map(Number).sort(function (x, y) { return x - y; }).map(function (n) {
+      var a = scoreOf(p.k, n), b = scoreOf(p.t, n), ha = mgHas(a), hb = mgHas(b);
+      return { seat: n, a: ha ? a : null, b: hb ? b : null, conflict: ha && hb && !mgSame(a, b) };
+    });
+  }
+  function mgFmt(c) {
+    if (!c) return '—';
+    var t = c.raw == null ? (c.sub ? '已交' : '') : String(c.raw);
+    if (c.ess != null) t += '＋作文' + c.ess;
+    if (c.bonus) t += '（訂正+' + c.bonus + '）';
+    if (c.leave) t += (t ? '・' : '') + '請假';
+    return t || '—';
+  }
+  function mgOpen() {
+    S.item = ''; S.edit = null; S.imp = null;
+    S.mg = { pairs: mgPairs(), on: {}, du: {}, ch: {} };
+    S.mg.pairs.forEach(function (p, i) { S.mg.du[i] = mgCnt(p.t) > mgCnt(p.k) ? 't' : 'k'; });
+    render();
+  }
+  function mgMissing(i) { var M = S.mg, p = M.pairs[i]; return mgSeats(p).filter(function (r) { return r.conflict && !M.ch[i + '|' + r.seat]; }).length; }
+  function mgHTML() {
+    var M = S.mg, h = '<div class="gr-h"><h4>🔗 合併重複考卷（四班）</h4><button class="gr-btn" data-g="mgx">返回</button></div>' +
+      '<p class="gr-muted" style="margin:0 0 8px">10/19 以前，老師建一張、小老師又建一張的同一次考試。勾選確定是同一次的，按最下面「合併」。合併後保留老師那張（改名），小老師那張的分數搬過來後刪掉。</p>';
+    if (!M.pairs.length) return h + '<p class="gr-muted">沒有找到可能重複的考卷。</p>';
+    M.pairs.forEach(function (p, i) {
+      var k = itemById(p.k), t = itemById(p.t); if (!k || !t) return;
+      var rows = mgSeats(p), cf = rows.filter(function (r) { return r.conflict; }), nm = {};
+      roster(k.cls).forEach(function (s) { nm[s.seat] = s.name; });
+      var dd = function (it) { return (it.issued ? md(it.issued) + ' 發　' : '') + (it.due ? '期限 ' + md(it.due) : '無期限'); };
+      h += '<div class="gr-mg' + (M.on[i] ? ' on' : '') + '"><label class="gr-mg-h"><input type="checkbox" data-g="mgon|' + i + '"' + (M.on[i] ? ' checked' : '') + '> <b>' + esc(k.cls) + '</b>　<span class="gr-tag t-' + esc(k.type) + '">' + esc(k.type) + '</span> 是同一次考試，合併</label>' +
+        '<table class="gr-t gr-mg-t"><tr><th></th><th>名稱</th><th>日期</th><th>有分數</th></tr>' +
+        '<tr><td>老師建</td><td class="nm">' + esc(itemLabel(k)) + '</td><td>' + dd(k) + '</td><td>' + mgCnt(k.id) + ' 人</td></tr>' +
+        '<tr><td>小老師 ' + esc(t.by) + ' 建</td><td class="nm">' + esc(t.title) + '</td><td>' + dd(t) + '</td><td>' + mgCnt(t.id) + ' 人</td></tr></table>' +
+        '<div class="gr-row">合併後名稱：<b>' + esc(mgTitle(k, p.q1) || itemLabel(k)) + '</b></div>';
+      if ((k.issued || '') !== (t.issued || '') || (k.due || '') !== (t.due || '')) {
+        h += '<div class="gr-row">日期用：<button class="gr-chip' + (M.du[i] === 'k' ? ' on' : '') + '" data-g="mgdu|' + i + '|k">老師那張（' + dd(k) + '）</button>' +
+          '<button class="gr-chip' + (M.du[i] === 't' ? ' on' : '') + '" data-g="mgdu|' + i + '|t">小老師那張（' + dd(t) + '）</button></div>';
+      }
+      if (cf.length) {
+        h += '<div class="gr-row late">兩張分數不一樣的 ' + cf.length + ' 人，請點要留的分數：</div><table class="gr-t gr-mg-t"><tr><th>座號</th><th>姓名</th><th>老師那張</th><th>小老師那張</th></tr>';
+        cf.forEach(function (r) {
+          var c = M.ch[i + '|' + r.seat];
+          h += '<tr class="gr-mg-cf"><td>' + r.seat + '</td><td class="nm">' + esc(nm[r.seat] || '') + '</td>' +
+            '<td><button class="gr-chip' + (c === 'k' ? ' on' : '') + '" data-g="mgch|' + i + '|' + r.seat + '|k">' + esc(mgFmt(r.a)) + '</button></td>' +
+            '<td><button class="gr-chip' + (c === 't' ? ' on' : '') + '" data-g="mgch|' + i + '|' + r.seat + '|t">' + esc(mgFmt(r.b)) + '</button></td></tr>';
+        });
+        h += '</table>';
+      }
+      var mv = rows.filter(function (r) { return r.b && !r.a; }).length, rest = rows.length - mv - cf.length;
+      h += '<div class="gr-muted">只有小老師那張有分數、會搬過去的：' + mv + ' 人' + (rest ? '；兩張一樣或只有老師那張有的：' + rest + ' 人' : '') + '</div></div>';
+    });
+    var picked = Object.keys(M.on).filter(function (i) { return M.on[i]; }), miss = picked.reduce(function (s, i) { return s + mgMissing(+i); }, 0);
+    h += '<div class="gr-row" style="margin-top:10px"><button class="gr-btn pri" data-g="mggo"' + (picked.length && !miss ? '' : ' disabled') + '>合併勾選的 ' + picked.length + ' 組</button>' +
+      (miss ? '<span class="late">還有 ' + miss + ' 人的分數沒選</span>' : '') + '</div>';
+    return h;
+  }
+  function mgRun() {
+    var M = S.mg, idx = Object.keys(M.on).filter(function (i) { return M.on[i] && !mgMissing(+i); }).map(Number);
+    if (!idx.length) return;
+    if (!confirm('合併這 ' + idx.length + ' 組？\n' + idx.map(function (i) { var k = itemById(M.pairs[i].k), t = itemById(M.pairs[i].t); return k.cls + '：' + itemLabel(k) + ' ← ' + t.title; }).join('\n') + '\n\n小老師那張合併後會刪掉，無法復原。')) return;
+    var ts = new Date().toISOString(), done = 0;
+    var step = function (n) {
+      if (n >= idx.length) { S.mg = null; setSt('✓ 已合併 ' + done + ' 組'); render(); return; }
+      var i = idx[n], p = M.pairs[i], k = itemById(p.k), t = itemById(p.t);
+      if (!k || !t) { step(n + 1); return; }
+      var rows = [];
+      mgSeats(p).forEach(function (r) {
+        if (!r.b) return;
+        if (r.conflict && M.ch[i + '|' + r.seat] === 'k') return;
+        var base = r.a && !r.conflict ? r.a : null, o = base || r.b;   /* 分數一樣：留老師那張，空的欄位用小老師那張補 */
+        var sub = base ? ([r.a.sub, r.b.sub].filter(Boolean).sort()[0] || '') : (r.b.sub || '');
+        rows.push({ item: k.id, cls: k.cls, seat: r.seat, raw: o.raw == null ? '' : o.raw, ess: o.ess == null ? '' : o.ess,
+          sub: sub, leave: o.leave || (base ? r.b.leave : '') || '', bonus: o.bonus || '', upd: ts, by: o.by || '', chk: o.chk || '' });
+      });
+      var nk = JSON.parse(JSON.stringify(k));
+      nk.title = mgTitle(k, p.q1);
+      if (M.du[i] === 't') { nk.issued = t.issued; nk.due = t.due; }
+      (rows.length ? save('scores', rows, '分數已搬過去') : Promise.resolve()).then(function () {
+        rows.forEach(function (w) {
+          var c = scoreOf(k.id, w.seat), v = { item: w.item, cls: w.cls, seat: w.seat, raw: num(w.raw), ess: num(w.ess), sub: w.sub, leave: w.leave, bonus: num(w.bonus) || 0, upd: w.upd, by: w.by, chk: w.chk };
+          if (c) Object.keys(v).forEach(function (f) { c[f] = v[f]; }); else D.scores.push(v);
+        });
+        reindex();
+        return save('items', [wireItem(nk)], '考卷已改名');
+      }).then(function () {
+        Object.keys(nk).forEach(function (f) { k[f] = nk[f]; });
+        return remove('items', [t.id]);
+      }).then(function () {
+        D.items = D.items.filter(function (x) { return x.id !== t.id; }); D.scores = D.scores.filter(function (x) { return x.item !== t.id; }); reindex();
+        done++; step(n + 1);
+      }).catch(function () { S.mg = null; render(); });
+    };
+    step(0);
   }
   function delItem(id) {
     var it = itemById(id); if (!it) return;
@@ -1188,6 +1318,7 @@
     var b = e.target.closest && e.target.closest('[data-g]'); if (!b) return;
     if (b.tagName === 'SELECT' || b.tagName === 'INPUT' && b.type !== 'checkbox') return;
     var a = b.getAttribute('data-g').split('|'), t = a[0], v = a.slice(1).join('|');
+    if (/^(item|new|imp|cls|tab|edit)$/.test(t)) S.mg = null;   /* V154：離開合併畫面 */
     if (t === 'x') close();
     else if (t === 'tab') { S.tab = v; put(K.tab, v); render(); }
     else if (t === 'cls') { S.cls = v; put(K.cls, v); S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }
@@ -1257,6 +1388,12 @@
       S.dRev[v] = !dShown(v); b.classList.toggle('m', !dShown(v));
     }
     else if (t === 'calclean') calClean();
+    else if (t === 'mg') mgOpen();
+    else if (t === 'mgx') { S.mg = null; render(); }
+    else if (t === 'mgon') { S.mg.on[v] = b.checked; render(); }
+    else if (t === 'mgdu') { S.mg.du[a[1]] = a[2]; render(); }
+    else if (t === 'mgch') { S.mg.ch[a[1] + '|' + a[2]] = a[3]; render(); }
+    else if (t === 'mggo') mgRun();
     else if (t === 'das') { S.dAs[v] = !S.dAs[v]; render(); }
     else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }   /* 10/20：不含身份別，不必確認 */
     else if (t === 'dfil') { S.dashFil = v; render(); }
