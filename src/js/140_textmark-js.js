@@ -254,6 +254,29 @@
       var h = bx.offsetHeight, w = bx.offsetWidth, ch = it.chip.getBoundingClientRect(), cr = rel(ch);
       var t = up ? cr.t - h - fsz * 0.12 : Math.max(cr.b, it.lastB || 0) + fsz * 0.12;   /* 句意：在整句最後一行之下，不蓋住自己的原文 */
       var rc = { l: x, r: x + w, t: t, b: t + h };
+      /* V152：撞到別的說明框時，先試同一排往左右挪（貼著對方），放得下就不往上疊（老師 10/20：稻浪、稻香同時開，稻香跑到稻浪上面） */
+      var hitOf = function (z) { return placed.filter(function (p) { return z.l < p.r && p.l < z.r && z.t < p.b && p.t < z.b; })[0]; };
+      var q0 = hitOf(rc);
+      if (q0) {
+        var ok = [q0.r + 4, q0.l - 4 - w, TR - w].some(function (nx) {
+          if (nx < TL - 0.5 || nx + w > TR + 0.5) return false;
+          var z = { l: nx, r: nx + w, t: t, b: t + h };
+          if (hitOf(z)) return false;
+          rc = z; bx.style.left = nx + 'px'; bx.style.maxWidth = (w + 1) + 'px'; return true;   /* 寬度不變（放寬會重新排版變寬，又撞到別人） */
+        });
+        /* 挪不開（框太寬）→ 縮窄放進對方左邊或右邊的空位（至少 7 個字寬） */
+        if (!ok) ok = [[TL, q0.l - 4], [q0.r + 4, TR]].some(function (R) {
+          var rw = R[1] - R[0]; if (rw < 7 * fsz) return false;
+          bx.style.maxWidth = rw + 'px'; bx.style.left = R[0] + 'px';
+          var w2 = bx.offsetWidth, h2 = bx.offsetHeight;
+          var nx = Math.max(R[0], Math.min(it.anchor.l, R[1] - w2));
+          var t2 = up ? cr.t - h2 - fsz * 0.12 : t;
+          var z = { l: nx, r: nx + w2, t: t2, b: t2 + h2 };
+          if (hitOf(z)) return false;
+          rc = z; h = h2; w = w2; bx.style.left = nx + 'px'; return true;
+        });
+        if (!ok) { bx.style.left = x + 'px'; bx.style.maxWidth = (TR - x) + 'px'; }   /* 都不行：恢復原寬，照舊往上疊 */
+      }
       for (var g = 0; g < 14; g++) {
         var q = placed.filter(function (p) { return rc.l < p.r && p.l < rc.r && rc.t < p.b && p.t < rc.b; })[0];
         if (!q) break;
@@ -267,7 +290,10 @@
       if (it.short && it.exp) h += '<span class="tm-more" data-full="' + it.id + '">' + (full ? '短' : '詳') + '</span>';
       return h;
     }
-    openR.forEach(function (it) { if (it.chip) box(it, true, body(it, true), 'tm-box-r'); });
+    /* V152：修辭說明框都往上放 → 從下面的句子先擺（同一行從右邊先擺），上面的句子讓位時才是往自己的上方讓，不會跳過別人的框 */
+    openR.filter(function (it) { return it.chip; }).sort(function (a, b) {
+      return Math.abs(a.anchor.t - b.anchor.t) > fsz * 0.5 ? b.anchor.t - a.anchor.t : b.anchor.l - a.anchor.l;
+    }).forEach(function (it) { box(it, true, body(it, true), 'tm-box-r'); });
     openM.forEach(function (it) {
       if (!it.chip) return;
       var mc = charsById(slide, cs, it.id); it.lastB = 0;
