@@ -5770,7 +5770,7 @@ try {
 
   /* ── 狀態 ── */
   var S = { tab: get(K.tab, 'proj'), cls: get(K.cls, '') || classes()[0] || '', item: '', admin: false, loaded: false, loadedAt: 0, loading: false,
-    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false, dRev: {}, dRevAll: false,
+    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false, dRev: {}, dRevAll: false, dAs: {},
     ptMode: '+', ptReason: '睡覺', ptView: get('gr_ptview_v1', 'grid'), seatEdit: false, ptRange: 'today', undo: [], setCls: '', paste: '', preview: null, loadErr: '' };
 
   function load(force) {
@@ -6546,9 +6546,19 @@ try {
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;max-width:' + W + 'px;height:auto" role="img">' + h + '</svg>' +
       '<div class="gr-muted"><span style="color:#2e5a7a">●━ 本人</span>　<span>●┅ 全班平均</span>　虛線橫線＝60 分</div>';
   }
+  /* 10/20 老師：假設鍵——打開後，該類還沒有分數的人先用假設分數算（已有分數的照實際）；只影響後台畫面，不存檔 */
+  var ASSUME = { 態度: 80, 筆記: 95 };
+  function assumeSm(cls, sm) {
+    var on = Object.keys(ASSUME).filter(function (k) { return S.dAs[k] && sm[k] == null; });
+    if (!on.length) return sm;
+    var w = weights(cls), o = {}; Object.keys(sm).forEach(function (k) { o[k] = sm[k]; });
+    o.assumed = {}; on.forEach(function (k) { o[k] = ASSUME[k]; o.assumed[k] = 1; });
+    o.total = mix(CATS.map(function (k) { return [o[k], +w[k] || 0]; }));
+    return o;
+  }
   function dashRows(cls, td) {
     return roster(cls).map(function (s) {
-      var sm = summary(cls, s.seat, td), j = judge(sm.total, s.idt), L = lineOf(s.idt);
+      var sm = assumeSm(cls, summary(cls, s.seat, td)), j = judge(sm.total, s.idt), L = lineOf(s.idt);
       return { s: s, sm: sm, j: j || 'none', line: L, nPass: needFor(cls, sm, L - 0.5), nMk: L > FAIL_BELOW ? needFor(cls, sm, FAIL_BELOW - 0.5) : null };
     });
   }
@@ -6557,9 +6567,11 @@ try {
     if (!rows.length) return '<div class="gr-main"><div class="gr-pane"><p class="gr-muted">這班還沒有學生名單。</p></div></div>';
     var cnt = { pass: 0, makeup: 0, fail: 0, none: 0 }; rows.forEach(function (x) { cnt[x.j]++; });
     var noIdt = rows.filter(function (x) { return !x.s.idt; }).length;
-    var h = '<div class="gr-main"><div class="gr-pane">' +
-      '<div class="gr-banner" style="margin:-4px -4px 10px;border-radius:4px;background:#fde8e6;color:#8a2a20;border-color:#f3c4bd">🔒 這頁有姓名、成績、身份別：<b>不要投影</b>。</div>';
-    h += '<div class="gr-dash-top"><div class="gr-sec gr-dash-pie"><h5>' + esc(cls) + '　目前學期成績</h5><div class="gr-row" style="align-items:center;gap:16px">' +
+    var asOn = Object.keys(ASSUME).filter(function (k) { return S.dAs[k]; });
+    var h = '<div class="gr-main"><div class="gr-pane">';   /* 10/20 老師：拿掉「不要投影」提示列 */
+    h += '<div class="gr-row" style="margin:0 0 10px"><span class="gr-muted">假設（還沒有分數的人先用這個分數算）：</span>' +
+      Object.keys(ASSUME).map(function (k) { return '<button class="gr-chip' + (S.dAs[k] ? ' on' : '') + '" data-g="das|' + k + '">' + k + ' ' + ASSUME[k] + '</button>'; }).join('') + '</div>';
+    h += '<div class="gr-dash-top"><div class="gr-sec gr-dash-pie"><h5>' + esc(cls) + '　目前學期成績' + (asOn.length ? '<span class="late" style="font-size:13px;font-weight:400">　（含假設：' + asOn.map(function (k) { return k + ASSUME[k]; }).join('、') + '）</span>' : '') + '</h5><div class="gr-row" style="align-items:center;gap:16px">' +
       svgPie(['pass', 'makeup', 'fail', 'none'].map(function (k) { return [JUDGE[k][0], cnt[k], JUDGE[k][1]]; }), 150) +
       '<div>' + ['pass', 'makeup', 'fail', 'none'].map(function (k) { return '<button class="gr-chip' + (S.dashFil === k ? ' on' : '') + '" data-g="dfil|' + (S.dashFil === k ? '' : k) + '" style="display:block;margin:4px 0"><span style="color:' + JUDGE[k][1] + '">■</span> ' + JUDGE[k][0] + ' ' + cnt[k] + ' 人</button>'; }).join('') + '</div></div>' +
       '<p class="gr-muted">依目前已有的成績與配分換算（還沒考的段考、沒有分數的項目先不算）。總分四捨五入後比及格線。</p></div>' +
@@ -6581,7 +6593,7 @@ try {
       h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td>' +
         M('idt', s.seat, s.idt ? '<span>' + IDT[s.idt].s + '</span>' + kNote : '<span class="gr-muted">—</span>') +   /* 💬 會透露身障，放身份格一起遮 */
         CATS.map(function (k) { var pe = x.sm[k] == null && /^[一二三]段$/.test(k) ? essPending(cls, k, s.seat) : null;   /* 10/20 老師：作文還沒登先看選擇題大概（不算進總分） */
-          return M(k, s.seat, x.sm[k] != null ? '<span>' + r1(x.sm[k]) + '</span>' : pe != null ? '<span class="gr-muted" title="作文還沒登，不算進總分">選擇 ' + r1(pe) + '／' + EXAM_MAX.raw + '<br>作文待登</span>' : '<span class="gr-muted">—</span>'); }).join('') +
+          return M(k, s.seat, x.sm.assumed && x.sm.assumed[k] ? '<span class="gr-muted" title="假設分數，還沒登">（假設）<br>' + r1(x.sm[k]) + '</span>' : x.sm[k] != null ? '<span>' + r1(x.sm[k]) + '</span>' : pe != null ? '<span class="gr-muted" title="作文還沒登，不算進總分">選擇 ' + r1(pe) + '／' + EXAM_MAX.raw + '<br>作文待登</span>' : '<span class="gr-muted">—</span>'); }).join('') +
         M('total', s.seat, '<b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b>') + '<td><span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span></td>' +
         M('np', s.seat, '<span>' + needTxt(x.nPass) + '</span>') + M('nm', s.seat, '<span>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</span>') + '</tr>';
       if (on) h += '<tr class="gr-dash-x"><td colspan="' + (CATS.length + 7) + '">' + trendHTML(cls, s, td) + '</td></tr>';
@@ -6683,6 +6695,7 @@ try {
       if (/\|idt$/.test(v) && !dShown(v) && !confirm('身份別是個資（含身心障礙、原住民等）。\n確定要顯示 ' + v.split('|')[0] + ' 號的身份？\n（請確認畫面沒有在投影）')) return;
       S.dRev[v] = !dShown(v); b.classList.toggle('m', !dShown(v));
     }
+    else if (t === 'das') { S.dAs[v] = !S.dAs[v]; render(); }
     else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }   /* 10/20：不含身份別，不必確認 */
     else if (t === 'dfil') { S.dashFil = v; render(); }
     else if (t === 'demoreset') { if (confirm('清除本機示範資料？')) { put(K.demo, null); S.loaded = false; load(true); } }
@@ -11011,7 +11024,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V146';
+  window.APP_VERSION = 'V147';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
