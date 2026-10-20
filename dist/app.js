@@ -6568,7 +6568,7 @@ try {
       (noIdt ? '<p class="late">' + noIdt + ' 人還沒有身份別，先當一般生（60 分）算。到「⚙ 設定 → ⑥」匯入學校 xls。</p>' : '') +
       '<p class="gr-muted">及格線：一般 60、技優 50、原住民 40、身障 60。39 以下死當；補考＝40～及格線−1。</p></div></div>';
     var list = rows.filter(function (x) { return !S.dashFil || x.j === S.dashFil; });
-    /* 10/20 老師：成績欄（各類平均、總分、狀態、要考幾分）預設遮住，點格子才顯示；可一鍵全部顯示／隱藏（與投影頁的遮罩各自獨立） */
+    /* 10/20 老師：身份、成績欄（各類平均、總分、要考幾分）預設遮住，點格子才顯示；狀態（及格／補考／死當）直接顯示；可一鍵全部顯示／隱藏（與投影頁的遮罩各自獨立） */
     var M = function (k, seat, html) { var key = seat + '|' + k, shown = S.dRevAll || S.dRev[key];
       return '<td class="gr-mask' + (shown ? '' : ' m') + '" data-g="drev|' + key + '">' + html + '</td>'; };
     h += '<div class="gr-sec"><h5>學生一覽' + (S.dashFil ? '（只看' + JUDGE[S.dashFil][0] + '）' : '') + '<span class="gr-muted" style="font-weight:400">　點座號／姓名看成績走勢，點成績格子才顯示</span>' +
@@ -6578,9 +6578,10 @@ try {
     list.forEach(function (x) {
       var s = x.s, on = S.dashSeat === s.seat, J = JUDGE[x.j];
       var kNote = s.idt === 'K' && (x.j === 'makeup' || x.j === 'fail') ? ' <span title="身障生：可考慮放過關">💬</span>' : '';
-      h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td><td>' + (s.idt ? IDT[s.idt].s :'<span class="gr-muted">—</span>') + '</td>' +
+      h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td>' +
+        M('idt', s.seat, s.idt ? '<span>' + IDT[s.idt].s + '</span>' + kNote : '<span class="gr-muted">—</span>') +   /* 💬 會透露身障，放身份格一起遮 */
         CATS.map(function (k) { return M(k, s.seat, x.sm[k] == null ? '<span class="gr-muted">—</span>' : '<span>' + r1(x.sm[k]) + '</span>'); }).join('') +
-        M('total', s.seat, '<b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b>') + M('j', s.seat, '<span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span>' + kNote) +
+        M('total', s.seat, '<b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b>') + '<td><span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span></td>' +
         M('np', s.seat, '<span>' + needTxt(x.nPass) + '</span>') + M('nm', s.seat, '<span>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</span>') + '</tr>';
       if (on) h += '<tr class="gr-dash-x"><td colspan="' + (CATS.length + 7) + '">' + trendHTML(cls, s, td) + '</td></tr>';
     });
