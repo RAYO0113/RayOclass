@@ -339,6 +339,7 @@
     if (S.item && !itemById(S.item)) S.item = '';
     var h = '<div class="gr-main"><div class="gr-side">' +
       '<div class="gr-row"><button class="gr-btn pri" data-g="new">＋ 新增</button><button class="gr-btn" data-g="imp">📅 從日曆匯入</button></div>';
+    var dz = calDeleted(); if (dz.length) h += '<div class="gr-row"><button class="gr-btn warn" data-g="calclean">🧹 清掉日曆已刪除的考卷（' + dz.length + ' 份）</button></div>';
     if (!its.length) h += '<p class="gr-muted">這班還沒有考卷。按「＋ 新增」或「從日曆匯入」。</p>';
     its.forEach(function (it) {
       var got = roster(S.cls).filter(function (s) { var c = scoreOf(it.id, s.seat); return c && (c.raw != null || c.sub); }).length;
@@ -478,6 +479,14 @@
       save('items', [wireItem(n)]).then(function () { Object.keys(n).forEach(function (k) { it[k] = n[k]; }); S.edit = null; render(); });
     }
   }
+  /* 10/20：日曆刪掉、名稱被標「（日曆已刪除）」而且沒有任何分數的考卷（四班一起），老師按一下清掉 */
+  function calDeleted() { return D.items.filter(function (it) { return String(it.title).indexOf('（日曆已刪除）') === 0 && !D.scores.some(function (s) { return s.item === it.id && (s.raw != null || s.sub); }); }); }
+  function calClean() {
+    var dz = calDeleted(); if (!dz.length) return;
+    if (!confirm('刪除這 ' + dz.length + ' 份（日曆已刪除、都沒有分數）？\n' + dz.map(function (i) { return i.cls + '・' + i.title; }).join('\n'))) return;
+    var ids = dz.map(function (i) { return i.id; });
+    remove('items', ids).then(function () { D.items = D.items.filter(function (i) { return ids.indexOf(i.id) < 0; }); if (ids.indexOf(S.item) >= 0) S.item = ''; setSt('✓ 已清掉 ' + ids.length + ' 份'); render(); });
+  }
   function delItem(id) {
     var it = itemById(id); if (!it) return;
     var n = D.scores.filter(function (s) { return s.item === id && (s.raw != null || s.sub); }).length;
@@ -570,7 +579,8 @@
     if (autoBusy || isDemo() || !pw()) return;
     var a = []; try { a = (window.V98CAL && V98CAL.data()) || []; } catch (e) {}
     var es = a.filter(function (e) { return e && e.date >= CAL_AUTO_FROM && CAL_MAP[e.item] && e.kind !== '檢討'; });
-    var sig = es.map(function (e) { return e.id + '@' + e.date + (e.quiz ? '#' + e.quiz.a + '-' + e.quiz.b : ''); }).sort().join(',');
+    var rs = nqRecs(), sig = es.map(function (e) { return e.id + '@' + e.date + (e.quiz ? '#' + e.quiz.a + '-' + e.quiz.b : ''); }).sort().join(',') +
+      '|nq' + rs.length + ':' + rs.map(function (r) { return r && r.createdAt || ''; }).sort().pop();   /* 小考紀錄多了也要跑（補第一題） */
     if (!es.length || sig === autoSeen) return;
     if (S.loaded && !renames().length) { var have = {}; D.items.forEach(function (i) { if (i.calId) have[i.calId] = 1; }); if (es.every(function (e) { return have[e.id]; })) { autoSeen = sig; return; } }
     autoBusy = true;
@@ -590,12 +600,39 @@
     }).catch(function () { autoBusy = false; });   /* 連不上就下一分鐘再試 */
   }
   function putQuiet(table, rows) { return call({ action: 'put', table: table, rows: rows }).then(function (r) { if (!r.ok) throw new Error(r.error || '儲存失敗'); return r; }); }
+  /* 10/20 老師：小考考完存了紀錄（nq-records：編號＋每一題），對應的日曆考卷（同班、同課、考試日＝紀錄那天；或名稱編號相同）
+     名稱改成「紀錄的編號 註釋小考（範圍）｜第一題：○○」、備註記「第一題：○○」（小老師頁靠這個認考卷） */
+  function nqRecs() { var rs = []; try { rs = JSON.parse(localStorage.getItem('nq-records-v1') || '[]') || []; } catch (x) {} return Array.isArray(rs) ? rs : []; }
+  function recFor(it) {
+    if (it.type !== '註釋小考') return null;
+    var n = +String(it.lessons).split(',')[0], byDay = null, byCode = null;
+    nqRecs().forEach(function (r) {
+      var c = r && r.codes && r.codes[it.cls]; if (!c || NQK[r.lesson] !== n) return;
+      var d = new Date(r.createdAt);
+      if (it.issued && !isNaN(d) && ymd(d) === it.issued) byDay = r;
+      if (String(it.title).replace('（日曆已刪除）', '').indexOf(c + ' ') === 0) byCode = r;
+    });
+    return byDay || byCode;
+  }
+  function recQ1(r) {
+    var qs = (r.questions || []).slice().sort(function (a, b) { return (+a.ord || 0) - (+b.ord || 0); });
+    var w = qs.length ? String(qs[0].w || '') : ''; return w.length > 14 ? w.slice(0, 14) + '…' : w;
+  }
   function renames() {
     var cal = {}, td = today(); try { ((window.V98CAL && V98CAL.data()) || []).forEach(function (e) { if (e && e.id) cal[e.id] = e; }); } catch (x) {}
     var out = [], DEL = '（日曆已刪除）', synced = false;
     try { synced = !!(window.V107SYNC && V107SYNC.state().pulled); } catch (x) {}   /* 這次開網頁已經從雲端拿過日曆，才判斷「已刪除」 */
     D.items.forEach(function (it) {
-      if (!it.calId || (it.issued || it.due || '') < td || (it.issued || it.due || '') < CAL_AUTO_FROM) return;
+      if (!it.calId || (it.issued || it.due || '') < CAL_AUTO_FROM) return;
+      var r = String(it.title).indexOf(DEL) === 0 || (synced && !cal[it.calId]) ? null : recFor(it);   /* 日曆已刪除的不配對紀錄 */
+      if (r) {   /* 已經考了：照小考紀錄 */
+        var q1 = recQ1(r), e0 = cal[it.calId], qa = e0 && e0.quiz && e0.quiz.a ? e0.quiz : (r.rangeStart ? { a: r.rangeStart, b: r.rangeEnd } : null);
+        var rt = r.codes[it.cls] + ' 註釋小考' + (qa ? '（註' + qa.a + '–' + qa.b + '）' : '') + (q1 ? '｜第一題：' + q1 : ''), rn = q1 ? '第一題：' + q1 : it.note, pr = { id: it.id };
+        if (rt !== it.title) pr.title = rt; if (rn !== it.note) pr.note = rn;
+        if (pr.title || pr.note) out.push(pr);
+        return;
+      }
+      if ((it.issued || it.due || '') < td) return;
       var e = cal[it.calId], t;
       if (!e) { if (synced && String(it.title).indexOf(DEL) !== 0) out.push({ id: it.id, title: DEL + it.title }); return; }   /* 只改名、不刪（可能另一台還沒同步） */
       t = it.type === '註釋小考' && e.item === '註釋小考' ? calTitle(e) : String(it.title).replace(DEL, '');
@@ -1219,6 +1256,7 @@
       if (/\|idt$/.test(v) && !dShown(v) && !confirm('身份別是個資（含身心障礙、原住民等）。\n確定要顯示 ' + v.split('|')[0] + ' 號的身份？\n（請確認畫面沒有在投影）')) return;
       S.dRev[v] = !dShown(v); b.classList.toggle('m', !dShown(v));
     }
+    else if (t === 'calclean') calClean();
     else if (t === 'das') { S.dAs[v] = !S.dAs[v]; render(); }
     else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }   /* 10/20：不含身份別，不必確認 */
     else if (t === 'dfil') { S.dashFil = v; render(); }
