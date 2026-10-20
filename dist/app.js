@@ -5770,7 +5770,7 @@ try {
 
   /* ── 狀態 ── */
   var S = { tab: get(K.tab, 'proj'), cls: get(K.cls, '') || classes()[0] || '', item: '', admin: false, loaded: false, loadedAt: 0, loading: false,
-    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false,
+    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false, dRev: {}, dRevAll: false,
     ptMode: '+', ptReason: '睡覺', ptView: get('gr_ptview_v1', 'grid'), seatEdit: false, ptRange: 'today', undo: [], setCls: '', paste: '', preview: null, loadErr: '' };
 
   function load(force) {
@@ -6568,16 +6568,20 @@ try {
       (noIdt ? '<p class="late">' + noIdt + ' 人還沒有身份別，先當一般生（60 分）算。到「⚙ 設定 → ⑥」匯入學校 xls。</p>' : '') +
       '<p class="gr-muted">及格線：一般 60、技優 50、原住民 40、身障 60。39 以下死當；補考＝40～及格線−1。</p></div></div>';
     var list = rows.filter(function (x) { return !S.dashFil || x.j === S.dashFil; });
-    h += '<div class="gr-sec"><h5>學生一覽' + (S.dashFil ? '（只看' + JUDGE[S.dashFil][0] + '）' : '') + '<span class="gr-muted" style="font-weight:400">　點一列看成績走勢</span></h5>' +
+    /* 10/20 老師：成績欄（各類平均、總分、狀態、要考幾分）預設遮住，點格子才顯示；可一鍵全部顯示／隱藏（與投影頁的遮罩各自獨立） */
+    var M = function (k, seat, html) { var key = seat + '|' + k, shown = S.dRevAll || S.dRev[key];
+      return '<td class="gr-mask' + (shown ? '' : ' m') + '" data-g="drev|' + key + '">' + html + '</td>'; };
+    h += '<div class="gr-sec"><h5>學生一覽' + (S.dashFil ? '（只看' + JUDGE[S.dashFil][0] + '）' : '') + '<span class="gr-muted" style="font-weight:400">　點座號／姓名看成績走勢，點成績格子才顯示</span>' +
+      '<button class="gr-btn" data-g="drevall" style="margin-left:10px;font-weight:400">' + (S.dRevAll ? '🙈 全部隱藏' : '👁 全部顯示') + '</button></h5>' +
       '<div style="overflow:auto"><table class="gr-t gr-dash-t"><thead><tr><th>座號</th><th>姓名</th><th>身份</th>' + CATS.map(function (k) { return '<th>' + k + '</th>'; }).join('') +
       '<th>目前總分</th><th>狀態</th><th>剩下段考要考<br>才及格</th><th>才能補考</th></tr></thead><tbody>';
     list.forEach(function (x) {
       var s = x.s, on = S.dashSeat === s.seat, J = JUDGE[x.j];
       var kNote = s.idt === 'K' && (x.j === 'makeup' || x.j === 'fail') ? ' <span title="身障生：可考慮放過關">💬</span>' : '';
       h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td><td>' + (s.idt ? IDT[s.idt].s :'<span class="gr-muted">—</span>') + '</td>' +
-        CATS.map(function (k) { return '<td>' + (x.sm[k] == null ? '<span class="gr-muted">—</span>' : r1(x.sm[k])) + '</td>'; }).join('') +
-        '<td><b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b></td><td><span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span>' + kNote + '</td>' +
-        '<td>' + needTxt(x.nPass) + '</td><td>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</td></tr>';
+        CATS.map(function (k) { return M(k, s.seat, x.sm[k] == null ? '<span class="gr-muted">—</span>' : '<span>' + r1(x.sm[k]) + '</span>'); }).join('') +
+        M('total', s.seat, '<b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b>') + M('j', s.seat, '<span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span>' + kNote) +
+        M('np', s.seat, '<span>' + needTxt(x.nPass) + '</span>') + M('nm', s.seat, '<span>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</span>') + '</tr>';
       if (on) h += '<tr class="gr-dash-x"><td colspan="' + (CATS.length + 7) + '">' + trendHTML(cls, s, td) + '</td></tr>';
     });
     h += '</tbody></table></div><p class="gr-muted">「剩下段考要考」＝還沒考（或作文還沒登）的段考每一次都考這個分數，其他項目維持現在的平均。💬＝身障生不及格，可考慮放過關。</p></div>';
@@ -6665,6 +6669,8 @@ try {
     else if (t === 'idgo') importIdt();
     else if (t === 'idx') { S.idPrev = null; render(); }
     else if (t === 'dseat') { S.dashSeat = +v || 0; render(); }
+    else if (t === 'drev') { S.dRev[v] = !S.dRev[v]; b.classList.toggle('m', !(S.dRevAll || S.dRev[v])); }
+    else if (t === 'drevall') { S.dRevAll = !S.dRevAll; S.dRev = {}; render(); }
     else if (t === 'dfil') { S.dashFil = v; render(); }
     else if (t === 'demoreset') { if (confirm('清除本機示範資料？')) { put(K.demo, null); S.loaded = false; load(true); } }
   }
