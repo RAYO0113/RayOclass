@@ -199,7 +199,7 @@
   var TOOLS = [
     ['cal', '📅', '日曆', '考試・作業'], ['gr', '📒', '成績', '登記・加減分'], ['nq', '📝', '小考紀錄', '訂正・給學生看'],
     ['hw', '✅', '重要進度檢核', '交作業・檢討'], ['sched', '🔁', '課表／調課', '預先調課'], ['plan', '📘', '教學進度', '老師專用'],
-    ['stu', '🎓', '班級網站', '學生版・小老師頁']];
+    ['stu', '🎓', '班級網站', '新版・學生版・小老師頁']];
   var SHEETS = { hw: '✅ 重要進度檢核', sched: '🔁 課表／調課', plan: '📘 教學進度', stu: '🎓 班級網站／小老師頁', sync: '☁ 同步／備份' };
 
   /* 10/7：學生班級網站（stu115）的密碼——老師輸入一次，存在 stu_pw_v1（雲端同步，學生端 stuGet 讀不到），
@@ -207,6 +207,7 @@
   var STU_BASE = 'https://rayo0113.github.io/stu115/';
   var STU_SLUG = { '建一忠': 'c-ywkbbb', '建一孝': 'c-pnn3hs', '冷一忠': 'c-efexia', '冷一孝': 'c-g2jy3u' };   /* 同 scripts/stu_releases.json */
   var TUTOR_URL = 'https://rayo0113.github.io/RayOclass/t';
+  var NEW_STU_URL = 'https://rayo0113.github.io/stu115/app/';   /* V153：新版班級網頁「我要當學霸」（四班同一網址，學校帳號登入；老師帳號可選學生預覽） */
   function stuPw() { var o = get('stu_pw_v1', {}); return o && typeof o === 'object' ? o : {}; }
   function applyStuPw() {
     var o = stuPw();
@@ -217,7 +218,9 @@
   }
   function renderStu(box) {
     var o = stuPw();
-    box.innerHTML = '<div class="v123-card"><b>👩‍🏫 小老師登記頁</b><div class="v123-mut">用您的學校帳號開，會自動以「老師」身分登入，四個班都看得到。</div>' +
+    box.innerHTML = '<div class="v123-card"><b>📱 新版班級網頁（我要當學霸）</b><div class="v123-mut">四個班同一個網址，學生用學校帳號登入；您用學校帳號開，可以選一位學生預覽他看到的畫面。</div>' +
+      '<a class="v123-pri v123-link" href="' + NEW_STU_URL + '" target="_blank" rel="noopener">打開新版班級網頁</a></div>' +
+      '<div class="v123-card"><b>👩‍🏫 小老師登記頁</b><div class="v123-mut">用您的學校帳號開，會自動以「老師」身分登入，四個班都看得到。</div>' +
       '<a class="v123-pri v123-link" href="' + TUTOR_URL + '" target="_blank" rel="noopener">打開小老師頁</a></div>' +
       '<div class="v123-card"><b>🎓 學生班級網站</b><div class="v123-mut">密碼只要在任何一台輸入一次，雲端同步後每台老師裝置點下面的連結就直接打開（學生看不到這裡）。</div>' +
       Object.keys(STU_SLUG).map(function (c) {
