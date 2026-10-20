@@ -1039,13 +1039,20 @@
       var kNote = s.idt === 'K' && (x.j === 'makeup' || x.j === 'fail') ? ' <span title="身障生：可考慮放過關">💬</span>' : '';
       h += '<tr class="gr-dash-r' + (on ? ' on' : '') + '" data-g="dseat|' + (on ? 0 : s.seat) + '"><td><b>' + s.seat + '</b></td><td class="nm">' + esc(s.name) + '</td>' +
         M('idt', s.seat, s.idt ? '<span>' + IDT[s.idt].s + '</span>' + kNote : '<span class="gr-muted">—</span>') +   /* 💬 會透露身障，放身份格一起遮 */
-        CATS.map(function (k) { return M(k, s.seat, x.sm[k] == null ? '<span class="gr-muted">—</span>' : '<span>' + r1(x.sm[k]) + '</span>'); }).join('') +
+        CATS.map(function (k) { var pe = x.sm[k] == null && /^[一二三]段$/.test(k) ? essPending(cls, k, s.seat) : null;   /* 10/20 老師：作文還沒登先看選擇題大概（不算進總分） */
+          return M(k, s.seat, x.sm[k] != null ? '<span>' + r1(x.sm[k]) + '</span>' : pe != null ? '<span class="gr-muted" title="作文還沒登，不算進總分">選擇 ' + r1(pe) + '／' + EXAM_MAX.raw + '<br>作文待登</span>' : '<span class="gr-muted">—</span>'); }).join('') +
         M('total', s.seat, '<b>' + (x.sm.total == null ? '—' : r1(x.sm.total)) + '</b>') + '<td><span class="gr-tag" style="background:' + J[1] + '">' + J[0] + '</span></td>' +
         M('np', s.seat, '<span>' + needTxt(x.nPass) + '</span>') + M('nm', s.seat, '<span>' + (x.line > FAIL_BELOW ? needTxt(x.nMk) : '<span class="gr-muted">無補考</span>') + '</span>') + '</tr>';
       if (on) h += '<tr class="gr-dash-x"><td colspan="' + (CATS.length + 7) + '">' + trendHTML(cls, s, td) + '</td></tr>';
     });
-    h += '</tbody></table></div><p class="gr-muted">「剩下段考要考」＝還沒考（或作文還沒登）的段考每一次都考這個分數，其他項目維持現在的平均。💬＝身障生不及格，可考慮放過關。</p></div>';
+    h += '</tbody></table></div><p class="gr-muted">段考格「選擇 xx／76 作文待登」＝作文還沒登，這次段考先不算進總分。「剩下段考要考」＝還沒考（或作文還沒登）的段考每一次都考這個分數，其他項目維持現在的平均。💬＝身障生不及格，可考慮放過關。</p></div>';
     return h + '</div></div>';
+  }
+  /* 段考已登選擇、作文還沒登：回傳選擇分數（同類有好幾份取最後一份），沒有就 null */
+  function essPending(cls, type, seat) {
+    var v = null;
+    itemsOf(cls).filter(function (it) { return it.type === type; }).forEach(function (it) { var c = scoreOf(it.id, seat); if (c && c.raw != null && c.ess == null && v == null) v = c.raw; });
+    return v;
   }
   function trendHTML(cls, s, td) {
     var its = itemsOf(cls).filter(function (it) { return it.type !== '態度'; }).slice().sort(function (a, b) { var x = a.due || a.issued || '', y = b.due || b.issued || ''; return x < y ? -1 : x > y ? 1 : 0; });
