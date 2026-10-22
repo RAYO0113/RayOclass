@@ -5662,10 +5662,11 @@ try {
     return w ? s / w : null;
   }
   function summary(cls, seat, td) {
-    var w = weights(cls), by = {};
+    var w = weights(cls), by = {}, has = {};
+    if (w.zeroMissing) D.scores.forEach(function (s) { if (s.raw != null) has[s.item] = 1; });   /* 10/22 老師：全班都沒有分數的考卷（還沒登、重複建的）不算 0；同學生頁不顯示（Code.gs gr-16 mSummary_ 同規則） */
     itemsOf(cls).forEach(function (it) {
       var sc = scoreOf(it.id, seat), f = finalOf(it, sc, td);
-      if (f == null && w.zeroMissing && it.late && it.due && !(sc && sc.sub) && lateOf(it, sc, td) > 0) f = 0;
+      if (f == null && w.zeroMissing && has[it.id] && it.late && it.due && !(sc && sc.sub) && lateOf(it, sc, td) > 0) f = 0;
       if (f != null) (by[it.type] = by[it.type] || []).push(f);
     });
     var t = {}; Object.keys(by).forEach(function (k) { t[k] = avg(by[k]); });
@@ -6555,7 +6556,7 @@ try {
       CATS.map(function (k) { return '<label>' + k + ' <input type="number" min="0" id="gr-w-' + k + '" value="' + esc(w[k]) + '" style="width:62px"></label>'; }).join('') + '</div>' +
       '<div class="gr-row"><span>作業內比例　習作 <input type="number" min="0" id="gr-w-習作" value="' + esc(w['習作']) + '" style="width:56px"> ： 回家考卷 <input type="number" min="0" id="gr-w-回家考卷" value="' + esc(w['回家考卷']) + '" style="width:56px"></span>' +
       '<span class="gr-muted">考試＝註釋小考平均×1/3＋A卷平均×2/3（固定）</span></div>' +
-      '<div class="gr-row"><label><input type="checkbox" id="gr-w-zero"' + (w.zeroMissing ? ' checked' : '') + '> 逾期未交的考卷以 0 分計入平均（不勾＝未交不列入）</label></div>' +
+      '<div class="gr-row"><label><input type="checkbox" id="gr-w-zero"' + (w.zeroMissing ? ' checked' : '') + '> 逾期未交的考卷以 0 分計入平均（不勾＝未交不列入；全班都沒分數的考卷不算）</label></div>' +
       '<div class="gr-row"><button class="gr-btn pri" data-g="wsave">儲存這班</button><button class="gr-btn" data-g="wsaveall">套用到全部班級</button><span class="gr-muted">比例數字不必加到 100，會自動換算；目前平均只算已有分數的項目。</span></div></div>';
     h += '<div class="gr-sec"><h5>④ 匯出 Excel</h5><div class="gr-row">' + classes().map(function (c) { return '<button class="gr-btn" data-g="csv|' + esc(c) + '">' + esc(c) + ' 成績總表</button>'; }).join('') +
       '<button class="gr-btn" data-g="csvpts">課堂加減分紀錄</button></div><p class="gr-muted">下載 CSV（Excel 可直接開，含姓名，請勿外流）。完整原始資料也在 Google 試算表裡。</p></div>';
@@ -11337,7 +11338,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V158';
+  window.APP_VERSION = 'V159';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
