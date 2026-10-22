@@ -1321,7 +1321,7 @@
     if (/^(item|new|imp|cls|tab|edit)$/.test(t)) S.mg = null;   /* V154：離開合併畫面 */
     if (t === 'x') close();
     else if (t === 'tab') { S.tab = v; put(K.tab, v); render(); }
-    else if (t === 'cls') { S.cls = v; put(K.cls, v); S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }
+    else if (t === 'cls') { S.cls = v; put(K.cls, v); S.setCls = v; S.preview = null; S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }   /* V158：上方班級也帶動「設定班級」（老師 10/22：配分只設得到冷一忠） */
     else if (t === 'reload') { S.loaded = false; load(true); }
     else if (t === 'retry') { if (Object.keys(pend).length) flush(); }
     else if (t === 'login') { var p = document.getElementById('gr-pw'); login(p && p.value, (document.getElementById('gr-rem') || {}).checked); }
@@ -1371,7 +1371,7 @@
     else if (t === 'ptw') { S.ptReason = v; render(); }
     else if (t === 'pt') addPoint(+v, b);
     else if (t === 'ptundo') undoPoint();
-    else if (t === 'scls') { S.setCls = v; S.preview = null; render(); }
+    else if (t === 'scls') { S.setCls = v; S.preview = null; S.cls = v; put(K.cls, v); S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }   /* V158：兩排班級按鈕同步 */
     else if (t === 'pprev') { S.paste = (document.getElementById('gr-paste') || {}).value || ''; S.preview = parsePaste(S.paste); render(); }
     else if (t === 'pgo') importRoster();
     else if (t === 'wsave') saveWeights(false);
