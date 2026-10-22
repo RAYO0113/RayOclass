@@ -3359,6 +3359,9 @@ try {
   function findIdx(pos) {
     for (var i = 0; i < wkSlides.length; i++) if (slideSig(wkSlides, i) === pos.sid) return i;
     if (pos.seg) for (var j = 0; j < wkSlides.length; j++) if (wkSlides[j].type === 'textpage' && wkSlides[j].page.seg === pos.seg) return j;
+    /* V157：段落改名（珍奶、火車線「第N部分」→「第N段」）後，舊進度用記住的句子開頭找回所在頁 */
+    if (pos.head) for (var h = 0; h < wkSlides.length; h++) if (wkSlides[h].type === 'textpage' &&
+      (wkSlides[h].page.lines || []).some(function (L) { return headOf(L.text) === pos.head; })) return h;
     return Math.max(0, Math.min(pos.idx || 0, wkSlides.length - 1));
   }
   function fixLine(pos, idx) {
@@ -4107,37 +4110,42 @@ try {
   var IMG = (function () { var B = /整理版_v\d+\.html$/.test(decodeURIComponent(location.pathname)) ? '上傳/' : ''; var P = {"九芎": "img/火車線/九芎.jpg", "光復糖廠": "img/火車線/光復糖廠.jpg", "冬候鳥群": "img/火車線/冬候鳥群.jpg", "吉安壽豐車票": "img/火車線/吉安壽豐車票.jpg", "吉安稻田": "img/火車線/吉安稻田.jpg", "吉安車站": "img/火車線/吉安車站.jpg", "四色牌": "img/火車線/四色牌.jpg", "夜鷹": "img/火車線/夜鷹.jpg", "太陽麻": "img/火車線/太陽麻.jpg", "木瓜溪橋火車": "img/火車線/木瓜溪橋火車.jpg", "棕背伯勞": "img/火車線/棕背伯勞.jpg", "永保安康車票": "img/火車線/永保安康車票.jpg", "泛舟": "img/火車線/泛舟.jpg", "烏頭翁": "img/火車線/烏頭翁.jpg", "環頸雉": "img/火車線/環頸雉.jpg", "甘蔗田": "img/火車線/甘蔗田.jpg", "田菁": "img/火車線/田菁.jpg", "白頭錦鴝": "img/火車線/白頭錦鴝.jpg", "臺灣野兔": "img/火車線/臺灣野兔.jpg", "苦楝": "img/火車線/苦楝.jpg", "虎爪豆": "img/火車線/虎爪豆.jpg", "賞鯨": "img/火車線/賞鯨.jpg", "路線圖_花蓮壽豐": "img/火車線/路線圖_花蓮壽豐.jpg", "軋日機": "img/火車線/軋日機.jpg", "金針花海": "img/火車線/金針花海.jpg"}; for (var k in P) P[k] = B + P[k]; return P; })();
   var PLAN = {
     '臺灣最美麗的火車線': {
-      '第1部分': {
+      /* V157：課文改成照課本一段一頁，鍵改成新段名、句序改成段內句序（舊：第1部分=一＋二段、第2部分=三＋四段、第6部分=八＋九段） */
+      '第二段': {
         after: {
-          2: { natural: true, items: [{ i: '軋日機', c: '軋日機' }, { i: '永保安康車票', c: '永康→保安 硬紙車票' }, { i: '四色牌', c: '四色牌' }] }
+          1: { natural: true, items: [{ i: '軋日機', c: '軋日機' }, { i: '永保安康車票', c: '永康→保安 硬紙車票' }, { i: '四色牌', c: '四色牌' }] }
         }
       },
-      '第2部分': {
+      '第三段': {
         after: {
-          2: [{ i: '路線圖_花蓮壽豐', c: '花東線：花蓮—吉安—志學—平和—壽豐' }],
-          6: { natural: true, items: [{ i: '吉安壽豐車票', c: '吉安→壽豐（15 元）' }, { i: '永保安康車票', c: '永康→保安' }] }
+          2: [{ i: '路線圖_花蓮壽豐', c: '花東線：花蓮—吉安—志學—平和—壽豐' }]
         }
       },
-      '第3部分': {
+      '第四段': {
+        after: {
+          1: { natural: true, items: [{ i: '吉安壽豐車票', c: '吉安→壽豐（15 元）' }, { i: '永保安康車票', c: '永康→保安' }] }
+        }
+      },
+      '第五段': {
         after: {
           0: [{ i: '吉安車站', c: '吉安車站' }],
           1: { banner: { i: '吉安稻田', c: '吉安的稻田', pos: 'center 52%' } }
         }
       },
-      '第5部分': {
+      '第七段': {
         after: {
           0: { t: '一般遊客的花蓮', items: [{ i: '賞鯨', c: '賞鯨' }, { i: '光復糖廠', c: '光復糖廠' }, { i: '泛舟', c: '秀姑巒溪泛舟' }] },
           1: { t: '作者的花蓮', items: [{ i: '苦楝', c: '苦楝' }, { i: '九芎', c: '九芎' }] }
         }
       },
-      '第6部分': {
+      '第八段': {
         after: {
           0: { contain: true, items: [{ i: '環頸雉', c: '環頸雉' }, { i: '白頭錦鴝', c: '白頭錦鴝' }, { i: '棕背伯勞', c: '棕背伯勞' }, { i: '夜鷹', c: '夜鷹' }, { i: '烏頭翁', c: '烏頭翁' }] },
           1: [{ i: '臺灣野兔', c: '臺灣野兔' }],
           2: [{ i: '冬候鳥群', c: '成群的冬候鳥', big: true }]
         }
       },
-      '第4部分': {
+      '第六段': {
         banner: { i: '金針花海', c: '金針花海' },
         after: {
           1: [{ i: '甘蔗田', c: '甘蔗田' }],
@@ -11329,7 +11337,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V156';
+  window.APP_VERSION = 'V157';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

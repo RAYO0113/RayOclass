@@ -226,6 +226,9 @@
   function findIdx(pos) {
     for (var i = 0; i < wkSlides.length; i++) if (slideSig(wkSlides, i) === pos.sid) return i;
     if (pos.seg) for (var j = 0; j < wkSlides.length; j++) if (wkSlides[j].type === 'textpage' && wkSlides[j].page.seg === pos.seg) return j;
+    /* V157：段落改名（珍奶、火車線「第N部分」→「第N段」）後，舊進度用記住的句子開頭找回所在頁 */
+    if (pos.head) for (var h = 0; h < wkSlides.length; h++) if (wkSlides[h].type === 'textpage' &&
+      (wkSlides[h].page.lines || []).some(function (L) { return headOf(L.text) === pos.head; })) return h;
     return Math.max(0, Math.min(pos.idx || 0, wkSlides.length - 1));
   }
   function fixLine(pos, idx) {
