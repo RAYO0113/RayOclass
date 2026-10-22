@@ -5661,12 +5661,21 @@ try {
     var s = 0, w = 0; pairs.forEach(function (p) { if (p[0] != null && p[1] > 0) { s += p[0] * p[1]; w += p[1]; } });
     return w ? s / w : null;
   }
+  /* 10/22 老師：L1～L3 是過渡期（小老師登記制剛上路），要有 10 人以上有分數才算「已登完」、缺交才算 0；
+     不到 10 人＝老師只先登了補考的、小老師還沒登全班 → 先不算 0（學生頁也不列未交；Code.gs gr-17 同規則） */
+  var TRANS_LES_MAX = 3, TRANS_MIN = 10;
+  function lesNums(it) {
+    var L = String(it.lessons || '').split(',').filter(Boolean).map(Number), m = /L(\d+)/.exec(it.title || '');
+    return L.length ? L : (m ? [m[1].length >= 3 ? +m[1].slice(0, 2) : +m[1]] : []);   /* 「L0501」＝第 5 課 */
+  }
+  function isTrans(it) { var L = lesNums(it); return L.length > 0 && L.every(function (n) { return n >= 1 && n <= TRANS_LES_MAX; }); }
+  function zeroReady(it, n) { return isTrans(it) ? n >= TRANS_MIN : n > 0; }   /* n＝這份考卷有分數的人數 */
   function summary(cls, seat, td) {
     var w = weights(cls), by = {}, has = {};
-    if (w.zeroMissing) D.scores.forEach(function (s) { if (s.raw != null) has[s.item] = 1; });   /* 10/22 老師：全班都沒有分數的考卷（還沒登、重複建的）不算 0；同學生頁不顯示（Code.gs gr-16 mSummary_ 同規則） */
+    if (w.zeroMissing) D.scores.forEach(function (s) { if (s.raw != null) has[s.item] = (has[s.item] || 0) + 1; });   /* 10/22 老師：全班都沒有分數的考卷（還沒登、重複建的）不算 0；同學生頁不顯示（Code.gs mSummary_ 同規則） */
     itemsOf(cls).forEach(function (it) {
       var sc = scoreOf(it.id, seat), f = finalOf(it, sc, td);
-      if (f == null && w.zeroMissing && has[it.id] && it.late && it.due && !(sc && sc.sub) && lateOf(it, sc, td) > 0) f = 0;
+      if (f == null && w.zeroMissing && zeroReady(it, has[it.id] || 0) && it.late && it.due && !(sc && sc.sub) && lateOf(it, sc, td) > 0) f = 0;
       if (f != null) (by[it.type] = by[it.type] || []).push(f);
     });
     var t = {}; Object.keys(by).forEach(function (k) { t[k] = avg(by[k]); });
@@ -11338,7 +11347,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V159';
+  window.APP_VERSION = 'V160';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
