@@ -1,16 +1,754 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>小老師成績登記</title>
-<!-- 短網址：rayo0113.github.io/RayOclass/t → 小老師頁「Google 學校帳號登入」部署（網域內，?page=tutor）；帳密登入版在 /tp。部署網址若換了，改這裡兩處。 -->
-<meta http-equiv="refresh" content="0; url=https://script.google.com/a/macros/mail2.ccvs.kh.edu.tw/s/AKfycbyW9KydiQ5kg8Mo7-JpBEHZVmmVg5Sgcor7nBO12lWU7zSBVQtle8bwEsdIK3VO2KsG/exec?page=tutor">
-<style>body{font-family:"Noto Sans TC",sans-serif;background:#f7f2e6;color:#33271a;text-align:center;padding:40px 16px;font-size:18px}a{color:#8a5a1f}</style>
+<!-- 瑞媛國文　小老師成績登記・GitHub 版（10/25 老師：整頁搬到 GitHub，語音登分放進登記畫面；網址 RayOclass/t）。
+     由 apps_script/tutor.html 搬來，功能照舊；只改三處：①連線＝fetch 帳密部署＋學校帳號通行證 t（後台 gr-18 起認，同學生網頁 ?page=auth 發的）
+     ②登入＝學校帳號（不用密碼）③登記畫面加 🎤 語音登分（說「5號14分」→ 暫存清單核對 → 全部寫入，走原本 queue／setSc）。
+     舊頁（Apps Script ?page=tutor）留著備用；Apps Script 外框不給麥克風，所以語音只能在這一版。
+     正本：教學系統 app/成績系統/src/tutor_gh.html → 複製到 RayOclass/t/index.html。網頁內沒有任何學生資料。 -->
+<style>
+:root{--bg:#faf6ef;--card:#fff;--ink:#3b2f25;--mut:#8a7a6a;--line:#e6dccd;--pri:#a0522d;--pri2:#f3e6d8;--ok:#2e7d4f;--okbg:#e5f3ea;--late:#b3261e;--latebg:#fde8e6;--lv:#6a4c93;--lvbg:#efe8f7;--hl:#fff3c4}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+.top{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.top b{font-size:17px}
+.top .sp{flex:1}
+.top button{background:rgba(255,255,255,.18);border:0;border-radius:8px;padding:5px 10px;color:#fff;font-size:14px}
+.mode{display:inline-block;background:#fff;color:var(--pri);border-radius:999px;padding:1px 10px;font-size:14px;font-weight:700}
+.wrap{max-width:720px;margin:0 auto;padding:12px 12px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px}
+.it{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px}
+.it .t{font-weight:700}
+.it small{display:block;color:var(--mut)}
+.tag{display:inline-block;font-size:13px;border-radius:6px;padding:0 6px;margin-right:6px;background:var(--pri2);color:var(--pri)}
+.miss{color:var(--late);font-weight:700}
+.okc{color:var(--ok);font-weight:700}
+.mut{color:var(--mut);font-size:14px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.big{width:100%;padding:14px;font-size:18px;margin:6px 0}
+h2{font-size:18px;margin:4px 0 8px}
+.missbox{background:var(--latebg);border-radius:10px;padding:8px 10px;margin:0 0 10px}
+.missbox b{color:var(--late)}
+.seg{display:flex;gap:6px;margin:0 0 10px}
+.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px}
+.seg button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.row{display:grid;grid-template-columns:3.4em 1fr auto;gap:6px 8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin:0 0 6px}
+.row.cur{outline:3px solid #e0a43a;background:var(--hl)}
+.row .no{font-size:20px;font-weight:700;text-align:center}
+.row .nm{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .nm small{display:block;color:var(--mut);font-size:12px}
+.sc{width:4.6em;font-size:22px;text-align:center;border:2px solid var(--line);border-radius:8px;padding:4px}
+.sc:focus{border-color:var(--pri);outline:0;background:#fffaf2}
+.chips{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 10px;font-size:14px}
+.chip.ok.on{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:700}
+.chip.late.on{background:var(--latebg);border-color:var(--late);color:var(--late);font-weight:700}
+.chip.lv.on{background:var(--lvbg);border-color:var(--lv);color:var(--lv);font-weight:700}
+.chip input{border:0;background:transparent;font-size:14px;padding:0;width:8.2em}
+.st{font-size:13px;min-width:1.2em;text-align:right}
+.st.err{color:var(--late)}
+.done{color:var(--ok);font-weight:700}
+.bon{grid-column:1/-1;display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.bon button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 0;font-size:15px}
+.bon button.on{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.ck{width:28px;height:28px}
+.mask{position:fixed;inset:0;background:rgba(40,28,18,.55);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.dlg{background:#fff;border-radius:16px;padding:18px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.dlg h3{margin:0 0 6px;font-size:20px}
+.dlg .choice{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin:10px 0 0}
+.dlg .choice b{font-size:19px}
+.dlg .choice small{display:block;color:var(--mut)}
+.dlg .choice:hover,.dlg .choice:focus{border-color:var(--pri)}
+label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
+.inp{width:100%;font-size:17px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#3b2f25;color:#fff;padding:8px 16px;border-radius:999px;z-index:30;font-size:15px;max-width:92vw}
+.toast.err{background:var(--late)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 12px;display:flex;gap:8px;align-items:center;z-index:6}
+.bar .sp{flex:1}
+.top select{font:inherit;font-size:15px;border:0;border-radius:8px;padding:4px 6px;background:#fff;color:var(--pri);font-weight:700}
+.warn{background:#fff3c4;border:1px solid #e0a43a;border-radius:10px;padding:6px 10px;margin:0 0 10px;font-size:14px}
+.dlg .me{font-size:22px;font-weight:700;margin:10px 0 4px;text-align:center}
+/* gr-6 */
+.seg.tf{position:sticky;top:46px;z-index:4;background:var(--bg);padding:4px 0}
+.les{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.les button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 2px;line-height:1.2}
+.les button small{display:block;font-size:11px;color:var(--mut)}
+.les button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.les button.on small{color:#fff}
+.opts{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 6px}
+.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font-size:15px}
+.opts button.on{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:700}
+.bon button{padding:9px 0;font-size:14px}
+.row.cur .bon button{border-color:#e0a43a}
+/* 按鈕爆粒子（10/8）：點下去 1→0.8→1.2→1 回彈＋8 顆古典色小圓點，600ms */
+.pop-fx-layer{position:absolute;left:0;top:0;width:0;height:0;overflow:visible;pointer-events:none;z-index:99999}
+.pop-fx-dot{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform,opacity}
+/* 10/25 語音登分（GitHub 版） */
+.vobtn{display:block;width:100%;border:2px solid var(--pri);background:#fff;color:var(--pri);border-radius:12px;padding:10px;font-size:17px;font-weight:700;margin:0 0 10px}
+.vobtn.on{background:var(--pri);color:#fff}
+.vo{border:2px solid var(--pri);border-radius:12px;background:#fff;padding:10px;margin:0 0 12px}
+.vo .go{width:100%;padding:12px;font-size:18px;border-radius:10px;border:0;background:var(--pri);color:#fff}
+.vo .go.stop{background:var(--late)}
+.say{font-size:20px;line-height:1.4;border:2px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;min-height:60px;text-align:center}
+.say b{font-size:36px;color:var(--pri)}
+.say small{display:block;font-size:15px}
+.say.bad{border-color:var(--late);color:var(--late);font-size:19px}
+.say.ok{border-color:var(--ok);color:var(--ok)}
+.vmid{min-height:18px;font-size:14px;color:var(--mut);text-align:center}
+.vt{width:100%;border-collapse:collapse;margin:6px 0}
+.vt th,.vt td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}
+.vt th{font-size:13px;color:var(--mut);font-weight:400}
+.vt td{font-size:17px}
+.vt tr.new td{background:var(--hl);font-weight:700}
+.vt .x{border:0;background:transparent;color:var(--mut);font-size:18px}
+.vbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vbar .sp{flex:1}
+.vbar .btn:disabled{opacity:.4}
+</style>
 </head>
 <body>
-<p>正在前往「小老師成績登記」……</p>
-<p>請用學校帳號（學號@mail2.ccvs.kh.edu.tw）登入。<br>沒有自動跳轉的話，請點：<br><a id="go" href="https://script.google.com/a/macros/mail2.ccvs.kh.edu.tw/s/AKfycbyW9KydiQ5kg8Mo7-JpBEHZVmmVg5Sgcor7nBO12lWU7zSBVQtle8bwEsdIK3VO2KsG/exec?page=tutor">小老師成績登記</a></p>
-<script>location.replace(document.getElementById('go').href);</script>
+<div id="app"><div class="wrap"><p class="mut">讀取中…</p></div></div>
+<script>
+(function () {
+  'use strict';
+  var TYPE_NAME = { '註釋小考': '小考', 'A卷': 'A卷', '習作': '習作', '筆記': '課本筆記', '回家考卷': '其它' };
+  var TEST = { '註釋小考': 1, 'A卷': 1 };
+  var S = { me: null, email: '', cls: '', mode: '', d: null, item: '', tab: 'raw', cur: 0, fix: {}, dlg: '', busy: false, newF: null, tf: '' };
+  var pend = {}, rowSt = {}, timer = null, saving = false;
+
+  /* ── 工具 ── */
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function md(s) { if (!s) return ''; var a = String(s).split('-'); return (+a[1]) + '/' + (+a[2]); }
+  function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function lsPut(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
+  function $(sel) { return document.querySelector(sel); }
+  function toast(t, err) {
+    var o = $('.toast'); if (o) o.remove();
+    o = document.createElement('div'); o.className = 'toast' + (err ? ' err' : ''); o.textContent = t; document.body.appendChild(o);
+    setTimeout(function () { if (o.parentNode) o.remove(); }, err ? 4500 : 1800);
+  }
+  /* GitHub 版：帳密部署（任何人）＋學校帳號通行證；登入用學校帳號部署 ?page=auth（同 stu115 新班級網頁） */
+  var CFG = {
+    api: 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec',
+    auth: 'https://script.google.com/a/macros/mail2.ccvs.kh.edu.tw/s/AKfycbyW9KydiQ5kg8Mo7-JpBEHZVmmVg5Sgcor7nBO12lWU7zSBVQtle8bwEsdIK3VO2KsG/exec'
+  };
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (LOCAL) CFG.api = CFG.auth = location.origin + '/exec';   /* 本機測試：scripts/成績系統/tutor_gh_dev_server.js（真的 Code.gs＋假名單） */
+  var TK = 'tv_t_v1', AC = 'tv_acct_v1', DOM = '@mail2.ccvs.kh.edu.tw';
+  function takeHash() {   /* #t= 收下就從網址列清掉 */
+    var hm = /[#&]t=([\w.-]+)/.exec(location.hash);
+    if (hm) { lsPut(TK, hm[1]); history.replaceState(null, '', location.pathname + location.search); }
+    return !!hm;
+  }
+  function api(req) {
+    req.t = lsGet(TK);
+    if (S.me && S.me.all && !('cls' in req)) req.cls = S.cls;   // 測試帳號：目前選的班
+    return fetch(CFG.api, { method: 'POST', body: JSON.stringify(req), redirect: 'follow' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+
+  /* ── 資料 ── */
+  function items() {
+    return (S.d ? S.d.items : []).slice().sort(function (a, b) { var x = a.issued || a.due || '', y = b.issued || b.due || ''; return x === y ? 0 : (x < y ? 1 : -1); });
+  }
+  function itemOf(id) { return (S.d ? S.d.items : []).filter(function (i) { return i.id === id; })[0] || null; }
+  function scOf(item, seat) { return (S.d ? S.d.scores : []).filter(function (o) { return o.item === item && o.seat === seat; })[0] || null; }
+  function setSc(item, seat, p) {
+    var o = scOf(item, seat);
+    if (!o) { o = { item: item, seat: seat, got: 0, late: 0, sub: '', lv: '', lvD: '', chk: 0, raw: '', bonus: '', show: 1 }; S.d.scores.push(o); }
+    Object.keys(p).forEach(function (k) { o[k] = p[k]; });
+    return o;
+  }
+  /* 測試帳號：班級以後台回傳的為準（後台會擋掉不存在的班）；第一次用上次選的班 */
+  function setMe(me) {
+    var first = !S.me || S.me.all !== me.all;
+    S.me = me;
+    if (me.all) { var c = lsGet('tutor_cls'); S.cls = first && c && (me.classes || []).indexOf(c) >= 0 ? c : (S.cls && (me.classes || []).indexOf(S.cls) >= 0 ? S.cls : me.cls); }
+    else S.cls = me.cls;
+  }
+  function itemName(it) { return it.title || (TYPE_NAME[it.type] || it.type); }
+  function stat(it) {
+    var r = S.d.roster, got = 0, chk = 0, miss = [];
+    r.forEach(function (s) { var o = scOf(it.id, s.seat); if (o && o.got) { got++; if (o.chk) chk++; } else if (!(o && o.lv)) miss.push(s); });
+    return { n: r.length, got: got, chk: chk, miss: miss };
+  }
+
+  function load(cb) {
+    var it = S.item;
+    api({ action: 'tLoad', item: it, mode: S.mode }).then(function (r) {
+      if (!r.ok) { if (r.auth === false) { lsPut(TK, ''); S.me = null; S.err = '登入已過期，請重新登入'; render(); return; } throw new Error(r.error || '讀取失敗'); }
+      S.d = r; setMe(r.me); if (cb) cb(); render();
+    }).catch(function (e) { toast('讀取失敗：' + e.message, true); });
+  }
+
+  /* ── 儲存（批次） ── */
+  function queue(seat, p) {
+    var k = S.item + '|' + seat, o = pend[k] || (pend[k] = { item: S.item, mode: S.mode, cls: S.cls, row: { seat: seat } });
+    Object.keys(p).forEach(function (f) { o.row[f] = p[f]; });
+    rowSt[k] = '⏳'; paintSt(seat);
+    clearTimeout(timer); timer = setTimeout(flush, 500);
+  }
+  function flush() {
+    if (saving) { clearTimeout(timer); timer = setTimeout(flush, 400); return; }
+    var keys = Object.keys(pend); if (!keys.length) return;
+    var by = {}; keys.forEach(function (k) { var o = pend[k]; var g = o.item + '|' + o.mode + '|' + o.cls; (by[g] = by[g] || { item: o.item, mode: o.mode, cls: o.cls, rows: [], keys: [] }); by[g].rows.push(o.row); by[g].keys.push(k); });
+    pend = {}; saving = true;
+    var groups = Object.keys(by).map(function (g) { return by[g]; });
+    (function next(i) {
+      if (i >= groups.length) { saving = false; renderBar(); if (Object.keys(pend).length) flush(); return; }
+      var g = groups[i];
+      api({ action: 'tPut', item: g.item, mode: g.mode, cls: g.cls, rows: g.rows }).then(function (r) {
+        g.keys.forEach(function (k) { rowSt[k] = r.ok ? '✓' : '⚠'; paintSt(+k.split('|')[1], k); });
+        if (!r.ok) toast(r.error || '儲存失敗', true);
+        next(i + 1);
+      }).catch(function (e) {
+        g.keys.forEach(function (k, j) { rowSt[k] = '⚠'; pend[k] = pend[k] || { item: g.item, mode: g.mode, cls: g.cls, row: g.rows[j] }; paintSt(+k.split('|')[1], k); });
+        saving = false; toast('沒存到（' + e.message + '），網路恢復後按「重存」', true); renderBar();
+      });
+    })(0);
+  }
+  function paintSt(seat, k) {
+    k = k || S.item + '|' + seat;
+    if (k.split('|')[0] !== S.item) return;
+    var e = document.querySelector('[data-st="' + seat + '"]'); if (!e) return;
+    e.textContent = rowSt[k] || ''; e.className = 'st' + (rowSt[k] === '⚠' ? ' err' : '');
+  }
+
+  /* ── 畫面 ── */
+  function render() {
+    var app = $('#app'), h = '';
+    if (!S.me) { app.innerHTML = loginHTML(); return; }
+    h += '<div class="top">' + (S.me.all ? '<b>' + (S.me.teacher ? '老師' : '測試帳號') + '</b><select data-a="cls" aria-label="班級">' + (S.me.classes || []).map(function (c) { return '<option' + (c === S.cls ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>'
+      : '<b>' + esc(S.me.cls) + ' ' + S.me.seat + '號</b>') +
+      (S.mode ? '<span class="mode">' + (S.mode === 'chk' ? '🔍 檢查' : '✏️ 登記') + '</span>' : '') +
+      '<span class="sp"></span><button data-a="mode">換模式</button><button data-a="reload">⟳</button><button data-a="logout">登出</button></div>';
+    h += '<div class="wrap">';
+    if (S.me.all && !S.me.teacher) h += '<div class="warn">🧪 測試帳號：登記、打勾都會寫進正式成績（記成「測試帳號」），請只在測試用的考卷上試。</div>';
+    if (!S.d) h += '<p class="mut">讀取中…</p>';
+    else if (S.newF) h += newHTML();
+    else if (S.item && itemOf(S.item)) h += itemHTML(itemOf(S.item));
+    else h += homeHTML();
+    h += '</div>';
+    if (S.dlg === 'who') h += whoDlg();
+    else if (S.dlg === 'mode' || (!S.mode && S.d)) h += modeDlg();
+    app.innerHTML = h;
+    renderBar();
+    var f = document.querySelector('.row.cur .sc'); if (f && !S.dlg && S.mode) { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }
+  }
+  function renderBar() {
+    var b = $('.bar'); if (b) b.remove();
+    var n = Object.keys(rowSt).filter(function (k) { return rowSt[k] === '⚠'; }).length;   // 只提示存失敗的（⏳ 是正在存）
+    if (!n) return;
+    b = document.createElement('div'); b.className = 'bar';
+    b.innerHTML = '<span class="miss">⚠ 有 ' + n + ' 筆還沒存到</span><span class="sp"></span><button class="btn pri" data-a="retry">重存</button>';
+    document.body.appendChild(b);
+  }
+
+  function loginHTML() {
+    return '<div class="top"><b>小老師成績登記</b></div><div class="wrap"><div class="card">' +
+      '<h2>用學校帳號登入</h2>' + (S.err ? '<p class="miss">' + esc(S.err) + '</p>' : '') +
+      '<p class="mut">打你的學號，按「登入」後選學校帳號（學號' + DOM + '）。只有小老師登得進來，不用另外的密碼。</p>' +
+      '<label class="f">學號</label><input class="inp" id="u" autocomplete="username" inputmode="text" autocapitalize="off" value="' + esc(lsGet(AC)) + '">' +
+      '<button class="btn pri big" data-a="login">登入</button></div></div>';
+  }
+  function meText() { return S.me.all ? (S.me.teacher ? '老師' : '測試帳號') + '（' + esc(S.cls) + '）' : esc(S.me.cls) + ' ' + S.me.seat + '號 ' + esc(S.me.name); }
+  /* 登入後先確認身分（10/6 老師要求）→「小奴工上工了」→ 再選登記／檢查 */
+  function whoDlg() {
+    var who = S.me.all ? (S.me.teacher ? '老師' : '測試帳號') : esc(S.me.cls) + ' ' + S.me.seat + '號 ' + esc(S.me.name);
+    return '<div class="mask"><div class="dlg"><h3>請確認你的身分</h3><p class="mut" style="text-align:center;margin:8px 0 0">你是</p><div class="me">' + who + '</div>' +
+      (S.me.all ? '<p class="mut" style="text-align:center">' + esc(S.me.email || '') + '<br>四個班都看得到，上方可以切換班級</p>' : '') +
+      '<button class="btn pri big" data-a="go">💪 小奴工上工了</button>' +
+      '<button class="btn" style="width:100%;margin-top:4px" data-a="logout">不是我（登出）</button></div></div>';
+  }
+  function modeDlg() {
+    return '<div class="mask"><div class="dlg"><h3>你現在要做什麼？</h3><p class="mut">' + meText() + '</p>' +
+      '<button class="choice" data-a="setmode|reg"><b>✏️ 登記</b><small>輸入分數、訂正加分，標記誰遲交、請假、補考</small></button>' +
+      '<button class="choice" data-a="setmode|chk"><b>🔍 檢查</b><small>對照考卷，核對別人登記的分數，沒錯就打勾</small></button>' +
+      (S.mode ? '<button class="btn" style="margin-top:12px;width:100%" data-a="closedlg">取消</button>' : '') + '</div></div>';
+  }
+  /* ── gr-6（10/7 老師）：先選類型 → 只列小老師新增的；新增時選第幾課＋（小考）第一題；分數＋訂正加分同一頁；遲交／補交／補考 ── */
+  var TYPE4 = ['註釋小考', '筆記', '習作', 'A卷'];
+  var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '論語選' };
+  function opt(it) {   /* 每份的設定（這支手機記得）：b＝一起登訂正加分，inc＝分數已含加分 */
+    var o = null; try { o = JSON.parse(lsGet('tutor_opt|' + it.id) || 'null'); } catch (e) {}
+    return o || { b: 1, inc: 0 };   /* 10/7：筆記也有分數；加分不點也可以，預設都顯示 */
+  }
+  function setOpt(it, o) { lsPut('tutor_opt|' + it.id, JSON.stringify(o)); }
+  function stOf(o) { if (!o) return ''; if (o.got && o.lv) return 'makeup'; if (o.got && o.late) return 'late'; if (o.got) return 'ok'; if (o.lv) return 'leave'; return ''; }
+  function stName(it, st) { var t = TEST[it.type]; return { ok: '準時', late: '遲交', makeup: t ? '補考' : '補交', leave: t ? '請假未考' : '請假未交' }[st] || ''; }
+  /* 10/20：老師從日曆建的註釋小考，期限＝下一節國文課，考試日要看 issued（日曆那天） */
+  function exDay(it) { return (TEST[it.type] && it.issued) || it.due || ''; }
+  function leaveDay(it) { var td = S.d.today, x = exDay(it); return x && x <= td ? x : td; }   /* 請假那天預設＝考試日／期限 */
+  function total(o) { return o && o.raw !== '' && o.raw !== '✓' ? +o.raw + (+o.bonus || 0) : ''; }
+
+  function homeHTML() {
+    var tf = S.tf, its = items().filter(function (i) { return i.type === tf; });
+    var h = '<div class="seg tf">' + TYPE4.map(function (t) { return '<button data-a="tf|' + t + '" class="' + (tf === t ? 'on' : '') + '">' + TYPE_NAME[t] + '</button>'; }).join('') + '</div>';
+    h += '<h2>' + (S.mode === 'chk' ? '選一份要檢查的' : '選一份要登記的') + TYPE_NAME[tf] + '</h2>';
+    if (!its.length) h += '<p class="mut">還沒有' + (S.mode === 'reg' ? '，按下面「＋ 新增」建一份。' : '人新增。') + '</p>';
+    its.forEach(function (it) {
+      var s = stat(it), dueP = it.due && it.due < S.d.today;
+      h += '<button class="it" data-a="item|' + esc(it.id) + '"><span class="t">' + esc(itemName(it)) + '</span>' +
+        '<small>' + (exDay(it) ? (TEST[it.type] ? '考試 ' : '期限 ') + md(exDay(it)) + '　' : '') + '已交 ' + s.got + '/' + s.n +
+        (s.miss.length ? '　<span class="' + (dueP ? 'miss' : '') + '">未交 ' + s.miss.length + '</span>' : '　<span class="okc">全交</span>') +
+        (S.mode === 'chk' ? '　已檢查 ' + s.chk + '/' + s.got : '') + '　（' + (it.by ? esc(it.by) + '新增' : '老師建') + '）</small></button>';
+    });
+    if (S.mode === 'reg') h += '<button class="btn pri big" data-a="new">＋ 新增一份' + TYPE_NAME[tf] + '</button>';
+    if (S.cls === '測試班') h += '<button class="btn big" style="margin-top:8px" data-a="treset">🧹 清空測試班（四種類型全部）</button>';
+    return h;
+  }
+  function newHTML() {
+    var f = S.newF, q = f.type === '註釋小考', h = '<div class="card"><h2>新增一份</h2>';
+    h += '<label class="f">類型</label><div class="seg">' + TYPE4.map(function (t) { return '<button data-a="ntype|' + t + '" class="' + (f.type === t ? 'on' : '') + '">' + TYPE_NAME[t] + '</button>'; }).join('') + '</div>';
+    h += '<label class="f">第幾課' + (q ? '' : '（可不選）') + '</label><div class="les">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) {
+      return '<button data-a="nles|' + n + '" class="' + (+f.les === n ? 'on' : '') + '"><b>L' + n + '</b>' + (LES[n] ? '<small>' + LES[n] + '</small>' : '') + '</button>'; }).join('') + '</div>';
+    if (q) h += '<label class="f">第一題考什麼？（照考卷第一題畫線的字詞寫，例：師道）</label><input class="inp" id="nq1" maxlength="40" value="' + esc(f.q1) + '">';
+    else h += '<label class="f">名稱</label><input class="inp" id="nt" maxlength="40" value="' + esc(f.title) + '" placeholder="' + esc((f.les ? 'L' + f.les + ' ' : '') + TYPE_NAME[f.type] + '（空白就用這個）') + '">';
+    h += '<label class="f">' + (TEST[f.type] ? '考試日期' : '繳交期限（過了才算遲交）') + '</label><input class="inp" id="nd" type="date" value="' + esc(f.date) + '">';
+    return h + '<p class="mut">新增的會標「小老師新增」，老師看得到。同一張考卷同班只要建一次，別的小老師會直接用你建的。</p>' +
+      '<button class="btn pri big" data-a="nsave">建立</button><button class="btn big" data-a="ncancel">取消</button></div>';
+  }
+  function readNew() {
+    var f = S.newF; if (!f) return;
+    var a = $('#nq1'), b = $('#nt'), c = $('#nd');
+    if (a) f.q1 = a.value.trim();
+    if (b) f.title = b.value.trim();
+    if (c) f.date = c.value;
+  }
+
+  function itemHTML(it) {
+    var s = stat(it), o = opt(it), h = '<button class="btn" data-a="home">← 回列表</button>' +
+      '<h2 style="margin-top:10px"><span class="tag">' + esc(TYPE_NAME[it.type] || it.type) + '</span>' + esc(itemName(it)) + '</h2>' +
+      '<p class="mut">' + (exDay(it) ? (TEST[it.type] ? '考試 ' : '期限 ') + md(exDay(it)) + (it.late ? '' : '（不算遲交）') : '沒有期限') + '　已交 ' + s.got + '/' + s.n + '</p>';
+    h += s.miss.length ? '<div class="missbox"><b>還沒交（' + s.miss.length + '）：</b>' + s.miss.map(function (x) { return x.seat; }).join('、') + '</div>'
+      : '<div class="missbox" style="background:var(--okbg)"><span class="okc">全部都交了 ✓</span></div>';
+    if (S.mode === 'chk') return h + chkHTML(it);
+    h += '<div class="opts"><button data-a="opt|b" class="' + (o.b ? 'on' : '') + '">' + (o.b ? '☑' : '☐') + ' 一起登訂正加分</button>' +
+      (o.b ? '<button data-a="opt|inc" class="' + (o.inc ? 'on' : '') + '">' + (o.inc ? '☑' : '☐') + ' 考卷上的分數已含加分</button>' : '') + '</div>';
+    h += '<p class="mut">' + (o.b ? (o.inc ? '打考卷上的<b>總分</b>，有訂正加分的再點 +幾，系統自動算回原始分數。' : '打分數會自動跳下一位；有訂正加分的再點那一位的 +幾。')
+      : '打分數會自動跳下一位（打 10 要按 Enter）。') + '準時交的不用管；遲交、補交、補考、請假的點一下。</p>';
+    h += voHTML(it);   /* 10/25：語音登分 */
+    S.d.roster.forEach(function (x) { h += rawRow(it, x, o); });
+    return h;
+  }
+  function stChips(it, x, sc) {
+    sc = sc || {};
+    var st = stOf(sc), td = S.d.today, t = TEST[it.type], h = '<div class="chips">';
+    var list = (sc.got ? ['ok'] : []).concat(t ? ['makeup'] : (it.late ? ['late', 'makeup'] : ['makeup']));   /* 10/8 老師：拿掉「已交（無分數）」——還沒有分數的不顯示「準時」，打分數就自動算準時 */
+    if (!sc.got) list.push('leave');
+    list.forEach(function (k) {
+      var on = st === k, cls = k === 'ok' ? 'ok' : k === 'leave' ? 'lv' : 'late';
+      h += '<button class="chip ' + cls + (on ? ' on' : '') + '" data-a="st|' + x.seat + '|' + k + '">' + stName(it, k) + '</button>';
+    });
+    if (st === 'late') h += '<span class="chip late on">收到 <input type="date" data-a="std|' + x.seat + '|late" max="' + td + '" value="' + esc(sc.sub || td) + '"></span>';
+    if (st === 'makeup') h += '<span class="chip lv on">請假 <input type="date" data-a="stl|' + x.seat + '" max="' + td + '" value="' + esc(sc.lvD || leaveDay(it)) + '"></span>' +
+      '<span class="chip late on">' + (t ? '補考' : '補交') + ' <input type="date" data-a="std|' + x.seat + '|makeup" max="' + td + '" value="' + esc(sc.sub || td) + '"></span>' +
+      '<span class="mut" style="font-size:12px;width:100%">請假後第一節國文課還沒' + (t ? '補考' : '補交') + '，系統會自動算遲交</span>';
+    if (st === 'leave') h += '<span class="chip lv on">請假 <input type="date" data-a="stl|' + x.seat + '" max="' + td + '" value="' + esc(sc.lvD || leaveDay(it)) + '"></span><button class="chip lv on" data-a="st|' + x.seat + '|unleave">✕</button>';
+    if (sc.got && sc.show) h += '<button class="chip" data-a="clear|' + x.seat + '">清除</button>';
+    return h + '</div>';
+  }
+  function rawRow(it, x, op) {
+    var sc = scOf(it.id, x.seat), cur = S.cur === x.seat ? ' cur' : '', k = it.id + '|' + x.seat;
+    var hidden = sc && sc.raw === '✓' && !S.fix[k];
+    var val = sc && sc.raw !== '✓' ? (op.b && op.inc ? total(sc) : sc.raw) : '';
+    var inp = hidden ? '<span class="done">✓ 已登記</span> <button class="chip" data-a="fix|' + x.seat + '">更正</button>'
+      : '<input class="sc" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" data-seat="' + x.seat + '" value="' + esc(val) + '">';
+    var note = '';
+    if (sc && sc.show && sc.raw !== '' && sc.raw !== '✓' && op.b) note = op.inc ? '原始 ' + sc.raw + (sc.bonus ? '＋' + sc.bonus : '') : (sc.bonus ? '加分 +' + sc.bonus : '');
+    var h = '<div class="row' + cur + '" data-row="' + x.seat + '"><div class="no">' + x.seat + '</div><div class="nm">' + esc(x.name) + (note ? '<small>' + esc(note) + '</small>' : '') + '</div>' +
+      '<div>' + inp + ' <span class="st" data-st="' + x.seat + '">' + esc(rowSt[k] || '') + '</span></div>';
+    if (op.b && !hidden) {
+      var v = sc && sc.bonus !== '✓' && sc.bonus !== '' ? +sc.bonus : (sc && sc.raw !== '' && sc.raw !== '✓' && sc.show && sc.bset ? 0 : null);
+      h += '<div class="bon">';
+      for (var i = 0; i <= 10; i++) h += '<button data-a="bon|' + x.seat + '|' + i + '" class="' + (v === i ? 'on' : '') + '">+' + i + '</button>';
+      h += '</div>';
+    }
+    return h + stChips(it, x, sc) + '</div>';
+  }
+  function chkHTML(it) {
+    var rows = S.d.roster.filter(function (x) { var o = scOf(it.id, x.seat); return o && (o.got || o.lv); });
+    var h = '<p class="mut">對照考卷，分數不對就直接改（會記錄是你改的）；對了就打勾。分數格是<b>原始分數</b>（不含訂正加分）。</p>';
+    if (!rows.length) return h + '<p class="mut">還沒有人登記。</p>';
+    rows.forEach(function (x) {
+      var o = scOf(it.id, x.seat), k = it.id + '|' + x.seat, st = stOf(o);
+      h += '<div class="row" data-row="' + x.seat + '"><div class="no">' + x.seat + '</div><div class="nm">' + esc(x.name) +
+        '<small>' + stName(it, st) + (st === 'late' || st === 'makeup' ? ' ' + md(o.sub) : st === 'leave' ? ' ' + md(o.lvD) : '') +
+        (o.bonus ? '　訂正 +' + esc(o.bonus) : '') + '</small></div>' +
+        '<div>' + (o.got ? '<input class="sc" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" data-seat="' + x.seat + '" value="' + esc(o.raw) + '"> ' +
+          '<input type="checkbox" class="ck" data-a="ck|' + x.seat + '"' + (o.chk ? ' checked' : '') + '>' : '') +
+        ' <span class="st" data-st="' + x.seat + '">' + esc(rowSt[k] || '') + '</span></div></div>';
+    });
+    return h + '<button class="btn pri big" data-a="ckall">這一份全部核對無誤 ✓</button>';
+  }
+
+  /* ── 語音登分（10/25 老師；GitHub 版才有）：說「5號14分」→ 暫存清單、大字核對 → 按「全部寫入」才存（同 commitRaw：queue＋setSc，後台照記登記者與修改紀錄）。
+     解析同老師端 grade.js voNorm／voParse；「四／十」「一／七」可能聽錯，所以聽到的不直接存。 ── */
+  var VO = { rec: null, on: false, want: false }, VMAX = 100;   /* 語音只收 100 以內（手打照舊 0～200） */
+  var CN_D = { '零': 0, '〇': 0, '一': 1, '壹': 1, '二': 2, '兩': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+  function cnNum(s) {   /* 「二十三」→23、「十四」→14、「一百」→100、沒有十百的逐字念：「三五」→35 */
+    var i, n = 0, cur = 0, seen = false;
+    if (!/[十百]/.test(s)) { var t = ''; for (i = 0; i < s.length; i++) { if (!(s[i] in CN_D)) return null; t += CN_D[s[i]]; } return t ? +t : null; }
+    for (i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if (ch in CN_D) { cur = CN_D[ch]; seen = true; }
+      else if (ch === '十' || ch === '百') { n += (seen ? cur : 1) * (ch === '十' ? 10 : 100); cur = 0; seen = false; }
+      else return null;
+    }
+    return n + cur;
+  }
+  function voNorm(txt) {
+    var s = String(txt || '').replace(/[０-９]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0xFEE0); }).replace(/\s+/g, '').replace(/号/g, '號');
+    s = s.replace(/[零〇一壹二兩两三四五六七八九十百]+/g, function (m) { var n = cnNum(m); return n == null ? m : String(n); });
+    return s.replace(/(\d)[點点．](\d)/g, '$1.$2');
+  }
+  function voParse(txt) {   /* 一定要有「號」才算（只聽到兩個數字不猜） */
+    var s = voNorm(txt), out = [], re = /(\d+)號(\d+(?:\.\d+)?)分?/g, m;
+    while ((m = re.exec(s)) ) out.push({ seat: +m[1], v: +m[2] });
+    return out;
+  }
+  function voOldOf(it, seat) {   /* 畫面上那一格現在顯示的分數（已含加分模式＝總分）；'✓'＝以前登過、看不到 */
+    var sc = scOf(it.id, seat), op = opt(it);
+    if (!sc || sc.raw === '') return '';
+    return sc.raw === '✓' ? '✓' : String(op.b && op.inc ? total(sc) : sc.raw);
+  }
+  function voLeaveOk() { return !(S.vo && S.vo.list.length) || confirm('語音登分還有 ' + S.vo.list.length + ' 筆沒寫入，離開就會丟掉，確定？'); }
+  function voClose() { voStop(); S.vo = null; }
+  function voAdd(seat, v) {
+    var it = itemOf(S.item), st = S.d.roster.filter(function (x) { return x.seat === seat; })[0];
+    if (!st) { S.vo.last = { bad: seat + ' 號不在名單裡，沒有記' }; return; }
+    if (!(v >= 0 && v <= VMAX)) { S.vo.last = { bad: seat + ' 號 ' + st.name + '：' + v + ' 分超過 ' + VMAX + '，沒有記' }; return; }
+    if (Math.round(v * 10) !== v * 10) { S.vo.last = { bad: seat + ' 號 ' + st.name + '：' + v + ' 只能到小數一位，沒有記' }; return; }
+    var old = voOldOf(it, seat), dup = S.vo.list.filter(function (x) { return x.seat === seat; })[0];
+    S.vo.list = S.vo.list.filter(function (x) { return x.seat !== seat; });
+    S.vo.list.push({ seat: seat, name: st.name, v: v, old: old });
+    S.vo.last = { seat: seat, name: st.name, v: v, old: old, dup: dup ? dup.v : null };
+  }
+  function voHeard(txt) {
+    if (!S.vo || !S.item) return;
+    S.vo.heard = txt;
+    var ps = voParse(txt);
+    if (ps.length) ps.forEach(function (p) { voAdd(p.seat, p.v); });
+    else if (/更正|取消|上一筆|刪掉|刪除/.test(txt)) { voUndo(); return; }
+    else S.vo.last = { bad: '沒有聽出「幾號幾分」' };
+    voPaint();
+  }
+  function voUndo() { var x = S.vo.list.pop(); S.vo.last = x ? { info: '已取消：' + x.seat + ' 號 ' + x.name + ' ' + x.v + ' 分' } : { info: '清單是空的' }; voPaint(); }
+  function voSave() {
+    var it = itemOf(S.item), L = S.vo.list.slice(); if (!it || !L.length) return;
+    var ow = L.filter(function (x) { return x.old !== '' && x.old !== String(x.v); });
+    if (ow.length && !confirm('這 ' + ow.length + ' 位以前已經登記過，寫入會蓋掉原本的分數：\n' +
+      ow.map(function (x) { return x.seat + ' 號 ' + x.name + '：' + (x.old === '✓' ? '（看不到原分數）' : x.old) + ' → ' + x.v; }).join('\n') + '\n\n確定全部寫入？')) return;
+    voStop();
+    var op = opt(it), inc = op.b && op.inc, bad = [];
+    L.forEach(function (x) {   /* 同 commitRaw：已含加分 → 存原始分數＝總分－加分；第一次有分數＝準時交、今天收 */
+      var o = scOf(S.item, x.seat), bo = o && o.bonus !== '✓' ? (+o.bonus || 0) : 0, v = String(x.v);
+      if (inc) { if (+v - bo < 0) { bad.push(x.seat + '號'); return; } v = String(+(+v - bo).toFixed(1)); }
+      queue(x.seat, { raw: v });
+      var p = { raw: v, show: 1 }; if (!(o && o.got)) { p.got = 1; p.late = 0; p.sub = S.d.today; }
+      setSc(S.item, x.seat, p);
+    });
+    S.vo.list = []; S.vo.last = bad.length ? { bad: '總分比加分還少，沒存：' + bad.join('、') } : { saved: L.length };
+    refreshItem();
+  }
+  function voStart() {
+    var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!R) { alert('這個瀏覽器不支援語音辨識，請改用 Chrome，或 iPhone／iPad 的 Safari。'); return; }
+    if (!VO.rec) {
+      var r = VO.rec = new R();
+      r.lang = 'zh-TW'; r.continuous = true; r.interimResults = true;
+      r.onresult = function (e) {
+        var fin = '', mid = '';
+        for (var i = e.resultIndex; i < e.results.length; i++) { var t = e.results[i][0].transcript; if (e.results[i].isFinal) fin += t; else mid += t; }
+        var m = $('#vmid'); if (m) m.textContent = mid ? '聽到：' + mid : '';
+        if (fin) voHeard(fin);
+      };
+      r.onerror = function (e) {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { VO.want = false; alert('沒有麥克風權限：請在網址列左邊（或 Safari 的「aA」）允許這個網頁使用麥克風。'); }
+        else if (e.error === 'network') { VO.want = false; alert('語音辨識要連網路，目前連不上。'); }
+        voPaint();
+      };
+      r.onend = function () { VO.on = false; if (VO.want && S.vo) { try { r.start(); VO.on = true; } catch (x) {} } voPaint(); };   /* 停頓太久瀏覽器會自己停，還在聽就重開 */
+    }
+    VO.want = true; try { VO.rec.start(); VO.on = true; } catch (x) {}
+    voPaint();
+  }
+  function voStop() { VO.want = false; if (VO.rec && VO.on) { try { VO.rec.stop(); } catch (x) {} } VO.on = false; }
+  function voHTML(it) {
+    if (!S.vo) return '<div id="vo-box"><button class="vobtn" data-a="vo">🎤 語音登分（用念的）</button></div>';
+    var q = S.vo, L = q.list, x = q.last, big;
+    if (!x) big = '<div class="say"><span class="mut">' + (VO.on ? '請開始說，例如「5 號 14 分」' : '按「🎤 開始聽」') + '</span></div>';
+    else if (x.saved) big = '<div class="say ok">✓ 已寫入 ' + x.saved + ' 筆</div>';
+    else if (x.bad) big = '<div class="say bad">' + esc(x.bad) + '</div>';
+    else if (x.info) big = '<div class="say"><span class="mut">' + esc(x.info) + '</span></div>';
+    else big = '<div class="say"><b>' + x.seat + '</b> 號 ' + esc(x.name) + '　<b>' + x.v + '</b> 分' +
+      (x.dup != null ? '<small>（剛才念 ' + x.dup + '，改成這個）</small>' : '') +
+      (x.old !== '' && x.old !== String(x.v) ? '<small class="miss">（以前登過' + (x.old === '✓' ? '' : ' ' + esc(x.old) + ' 分') + '，寫入會蓋掉）</small>' : '') + '</div>';
+    var op = opt(it);
+    var h = '<div id="vo-box"><button class="vobtn on" data-a="vo">🎤 語音登分（按這裡收起來）</button><div class="vo">' +
+      '<button class="go' + (VO.on ? ' stop' : '') + '" data-a="vogo">' + (VO.on ? '⏹ 停止聽' : '🎤 開始聽') + '</button>' +
+      '<p class="mut" style="margin:4px 0 0;text-align:center">說「5 號 14 分」，可以連著說；說「更正」取消上一筆' + (op.b && op.inc ? '。<b>念考卷上的總分</b>' : '') + '</p>' +
+      big + '<div class="vmid" id="vmid"></div>' + (q.heard ? '<p class="mut" style="margin:2px 0">最後聽到的原文：' + esc(q.heard) + '</p>' : '');
+    if (L.length) h += '<table class="vt"><thead><tr><th>座號</th><th>姓名</th><th>分數</th><th>以前</th><th></th></tr></thead><tbody>' +
+      L.slice().reverse().map(function (y, i) { return '<tr' + (i === 0 ? ' class="new"' : '') + '><td>' + y.seat + '</td><td>' + esc(y.name) + '</td><td><b>' + y.v + '</b></td><td>' +
+        (y.old === '' ? '' : '<span class="miss">' + (y.old === '✓' ? '登過' : esc(y.old)) + '</span>') + '</td><td><button class="x" data-a="vodel|' + y.seat + '">✕</button></td></tr>'; }).join('') + '</tbody></table>';
+    return h + '<div class="vbar"><button class="btn" data-a="voundo"' + (L.length ? '' : ' disabled') + '>↶ 上一筆取消</button><button class="btn" data-a="voclr"' + (L.length ? '' : ' disabled') + '>清空</button>' +
+      '<span class="sp"></span><button class="btn pri" data-a="vosave"' + (L.length ? '' : ' disabled') + '>全部寫入（' + L.length + ' 筆）</button></div></div></div>';
+  }
+  function voPaint() {   /* 只換語音區（不重畫整頁，手機鍵盤不會跳出來） */
+    var el = $('#vo-box'), it = itemOf(S.item); if (!el || !it) return;
+    var t = document.createElement('div'); t.innerHTML = voHTML(it); el.parentNode.replaceChild(t.firstChild, el);
+  }
+
+  /* ── 輸入：自動跳下一格 ── */
+  function nextSeat(seat) {
+    var inputs = Array.prototype.slice.call(document.querySelectorAll('.sc'));
+    var i = inputs.map(function (e) { return +e.getAttribute('data-seat'); }).indexOf(seat);
+    return inputs[i + 1] || null;
+  }
+  function commitRaw(el) {
+    var seat = +el.getAttribute('data-seat'), v = el.value.trim(), o = scOf(S.item, seat), it0 = itemOf(S.item), op = it0 && S.mode === 'reg' ? opt(it0) : {};
+    var inc = op.b && op.inc, bo = o && o.bonus !== '✓' ? (+o.bonus || 0) : 0;
+    var old = o && o.raw !== '✓' ? String(inc && o.raw !== '' ? +o.raw + bo : o.raw) : '';
+    if (v === old) return true;
+    if (v !== '' && !(/^\d{1,3}(\.\d)?$/.test(v) && +v <= 200)) { toast(seat + '號：分數要是 0～200 的數字', true); el.select(); return false; }
+    if (v === '' && old !== '' && !confirm(seat + '號的分數要清空嗎？')) { el.value = old; return true; }
+    if (inc && v !== '') { if (+v - bo < 0) { toast(seat + '號：總分比加分還少？', true); el.select(); return false; } v = String(+(+v - bo).toFixed(1)); }   /* gr-6：已含加分 → 存原始分數＝總分－加分 */
+    queue(seat, { raw: v });
+    var p = { raw: v, show: 1 }; if (v !== '' && !(o && o.got)) { p.got = 1; p.late = 0; p.sub = S.d.today; }
+    setSc(S.item, seat, p);
+    paintRow(seat);
+    return true;
+  }
+  /* 只重畫這一列的狀態按鈕和上方「還沒交」（不重畫整頁，游標才不會跑掉） */
+  function paintRow(seat) {
+    var it = itemOf(S.item), row = document.querySelector('.row[data-row="' + seat + '"] .chips'), x = S.d.roster.filter(function (r) { return r.seat === seat; })[0];
+    if (row && x && S.mode === 'reg') { var t = document.createElement('div'); t.innerHTML = stChips(it, x, scOf(it.id, seat)); row.parentNode.replaceChild(t.firstChild, row); }
+    var mb = $('.missbox'), s = stat(it);
+    if (mb) mb.innerHTML = s.miss.length ? '<b>還沒交（' + s.miss.length + '）：</b>' + s.miss.map(function (r) { return r.seat; }).join('、') : '<span class="okc">全部都交了 ✓</span>';
+  }
+  function goNext(el) {
+    var n = nextSeat(+el.getAttribute('data-seat'));
+    if (n) { S.cur = +n.getAttribute('data-seat'); markCur(); n.focus(); n.select(); n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    else { el.blur(); refreshItem(); toast('最後一位了 ✓'); }
+  }
+  /* gr-6（10/7 老師）：沒加分的不用點 +0 → 打完分數一律跳下一位；有加分的再點 +幾（點完也跳到那一位的下一位） */
+  function afterScore(el) { goNext(el); }
+  function focusSeat(seat) {
+    var n = document.querySelector('.sc[data-seat="' + seat + '"]');
+    S.cur = seat; markCur();
+    if (n) { n.focus(); n.select(); n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+  function markCur() {
+    Array.prototype.forEach.call(document.querySelectorAll('.row.cur'), function (r) { r.classList.remove('cur'); });
+    var r = document.querySelector('.row[data-row="' + S.cur + '"]'); if (r) r.classList.add('cur');
+  }
+  function firstOpen() {   // 第一位還沒登分數的
+    var r = S.d.roster.filter(function (x) { var o = scOf(S.item, x.seat); return !(o && o.raw !== ''); })[0] || S.d.roster[0];
+    return r ? r.seat : 0;
+  }
+  function refreshItem() { var y = window.scrollY; render(); window.scrollTo(0, y); }
+
+  /* 10/8 晚：試過「停 1 秒自動跳」——打 100 停在「10」會先跳走，後面的 0 打進下一位、又觸發「只打 0 自動跳」，把下一位的成績蓋成 0。
+     老師要求拿掉，恢復原本：10～19、1～9、小數要按 Enter。 */
+  document.addEventListener('input', function (e) {
+    var el = e.target; if (!el.classList || !el.classList.contains('sc')) return;
+    var v = el.value.replace(/[^\d.]/g, ''); if (v !== el.value) el.value = v;
+    // 3 位數、或 2 位數且第一碼不是 1、或只打 0 → 自動跳；打「10」可能是 10 或 100，要等 Enter
+    if (/^\d+$/.test(v) && (v.length >= 3 || (v.length === 2 && v[0] !== '1') || v === '0')) { if (commitRaw(el)) afterScore(el); }
+  });
+  document.addEventListener('keydown', function (e) {
+    var el = e.target;
+    if (el.id === 'u' && e.key === 'Enter') { doLogin(); return; }
+    if (!el.classList || !el.classList.contains('sc')) return;
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); if (commitRaw(el)) afterScore(el); }
+  });
+  document.addEventListener('focusin', function (e) { var el = e.target; if (el.classList && el.classList.contains('sc')) { S.cur = +el.getAttribute('data-seat'); markCur(); } });
+  document.addEventListener('focusout', function (e) { var el = e.target; if (el.classList && el.classList.contains('sc')) commitRaw(el); });
+  document.addEventListener('change', function (e) {
+    var a = e.target.getAttribute && e.target.getAttribute('data-a'); if (!a) return;
+    var p = a.split('|');
+    if (p[0] === 'cls') { if (!voLeaveOk()) { e.target.value = S.cls; return; } voClose(); flush(); S.cls = e.target.value; lsPut('tutor_cls', S.cls); S.item = ''; S.newF = null; S.fix = {}; S.d = null; render(); window.scrollTo(0, 0); load(); return; }
+    if (p[0] === 'std') { var d = e.target.value, it1 = itemOf(S.item), o1 = scOf(S.item, +p[1]) || {}; if (!d) return;
+      if (p[2] === 'makeup') { queue(+p[1], { st: 'makeup', d: d, ld: o1.lvD || leaveDay(it1) }); setSc(S.item, +p[1], { got: 1, sub: d }); }
+      else { queue(+p[1], { st: p[2], d: d }); setSc(S.item, +p[1], { got: 1, late: d > (it1.due || '9') ? 1 : 0, sub: d }); }
+      refreshItem(); }
+    if (p[0] === 'stl') { var l = e.target.value, it3 = itemOf(S.item), o3 = scOf(S.item, +p[1]) || {}; if (!l) return;   /* 改請假那天 */
+      if (o3.got) queue(+p[1], { st: 'makeup', d: o3.sub || S.d.today, ld: l }); else queue(+p[1], { st: 'leave', ld: l });
+      setSc(S.item, +p[1], { lv: TEST[it3.type] ? '考' : '交', lvD: l }); refreshItem(); }
+    if (p[0] === 'ck') {
+      var on = e.target.checked, seat = +p[1];
+      api({ action: 'tChk', item: S.item, seats: [seat], off: !on }).then(function (r) { if (!r.ok) throw new Error(r.error); setSc(S.item, seat, { chk: on ? 1 : 0 }); toast(on ? seat + '號 ✓' : seat + '號 取消勾'); })
+        .catch(function (er) { e.target.checked = !on; toast('沒存到：' + er.message, true); });
+    }
+  });
+
+  /* GitHub 版：學校帳號 → Google 帳號選擇頁帶入學號 → 學校帳號部署 ?page=auth 發通行證 → 回本頁 #t= */
+  function doLogin() {
+    var id = ($('#u').value || '').trim().toLowerCase().replace(/\s+/g, ''); if (id.indexOf('@') >= 0) id = id.split('@')[0];
+    if (!id) { toast('請先打學號', true); return; }
+    lsPut(AC, id);
+    var url = CFG.auth + '?page=auth&ret=' + encodeURIComponent(location.origin + location.pathname);
+    location.href = LOCAL ? url + '&as=' + encodeURIComponent(id + DOM) : 'https://accounts.google.com/AccountChooser?Email=' + encodeURIComponent(id + DOM) + '&continue=' + encodeURIComponent(url);
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-a]') : null; if (!t || t.tagName === 'INPUT') return;
+    var p = t.getAttribute('data-a').split('|'), a = p[0];
+    if (/^(home|setmode|item)$/.test(a)) { if (!voLeaveOk()) return; voClose(); }   /* 語音登分：離開這份 */
+    if (a === 'login') doLogin();
+    else if (a === 'vo') { if (S.vo) { if (!voLeaveOk()) return; voClose(); } else S.vo = { list: [], last: null, heard: '' }; voPaint(); }
+    else if (a === 'vogo') { if (VO.on) { voStop(); voPaint(); } else voStart(); }
+    else if (a === 'voundo') voUndo();
+    else if (a === 'vodel') { S.vo.list = S.vo.list.filter(function (x) { return x.seat !== +p[1]; }); voPaint(); }
+    else if (a === 'voclr') { if (confirm('清空清單裡的 ' + S.vo.list.length + ' 筆？')) { S.vo.list = []; S.vo.last = null; voPaint(); } }
+    else if (a === 'vosave') voSave();
+    else if (a === 'logout') { if (!voLeaveOk()) return; voClose(); if (Object.keys(pend).length) flush(); lsPut(TK, ''); S.me = null; S.d = null; S.mode = ''; S.item = ''; S.dlg = ''; S.err = ''; init(); }
+    else if (a === 'mode') { S.dlg = 'mode'; render(); }
+    else if (a === 'closedlg') { S.dlg = ''; render(); }
+    else if (a === 'go') { S.dlg = 'mode'; render(); }
+    else if (a === 'setmode') { S.mode = p[1]; S.dlg = ''; S.fix = {}; if (S.item) load(); else render(); }
+    else if (a === 'reload') { flush(); load(); }
+    else if (a === 'retry') { Object.keys(rowSt).forEach(function (k) { if (rowSt[k] === '⚠') delete rowSt[k]; }); flush(); renderBar(); }
+    else if (a === 'home') { flush(); S.item = ''; S.fix = {}; render(); window.scrollTo(0, 0); load(); }
+    else if (a === 'item') { S.item = p[1]; S.tab = 'raw'; S.fix = {}; S.cur = firstOpen(); render(); window.scrollTo(0, 0); load(); }
+    else if (a === 'tab') { S.tab = p[1]; var r1 = S.d.roster.filter(function (x) { var o = scOf(S.item, x.seat); return p[1] === 'raw' || (o && o.got); })[0]; S.cur = r1 ? r1.seat : 0; render(); }
+    else if (a === 'fix') { S.fix[S.item + '|' + p[1]] = 1; S.cur = +p[1]; refreshItem(); }
+    else if (a === 'st') {
+      var seat = +p[1], st = p[2], o = scOf(S.item, seat) || {}, td = S.d.today, it = itemOf(S.item);
+      if (st === 'ok') { queue(seat, { st: 'ok' }); setSc(S.item, seat, { got: 1, late: 0, lv: '', lvD: '', sub: it.due && td > it.due ? it.due : td }); }
+      else if (st === 'late') { queue(seat, { st: 'late', d: td }); setSc(S.item, seat, { got: 1, late: it.due && td > it.due ? 1 : 0, lv: '', lvD: '', sub: td }); if (!(it.due && td > it.due)) toast('還沒過期限，不會扣分'); }
+      else if (st === 'makeup') { var ld0 = o.lvD || leaveDay(it); queue(seat, { st: 'makeup', d: td, ld: ld0 }); setSc(S.item, seat, { got: 1, late: 0, sub: td, lv: TEST[it.type] ? '考' : '交', lvD: ld0 }); toast('請確認「請假」和「' + stName(it, 'makeup') + '」的日期'); }
+      else if (st === 'leave') { var ld1 = leaveDay(it); queue(seat, { st: 'leave', ld: ld1 }); setSc(S.item, seat, { lv: TEST[it.type] ? '考' : '交', lvD: ld1 }); }
+      else if (st === 'unleave') { queue(seat, { st: 'unleave' }); setSc(S.item, seat, { lv: '', lvD: '' }); }
+      refreshItem();
+    }
+    else if (a === 'clear') {
+      if (!confirm(p[1] + '號：清除這份的分數、繳交紀錄與訂正加分？（登錯人時用）')) return;
+      queue(+p[1], { clear: 1 }); setSc(S.item, +p[1], { got: 0, late: 0, sub: '', raw: '', bonus: '' }); refreshItem();
+    }
+    else if (a === 'bon') {
+      var s2 = +p[1], v = +p[2], o2, op2 = opt(itemOf(S.item));
+      var ae = document.activeElement; if (ae && ae.classList && ae.classList.contains('sc') && +ae.getAttribute('data-seat') === s2 && !commitRaw(ae)) return;
+      o2 = scOf(S.item, s2);
+      if (op2.inc) {   /* 已含加分：總分不變，原始分數＝總分－新加分 */
+        if (!o2 || o2.raw === '' || o2.raw === '✓') { toast('先打這位的總分', true); return; }
+        var tot = +o2.raw + (o2.bonus !== '✓' ? +o2.bonus || 0 : 0), nr = +(tot - v).toFixed(1);
+        if (nr < 0) { toast('加分比總分還多？', true); return; }
+        queue(s2, { raw: String(nr), bonus: v }); setSc(S.item, s2, { raw: String(nr), bonus: v ? String(v) : '', bset: 1, show: 1 });
+      } else { queue(s2, { bonus: v }); setSc(S.item, s2, { bonus: v ? String(v) : '', bset: 1 }); }
+      var ros = S.d.roster.map(function (x) { return x.seat; }), nx = ros[ros.indexOf(s2) + 1];
+      refreshItem();
+      if (nx) focusSeat(nx); else { S.cur = s2; markCur(); toast('最後一位了 ✓'); }
+    }
+    else if (a === 'opt') { var it2 = itemOf(S.item), oo = opt(it2); oo[p[1]] = oo[p[1]] ? 0 : 1; setOpt(it2, oo); refreshItem(); }
+    else if (a === 'tf') { S.tf = p[1]; lsPut('tutor_tf', p[1]); render(); }
+    else if (a === 'treset') {   /* 10/8：測試班清空（後台只允許測試班） */
+      if (!confirm('清空測試班的所有考卷和分數？（正式的四個班不受影響）')) return;
+      flush();
+      api({ action: 'tReset', cls: S.cls }).then(function (r) { if (!r.ok) throw new Error(r.error); S.item = ''; toast('測試班已清空'); load(); })
+        .catch(function (er) { toast('沒清空：' + er.message, true); });
+    }
+    else if (a === 'ckall') {
+      var seats = S.d.roster.filter(function (x) { var o3 = scOf(S.item, x.seat); return o3 && o3.got; }).map(function (x) { return x.seat; });
+      if (!seats.length) return;
+      if (!confirm('確定 ' + seats.length + ' 位都核對過、沒有錯？')) return;
+      flush();
+      api({ action: 'tChk', item: S.item, seats: seats }).then(function (r) { if (!r.ok) throw new Error(r.error); seats.forEach(function (s) { setSc(S.item, s, { chk: 1 }); }); toast('已打勾 ' + r.n + ' 位'); refreshItem(); })
+        .catch(function (er) { toast('沒存到：' + er.message, true); });
+    }
+    else if (a === 'new') { S.newF = { type: S.tf, les: '', q1: '', title: '', date: S.d.today }; render(); window.scrollTo(0, 0); }
+    else if (a === 'ntype') { readNew(); S.newF.type = p[1]; render(); }
+    else if (a === 'nles') { readNew(); S.newF.les = +S.newF.les === +p[1] ? '' : p[1]; render(); }
+    else if (a === 'ncancel') { S.newF = null; render(); }
+    else if (a === 'nsave') {
+      readNew(); var f = S.newF, q = f.type === '註釋小考';
+      if (q && !f.les) { toast('請選第幾課', true); return; }
+      if (q && !f.q1) { toast('請填第一題考什麼', true); return; }
+      var title = q ? '' : (f.title || (f.les ? 'L' + f.les + ' ' : '') + TYPE_NAME[f.type]);
+      var send = function (force) {
+        api({ action: 'tNew', cls: S.cls, type: f.type, lessons: f.les, q1: f.q1, title: title, date: f.date, force: force ? 1 : 0 }).then(function (r) {
+          if (!r.ok && r.dup) {
+            if (confirm(r.error + '\n\n是同一張的話按「確定」，直接打開它（不要重複建）。\n不是同一張才按「取消」，另外建一份。')) { S.newF = null; S.item = r.dup; S.tf = f.type; load(function () { S.cur = firstOpen(); }); }
+            else send(true);
+            return;
+          }
+          if (!r.ok) { toast(r.error, true); return; }
+          S.newF = null; S.item = r.id; S.tf = f.type; lsPut('tutor_tf', f.type); toast('已建立'); load(function () { S.cur = firstOpen(); });
+        }).catch(function (er) { toast('沒存到：' + er.message, true); });
+      };
+      send(false);
+    }
+  });
+  /* ── 按鈕爆粒子（10/8）：只套用在「完成一件事」的按鈕；翻頁、取消、清除、登出不爆 ── */
+  var FX_RE = /^(login|go|setmode|bon|nsave|ckall)(\||$)/;
+  var FX_COLORS = ['#c23a2b', '#d9a420', '#3f8f6b', '#2b6c9e', '#9d2933', '#c8a046', '#6aa3b8', '#9b5b2b'];   // 朱砂、藤黃、石綠、石青、胭脂、泥金、天青、赭石
+  var fxLayer = null, fxReduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function popFx(btn, r) {   // r：按鈕已被重畫掉時，用按下那一刻的位置只炸粒子
+    if (fxReduce || !document.body.animate) return;
+    var BOUNCE = 'cubic-bezier(.34,1.56,.64,1)', d = 600;
+    var hi = 1.2;
+    if (btn) { var rb = btn.getBoundingClientRect(), room = Math.min(rb.left, document.documentElement.clientWidth - rb.right); if (rb.width) hi = Math.min(1.2, Math.max(1.03, 1 + 2 * room / rb.width)); }   // 滿版寬的按鈕放大幅度自動縮小，不會超出螢幕
+    if (btn) btn.animate([
+      { transform: 'scale(1)', easing: 'cubic-bezier(.3,0,.6,1)' },
+      { transform: 'scale(0.8)', offset: 0.22, easing: BOUNCE },
+      { transform: 'scale(' + hi + ')', offset: 0.6, easing: BOUNCE },
+      { transform: 'scale(1)' }
+    ], { duration: d });
+    if (!fxLayer || !fxLayer.isConnected) { fxLayer = document.createElement('div'); fxLayer.className = 'pop-fx-layer'; document.body.appendChild(fxLayer); }
+    if (btn) r = btn.getBoundingClientRect(); if (!r || !r.width) return;
+    var cx = r.left + r.width / 2 + window.scrollX, cy = r.top + r.height / 2 + window.scrollY;
+    var st = Math.max(r.width, r.height) / 2 * 0.6, a0 = Math.random() * Math.PI * 2;
+    for (var i = 0; i < 8; i++) {
+      var a = a0 + i * Math.PI / 4 + (Math.random() - 0.5) * 0.35, dist = st + 16 + Math.random() * 10, sz = 3 + Math.random() * 1.5;
+      var sx = cx + Math.cos(a) * st, sy = cy + Math.sin(a) * st, ex = cx + Math.cos(a) * dist, ey = cy + Math.sin(a) * dist;
+      var dot = document.createElement('div'); dot.className = 'pop-fx-dot';
+      dot.style.cssText = 'width:' + sz + 'px;height:' + sz + 'px;margin:' + (-sz / 2) + 'px 0 0 ' + (-sz / 2) + 'px;background:' + FX_COLORS[i];
+      fxLayer.appendChild(dot);
+      var P = (function (sx, sy, ex, ey) { return function (k) { return 'translate(' + (sx + (ex - sx) * k) + 'px,' + (sy + (ey - sy) * k) + 'px)'; }; })(sx, sy, ex, ey);
+      dot.animate([
+        { transform: P(0) + ' scale(.4)', opacity: 0, easing: 'ease-out' },
+        { transform: P(0.3) + ' scale(1.2)', opacity: 1, offset: 0.15, easing: 'cubic-bezier(.2,.8,.3,1)' },
+        { transform: P(0.9) + ' scale(1)', opacity: 1, offset: 0.7, easing: 'ease-in' },
+        { transform: P(1) + ' scale(.4)', opacity: 0 }
+      ], { duration: d }).onfinish = (function (el) { return function () { el.remove(); }; })(dot);
+    }
+  }
+  // 放在主要 click 處理之後：+幾 按完會重畫整列 → 找重畫後的新按鈕來彈；整個視窗關掉的（上工、選模式）→ 用按下時的位置只炸粒子
+  var fxDown = null;
+  document.addEventListener('pointerdown', function (e) {
+    var t = e.target.closest ? e.target.closest('button[data-a]') : null;
+    fxDown = t && FX_RE.test(t.getAttribute('data-a')) ? { el: t, r: t.getBoundingClientRect(), y: window.scrollY, x: window.scrollX } : null;
+  }, true);
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('button[data-a]') : null; if (!t) return;
+    var k = t.getAttribute('data-a'); if (!FX_RE.test(k)) return;
+    var r0 = fxDown && fxDown.el === t ? fxDown : null; fxDown = null;
+    if (!t.isConnected) { var q = document.querySelectorAll('button[data-a]'); t = null; for (var i = 0; i < q.length; i++) if (q[i].getAttribute('data-a') === k) { t = q[i]; break; } }
+    if (t) popFx(t);
+    else if (r0) popFx(null, { left: r0.r.left + r0.x - window.scrollX, top: r0.r.top + r0.y - window.scrollY, width: r0.r.width, height: r0.r.height });
+  });
+
+  window.addEventListener('beforeunload', function (e) { if (Object.keys(pend).length || (S.vo && S.vo.list.length)) { flush(); e.preventDefault(); e.returnValue = ''; } });
+
+  function init() {
+    S.tf = TYPE4.indexOf(lsGet('tutor_tf')) >= 0 ? lsGet('tutor_tf') : '註釋小考';
+    takeHash();
+    if (!lsGet(TK)) { S.me = null; render(); return; }
+    api({ action: 'tWho' }).then(function (r) {
+      if (r.me) { setMe(r.me); S.dlg = 'who'; render(); load(); } else { lsPut(TK, ''); S.me = null; S.err = '登入已過期，或這個學校帳號不在小老師名單裡。'; render(); }
+    }).catch(function (e) { $('#app').innerHTML = '<div class="wrap"><p class="miss">連線失敗：' + esc(e.message) + '</p></div>'; });
+  }
+  window.addEventListener('hashchange', function () { if (takeHash()) init(); });
+  window.TUT = { voParse: voParse, voHeard: voHeard };   /* 測試用：模擬「聽到」一句話（不含學生資料） */
+  init();
+})();
+</script>
 </body>
 </html>
