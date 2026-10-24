@@ -129,3 +129,13 @@
 #v106-gr .gr-mg-h { display:block; cursor:pointer; margin-bottom:6px; font-size:15px; }
 #v106-gr table.gr-mg-t { margin:4px 0 6px; }
 #v106-gr .gr-mg-cf td { background:rgba(176,58,46,.07); }
+/* 10/24 語音登分 */
+#v106-gr .gr-vo { border:2px solid #2e5a7a; border-radius:8px; padding:10px 12px; margin:0 0 12px; background:rgba(46,90,122,.04); }
+#v106-gr .gr-vo-big { font-size:30px; line-height:1.4; padding:10px 6px; margin:6px 0; border-radius:6px; background:var(--surface,#fff); border:1px solid var(--border,#d4c4a8); min-height:42px; }
+#v106-gr .gr-vo-big b { font-size:40px; color:#2e5a7a; }
+#v106-gr .gr-vo-big small { font-size:16px; margin-left:8px; }
+#v106-gr .gr-vo-big.err { border-color:#b03a2e; }
+#v106-gr .gr-vo-mid { min-height:18px; font-size:14px; color:var(--muted,#7a6a55); }
+#v106-gr table.gr-vo-t { margin:6px 0; }
+#v106-gr table.gr-vo-t td { font-size:16px; }
+#v106-gr tr.gr-vo-new td { background:rgba(46,90,122,.12); font-weight:700; }

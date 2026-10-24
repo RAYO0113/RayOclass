@@ -5835,6 +5835,7 @@ try {
   }
   function close() {
     var m = document.getElementById('v106-gr'); if (m) m.classList.remove('open');
+    voStop();   /* 語音登分：關視窗就停止聽（暫存清單留著，再開還在） */
     if (Object.keys(pend).length) flush();
   }
 
@@ -5926,7 +5927,9 @@ try {
       '<button class="gr-btn" data-g="b10|' + it.id + '" title="這份考卷已交（或有分數）的人，訂正加分一次設成 +10；其他分數再個別手動調整">已交的訂正 +10</button>' +   /* v110 */
       (function () { var n = D.log.filter(function (l) { return l.item === it.id && l.old !== ''; }).length;   /* gr-5 */
         return '<button class="gr-btn' + (n ? ' gr-chgb' : '') + '" data-g="hist|' + it.id + '|0">📜 修改紀錄' + (n ? '（' + n + '）' : '') + '</button>'; })() +
+      '<button class="gr-btn' + (S.vo && S.vo.item === it.id ? ' pri' : '') + '" data-g="vo|' + it.id + '" title="說「5號14分」登分，念完核對再一起寫入">🎤 語音登分</button>' +
       '<button class="gr-btn" data-g="edit|' + it.id + '">編輯</button></div>' +
+      (S.vo && S.vo.item === it.id ? voHTML(it) : '') +
       (it.by ? '<p class="gr-muted" style="margin:0 0 6px">這份是小老師 ' + esc(it.by) + ' 新增的' + (it.note && it.note !== '小老師新增' ? '（' + esc(it.note) + '）' : '') + '，請確認類型、期限。</p>' : '') +
       '<div class="gr-row"><label class="k">繳交日期</label><input type="date" id="gr-subdate" value="' + esc(S.subDate) + '">' +
       '<span class="gr-muted">按「已交」或輸入分數時記這天（補登時改這裡）</span></div>';
@@ -6870,6 +6873,138 @@ try {
     return '<div style="padding:6px 4px"><b>' + s.seat + ' 號 ' + esc(s.name) + '</b>　各次成績（' + pts.length + ' 份）' + svgTrend(pts) + '</div>';
   }
 
+  /* ── 語音登分（10/24 老師）：說「5號14分」→ 先列進暫存清單、大字顯示給老師核對；按「全部寫入」才走 patchScore 存（修改紀錄、更新時間照記）。
+     用瀏覽器的 SpeechRecognition（Chrome／Edge／iPad Safari，zh-TW，要連網路）。「四／十」「一／七」可能聽錯，所以聽到的不直接存。 */
+  var VO = { rec: null, on: false, want: false };
+  var CN_D = { '零': 0, '〇': 0, '一': 1, '壹': 1, '二': 2, '兩': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+  function cnNum(s) {   /* 「二十三」→23、「十四」→14、「一百」→100、沒有十百的逐字念：「三五」→35 */
+    var i, n = 0, cur = 0, seen = false;
+    if (!/[十百]/.test(s)) { var t = ''; for (i = 0; i < s.length; i++) { if (!(s[i] in CN_D)) return null; t += CN_D[s[i]]; } return t ? +t : null; }
+    for (i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if (ch in CN_D) { cur = CN_D[ch]; seen = true; }
+      else if (ch === '十' || ch === '百') { n += (seen ? cur : 1) * (ch === '十' ? 10 : 100); cur = 0; seen = false; }
+      else return null;
+    }
+    return n + cur;
+  }
+  function voNorm(txt) {
+    var s = String(txt || '').replace(/[０-９]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0xFEE0); }).replace(/\s+/g, '').replace(/号/g, '號');
+    s = s.replace(/[零〇一壹二兩两三四五六七八九十百]+/g, function (m) { var n = cnNum(m); return n == null ? m : String(n); });
+    return s.replace(/(\d)[點点．](\d)/g, '$1.$2');
+  }
+  /* 回傳 [{seat, v}]；一定要有「號」才算（只聽到兩個數字不猜） */
+  function voParse(txt) {
+    var s = voNorm(txt), out = [], re = /(\d+)號(\d+(?:\.\d+)?)分?/g, m;
+    while ((m = re.exec(s))) out.push({ seat: +m[1], v: +m[2] });
+    return out;
+  }
+  function voFdName(it, fd) { return isExam(it) ? (fd === 'ess' ? '作文' : '選擇') : '分數'; }
+  function voMax(it, fd) { return isExam(it) ? EXAM_MAX[fd] : 100; }   /* 手打可到 200（commitRaw）；語音只收 100 以內，「5號14 6號8」連成 146 這種會被擋下 */
+  function voOpen(id) {
+    if (S.vo && S.vo.item === id) return;
+    S.vo = { item: id, fd: 'raw', list: [], last: null, heard: '' };
+    render();
+  }
+  function voClose() { voStop(); S.vo = null; }
+  function voAdd(seat, v) {
+    var it = itemById(S.vo.item), fd = S.vo.fd, mx = voMax(it, fd);
+    var s = roster(it.cls).filter(function (x) { return x.seat === seat; })[0];
+    if (!s) { S.vo.last = { ok: false, msg: seat + ' 號不在 ' + it.cls + ' 名單裡，沒有記' }; return; }
+    if (!(v >= 0 && v <= mx)) { S.vo.last = { ok: false, msg: seat + ' 號 ' + esc(s.name) + '：' + v + ' 分超過' + voFdName(it, fd) + '滿分 ' + mx + '，沒有記' }; return; }
+    var c = scoreOf(it.id, seat), old = c ? c[fd] : null;
+    var dup = S.vo.list.filter(function (x) { return x.seat === seat; })[0];
+    S.vo.list = S.vo.list.filter(function (x) { return x.seat !== seat; });
+    S.vo.list.push({ seat: seat, name: s.name, v: v, old: old });
+    S.vo.last = { ok: true, seat: seat, name: s.name, v: v, old: old, dup: dup ? dup.v : null };
+  }
+  function voHeard(txt) {
+    if (!S.vo) return;
+    S.vo.heard = txt;
+    var ps = voParse(txt);
+    if (ps.length) ps.forEach(function (p) { voAdd(p.seat, p.v); });
+    else if (/更正|取消|上一筆|刪掉|刪除/.test(txt)) voUndo();
+    else S.vo.last = { ok: false, msg: '沒有聽出「幾號幾分」' };
+    voPaint();
+  }
+  function voUndo() {
+    if (!S.vo) return;
+    var x = S.vo.list.pop();
+    S.vo.last = x ? { ok: false, undo: 1, msg: '已取消：' + x.seat + ' 號 ' + esc(x.name) + ' ' + x.v + ' 分' } : { ok: false, msg: '清單是空的，沒有可以取消的' };
+    voPaint();
+  }
+  function voSave() {
+    var it = itemById(S.vo.item), fd = S.vo.fd, L = S.vo.list.slice();
+    if (!it || !L.length) return;
+    var ow = L.filter(function (x) { return x.old != null && x.old !== x.v; });
+    if (ow.length && !confirm('有 ' + ow.length + ' 位原本已經有' + voFdName(it, fd) + '分數，會被覆蓋：\n' +
+      ow.map(function (x) { return x.seat + ' 號 ' + x.name + '：' + x.old + ' → ' + x.v; }).join('\n') + '\n\n確定全部寫入？')) return;
+    var sd = (document.getElementById('gr-subdate') || {}).value || today();
+    voStop();
+    L.forEach(function (x) {   /* 同 commitRaw：有分數沒繳交日就補繳交日 */
+      var c = scoreOf(it.id, x.seat); if (c && c[fd] === x.v) return;
+      var p = {}; p[fd] = x.v; if (!(c && c.sub)) p.sub = sd;
+      patchScore(it.id, x.seat, p);
+    });
+    S.vo.list = []; S.vo.last = { ok: true, saved: L.length };
+    voPaint();
+  }
+  function voStart() {
+    var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!R) { alert('這個瀏覽器不支援語音辨識，請改用 Chrome、Edge 或 iPad 的 Safari。'); return; }
+    if (!VO.rec) {
+      var r = VO.rec = new R();
+      r.lang = 'zh-TW'; r.continuous = true; r.interimResults = true;
+      r.onresult = function (e) {
+        var fin = '', mid = '';
+        for (var i = e.resultIndex; i < e.results.length; i++) { var t = e.results[i][0].transcript; if (e.results[i].isFinal) fin += t; else mid += t; }
+        var mel = document.getElementById('gr-vo-mid'); if (mel) mel.textContent = mid ? '聽到：' + mid : '';
+        if (fin) voHeard(fin);
+      };
+      r.onerror = function (e) {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { VO.want = false; alert('沒有麥克風權限：請在網址列左邊允許這個網頁使用麥克風。'); }
+        else if (e.error === 'network') { VO.want = false; alert('語音辨識要連網路，目前連不上。'); }
+        voPaint();
+      };
+      r.onend = function () { VO.on = false; if (VO.want && S.vo) { try { r.start(); VO.on = true; } catch (x) {} } voPaint(); };   /* 停頓太久瀏覽器會自己停，還在聽就重開 */
+    }
+    VO.want = true;
+    try { VO.rec.start(); VO.on = true; } catch (x) {}
+    voPaint();
+  }
+  function voStop() { VO.want = false; if (VO.rec && VO.on) { try { VO.rec.stop(); } catch (x) {} } VO.on = false; }
+  function voHTML(it) {
+    var q = S.vo, fds = isExam(it) ? ['raw', 'ess'] : ['raw'], L = q.list, x = q.last;
+    var h = '<div class="gr-vo" id="gr-vo"><div class="gr-row">' +
+      fds.map(function (f) { return '<button class="gr-chip' + (q.fd === f ? ' on' : '') + '" data-g="vofd|' + f + '">' + voFdName(it, f) + '（' + voMax(it, f) + '）</button>'; }).join('') +
+      '<button class="gr-btn ' + (VO.on ? 'warn' : 'pri') + '" data-g="vogo">' + (VO.on ? '⏹ 停止聽' : '🎤 開始聽') + '</button>' +
+      '<span class="gr-muted">說「5號14分」，可以連著說；說「更正」取消上一筆</span>' +
+      '<span class="gr-sp" style="flex:1"></span><button class="gr-btn" data-g="vox">關閉語音</button></div>';
+    var big = '';
+    if (!x) big = '<span class="gr-muted">' + (VO.on ? '請開始說…' : '按「🎤 開始聽」') + '</span>';
+    else if (x.saved) big = '<span class="pos">✓ 已寫入 ' + x.saved + ' 筆</span>';
+    else if (x.ok) big = '<b>' + x.seat + '</b> 號 ' + esc(x.name) + '　<b>' + x.v + '</b> 分' +
+      (x.dup != null ? '<small>（剛才念 ' + x.dup + '，改成這個）</small>' : '') + (x.old != null && x.old !== x.v ? '<small class="late">（原本 ' + x.old + '，寫入時會覆蓋）</small>' : '');
+    else big = '<span class="' + (x.undo ? 'gr-muted' : 'late') + '">' + x.msg + '</span>';
+    h += '<div class="gr-vo-big' + (x && !x.ok && !x.undo ? ' err' : '') + '">' + big + '</div>' +
+      '<div class="gr-vo-mid" id="gr-vo-mid"></div>' + (q.heard ? '<div class="gr-muted">最後聽到的原文：' + esc(q.heard) + '</div>' : '');
+    if (L.length) {
+      h += '<table class="gr-t gr-vo-t"><thead><tr><th>座號</th><th>姓名</th><th>' + voFdName(it, q.fd) + '</th><th>原本</th><th></th></tr></thead><tbody>' +
+        L.slice().reverse().map(function (y, i) { return '<tr' + (i === 0 ? ' class="gr-vo-new"' : '') + '><td>' + y.seat + '</td><td>' + esc(y.name) + '</td><td><b>' + y.v + '</b></td><td>' +
+          (y.old == null ? '' : (y.old !== y.v ? '<span class="late">' + y.old + '</span>' : y.old)) + '</td><td><button class="gr-x" data-g="vodel|' + y.seat + '" title="刪掉這筆">✕</button></td></tr>'; }).join('') +
+        '</tbody></table>';
+    }
+    h += '<div class="gr-row"><button class="gr-btn" data-g="voundo"' + (L.length ? '' : ' disabled') + '>↶ 上一筆取消</button>' +
+      '<button class="gr-btn" data-g="voclr"' + (L.length ? '' : ' disabled') + '>清空</button><span class="gr-sp" style="flex:1"></span>' +
+      '<button class="gr-btn pri" data-g="vosave"' + (L.length ? '' : ' disabled') + '>全部寫入（' + L.length + ' 筆）</button></div>';
+    return h + '</div>';
+  }
+  function voPaint() {
+    var el = document.getElementById('gr-vo'), it = S.vo && itemById(S.vo.item);
+    if (!el || !it) return;
+    var t = document.createElement('div'); t.innerHTML = voHTML(it); el.parentNode.replaceChild(t.firstChild, el);
+  }
+
   /* ── 事件 ── */
   function onClick(e) {
     var m = document.getElementById('v106-gr');
@@ -6877,6 +7012,10 @@ try {
     var b = e.target.closest && e.target.closest('[data-g]'); if (!b) return;
     if (b.tagName === 'SELECT' || b.tagName === 'INPUT' && b.type !== 'checkbox') return;
     var a = b.getAttribute('data-g').split('|'), t = a[0], v = a.slice(1).join('|');
+    if (S.vo && /^(item|new|imp|cls|tab|edit|mg|calclean|scls)$/.test(t) && !(t === 'item' && v === S.vo.item)) {   /* 語音登分：離開這份考卷 */
+      if (S.vo.list.length && !confirm('語音登分還有 ' + S.vo.list.length + ' 筆沒寫入，離開就會丟掉，確定？')) return;
+      voClose();
+    }
     if (/^(item|new|imp|cls|tab|edit)$/.test(t)) S.mg = null;   /* V154：離開合併畫面 */
     if (t === 'x') close();
     else if (t === 'tab') { S.tab = v; put(K.tab, v); render(); }
@@ -6915,6 +7054,14 @@ try {
       if (!confirm('把這份考卷已交的 ' + who.length + ' 人，訂正加分設成 +10？\n（座號 ' + who.map(function (s) { return s.seat; }).join('、') + '）\n之後可以個別手動調整。')) return;
       who.forEach(function (s) { patchScore(v, s.seat, { bonus: 10 }); });
     }
+    else if (t === 'vo') { if (S.vo && S.vo.item === v) { if (S.vo.list.length && !confirm('語音登分還有 ' + S.vo.list.length + ' 筆沒寫入，關掉就會丟掉，確定？')) return; voClose(); render(); } else voOpen(v); }
+    else if (t === 'vox') { if (S.vo.list.length && !confirm('語音登分還有 ' + S.vo.list.length + ' 筆沒寫入，關掉就會丟掉，確定？')) return; voClose(); render(); }
+    else if (t === 'vogo') { if (VO.on) { voStop(); voPaint(); } else voStart(); }
+    else if (t === 'vofd') { if (S.vo.fd === v) return; if (S.vo.list.length) { alert('暫存清單裡是「' + voFdName(itemById(S.vo.item), S.vo.fd) + '」的分數，請先寫入或清空，再換欄位。'); return; } S.vo.fd = v; S.vo.last = null; voPaint(); }
+    else if (t === 'voundo') voUndo();
+    else if (t === 'vodel') { S.vo.list = S.vo.list.filter(function (x) { return x.seat !== +v; }); voPaint(); }
+    else if (t === 'voclr') { if (confirm('清空暫存的 ' + S.vo.list.length + ' 筆？')) { S.vo.list = []; S.vo.last = null; voPaint(); } }
+    else if (t === 'vosave') voSave();
     else if (t === 'hist') { var hq = v.split('|'); S.hist = { item: hq[0], seat: +hq[1] || 0 }; render(); }   /* gr-5 */
     else if (t === 'histx') { S.hist = null; render(); }
     else if (t === 'tadm') tutorAdmin(v);
@@ -7020,7 +7167,8 @@ try {
 
   /* 測試／除錯用介面（不含任何學生資料） */
   window.V106GR = { open: open, close: close, data: function () { return D; }, summary: summary, lateOf: lateOf, finalOf: finalOf,
-    nextLesson: nextLesson, schoolDaysBetween: schoolDaysBetween, parsePaste: parsePaste, isDemo: isDemo, addFromCal: addFromCal };
+    nextLesson: nextLesson, schoolDaysBetween: schoolDaysBetween, parsePaste: parsePaste, isDemo: isDemo, addFromCal: addFromCal,
+    voParse: voParse, voHeard: voHeard };   /* voHeard：測試時模擬「聽到」一句話 */
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
 /* ════ src/js/122_v107-sync-js.js ════ */
@@ -11347,7 +11495,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V160';
+  window.APP_VERSION = 'V161';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
