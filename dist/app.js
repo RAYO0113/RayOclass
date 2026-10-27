@@ -11499,7 +11499,7 @@ try {
    作文模式時把 wkKey、wkSlides 清空，其他外掛（進度、修辭、畫記…）看到的是「沒有開課文」。
    投影片裡有 data-build-in 的元素：按 ▶／→ 先逐條出現，全部出現後才換下一頁。 */
 (function () {
-  var VER = '20261027a';
+  var VER = '20261027b';
   var LIST = [['full', '作文四步驟（完整版）'], ['short', '作文四步驟（一節課）']];
   var st = { on: false, deck: null, idx: 0, step: 0 };
 
