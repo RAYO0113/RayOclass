@@ -9558,7 +9558,7 @@ try {
      舊站 v113 讀到 cls 空白也一樣當成沒課；舊站「本節改為」選「依課表」會刪掉該節設定（恢復課表）。
    - 教學進度（138_plan-js）同步改為認 cls 空白＝沒課（原本會退回課表）。
    - 清單：今天以後的調課；同一次調課的兩節一起刪。
-   V175（10/28 老師：停課要顯示在日曆）：offOn(日期) 給日曆（108_v101-js）顯示停課標籤。
+   V175（10/28 老師：停課要顯示在日曆，像光復節那樣整天劃掉）：offOn(日期) 給日曆（108_v101-js）。
    V174 停課／颱風假（2026-10-28，老師）：
    - 「調課」區塊裡加「⛔ 停課／颱風假」：選日期（可到某天，連放多天）、整天或第幾節到第幾節、原因。
    - 這段時間裡有課的每一節寫成 { cls: '', at, off: id, reason }（同樣 cls 空白＝不上課），教學進度自動順延；同一次停課一起刪。
@@ -9758,17 +9758,13 @@ try {
     if (a !== 'note') render();   /* 打字中不重畫，免得游標跑掉 */
   }
 
-  /* V175 日曆用：這天的停課，依原因合併；整天都停＝c 'stop all'（格子加斜線），只停幾節＝標出節次 */
+  /* V175 日曆用：這天有停課就像國定假日一樣整天劃掉、只寫原因（老師 10/28：不用寫節次，像光復節那樣）。
+     c 用 'off' 只影響日曆外觀；教學進度看的是 V101.eventsOn，不含這裡，所以只停下午仍只扣那幾節。 */
   function offOn(ds) {
-    var o = ovr(), by = {}, left = 0;
-    sched().periods.forEach(function (P) {
-      var x = o[ds + '|' + P.p];
-      if (x && x.off) (by[x.reason || '停課'] = by[x.reason || '停課'] || []).push(P.p); else if (whoAt(ds, P.p)) left++;
-    });
-    return Object.keys(by).map(function (r) {
-      var ps = by[r], run = ps[ps.length - 1] - ps[0] === ps.length - 1;   /* 連續節次寫成 5–7，格子比較放得下 */
-      return { t: left ? r + ' 第' + (run && ps.length > 1 ? ps[0] + '–' + ps[ps.length - 1] : ps.join('、')) + '節' : r, c: left ? 'stop' : 'stop all' };
-    });
+    var o = ovr(), seen = {};
+    return sched().periods.map(function (P) { var x = o[ds + '|' + P.p]; return x && x.off ? (x.reason || '停課') : ''; })
+      .filter(function (r) { return r && !seen[r] && (seen[r] = 1); })
+      .map(function (r) { return { t: r, c: 'off' }; });
   }
   window.V122SWAP = { whoAt: whoAt, render: render, offOn: offOn };
   if (typeof clsRender === 'function') {
