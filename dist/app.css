@@ -7409,6 +7409,8 @@ body.dark-mode .au-pop .au-frame{
 /* ④ 段落說明框裡的表格（如〈長干行〉示現說明）：第一欄「類型」不換行（全站表格規則會強制換行，這裡要更具體才蓋得過） */
 .wk-slide-area .tp-sumbox table td:first-child, .wk-slide-area .tp-sumbox table th:first-child,
 #wk-fullscreen .tp-sumbox table td:first-child, #wk-fullscreen .tp-sumbox table th:first-child { white-space:nowrap !important; }
+/* ⑤ 資料裡標 class="nw" 的表格格子不換行（全站表格規則強制換行，要更具體才蓋得過） */
+.wk-slide-area td.nw, .wk-slide-area th.nw, #wk-fullscreen td.nw, #wk-fullscreen th.nw { white-space:nowrap !important; }
 /* ════ src/css/164_v178-teacher-notrans-css.css ════ */
 /* V178：老師 10/28「翻譯我好像不太需要，是學生比較需要」→ 老師網站隱藏每行底下的「翻譯」按鈕（段落上方整段「翻譯」保留）
    只給老師網站；學生網站建置（scripts/RayOclass/build_stu_text.py）的 DROP_CSS 已排除本檔，學生照常有翻譯。 */
