@@ -14,3 +14,7 @@
 #v122-swap .v122-list li { display:flex; align-items:center; gap:6px; padding:4px 0; border-top:1px dashed var(--border,#d4c4a8); }
 #v122-swap .v122-list li button { margin-left:auto; padding:2px 8px; }
 #v122-swap .v122-list small { color:var(--muted,#7a6a55); }
+/* V174 停課／颱風假（144_swap-js） */
+#v122-swap .v174-off-form { margin-top:10px; padding-top:6px; border-top:1px solid var(--border,#d4c4a8); }
+#v122-swap button.v174-ok { background:#a33a2a; border-color:#a33a2a; }
+#v122-swap .v122-list li.v174-off b { color:#a33a2a; white-space:nowrap; }
