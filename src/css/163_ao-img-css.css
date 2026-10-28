@@ -1,0 +1,7 @@
+/* 答案總覽：答案在圖上的大題（173_ao-img-js.js） */
+.wk-ao-chip.ao-img { display:block; width:fit-content; max-width:100%; margin:6px 0 2px; padding:6px; white-space:normal; }
+.wk-ao-chip.ao-img > span { display:block; }
+.wk-ao-chip.ao-img img { margin:0 !important; }
+.v68-ao-hidden .wk-ao-chip.ao-img:not(.v68-show) > span { min-width:12em; min-height:2.2em; }
+.v68-ao-hidden .wk-ao-chip.ao-img:not(.v68-show) img { visibility:hidden; height:0; }
+.v68-ao-hidden .wk-ao-chip.ao-img:not(.v68-show) > span::after { content:"？ 點一下顯示車票答案"; }
