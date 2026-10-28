@@ -1,0 +1,4 @@
+/* V178：老師 10/28「翻譯我好像不太需要，是學生比較需要」→ 老師網站隱藏每行底下的「翻譯」按鈕（段落上方整段「翻譯」保留）
+   只給老師網站；學生網站建置（scripts/RayOclass/build_stu_text.py）的 DROP_CSS 已排除本檔，學生照常有翻譯。 */
+.tp-lbtns .tp-lb-t { display:none !important; }
+.tp-line > .tp-extra:not(:has(.tp-lb:not(.tp-lb-t))) { display:none !important; }

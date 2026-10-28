@@ -7395,3 +7395,16 @@ body.dark-mode .au-pop .au-frame{
 .zw-stage .zw-hidden { opacity: 0 !important; transform: translateY(24px); }
 #wkfs-body .zw-slide { display: flex; align-items: center; justify-content: center; height: 100%; }
 #wkfs-body .zw-stage { border-radius: 0; box-shadow: none; }
+/* ════ src/css/163_v178-compact-css.css ════ */
+/* V178：老師 10/28「標籤離句子太遠、翻譯的格子也太大」
+   ① 新標示的課（.tm-on）行距 3.1 → 2.5，〔修〕〔句意〕標籤縮小並貼近文字（字級、位移在 140_textmark-js.js）
+   ② 每行的「翻譯」等按鈕縮小、不再撐滿一欄，按鈕列上下留白縮小（所有課） */
+#wk-fullscreen .tm-on .tp-text, #wk-slide-area .tm-on .tp-text { line-height:2.5 !important; }
+.tp-lbtns .tp-lb, .tp-style-before > .tp-lb { font-size:13px !important; line-height:1.3 !important; min-height:0 !important; padding:3px 10px !important; width:auto !important; }
+.tp-lbtns { min-width:0 !important; margin-top:0 !important; }
+.tp-line > .tp-extra { margin-top:2px !important; margin-bottom:2px !important; }
+/* ════ src/css/164_v178-teacher-notrans-css.css ════ */
+/* V178：老師 10/28「翻譯我好像不太需要，是學生比較需要」→ 老師網站隱藏每行底下的「翻譯」按鈕（段落上方整段「翻譯」保留）
+   只給老師網站；學生網站建置（scripts/RayOclass/build_stu_text.py）的 DROP_CSS 已排除本檔，學生照常有翻譯。 */
+.tp-lbtns .tp-lb-t { display:none !important; }
+.tp-line > .tp-extra:not(:has(.tp-lb:not(.tp-lb-t))) { display:none !important; }

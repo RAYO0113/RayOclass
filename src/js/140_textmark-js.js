@@ -222,14 +222,21 @@
       if (!c) return;
       var r = rel(rectOf(c)), key = Math.round(r.l) + ',' + Math.round(r.t);
       var n = (chipsUp[key] = (chipsUp[key] || 0) + 1) - 1;
-      it.chip = chip(layer, '修', it.id, 'r', r.l + n * fsz * 0.62, r.t, true, fsz, it.lv ? 'var(--tm-r2)' : 'var(--tm-r1)');
+      it.chip = chip(layer, '修', it.id, 'r', r.l + n * fsz * 0.82, r.t, true, fsz, it.lv ? 'var(--tm-r2)' : 'var(--tm-r1)');
       it.anchor = r;
     });
     st.mn.forEach(function (it) {
       var c = it.ok ? firstChar(it.id) : null; if (!c) return;
       var r = rel(rectOf(c)), key = Math.round(r.l) + ',' + Math.round(r.b);
       var n = (chipsDn[key] = (chipsDn[key] || 0) + 1) - 1;
-      it.chip = chip(layer, '句意', it.id, 'm', r.l + n * fsz * 1.1, r.b, false, fsz, 'var(--tm-g)');
+      it.chip = chip(layer, '句意', it.id, 'm', r.l + n * fsz * 1.3, r.b, false, fsz, 'var(--tm-g)');
+      /* V178：行距縮小後，上一行的〔句意〕可能壓到下一行的〔修〕→ 往右移到不重疊 */
+      var cr = it.chip.getBoundingClientRect();
+      st.rh.forEach(function (o) {
+        if (!o.chip) return; var orc = o.chip.getBoundingClientRect();
+        if (cr.right <= orc.left || orc.right <= cr.left || cr.bottom <= orc.top || orc.bottom <= cr.top) return;
+        it.chip.style.left = (parseFloat(it.chip.style.left) + (orc.right - cr.left) / kx + 2) + 'px'; cr = it.chip.getBoundingClientRect();
+      });
       it.anchor = r;
     });
 
@@ -308,8 +315,9 @@
   }
   function chip(layer, label, id, kind, x, y, up, fsz, col) {
     var c = document.createElement('span'); c.className = 'tm-chip tm-chip-' + kind + (isOpen(id) ? ' on' : ''); c.textContent = label;
-    c.style.fontSize = (fsz * 0.5) + 'px'; c.style.setProperty('--cc', col);
-    c.style.left = x + 'px'; c.style.top = y + 'px'; c.style.transform = up ? 'translateY(calc(-100% - ' + (fsz * 0.1) + 'px))' : 'translateY(' + (fsz * 0.14) + 'px)';
+    /* V178：標籤縮小（0.5→0.42）、〔修〕貼近文字（0.1→0.04）；〔句意〕仍留在底線下方 0.14 */
+    c.style.fontSize = (fsz * 0.42) + 'px'; c.style.setProperty('--cc', col);
+    c.style.left = x + 'px'; c.style.top = y + 'px'; c.style.transform = up ? 'translateY(calc(-100% - ' + (fsz * 0.04) + 'px))' : 'translateY(' + (fsz * 0.14) + 'px)';
     c.addEventListener('click', function (e) { e.stopPropagation(); OPEN[sk(id)] = !OPEN[sk(id)]; relayoutAll(); });
     layer.appendChild(c); return c;
   }
