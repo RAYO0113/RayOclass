@@ -14,6 +14,8 @@
     { from: '2027-01-20', t: '休業式（補考）', c: 'event' }
   ];
   function evOn(d) { return EVENTS.filter(function (e) { return d >= e.from && d <= (e.to || e.from); }); }
+  /* V175：日曆另外顯示老師自己設的停課／颱風假（144_swap-js）；不放進 eventsOn，免得教學進度把「只停下午」當整天放假 */
+  function evCal(d) { var s = []; try { s = window.V122SWAP && V122SWAP.offOn ? V122SWAP.offOn(d) : []; } catch (e) {} return evOn(d).concat(s); }
   window.V101 = { events: EVENTS, eventsOn: evOn };
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -30,16 +32,16 @@
     try {
       document.querySelectorAll('#v98-cal .v98-d').forEach(function (c) {
         if (c.hasAttribute('data-v101')) return; c.setAttribute('data-v101', '1');
-        var evs = evOn((c.getAttribute('data-v98') || '').slice(2)); if (!evs.length) return;
+        var evs = evCal((c.getAttribute('data-v98') || '').slice(2)); if (!evs.length) return;
         var dn = c.querySelector('.v98-dn'), frag = evs.map(function (e) { return '<div class="v101-ev ' + e.c + '" title="' + esc(e.t) + '">' + esc(e.t) + '</div>'; }).join('');
         if (dn) dn.insertAdjacentHTML('afterend', frag);
-        evs.forEach(function (e) { c.classList.add('v101-' + e.c); });
+        evs.forEach(function (e) { e.c.split(' ').forEach(function (x) { c.classList.add('v101-' + x); }); });   /* V175：停課 c 可能是 'stop all' */
       });
       var ed = document.querySelector('#v98-cal .v98-ed'), sd = selDate();
       if (ed && sd && !ed.hasAttribute('data-v101')) {
         ed.setAttribute('data-v101', '1');
         var h4 = ed.querySelector('h4');
-        evOn(sd).forEach(function (e) { if (h4) h4.insertAdjacentHTML('afterend', '<div class="v101-edev ' + e.c + '">📌 ' + esc(e.t) + '</div>'); });
+        evCal(sd).forEach(function (e) { if (h4) h4.insertAdjacentHTML('afterend', '<div class="v101-edev ' + e.c + '">📌 ' + esc(e.t) + '</div>'); });
         var add = ed.querySelector('.v98-add');
         if (add && sd < ymd(new Date())) add.insertAdjacentHTML('beforebegin',
           '<label class="v101-past"><input type="checkbox" id="v101-past"' + (pastDone ? ' checked' : '') + '> 已經考完／交了（補登為已完成）</label>');

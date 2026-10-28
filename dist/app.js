@@ -5368,6 +5368,8 @@ try {
     { from: '2027-01-20', t: '休業式（補考）', c: 'event' }
   ];
   function evOn(d) { return EVENTS.filter(function (e) { return d >= e.from && d <= (e.to || e.from); }); }
+  /* V175：日曆另外顯示老師自己設的停課／颱風假（144_swap-js）；不放進 eventsOn，免得教學進度把「只停下午」當整天放假 */
+  function evCal(d) { var s = []; try { s = window.V122SWAP && V122SWAP.offOn ? V122SWAP.offOn(d) : []; } catch (e) {} return evOn(d).concat(s); }
   window.V101 = { events: EVENTS, eventsOn: evOn };
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -5384,16 +5386,16 @@ try {
     try {
       document.querySelectorAll('#v98-cal .v98-d').forEach(function (c) {
         if (c.hasAttribute('data-v101')) return; c.setAttribute('data-v101', '1');
-        var evs = evOn((c.getAttribute('data-v98') || '').slice(2)); if (!evs.length) return;
+        var evs = evCal((c.getAttribute('data-v98') || '').slice(2)); if (!evs.length) return;
         var dn = c.querySelector('.v98-dn'), frag = evs.map(function (e) { return '<div class="v101-ev ' + e.c + '" title="' + esc(e.t) + '">' + esc(e.t) + '</div>'; }).join('');
         if (dn) dn.insertAdjacentHTML('afterend', frag);
-        evs.forEach(function (e) { c.classList.add('v101-' + e.c); });
+        evs.forEach(function (e) { e.c.split(' ').forEach(function (x) { c.classList.add('v101-' + x); }); });   /* V175：停課 c 可能是 'stop all' */
       });
       var ed = document.querySelector('#v98-cal .v98-ed'), sd = selDate();
       if (ed && sd && !ed.hasAttribute('data-v101')) {
         ed.setAttribute('data-v101', '1');
         var h4 = ed.querySelector('h4');
-        evOn(sd).forEach(function (e) { if (h4) h4.insertAdjacentHTML('afterend', '<div class="v101-edev ' + e.c + '">📌 ' + esc(e.t) + '</div>'); });
+        evCal(sd).forEach(function (e) { if (h4) h4.insertAdjacentHTML('afterend', '<div class="v101-edev ' + e.c + '">📌 ' + esc(e.t) + '</div>'); });
         var add = ed.querySelector('.v98-add');
         if (add && sd < ymd(new Date())) add.insertAdjacentHTML('beforebegin',
           '<label class="v101-past"><input type="checkbox" id="v101-past"' + (pastDone ? ' checked' : '') + '> 已經考完／交了（補登為已完成）</label>');
@@ -9556,6 +9558,7 @@ try {
      舊站 v113 讀到 cls 空白也一樣當成沒課；舊站「本節改為」選「依課表」會刪掉該節設定（恢復課表）。
    - 教學進度（138_plan-js）同步改為認 cls 空白＝沒課（原本會退回課表）。
    - 清單：今天以後的調課；同一次調課的兩節一起刪。
+   V175（10/28 老師：停課要顯示在日曆）：offOn(日期) 給日曆（108_v101-js）顯示停課標籤。
    V174 停課／颱風假（2026-10-28，老師）：
    - 「調課」區塊裡加「⛔ 停課／颱風假」：選日期（可到某天，連放多天）、整天或第幾節到第幾節、原因。
    - 這段時間裡有課的每一節寫成 { cls: '', at, off: id, reason }（同樣 cls 空白＝不上課），教學進度自動順延；同一次停課一起刪。
@@ -9755,7 +9758,19 @@ try {
     if (a !== 'note') render();   /* 打字中不重畫，免得游標跑掉 */
   }
 
-  window.V122SWAP = { whoAt: whoAt, render: render };
+  /* V175 日曆用：這天的停課，依原因合併；整天都停＝c 'stop all'（格子加斜線），只停幾節＝標出節次 */
+  function offOn(ds) {
+    var o = ovr(), by = {}, left = 0;
+    sched().periods.forEach(function (P) {
+      var x = o[ds + '|' + P.p];
+      if (x && x.off) (by[x.reason || '停課'] = by[x.reason || '停課'] || []).push(P.p); else if (whoAt(ds, P.p)) left++;
+    });
+    return Object.keys(by).map(function (r) {
+      var ps = by[r], run = ps[ps.length - 1] - ps[0] === ps.length - 1;   /* 連續節次寫成 5–7，格子比較放得下 */
+      return { t: left ? r + ' 第' + (run && ps.length > 1 ? ps[0] + '–' + ps[ps.length - 1] : ps.join('、')) + '節' : r, c: left ? 'stop' : 'stop all' };
+    });
+  }
+  window.V122SWAP = { whoAt: whoAt, render: render, offOn: offOn };
   if (typeof clsRender === 'function') {
     var _cr = clsRender;
     clsRender = function () { var r = _cr.apply(this, arguments); try { render(); } catch (e) { setTimeout(function () { throw e; }); } return r; };
@@ -11734,7 +11749,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V174';
+  window.APP_VERSION = 'V175';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

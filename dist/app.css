@@ -6267,6 +6267,12 @@ body.dark-mode #v98-cal .v101-ev.exam { background:#5a3a1c; color:#ffd6a8; }
 body.dark-mode #v98-cal .v101-ev.off { background:#444; color:#ddd; }
 body.dark-mode #v98-cal .v101-ev.event { background:#4f4520; color:#f3e3a6; }
 body.dark-mode #v101-entry .v101-h { color:#e3a0a0; }
+/* V175 停課／颱風假顯示在日曆（108_v101-js evCal ← 144_swap-js offOn） */
+#v98-cal .v101-ev.stop { background:#f4d0c8; color:#8a2a1a; }
+#v98-cal .v98-d.v101-all { background:repeating-linear-gradient(135deg, rgba(163,58,42,.07) 0 6px, transparent 6px 12px); }
+#v98-cal .v101-edev.stop { color:#a33a2a; }
+body.dark-mode #v98-cal .v101-ev.stop { background:#5a2a22; color:#ffc9bd; }
+body.dark-mode #v98-cal .v101-edev.stop { color:#ff9f8c; }
 /* ════ src/css/110_v102-css.css ════ */
 
 /* v102：日曆加「A卷檢討」、註釋小考可在日曆直接點選題目（選題／必考／不考） */
