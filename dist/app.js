@@ -3692,14 +3692,18 @@ try {
 try {
 
 (function () {
-  /* 課次依 source/115-1/高職/第一冊 教材檔名的 L01～L06；k＝TEXTBOOK 課名 */
+  /* 課次依 source/115-1/高職/第一冊 教材檔名的 L01～L10（V176 補 L7～L10）；k＝TEXTBOOK 課名 */
   var LESSONS = [
     { no: 'L1', k: '身為魚販' },
     { no: 'L2', k: '世說新語選' },
     { no: 'L3', k: '師說' },
     { no: 'L4', k: '珍珠奶茶' },
     { no: 'L5', k: '臺灣最美麗的火車線', s: '火車線' },
-    { no: 'L6', k: '論語選—子路曾皙冉有公西華侍坐', s: '侍坐' }
+    { no: 'L6', k: '論語選—子路曾皙冉有公西華侍坐', s: '侍坐' },
+    { no: 'L7', k: '樂府詩選—長干行', s: '長干行' },
+    { no: 'L8', k: '茫茫人海中的一名女孩', s: '茫茫人海' },
+    { no: 'L9', k: '桃花源記' },
+    { no: 'L10', k: '極短篇小說選', s: '極短篇' }
   ];
   var ITEMS = ['課後習題', '習作', 'A卷'];
   var STAGES = ['考試', '檢討'];
@@ -4825,13 +4829,13 @@ try {
 try {
 
 (function () {
-  /* 課次同 v84（L1～L6 依 source/115-1/高職/第一冊 教材檔名）；L7 以後尚未建課，只顯示課次 */
-  var LESSONS = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐' };
+  /* 課次同 v84（L1～L10 依 source/115-1/高職/第一冊 教材檔名；V176 補 L7～L10）；L11 以後尚未建課，只顯示課次 */
+  var LESSONS = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var MAXL = 12;
   var KINDS = ['考試', '交作業'];
   function disp(k) { return String(k).replace('課後習題', '課本後習題'); }   /* V123：畫面上叫「課本後習題」（基礎練習＋進階練習）；存的值仍是「課後習題」 */
   var ITEMS = ['A卷', 'A卷檢討', '習作', '習作檢討', '註釋小考', '課後習題', '課後習題檢討', '其他'];   /* V123：加習作檢討、課後習題檢討（重要進度檢核「檢討」格） */   /* v102：加 A卷檢討 */   /* v100：加註釋小考 */
-  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
+  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };
   var CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];   /* 四班顏色，依 CLS_LIST 順序 */
   var K = { data: 'exam_cal_v1', cls: 'exam_cal_cls_v1' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];   /* v103：星期日開頭 */
@@ -5233,8 +5237,9 @@ try {
 try {
 
 (function () {
-  /* 課次 → V84 課名（同 v84 LESSONS）；L7 以後 V84 沒有格子，完成狀態記在日曆項目本身（e.done） */
-  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
+  /* 課次 → V84 課名（同 v84 LESSONS）；L11 以後 V84 沒有格子，完成狀態記在日曆項目本身（e.done）
+     V176：補 L7～L10。之前 L7～L10 的完成記在 e.done，連動後仍算完成（isDone 也看 e.done），取消時一併清掉 */
+  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };
   var NO = {}; Object.keys(LK).forEach(function (n) { NO[LK[n]] = +n; });
   var V84ITEMS = ['A卷', '習作', '課後習題'];
   var K = { cal: 'exam_cal_v1', hw: 'hw_done_v1' };
@@ -5257,7 +5262,7 @@ try {
   function isDone(e, hw) {
     if (!linked(e)) return !!e.done;
     hw = hw || get(K.hw, {});
-    return e.lessons.every(function (n) { var r = (hw[LK[n]] || {})[e.cls] || {}; return !!r[hwKey(e)]; });
+    return !!e.done || e.lessons.every(function (n) { var r = (hw[LK[n]] || {})[e.cls] || {}; return !!r[hwKey(e)]; });
   }
   function toggle(id) {
     var a = cal(), e = a.filter(function (x) { return x.id === id; })[0]; if (!e) return;
@@ -5270,6 +5275,7 @@ try {
         if (done) delete r[key]; else if (!r[key]) r[key] = when;
       });
       put(K.hw, hw);
+      if (done && e.done) { delete e.done; put(K.cal, a); }
     } else {
       if (done) delete e.done; else e.done = when;
       put(K.cal, a);
@@ -5424,7 +5430,7 @@ try {
   if (window.V98CAL) { var _o = V98CAL.open; V98CAL.open = function () { var r = _o.apply(this, arguments); watch(); return r; }; }
 
   /* ── 補登過去上課進度（寫入 V82 正式紀錄 tp_hist_v1，格式同自動紀錄） ── */
-  var LESSONS = ['身為魚販', '世說新語選', '師說', '珍珠奶茶', '臺灣最美麗的火車線', '論語選—子路曾皙冉有公西華侍坐'];
+  var LESSONS = ['身為魚販', '世說新語選', '師說', '珍珠奶茶', '臺灣最美麗的火車線', '論語選—子路曾皙冉有公西華侍坐', '樂府詩選—長干行', '茫茫人海中的一名女孩', '桃花源記', '極短篇小說選'];
   var DEF_PERIODS = [
     { p:1, start:'08:10', end:'09:00' }, { p:2, start:'09:10', end:'10:00' }, { p:3, start:'10:10', end:'11:00' }, { p:4, start:'11:10', end:'12:00' },
     { p:5, start:'13:20', end:'14:10' }, { p:6, start:'14:15', end:'15:05' }, { p:7, start:'15:25', end:'16:15' }, { p:8, start:'16:20', end:'17:10' }];
@@ -5569,7 +5575,7 @@ try {
   var REASONS = ['睡覺', '吵鬧', '遲到', '其他'];
   var PEN = 0;                        /* 遲交每一上課日扣幾分；10/16 老師：暫時全部不扣（原 10）。恢復扣分改回 10，並同步 Code.gs ME_PEN */
   function penTxt(L) { return PEN ? ' −' + L * PEN : '（暫不扣）'; }
-  var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐' };
+  var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'] };
   var DEF_SLOTS = [[1,1,'冷一孝'],[1,2,'冷一忠'],[1,3,'建一忠'],[1,5,'建一孝'],[2,5,'建一孝'],[3,2,'冷一孝'],[3,3,'冷一孝'],[3,4,'冷一忠'],
     [4,1,'建一孝'],[4,3,'冷一孝'],[4,5,'建一忠'],[5,1,'建一忠'],[5,2,'建一忠'],[5,5,'冷一忠'],[5,6,'冷一忠'],[5,7,'建一孝']];   /* 同 V82 預設課表 */
@@ -5877,7 +5883,7 @@ try {
 
   /* ── 登記 ── */
   function itemLabel0(it) { return it.title || (it.type + (it.lessons ? ' L' + it.lessons.split(',').join('、L') : '')); }
-  var NQK = { '身為魚販': 1, '世說新語選': 2, '師說': 3, '珍珠奶茶': 4, '臺灣最美麗的火車線': 5, '論語選—子路曾皙冉有公西華侍坐': 6 };   /* 同 v98 QK */
+  var NQK = { '身為魚販': 1, '世說新語選': 2, '師說': 3, '珍珠奶茶': 4, '臺灣最美麗的火車線': 5, '論語選—子路曾皙冉有公西華侍坐': 6, '樂府詩選—長干行': 7, '茫茫人海中的一名女孩': 8, '桃花源記': 9, '極短篇小說選': 10 };   /* 同 v98 QK */
   function nqCode(it) {   /* v110 */
     if (it.type !== '註釋小考' || !it.issued) return '';
     var rs; try { rs = JSON.parse(localStorage.getItem('nq-records-v1') || '[]'); } catch (e) { return ''; }
@@ -7949,7 +7955,7 @@ try {
 (function () {
   'use strict';
   var REC = 'nq-records-v1', CORR_LAST = 'nq-corr-last', CLS_LAST = 'nq-v109-cls';
-  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };   /* 同 v98 */
+  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };   /* 同 v98 */
   var CP = [['x', '考卷句'], ['s', '完整原句'], ['w', '只抄詞']];
   function jget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function jput(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
@@ -8272,7 +8278,7 @@ try {
 (function () {
   'use strict';
   var REC = 'nq-records-v1';
-  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
+  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };
   function jget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function jput(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { alert('儲存失敗，可能是瀏覽器限制。'); return false; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
@@ -8904,7 +8910,7 @@ try {
   }
 
   /* ── V135：常用項目按鈕（先選課，再點項目，加到最後面；之後用「⠿」拖到想要的位置） ── */
-  var PL = [['火車線', HC], ['論語', LY], ['珍奶', '珍珠奶茶'], ['師說', '師說'], ['世說', '世說新語選'], ['魚販', '身為魚販'], ['不指定', '']];
+  var PL = [['極短篇', '極短篇小說選'], ['桃花源', '桃花源記'], ['茫茫人海', '茫茫人海中的一名女孩'], ['長干行', '樂府詩選—長干行'], ['火車線', HC], ['論語', LY], ['珍奶', '珍珠奶茶'], ['師說', '師說'], ['世說', '世說新語選'], ['魚販', '身為魚販'], ['不指定', '']];
   var PAL = [['txt', '課文'], ['sup', '補充講義＋題解'], ['hw', '習題＋習作檢討'], ['a', 'A卷'], ['ar', 'A卷檢討'],
     ['g|作文說明', '作文說明'], ['g|作文檢討', '作文檢討'], ['g|公佈成績＋劃卡', '公佈成績＋劃卡'], ['g|段考總複習', '段考總複習'], ['g|彈性節', '彈性節']];
   function plName(k) { var r = PL.filter(function (x) { return x[1] === k; })[0]; return r ? r[0] : ''; }
@@ -9800,7 +9806,7 @@ try {
   'use strict';
   var HW = 'hw_done_v1', CAL = 'exam_cal_v1';
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
-  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };   /* 同 v99 */
+  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };   /* 同 v99 */
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';   /* 同 grade.js GS_URL */
   var DEF_PERIODS = [
     { p:1, start:'08:10', end:'09:00' }, { p:2, start:'09:10', end:'10:00' }, { p:3, start:'10:10', end:'11:00' }, { p:4, start:'11:10', end:'12:00' },
@@ -11745,7 +11751,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V175';
+  window.APP_VERSION = 'V176';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

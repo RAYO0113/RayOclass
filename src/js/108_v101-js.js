@@ -70,7 +70,7 @@
   if (window.V98CAL) { var _o = V98CAL.open; V98CAL.open = function () { var r = _o.apply(this, arguments); watch(); return r; }; }
 
   /* ── 補登過去上課進度（寫入 V82 正式紀錄 tp_hist_v1，格式同自動紀錄） ── */
-  var LESSONS = ['身為魚販', '世說新語選', '師說', '珍珠奶茶', '臺灣最美麗的火車線', '論語選—子路曾皙冉有公西華侍坐'];
+  var LESSONS = ['身為魚販', '世說新語選', '師說', '珍珠奶茶', '臺灣最美麗的火車線', '論語選—子路曾皙冉有公西華侍坐', '樂府詩選—長干行', '茫茫人海中的一名女孩', '桃花源記', '極短篇小說選'];
   var DEF_PERIODS = [
     { p:1, start:'08:10', end:'09:00' }, { p:2, start:'09:10', end:'10:00' }, { p:3, start:'10:10', end:'11:00' }, { p:4, start:'11:10', end:'12:00' },
     { p:5, start:'13:20', end:'14:10' }, { p:6, start:'14:15', end:'15:05' }, { p:7, start:'15:25', end:'16:15' }, { p:8, start:'16:20', end:'17:10' }];

@@ -11,7 +11,7 @@
 (function () {
   'use strict';
   var REC = 'nq-records-v1', CORR_LAST = 'nq-corr-last', CLS_LAST = 'nq-v109-cls';
-  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };   /* 同 v98 */
+  var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };   /* 同 v98 */
   var CP = [['x', '考卷句'], ['s', '完整原句'], ['w', '只抄詞']];
   function jget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function jput(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }

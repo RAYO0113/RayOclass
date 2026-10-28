@@ -22,7 +22,7 @@
   'use strict';
   var HW = 'hw_done_v1', CAL = 'exam_cal_v1';
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
-  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };   /* 同 v99 */
+  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };   /* 同 v99 */
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';   /* 同 grade.js GS_URL */
   var DEF_PERIODS = [
     { p:1, start:'08:10', end:'09:00' }, { p:2, start:'09:10', end:'10:00' }, { p:3, start:'10:10', end:'11:00' }, { p:4, start:'11:10', end:'12:00' },

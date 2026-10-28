@@ -1,7 +1,8 @@
 
 (function () {
-  /* 課次 → V84 課名（同 v84 LESSONS）；L7 以後 V84 沒有格子，完成狀態記在日曆項目本身（e.done） */
-  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐' };
+  /* 課次 → V84 課名（同 v84 LESSONS）；L11 以後 V84 沒有格子，完成狀態記在日曆項目本身（e.done）
+     V176：補 L7～L10。之前 L7～L10 的完成記在 e.done，連動後仍算完成（isDone 也看 e.done），取消時一併清掉 */
+  var LK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };
   var NO = {}; Object.keys(LK).forEach(function (n) { NO[LK[n]] = +n; });
   var V84ITEMS = ['A卷', '習作', '課後習題'];
   var K = { cal: 'exam_cal_v1', hw: 'hw_done_v1' };
@@ -24,7 +25,7 @@
   function isDone(e, hw) {
     if (!linked(e)) return !!e.done;
     hw = hw || get(K.hw, {});
-    return e.lessons.every(function (n) { var r = (hw[LK[n]] || {})[e.cls] || {}; return !!r[hwKey(e)]; });
+    return !!e.done || e.lessons.every(function (n) { var r = (hw[LK[n]] || {})[e.cls] || {}; return !!r[hwKey(e)]; });
   }
   function toggle(id) {
     var a = cal(), e = a.filter(function (x) { return x.id === id; })[0]; if (!e) return;
@@ -37,6 +38,7 @@
         if (done) delete r[key]; else if (!r[key]) r[key] = when;
       });
       put(K.hw, hw);
+      if (done && e.done) { delete e.done; put(K.cal, a); }
     } else {
       if (done) delete e.done; else e.done = when;
       put(K.cal, a);
