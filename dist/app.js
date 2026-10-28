@@ -9031,7 +9031,7 @@ try {
    - 一般畫面（#wk-slide-area）與全螢幕（#wkfs-body）各自處理；字級／視窗改變時重新排版。 */
 (function () {
   'use strict';
-  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐', '珍珠奶茶', '臺灣最美麗的火車線'];  /* V128 加〈珍珠奶茶〉；V136 加〈火車線〉 */
+  var ENABLED = ['論語選—子路曾皙冉有公西華侍坐', '珍珠奶茶', '臺灣最美麗的火車線', '樂府詩選—長干行', '茫茫人海中的一名女孩', '極短篇小說選'];  /* V128 加〈珍珠奶茶〉；V136 加〈火車線〉；V178 加第一冊 L7、L8、L10 */
   var B_TYPES = ['頂真', '映襯'];                 /* 跨句單詞型 */
   var C_TYPES = ['轉品', '借代'];                 /* 單字單詞型 */
   var GENERIC = ['回文', '頂真'];                 /* 說明只是基本概念 → 只顯示名稱 */
@@ -11751,7 +11751,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V177';
+  window.APP_VERSION = 'V178';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
