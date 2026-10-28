@@ -18,7 +18,8 @@
 
   function on() { return typeof wkKey !== 'undefined' && ENABLED.indexOf(wkKey) >= 0; }
   function sk(id) { return wkKey + '|' + wkIdx + '|' + id; }
-  function isOpen(id) { return !!OPEN[sk(id)]; }
+  var ALIAS_NOW = {};                             /* V178：合併組的跟隨項 id → 帶頭項 id（目前頁） */
+  function isOpen(id) { return !!OPEN[sk(ALIAS_NOW[id] || id)]; }
 
   /* ── 字元模型：.tp-text 內可見文字（不含圈號、注音、浮窗內容） ── */
   function chars(root) {
@@ -147,7 +148,21 @@
       cs = chars(slide);
     });
     attachShort(rh, mn);
-    slide.__tm = { rh: rh, mn: mn };
+    /* V178：相鄰兩行同一修辭／句意（名稱、長版、短版都相同）→ 合併成一組：只留第一行的標籤、開關一起，句意括號從第一行括到最後一行（老師 10/28） */
+    var alias = {}, lineOf = function (id) { var m = /^[rm](\d+)_/.exec(id || ''); return m ? +m[1] : -1; };
+    [rh, mn].forEach(function (list) {
+      list.forEach(function (it) {
+        if (!it.ok) return;
+        var prev = list.filter(function (o) { return o !== it && o.ok && lineOf(o.id) === lineOf(it.id) - 1 && o.name === it.name && o.exp === it.exp && o.short === it.short; })[0];
+        if (!prev) return;
+        it.lead = prev.lead || prev.id; alias[it.id] = it.lead; it.prevId = prev.id;
+        if (list === mn) {
+          var pr = slide.querySelector('.tm-pr[data-m="' + prev.id + '"]'), pl = slide.querySelector('.tm-pl[data-m="' + it.id + '"]');
+          if (pr) pr.style.display = 'none'; if (pl) pl.style.display = 'none';
+        }
+      });
+    });
+    slide.__tm = { rh: rh, mn: mn, alias: alias };
     return slide.__tm;
   }
 
@@ -158,6 +173,7 @@
     var old = slide.querySelector(':scope > .tm-layer'); if (old) old.remove();
     if (!on() || !slide.querySelector('.tp-line')) { slide.classList.remove('tm-on'); return; }
     var st = prepare(slide);
+    ALIAS_NOW = st.alias || {};
     if (window.__tmRO && !slide.__tmObs) { slide.__tmObs = 1; window.__tmRO.observe(slide); var t0 = slide.querySelector('.tp-text'); if (t0) window.__tmRO.observe(t0); }
     var cs = chars(slide);
     if (getComputedStyle(slide).position === 'static') slide.style.position = 'relative';
@@ -217,6 +233,7 @@
     function firstChar(id) { var x = charsById(slide, cs, id); return x[0]; }
     function lineStart(div) { var ln = div.closest('.tp-line'); var t = ln && ln.querySelector('.tp-text'); var c = t && chars(t.parentNode).filter(function (z) { return t.contains(z.n); })[0]; return c; }
     st.rh.forEach(function (it) {
+      if (it.lead) return;   /* V178：合併組只在第一行放標籤 */
       var c = it.ok ? (it.type === 'A' ? firstChar(it.id) : (slide.querySelector('.tm-kw[data-r="' + it.id + '"]') ? chars(slide).filter(function (z) { return slide.querySelector('.tm-kw[data-r="' + it.id + '"]').contains(z.n); })[0] : firstChar(it.id))) : null;
       if (!c) { var d = slide.querySelector('.tp-box-r .tp-rhet[data-lid="' + it.id + '"]'); c = d && lineStart(d); }
       if (!c) return;
@@ -226,6 +243,7 @@
       it.anchor = r;
     });
     st.mn.forEach(function (it) {
+      if (it.lead) return;   /* V178：合併組只在第一行放標籤 */
       var c = it.ok ? firstChar(it.id) : null; if (!c) return;
       var r = rel(rectOf(c)), key = Math.round(r.l) + ',' + Math.round(r.b);
       var n = (chipsDn[key] = (chipsDn[key] || 0) + 1) - 1;
@@ -304,8 +322,22 @@
     openM.forEach(function (it) {
       if (!it.chip) return;
       var mc = charsById(slide, cs, it.id); it.lastB = 0;
+      st.mn.forEach(function (o) { if (o.lead === it.id) mc = mc.concat(charsById(slide, cs, o.id)); });   /* V178：合併組的說明框放在整組最後一行下面 */
       mc.forEach(function (c) { it.lastB = Math.max(it.lastB, rel(rectOf(c)).b); });
       box(it, false, body(it, false), 'tm-box-m');
+    });
+    /* V178：段落下方的統整／說明框（.tp-sumbox）被說明框蓋到時，往下推到不重疊 */
+    slide.querySelectorAll('.tp-body > .tp-sumbox').forEach(function (sb) {
+      sb.style.removeProperty('margin-top');
+      for (var g = 0; g < 6; g++) {   /* 推一次後再量，直到沒有重疊（說明框可能很長） */
+        var r = sb.getBoundingClientRect(), need = 0;
+        layer.querySelectorAll('.tm-box').forEach(function (b) {
+          var q = b.getBoundingClientRect();
+          if (q.bottom > r.top && q.top < r.bottom && q.right > r.left && q.left < r.right) need = Math.max(need, q.bottom - r.top + 8);
+        });
+        if (!need) break;
+        sb.style.setProperty('margin-top', (parseFloat(getComputedStyle(sb).marginTop) + need) + 'px', 'important');   /* CSS 163 用了 !important，這裡也要 */
+      }
     });
   }
   function add(layer, cls, s) {
