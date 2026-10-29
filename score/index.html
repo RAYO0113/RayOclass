@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>成績快速輸入</title>
+<!-- 成績快速輸入（2026-10-28 瑞媛：給隔壁老師期末用）
+     讀學校「全部分項」.xls → 老師填配分百分比、逐位輸入（鍵盤／語音）→ 算好的學期總分寫進「ZZ.僅供轉入學期總分」→ 下載同格式 .xls。
+     只動 A1～A5 與 ZZ 欄，其他欄（代碼、學期成績、身份別）原樣保留；身份別不顯示。資料只存在這台裝置的瀏覽器。 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#fbf8f1;--card:#fff;--ink:#1d1d1d;--mut:#5c5c5c;--line:#d9d2c3;--pri:#1f5fa8;--pri2:#e8f0fa;--ok:#1d7a3a;--okbg:#e6f4ea;--err:#b3261e;--errbg:#fdecea;--warn:#8a5a00;--warnbg:#fff4d6;--cur:#fff2b3}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:22px/1.5 "Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif}
+#app{max-width:980px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:36px;margin:8px 0 4px}
+h2{font-size:30px;margin:18px 0 10px}
+p{margin:8px 0}
+.mut{color:var(--mut)}
+.small{font-size:18px}
+button{font:inherit;cursor:pointer;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:12px 20px;min-height:60px}
+button:disabled{opacity:.4;cursor:default}
+button.pri{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:bold}
+button.big{font-size:28px;padding:18px 26px;min-height:80px;width:100%;margin:8px 0}
+button.link{border:none;background:none;color:var(--pri);text-decoration:underline;min-height:44px;padding:6px 8px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.row>.grow{flex:1}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.step{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px 18px;margin:12px 0}
+.step b.n{flex:none;display:inline-flex;width:48px;height:48px;border-radius:50%;background:var(--pri);color:#fff;align-items:center;justify-content:center;font-size:26px}
+.drop{border:3px dashed var(--pri);border-radius:18px;padding:22px;text-align:center;background:var(--pri2);margin:12px 0}
+.drop.on{background:#d3e3f7}
+.msg{border-radius:14px;padding:12px 16px;margin:10px 0;font-size:24px}
+.msg.ok{background:var(--okbg);color:var(--ok)}
+.msg.err{background:var(--errbg);color:var(--err)}
+.msg.warn{background:var(--warnbg);color:var(--warn)}
+.cls{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left}
+.cls .p{font-size:20px;color:var(--mut);font-weight:normal}
+.cls.done .p{color:var(--ok)}
+table.w{border-collapse:collapse;width:100%;margin:8px 0}
+table.w td{padding:10px 6px;border-bottom:1px solid var(--line)}
+table.w input{width:110px;font:inherit;font-size:30px;text-align:center;padding:6px;border:2px solid var(--line);border-radius:10px}
+.total{font-size:28px;font-weight:bold}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.tabs button{min-height:56px;padding:8px 14px;font-size:21px}
+.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:bold}
+.tabs button.zero{opacity:.55}
+.card{background:var(--card);border:3px solid var(--pri);border-radius:22px;padding:16px;text-align:center;margin:10px 0}
+.card .seat{font-size:64px;font-weight:bold;line-height:1.1}
+.card .nm{font-size:48px;font-weight:bold;line-height:1.2;margin:4px 0 10px;word-break:break-all}
+.card .it{font-size:24px;color:var(--mut)}
+#val{width:100%;max-width:320px;font:inherit;font-size:60px;font-weight:bold;text-align:center;padding:6px;border:3px solid var(--ink);border-radius:16px;margin:8px 0}
+.card .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.card .nav button{flex:1;min-width:130px;font-size:26px}
+.mic{font-size:30px;font-weight:bold;width:100%;min-height:84px;margin:6px 0;background:var(--ok);border-color:var(--ok);color:#fff}
+.mic.on{background:var(--err);border-color:var(--err)}
+.heard{font-size:20px;color:var(--mut);min-height:30px}
+.tip{font-size:19px;color:var(--mut);text-align:left;background:#f4f1ea;border-radius:12px;padding:10px 14px;margin:8px 0}
+table.list{border-collapse:collapse;width:100%;margin-top:8px;font-size:22px}
+table.list th,table.list td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:center}
+table.list th{background:#efe9dc;position:sticky;top:0}
+.lw{max-height:55vh;overflow:auto;position:relative;border:2px solid var(--line);border-radius:12px;margin-top:8px}
+.lw table.list{margin-top:0}
+table.list tr{cursor:pointer}
+table.list tr.cur td{background:var(--cur);font-weight:bold}
+table.list td.nm{text-align:left}
+td.miss{color:var(--err)}
+.saved{font-size:16px;color:var(--mut);text-align:right}
+@media (max-width:600px){
+  body{font-size:20px}
+  h1{font-size:30px}
+  .card .seat{font-size:52px}
+  .card .nm{font-size:40px}
+  #val{font-size:52px}
+  table.list{font-size:19px}
+  table.w input{width:90px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+  var KEY = 'qg-score-v1';
+  var DEF_W = { A1: 30, A2: 10, A3: 20, A4: 20, A5: 20 };
+  /* st：存在瀏覽器的全部資料。sc[工作表名稱][學生代碼][A1..] = 分數（null＝清空） */
+  var st = load() || {};
+  st.w = st.w || {}; st.sc = st.sc || {}; if (st.dec == null) st.dec = 0; if (st.speak == null) st.speak = true;
+  var WB = null, SH = [], ITEMS = [];
+  var V = { page: 'home', si: 0, item: 'A1', cur: 0, msg: null, heard: '', drop: false };
+  var VO = { rec: null, on: false, want: false, talking: false };
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function save() {
+    st.savedAt = new Date().toLocaleString('zh-TW', { hour12: false });
+    try { localStorage.setItem(KEY, JSON.stringify(st)); return true; } catch (e) { return false; }
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function abToB64(ab) { var u = new Uint8Array(ab), s = '', i; for (i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+  function b64ToAb(b) { var s = atob(b), u = new Uint8Array(s.length), i; for (i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; }
+
+  /* ── 讀學校檔：找 A1.～A5.、ZZ.、座號、姓名 欄 ── */
+  function parseWB(wb) {
+    var sh = [], items = {};
+    wb.SheetNames.forEach(function (n) {
+      var ws = wb.Sheets[n]; if (!ws || !ws['!ref']) return;
+      var rg = XLSX.utils.decode_range(ws['!ref']);
+      var val = function (r, c) { var x = ws[XLSX.utils.encode_cell({ r: r, c: c })]; return x ? x.v : ''; };
+      var cols = {}, zz = -1, seat = -1, nm = -1, cls = -1, subj = -1, key = -1, c;
+      for (c = rg.s.c; c <= rg.e.c; c++) {
+        var h = String(val(rg.s.r, c)).trim(), m = h.match(/^A(\d+)[.．]\s*(.*)$/);
+        if (m) { cols['A' + m[1]] = c; if (!items['A' + m[1]]) items['A' + m[1]] = m[2] || ('A' + m[1]); }
+        else if (/^ZZ[.．]/.test(h)) zz = c;
+        else if (h === '座號') seat = c; else if (h === '姓名') nm = c;
+        else if (h === '班級') cls = c; else if (h === '科目') subj = c; else if (h === '上課學生代碼') key = c;
+      }
+      if (!Object.keys(cols).length || zz < 0 || seat < 0) return;
+      var rows = [], r;
+      for (r = rg.s.r + 1; r <= rg.e.r; r++) {
+        var se = String(val(r, seat)).trim(), na = nm >= 0 ? String(val(r, nm)).trim() : '';
+        if (!se && !na) continue;
+        rows.push({ r: r, key: key >= 0 ? String(val(r, key)).trim() : 'r' + r, seat: se, name: na });
+      }
+      if (!rows.length) return;
+      var f = rows[0].r;
+      sh.push({ name: n, ws: ws, cls: cls >= 0 ? String(val(f, cls)) : n, subj: subj >= 0 ? String(val(f, subj)) : '', cols: cols, zz: zz, rows: rows });
+    });
+    ITEMS = Object.keys(items).sort().map(function (k) { return { code: k, label: items[k] }; });
+    return sh;
+  }
+  function loadAB(ab, name) {
+    var wb;
+    try { wb = XLSX.read(ab, { type: 'array' }); } catch (e) { return '這個檔案打不開，請確認是學校下載的 Excel 檔。'; }
+    var sh = parseWB(wb);
+    if (!sh.length) return '這個檔案裡找不到「A1.平時成績」「ZZ.僅供轉入學期總分」這些欄位。請從學校系統下載「全部分項」的檔案。';
+    WB = wb; SH = sh;
+    st.fileName = name; st.fileB64 = abToB64(ab);
+    ITEMS.forEach(function (it) { if (st.w[it.code] == null) st.w[it.code] = DEF_W[it.code] != null ? DEF_W[it.code] : 0; });
+    /* 檔案裡原本就有的分數（例如段考已上傳過、或匯入上次下載的檔）→ 這台裝置沒記過的才帶進來 */
+    SH.forEach(function (s) {
+      var m = st.sc[s.name] = st.sc[s.name] || {};
+      s.rows.forEach(function (row) {
+        var o = m[row.key] = m[row.key] || {};
+        ITEMS.forEach(function (it) {
+          if (s.cols[it.code] == null || o.hasOwnProperty(it.code)) return;
+          var x = s.ws[XLSX.utils.encode_cell({ r: row.r, c: s.cols[it.code] })];
+          if (x && typeof x.v === 'number') o[it.code] = x.v;
+        });
+      });
+    });
+    if (!save()) V.msg = { k: 'warn', t: '提醒：這台裝置的瀏覽器不能自動儲存，關掉網頁前請先下載。' };
+    return '';
+  }
+
+  /* ── 計算 ── */
+  function W(code) { var n = +st.w[code]; return isFinite(n) ? n : 0; }
+  function wSum() { return ITEMS.reduce(function (a, it) { return a + W(it.code); }, 0); }
+  function rnd(x) { var p = Math.pow(10, st.dec); return Math.round(x * p + 1e-9) / p; }
+  function rec(s, row) { var m = st.sc[s.name] = st.sc[s.name] || {}; return m[row.key] = m[row.key] || {}; }
+  function getV(s, row, code) { var v = rec(s, row)[code]; return v == null ? null : v; }
+  /* 學期總分：配分不是 100% 或有配分的欄沒填 → null（不偷偷當 0 分） */
+  function total(s, row) {
+    if (Math.abs(wSum() - 100) > 1e-9) return null;
+    var sum = 0, i;
+    for (i = 0; i < ITEMS.length; i++) {
+      var c = ITEMS[i].code, w = W(c); if (!w) continue;
+      var v = getV(s, row, c); if (v == null) return null;
+      sum += v * w;
+    }
+    return rnd(sum / 100);
+  }
+  function filled(s, code) { return s.rows.filter(function (row) { return getV(s, row, code) != null; }).length; }
+  function seatTxt(row) { var n = parseInt(row.seat, 10); return isNaN(n) ? row.seat : String(n); }
+
+  /* ── 中文數字（沿用成績系統語音登分的寫法） ── */
+  var CN_D = { '零': 0, '〇': 0, '一': 1, '壹': 1, '二': 2, '兩': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+  function cnNum(s) {
+    var i, n = 0, cur = 0, seen = false;
+    if (!/[十百]/.test(s)) { var t = ''; for (i = 0; i < s.length; i++) { if (!(s[i] in CN_D)) return null; t += CN_D[s[i]]; } return t ? +t : null; }
+    for (i = 0; i < s.length; i++) {
+      var ch = s[i];
+      if (ch in CN_D) { cur = CN_D[ch]; seen = true; }
+      else if (ch === '十' || ch === '百') { n += (seen ? cur : 1) * (ch === '十' ? 10 : 100); cur = 0; seen = false; }
+      else return null;
+    }
+    return n + cur;
+  }
+  function norm(txt) {
+    var s = String(txt || '').replace(/[０-９]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0xFEE0); }).replace(/\s+/g, '').replace(/号/g, '號');
+    s = s.replace(/[零〇一壹二兩两三四五六七八九十百]+/g, function (m) { var n = cnNum(m); return n == null ? m : String(n); });
+    s = s.replace(/(\d)[點点．](\d)/g, '$1.$2');
+    return s.replace(/[。，,、！!？?；;：:「」]/g, '');
+  }
+  function numOf(txt) { var m = norm(txt).match(/^(\d+(?:\.\d+)?)分?$/); return m ? +m[1] : null; }
+
+  /* ── 輸入 ── */
+  function curSheet() { return SH[V.si]; }
+  function setCur(v) {
+    var s = curSheet(), row = s.rows[V.cur];
+    rec(s, row)[V.item] = v; save();
+  }
+  function go(d) { var n = curSheet().rows.length; V.cur = Math.max(0, Math.min(n - 1, V.cur + d)); }
+  /* 存一個分數並跳下一位；回傳錯誤訊息 */
+  function enter(v) {
+    if (!(v >= 0 && v <= 100)) return v + ' 超過 0～100，沒有記';
+    var s = curSheet(), row = s.rows[V.cur];
+    setCur(v);
+    var last = V.cur >= s.rows.length - 1;
+    V.msg = { k: 'ok', t: '✓ ' + seatTxt(row) + ' 號 ' + row.name + '：' + v + ' 分' + (last ? '　（這一欄最後一位了）' : '') };
+    say(seatTxt(row) + '號，' + v + '分' + (last ? '。最後一位了' : ''));
+    if (!last) go(1);
+    return '';
+  }
+  function keyEnter() {
+    var el = document.getElementById('val'); if (!el) return;
+    var raw = el.value.trim();
+    if (raw === '') { go(1); V.msg = null; render(); return; }
+    var v = numOf(raw);
+    if (v == null) { V.msg = { k: 'err', t: '「' + raw + '」不是分數，請重打' }; render(); return; }
+    var e = enter(v); if (e) V.msg = { k: 'err', t: e };
+    render();
+  }
+
+  /* ── 語音（Chrome／Edge／Safari，要連網路）：念回確認時先停止聽，免得把電腦念的分數又聽進去 ── */
+  function canVoice() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+  function say(t, cb) {
+    if (!st.speak || !window.speechSynthesis || !VO.want) { if (cb) cb(); return; }
+    VO.talking = true;
+    if (VO.rec && VO.on) { try { VO.rec.abort(); } catch (e) {} }
+    var done = false, fin = function () {
+      if (done) return; done = true; VO.talking = false;
+      setTimeout(function () { if (VO.want) recStart(); if (cb) cb(); }, 150);
+    };
+    var u = new SpeechSynthesisUtterance(t); u.lang = 'zh-TW'; u.rate = 1.15; u.onend = u.onerror = fin;
+    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { fin(); }
+    setTimeout(fin, 1500 + t.length * 400);   /* 有些瀏覽器不會觸發 onend */
+  }
+  function recStart() {
+    if (!VO.rec) {
+      var R = window.SpeechRecognition || window.webkitSpeechRecognition, r = VO.rec = new R();
+      r.lang = 'zh-TW'; r.continuous = true; r.interimResults = true;
+      r.onresult = function (e) {
+        if (VO.talking) return;
+        var fin = '', mid = '', i;
+        for (i = e.resultIndex; i < e.results.length; i++) { var t = e.results[i][0].transcript; if (e.results[i].isFinal) fin += t; else mid += t; }
+        var h = document.getElementById('heard'); if (h) h.textContent = mid ? '聽到：' + mid : '';
+        if (fin) heard(fin);
+      };
+      r.onerror = function (e) {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { VO.want = false; V.msg = { k: 'err', t: '沒有麥克風權限：請按網址列左邊的圖示，允許使用麥克風。' }; }
+        else if (e.error === 'network') { VO.want = false; V.msg = { k: 'err', t: '語音要連網路，目前連不上。可以改用鍵盤打分數。' }; }
+        else if (e.error === 'audio-capture') { VO.want = false; V.msg = { k: 'err', t: '找不到麥克風，請確認麥克風有插好。' }; }
+        if (!VO.want) render();
+      };
+      r.onend = function () { VO.on = false; if (VO.want && !VO.talking) { try { r.start(); VO.on = true; } catch (x) {} } };
+    }
+    if (VO.on) return;
+    try { VO.rec.start(); VO.on = true; } catch (x) {}
+  }
+  function voStart() { VO.want = true; V.msg = { k: 'ok', t: '請說分數，例如「八十五」' }; recStart(); render(); }
+  function voStop() { VO.want = false; try { speechSynthesis.cancel(); } catch (e) {} if (VO.rec && VO.on) { try { VO.rec.stop(); } catch (x) {} } VO.on = false; }
+  function heard(txt) {
+    if (V.page !== 'input') return;
+    var s = norm(txt), s0 = String(txt).trim(), w = s0.replace(/\s+/g, ''), e = '';   /* 指令用原文比對（norm 會把「上一個」的一變成 1） */
+    V.heard = s0;
+    if (/停止|停下|不要聽|結束/.test(w)) { V.msg = { k: 'ok', t: '已停止聽。' }; say('停止'); voStop(); render(); return; }
+    if (/上[一1][個个位筆]|回去|更正|退回|前[一1]/.test(w)) { go(-1); V.msg = { k: 'warn', t: '回到上一位，請重新說分數' }; announce(); render(); return; }
+    if (/下[一1][個个位筆]|跳過|跳过/.test(w)) { go(1); V.msg = { k: 'warn', t: '跳過' }; announce(); render(); return; }
+    if (/清除|空白|刪除|刪掉|不填/.test(w)) { setCur(null); V.msg = { k: 'warn', t: '已清空這一格' }; say('清空'); render(); return; }
+    var m = s.match(/(\d+)號(\d+(?:\.\d+)?)?分?/);
+    if (m) {
+      var idx = -1, rows = curSheet().rows, i;
+      for (i = 0; i < rows.length; i++) if (parseInt(rows[i].seat, 10) === +m[1]) { idx = i; break; }
+      if (idx < 0) e = m[1] + ' 號不在名單裡';
+      else { V.cur = idx; if (m[2] == null) { V.msg = null; announce(); } else e = enter(+m[2]); }
+    } else {
+      var v = numOf(s);
+      if (v == null) e = '沒聽清楚：「' + s0 + '」，請再說一次';
+      else e = enter(v);
+    }
+    if (e) { V.msg = { k: 'err', t: e }; say('請再說一次'); }
+    render();
+  }
+  function announce() { var row = curSheet().rows[V.cur]; say(seatTxt(row) + '號'); }
+
+  /* ── 下載：只寫 A1～A5 與 ZZ，其他欄不動 ── */
+  function buildOut() {
+    SH.forEach(function (s) {
+      s.rows.forEach(function (row) {
+        ITEMS.forEach(function (it) {
+          var c = s.cols[it.code]; if (c == null) return;
+          put(s.ws, row.r, c, getV(s, row, it.code));
+        });
+        put(s.ws, row.r, s.zz, total(s, row));
+      });
+    });
+    return XLSX.write(WB, { bookType: 'biff8', type: 'array' });
+  }
+  function put(ws, r, c, v) {
+    var a = XLSX.utils.encode_cell({ r: r, c: c });
+    if (v == null) delete ws[a]; else ws[a] = { t: 'n', v: v };
+  }
+  function outName() { return String(st.fileName || '成績').replace(/\.xlsx?$/i, '') + '_已填好.xls'; }
+  function download() {
+    var ab = buildOut(), blob = new Blob([ab], { type: 'application/vnd.ms-excel' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = outName();
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+
+  /* ── 畫面 ── */
+  function render() {
+    var h = V.page === 'home' || !SH.length ? pHome() : V.page === 'weights' ? pWeights() : V.page === 'input' ? pInput() : V.page === 'check' ? pCheck() : pClasses();
+    document.getElementById('app').innerHTML = h;
+    if (V.page === 'input') {
+      var el = document.getElementById('val');
+      if (el && !VO.want) { el.focus(); el.select(); }
+      /* 名單只在自己的框框裡捲動，大卡片（座號姓名）一定留在畫面上 */
+      var box = document.getElementById('lw'), c = document.querySelector('tr.cur'), cd = document.querySelector('.card');
+      if (box && c) box.scrollTop = Math.max(0, c.offsetTop - box.clientHeight / 2);
+      if (cd && cd.getBoundingClientRect().top < 0) window.scrollTo(0, window.scrollY + cd.getBoundingClientRect().top - 8);
+    }
+  }
+  function msgHTML() { return V.msg ? '<div class="msg ' + V.msg.k + '">' + esc(V.msg.t) + '</div>' : ''; }
+  function pHome() {
+    var h = '<h1>成績快速輸入</h1><p class="mut">把學校的成績檔放進來，填好分數，再下載回去上傳。</p>';
+    h += '<div class="step"><b class="n">1</b><div>到學校成績系統，下載<b>「全部分項」</b>的成績檔（.xls）。</div></div>';
+    h += '<div class="step"><b class="n">2</b><div class="grow" style="flex:1">把檔案放進來：' +
+      '<div class="drop' + (V.drop ? ' on' : '') + '" id="drop"><button class="pri big" data-a="pick">📂 選擇成績檔</button><div class="small mut">電腦也可以把檔案直接拖到這個框框裡</div></div></div></div>';
+    if (st.fileB64 && !SH.length) h += '<button class="big" data-a="resume">↻ 繼續上次的檔案：' + esc(st.fileName) + '<br><span class="small mut">最後儲存 ' + esc(st.savedAt || '') + '</span></button>';
+    else if (SH.length) h += '<button class="big" data-a="classes">↻ 回到 ' + esc(st.fileName) + '</button>';
+    h += msgHTML();
+    h += '<p class="small mut">資料只存在這台電腦（或手機）的瀏覽器裡，不會上傳到任何地方。</p>';
+    return h + '<input type="file" id="file" accept=".xls,.xlsx" style="display:none">';
+  }
+  function pClasses() {
+    var ok = Math.abs(wSum() - 100) < 1e-9;
+    var h = '<div class="bar"><button data-a="home">← 換檔案</button><span class="grow" style="flex:1"></span><span class="saved">已自動儲存 ' + esc(st.savedAt || '') + '</span></div>';
+    h += '<h1>' + esc(st.fileName) + '</h1>';
+    h += '<button class="big" data-a="weights">⚙ 配分：' + ITEMS.map(function (it) { return esc(it.label) + ' ' + W(it.code) + '%'; }).join('、') + (ok ? '' : '　<b style="color:var(--err)">（加起來不是 100%）</b>') + '</button>';
+    h += msgHTML();
+    h += '<h2>選一個班級開始輸入</h2>';
+    SH.forEach(function (s, i) {
+      var n = s.rows.length, d = s.rows.filter(function (row) { return total(s, row) != null; }).length;
+      h += '<button class="big cls' + (d === n ? ' done' : '') + '" data-a="open|' + i + '"><span>' + esc(s.cls) + '　' + esc(s.subj) + '</span><span class="p">' + (d === n ? '✓ 全部完成' : '完成 ' + d + '／' + n + ' 人') + '</span></button>';
+    });
+    h += '<h2>全部填好後</h2><button class="big pri" data-a="check">⬇ 檢查並下載成績檔</button>';
+    return h;
+  }
+  function pWeights() {
+    var sum = wSum(), ok = Math.abs(sum - 100) < 1e-9;
+    var h = '<div class="bar"><button data-a="classes">← 回班級列表</button></div><h1>配分</h1><p>每一項占學期成績幾 %？直接改數字就好，全部加起來要是 100。</p><table class="w">';
+    ITEMS.forEach(function (it) { h += '<tr><td>' + esc(it.label) + '</td><td style="text-align:right"><input type="text" inputmode="decimal" data-w="' + it.code + '" value="' + esc(st.w[it.code]) + '"> %</td></tr>'; });
+    h += '</table><p class="total" id="wsum" style="color:' + (ok ? 'var(--ok)' : 'var(--err)') + '">合計：' + sum + ' %' + (ok ? '　✓' : '　（要等於 100）') + '</p>';
+    h += '<h2>學期總分算到</h2><div class="row">' + [0, 1, 2].map(function (d) { return '<button data-a="dec|' + d + '"' + (st.dec === d ? ' class="pri"' : '') + '>' + (d ? '小數 ' + d + ' 位' : '整數') + '</button>'; }).join('') + '</div><p class="small mut">四捨五入。例：平時 85、作業 90、三次段考 70、72、80 → ' + example() + '</p>';
+    h += '<button class="big pri" data-a="classes" style="margin-top:20px">✓ 好了，回班級列表</button>';
+    return h;
+  }
+  function example() {
+    var v = { A1: 85, A2: 90, A3: 70, A4: 72, A5: 80 }, sum = 0;
+    if (Math.abs(wSum() - 100) > 1e-9) return '（配分要先等於 100）';
+    ITEMS.forEach(function (it) { sum += (v[it.code] || 0) * W(it.code); });
+    return rnd(sum / 100) + ' 分';
+  }
+  function pInput() {
+    var s = curSheet(), row = s.rows[V.cur], it = ITEMS.filter(function (x) { return x.code === V.item; })[0] || ITEMS[0];
+    var v = getV(s, row, it.code), tot = total(s, row);
+    var h = '<div class="bar"><button data-a="classes">← 回班級列表</button><b style="font-size:26px">' + esc(s.cls) + '　' + esc(s.subj) + '</b></div>';
+    h += '<div class="tabs">' + ITEMS.filter(function (x) { return s.cols[x.code] != null; }).map(function (x) {
+      return '<button data-a="item|' + x.code + '" class="' + (x.code === it.code ? 'on' : '') + (W(x.code) ? '' : ' zero') + '">' + esc(x.label) + '<br><span class="small">' + filled(s, x.code) + '／' + s.rows.length + '</span></button>';
+    }).join('') + '</div>';
+    h += '<div class="card"><div class="it">現在輸入：' + esc(it.label) + '（' + W(it.code) + '%）</div>' +
+      '<div class="seat">' + esc(seatTxt(row)) + ' 號</div><div class="nm">' + esc(row.name) + '</div>' +
+      '<input id="val" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" placeholder="分數" value="' + (v == null ? '' : v) + '">' +
+      '<div class="small mut">打完按 Enter（手機按「下一個」）就存好、跳下一位　｜　學期總分：' + (tot == null ? '—' : '<b>' + tot + '</b>') + '</div>' +
+      '<div class="nav"><button data-a="prev"' + (V.cur ? '' : ' disabled') + '>◀ 上一位</button><button data-a="ok" class="pri">存好・下一位 ▶</button></div></div>';
+    h += msgHTML();
+    if (canVoice()) {
+      h += '<button class="mic' + (VO.want ? ' on' : '') + '" data-a="mic">' + (VO.want ? '⏹ 停止聽' : '🎤 用說的輸入') + '</button><div class="heard" id="heard">' + (V.heard ? '最後聽到：' + esc(V.heard) : '') + '</div>' +
+        '<div class="row small"><label><input type="checkbox" data-a="speak"' + (st.speak ? ' checked' : '') + ' style="width:24px;height:24px;vertical-align:middle"> 電腦把分數念回來給我聽</label></div>' +
+        '<div class="tip">說「<b>八十五</b>」→ 填給這一位，自動換下一位<br>說「<b>上一個</b>」→ 回去重說　說「<b>跳過</b>」→ 換下一位<br>說「<b>12 號</b>」→ 跳到 12 號　說「<b>停止</b>」→ 不聽了</div>';
+    } else {
+      h += '<div class="tip">手機可以按鍵盤上的 🎤 麥克風，用說的打出分數，再按「下一個」。</div>';
+    }
+    h += '<div class="lw" id="lw"><table class="list"><thead><tr><th>座號</th><th>姓名</th><th>' + esc(it.label) + '</th><th>學期總分</th></tr></thead><tbody>';
+    s.rows.forEach(function (r, i) {
+      var x = getV(s, r, it.code), t = total(s, r);
+      h += '<tr data-a="goto|' + i + '"' + (i === V.cur ? ' class="cur"' : '') + '><td>' + esc(seatTxt(r)) + '</td><td class="nm">' + esc(r.name) + '</td><td' + (x == null ? ' class="miss"' : '') + '>' + (x == null ? '未填' : x) + '</td><td>' + (t == null ? '—' : t) + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+  function pCheck() {
+    var wok = Math.abs(wSum() - 100) < 1e-9, all = 0, done = 0, rows = '';
+    SH.forEach(function (s) {
+      var miss = ITEMS.filter(function (it) { return W(it.code) && s.cols[it.code] != null; }).map(function (it) { var n = s.rows.length - filled(s, it.code); return n ? esc(it.label) + ' 缺 ' + n + ' 人' : ''; }).filter(Boolean);
+      var d = s.rows.filter(function (row) { return total(s, row) != null; }).length;
+      all += s.rows.length; done += d;
+      rows += '<tr><td class="nm">' + esc(s.cls) + ' ' + esc(s.subj) + '</td><td>' + d + '／' + s.rows.length + '</td><td class="nm' + (miss.length ? ' miss' : '') + '">' + (miss.length ? miss.join('、') : '✓') + '</td></tr>';
+    });
+    var h = '<div class="bar"><button data-a="classes">← 回班級列表</button></div><h1>檢查並下載</h1>';
+    if (!wok) h += '<div class="msg err">配分加起來是 ' + wSum() + '%，不是 100%，學期總分算不出來。請先按「回班級列表」→「配分」修改。</div>';
+    else if (done < all) h += '<div class="msg warn">還有 ' + (all - done) + ' 位學生有分數沒填，他們的「學期總分」會是空白。缺考要算 0 分的，請記得填 0。</div>';
+    else h += '<div class="msg ok">✓ 全部 ' + all + ' 位學生都算好學期總分了。</div>';
+    h += '<table class="list"><thead><tr><th>班級</th><th>學期總分</th><th>還沒填</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    h += '<button class="big pri" data-a="dl" style="margin-top:20px"' + (wok ? '' : ' disabled') + '>⬇ 下載成績檔</button>';
+    h += '<p class="small mut">下載的檔名是「' + esc(outName()) + '」。會填入各項分數和「ZZ.僅供轉入學期總分」，其他欄位不動。<br>下載後請到學校成績系統上傳這個檔案。</p>';
+    return h;
+  }
+
+  /* ── 事件 ── */
+  function openFile(f) {
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var e = loadAB(rd.result, f.name);
+      if (e) { V.msg = { k: 'err', t: e }; V.page = 'home'; } else { V.msg = null; V.page = 'classes'; }
+      render();
+    };
+    rd.readAsArrayBuffer(f);
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-a]'); if (!b) return;
+    var a = b.getAttribute('data-a').split('|'), t = a[0], x = a[1];
+    if (t === 'speak') { st.speak = b.checked; save(); return; }
+    if (t !== 'mic' && t !== 'goto' && t !== 'item' && t !== 'prev' && t !== 'ok') voStop();
+    if (t === 'pick') document.getElementById('file').click();
+    else if (t === 'resume') { var e = loadAB(b64ToAb(st.fileB64), st.fileName); V.msg = e ? { k: 'err', t: e } : null; V.page = e ? 'home' : 'classes'; }
+    else if (t === 'home') { V.page = 'home'; V.msg = null; }
+    else if (t === 'classes') { V.page = 'classes'; V.msg = null; }
+    else if (t === 'weights') { V.page = 'weights'; V.msg = null; }
+    else if (t === 'check') { V.page = 'check'; V.msg = null; }
+    else if (t === 'dec') { st.dec = +x; save(); }
+    else if (t === 'open') { V.si = +x; V.cur = 0; V.page = 'input'; V.msg = null; V.heard = ''; V.item = (ITEMS.filter(function (it) { return W(it.code) && SH[V.si].cols[it.code] != null; })[0] || ITEMS[0]).code; }
+    else if (t === 'item') { V.item = x; V.cur = 0; V.msg = null; if (VO.want) announce(); }
+    else if (t === 'goto') { V.cur = +x; V.msg = null; }
+    else if (t === 'prev') { go(-1); V.msg = null; }
+    else if (t === 'ok') { keyEnter(); return; }
+    else if (t === 'mic') { if (VO.want) { voStop(); V.msg = null; } else { voStart(); return; } }
+    else if (t === 'dl') { download(); V.msg = { k: 'ok', t: '已下載「' + outName() + '」。' }; }
+    render();
+  });
+  document.addEventListener('change', function (ev) { if (ev.target.id === 'file') openFile(ev.target.files[0]); });
+  document.addEventListener('input', function (ev) {
+    var c = ev.target.getAttribute && ev.target.getAttribute('data-w'); if (!c) return;
+    var n = numOf(ev.target.value); st.w[c] = n == null ? 0 : n; save();
+    var sum = wSum(), ok = Math.abs(sum - 100) < 1e-9, el = document.getElementById('wsum');
+    if (el) { el.textContent = '合計：' + sum + ' %' + (ok ? '　✓' : '　（要等於 100）'); el.style.color = ok ? 'var(--ok)' : 'var(--err)'; }
+  });
+  document.addEventListener('focusout', function (ev) { if (ev.target.getAttribute && ev.target.getAttribute('data-w') && V.page === 'weights') render(); });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.target.id === 'val' && ev.key === 'Enter') { ev.preventDefault(); keyEnter(); }
+    else if (ev.target.id === 'val' && ev.key === 'ArrowUp') { ev.preventDefault(); go(-1); V.msg = null; render(); }
+    else if (ev.target.id === 'val' && ev.key === 'ArrowDown') { ev.preventDefault(); go(1); V.msg = null; render(); }
+  });
+  ['dragover', 'dragenter'].forEach(function (n) { document.addEventListener(n, function (ev) { ev.preventDefault(); if (V.page === 'home' && !V.drop) { V.drop = true; render(); } }); });
+  document.addEventListener('dragleave', function (ev) { if (!ev.relatedTarget && V.drop) { V.drop = false; render(); } });
+  document.addEventListener('drop', function (ev) { ev.preventDefault(); V.drop = false; var f = ev.dataTransfer && ev.dataTransfer.files[0]; if (f) openFile(f); else render(); });
+
+  if (!window.XLSX) { document.getElementById('app').innerHTML = '<h1>成績快速輸入</h1><div class="msg err">讀 Excel 的程式沒有載入，請確認電腦有連上網路，再重新整理這個網頁。</div>'; return; }
+  window.QG = { loadAB: loadAB, buildOut: buildOut, heard: heard, st: st, V: V, render: render, SH: function () { return SH; } };   /* 測試用 */
+  render();
+})();
+</script>
+</body>
+</html>
