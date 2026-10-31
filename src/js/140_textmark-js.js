@@ -190,6 +190,7 @@
     /* 換頁淡入動畫會縮放課文頁（scale 0.99）：把縮放比例算回去，動畫中量也準 */
     var kx = slide.offsetWidth ? base.width / slide.offsetWidth : 1, ky = slide.offsetHeight ? base.height / slide.offsetHeight : 1;
     var rel = function (r) { return { l: (r.left - base.left) / kx + sx, r: (r.right - base.left) / kx + sx, t: (r.top - base.top) / ky + sy, b: (r.bottom - base.top) / ky + sy }; };
+    var topLim = Math.max(sy, rel(container.getBoundingClientRect()).t) + 2;   /* 說明框最高只能到這裡（課文頁／全螢幕區的上緣） */
 
     /* 狀態上色 */
     var openR = st.rh.filter(function (it) { return it.ok && isOpen(it.id); });
@@ -216,15 +217,21 @@
       if (r) s.style.setProperty('--tmc', r.col);
     });
     A.forEach(function (it) {
-      var lines = [];
-      it.cs.forEach(function (c) { var r = rel(rectOf(c)); var L = lines[lines.length - 1]; if (L && Math.abs(L.t - r.t) < fsz * 0.5) { L.r = Math.max(L.r, r.r); L.b = Math.max(L.b, r.b); } else lines.push({ l: r.l, r: r.r, t: r.t, b: r.b }); });
+      /* 引句只標重點字（rq-hi，如類疊的「一個」「女孩」）時，字元不連續：每一段連續的字各畫一個括號，
+         不能從第一個重點字一路畫到最後一個（原本會把中間不相干的字也畫上紅線） */
+      var runs = [];
+      it.cs.forEach(function (c) { var k = cs.indexOf(c), R = runs[runs.length - 1]; if (R && k === R.k + 1) { R.cs.push(c); R.k = k; } else runs.push({ cs: [c], k: k }); });
       var op = isOpen(it.id), th = op ? Math.max(1.5, fsz * 0.07) : Math.max(1, fsz * 0.045), col = op ? it.col : 'var(--tm-faint)';
       var off = fsz * (0.12 + it.lv * 0.36), tick = fsz * 0.28;
-      lines.forEach(function (L, i) {
-        var y = L.b + off;
-        add(layer, 'tm-line', { left: L.l, top: y, width: L.r - L.l, height: th, background: col });
-        if (i === 0) add(layer, 'tm-line', { left: L.l, top: y - tick + th, width: th, height: tick, background: col });
-        if (i === lines.length - 1) add(layer, 'tm-line', { left: L.r - th, top: y - tick + th, width: th, height: tick, background: col });
+      runs.forEach(function (R) {
+        var lines = [];
+        R.cs.forEach(function (c) { var r = rel(rectOf(c)); var L = lines[lines.length - 1]; if (L && Math.abs(L.t - r.t) < fsz * 0.5) { L.r = Math.max(L.r, r.r); L.b = Math.max(L.b, r.b); } else lines.push({ l: r.l, r: r.r, t: r.t, b: r.b }); });
+        lines.forEach(function (L, i) {
+          var y = L.b + off;
+          add(layer, 'tm-line', { left: L.l, top: y, width: L.r - L.l, height: th, background: col });
+          if (i === 0) add(layer, 'tm-line', { left: L.l, top: y - tick + th, width: th, height: tick, background: col });
+          if (i === lines.length - 1) add(layer, 'tm-line', { left: L.r - th, top: y - tick + th, width: th, height: tick, background: col });
+        });
       });
     });
 
@@ -306,6 +313,16 @@
         var q = placed.filter(function (p) { return rc.l < p.r && p.l < rc.r && rc.t < p.b && p.t < rc.b; })[0];
         if (!q) break;
         var nt = up ? q.t - h - 4 : q.b + 4; rc = { l: x, r: x + w, t: nt, b: nt + h };
+      }
+      /* 第一行的修辭說明框往上放會超出課文頁上緣（全螢幕字放大時最明顯，如〈火車線〉末段「轉化（形象化）」）：
+         先往左挪、放寬成一行試試；還是放不下就改放到該行底線下方 */
+      if (up && rc.t < topLim) {
+        bx.style.left = TL + 'px'; bx.style.maxWidth = (TR - TL) + 'px';
+        var w3 = bx.offsetWidth, h3 = bx.offsetHeight, x3 = Math.max(TL, Math.min(it.anchor.l, TR - w3));
+        var t3 = cr.t - h3 - fsz * 0.12, z3 = { l: x3, r: x3 + w3, t: t3, b: t3 + h3 };
+        var hit3 = placed.some(function (p) { return z3.l < p.r && p.l < z3.r && z3.t < p.b && p.t < z3.b; });
+        if (t3 < topLim || hit3) { t3 = it.anchor.b + fsz * (0.3 + (it.lv || 0) * 0.36); z3 = { l: x3, r: x3 + w3, t: t3, b: t3 + h3 }; }
+        bx.style.left = x3 + 'px'; bx.style.maxWidth = (w3 + 1) + 'px'; rc = z3;
       }
       bx.style.top = rc.t + 'px'; placed.push(rc);
     }
