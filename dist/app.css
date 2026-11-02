@@ -7522,3 +7522,19 @@ body.dark-mode .kzl-pl.on text { fill: #e8d9bd; }
 body.dark-mode .kzl-pl.here text { fill: var(--kzl-red); }
 body.dark-mode .kzl-q { color: #c8a2e8; }
 body.dark-mode .kzl-grp { background: #221d18; }
+
+/* V191：〈論語選〉作者·補充｜儒家（字級跟內文一樣，用顏色區分） */
+.wks-info-body .rj-k { color: var(--sp-color, #b03a2e); }
+.rj-evo, .rj-flow { display: flex; flex-wrap: wrap; align-items: center; gap: .4em; margin: .3em 0 .5em; }
+.rj-step, .rj-f { display: inline-flex; flex-direction: column; align-items: center; padding: .25em .9em; border: 2px solid var(--sp-color, #b03a2e);
+  border-radius: .5em; background: var(--surface, #fffdf8); line-height: 1.45; text-align: center; }
+.rj-step i { font-style: normal; color: var(--mk-ink-soft, #6b5a42); }
+.rj-step em { font-style: normal; font-weight: 900; color: var(--sp-color, #b03a2e); }
+.rj-f b { color: var(--sp-color, #b03a2e); }
+.rj-arr { color: var(--sp-color, #b03a2e); font-weight: 900; }
+.rj-tb th { color: var(--sp-color, #b03a2e); background: color-mix(in srgb, var(--sp-color, #b03a2e) 10%, transparent); }
+.rj-tb td:first-child { color: var(--sp-color, #b03a2e); background: color-mix(in srgb, var(--sp-color, #b03a2e) 6%, transparent); }
+.wks-info-body .rj-n { color: var(--sp-color, #b03a2e); }
+body.dark-mode .rj-step, body.dark-mode .rj-f { background: #221d18; }
+.wks-info-body .rj-tb th, .wks-info-body .rj-tb td { width: 31%; }
+:is(#wk-fullscreen, #wk-slide-area) .wks-info-body .rj-tb tr > :first-child { white-space: nowrap !important; width: 1%; }
