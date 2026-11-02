@@ -16,3 +16,9 @@ body.dark-mode .wks-hd2 .hdx-q { color: #c8a2e8; }
 body.dark-mode .wks-hd2 .hdx-tr { background: rgba(110,200,150,.1); border-left-color: #5fbf8a; color: #bfe6cf; }
 body.dark-mode .wks-hd2 .hdx-trk { background: #2d7a4f; }
 body.dark-mode .wks-hd2 .hdx-hd, body.dark-mode .wks-hd2 .hdx-n { background: #8d5cb5; }
+
+/* V196：補充講義填空答案放大＋亮紅＋淡黃底（老師 11/2：紫綠之後紅色答案不顯眼，答案字調大） */
+body[data-wk="論語選—子路曾皙冉有公西華侍坐"] :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2 .jy-blank.show span.jy-blank-ans.jy-blank-ans {
+  font-size: 1.25em !important; color: #d0312d; background: #fff3b0; border-radius: .2em; padding: 0 .2em; line-height: 1.2;
+}
+body.dark-mode[data-wk="論語選—子路曾皙冉有公西華侍坐"] .wks-hd2 .jy-blank.show .jy-blank-ans { color: #ff8a7a; background: rgba(255,220,100,.18); }
