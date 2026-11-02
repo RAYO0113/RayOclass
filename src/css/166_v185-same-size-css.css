@@ -1,0 +1,11 @@
+/* V185：補充頁、補充講義的「原文框」和旁邊的解釋文字一樣大，改用顏色區分（老師 11/2：字體大小由老師自己用 A−／A＋ 控制，不要用大小字區別）。
+   原文框：跟著所在段落的字級（1em），字色用該頁的補充色（作者紅、題解紫、課後補充綠、賞析藍）；補充浮框在全螢幕也跟內文同大。 */
+.sp-anc,
+#wk-fullscreen .sp-anc {   /* 〈盍各言爾志〉（.hg-m）原文、語譯本來就同大，157 的規則較具體，照舊 */
+  font-size: 1em !important;
+  color: var(--sp-color, #7c4da0);
+}
+.hd-anc { font-size: 1em; color: #7c4da0; }
+#wk-fullscreen .sp-box { font-size: 1em; }
+body.dark-mode .sp-anc { color: color-mix(in srgb, var(--sp-color, #7c4da0) 55%, #fff); }
+body.dark-mode .hd-anc { color: color-mix(in srgb, #7c4da0 55%, #fff); }
