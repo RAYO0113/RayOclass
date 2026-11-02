@@ -12020,7 +12020,7 @@ try {
     return '<div class="kzl-tl">' + tl + '</div>' +
       '<div class="kzl-main"><div class="kzl-mapbox">' + svgHTML() + '</div>' +
       '<div class="kzl-side"><div class="kzl-head"><b class="kzl-age"></b><span class="kzl-yr"></span></div>' +
-      '<div class="kzl-title"></div><div class="kzl-txt"></div></div></div>' +
+      '<div class="kzl-title"></div><div class="kzl-txt"></div></div></div><div class="kzl-xout"></div>' +
       '<div class="kzl-ctrl"><button class="kzl-btn kzl-prev" onclick="kzlStep(this,-1)">◀ 上一步</button>' +
       '<button class="kzl-btn kzl-next" onclick="kzlStep(this,1)">下一步 ▶</button>' +
       '<button class="kzl-btn" onclick="kzlGo(this,0)">⟳ 從頭</button><span class="kzl-hint-ind"></span></div>';
@@ -12038,7 +12038,8 @@ try {
     box.querySelector('.kzl-age').textContent = S.zy ? '周遊列國 ' + S.tl + (S.age ? '　' + S.age : '') : age;
     var yr = box.querySelector('.kzl-yr'); yr.textContent = S.yr || ''; yr.style.display = S.yr ? '' : 'none';
     box.querySelector('.kzl-title').textContent = S.h;
-    var x = X[i]; box.querySelector('.kzl-txt').innerHTML = S.t + (x ? '<button class="kzl-xbtn" onclick="kzlX(this)">▸ 原典故事：' + x[0] + '</button><div class="kzl-x">' + x[1] + '</div>' : '');
+    var x = X[i]; box.querySelector('.kzl-txt').innerHTML = S.t + (x ? '<button class="kzl-xbtn" onclick="kzlX(this)">▸ 原典故事：' + x[0] + '</button>' : '');
+    box.classList.remove('xon'); box.querySelector('.kzl-xout').innerHTML = x ? '<b class="kzl-xh">原典故事：' + x[0] + '</b>' + x[1] : '';
     box.querySelector('.kzl-prev').disabled = i === 0;
     box.querySelector('.kzl-next').disabled = i === ST.length - 1;
     box.querySelector('.kzl-hint-ind').textContent = (i + 1) + ' / ' + ST.length;
@@ -12081,7 +12082,7 @@ try {
   }
   function boxOf(el) { return el.closest('.kzl'); }
   function stop() { if (window.event) window.event.stopPropagation(); }
-  window.kzlX = function (btn) { stop(); var on = btn.classList.toggle('on'); btn.textContent = (on ? '▾' : '▸') + btn.textContent.slice(1); };
+  window.kzlX = function (btn) { stop(); var box = boxOf(btn), on = btn.classList.toggle('on'); box.classList.toggle('xon', on); btn.textContent = (on ? '▾' : '▸') + btn.textContent.slice(1); };
   window.kzlStep = function (btn, dir) { stop(); var box = boxOf(btn), i = +box.dataset.st + dir; if (i >= 0 && i < ST.length) render(box, i, dir > 0); };
   window.kzlGo = function (btn, i) { stop(); var box = boxOf(btn); render(box, i, i === +box.dataset.st + 1); };
   function initAll() {
