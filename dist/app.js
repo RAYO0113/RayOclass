@@ -11930,7 +11930,7 @@ try {
 (function () {
   /* 地點：經緯度（今地）→ SVG 座標 */
   var PL = {
-    '周': { ll: [112.45, 34.62], n: '周（洛邑）' }, '鄭': { ll: [113.74, 34.40], n: '鄭' },
+    '周': { ll: [112.45, 34.62], n: '周（雒邑）' }, '鄭': { ll: [113.74, 34.40], n: '鄭' },
     '衛': { ll: [115.03, 35.76], n: '衛' }, '匡': { ll: [114.67, 35.20], n: '匡', s: 1 },
     '曹': { ll: [115.57, 35.07], n: '曹' }, '宋': { ll: [115.65, 34.41], n: '宋' },
     '魯': { ll: [116.99, 35.58], n: '魯（曲阜）' }, '陬': { ll: [117.17, 35.47], n: '陬邑', s: 1 },
@@ -12195,7 +12195,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V194';
+  window.APP_VERSION = 'V195';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
