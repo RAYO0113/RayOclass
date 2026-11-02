@@ -7589,6 +7589,8 @@ body.dark-mode .kzl-inset-land { fill: #4a3f30; stroke: #6e604c; }
 .kz-sec-hint-i b { display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em; border-radius: 50%; border: 2px solid #b03a2e; color: #b03a2e; font-size: .8em; }
 body.dark-mode .kz-sec-title { color: #ff8a7a; }
 body.dark-mode .kz-sec-hint-i b { border-color: #ff8a7a; color: #ff8a7a; }
+/* V199：弟子人物像放大（老師 11/2：太小） */
+.wks-info-body .dz-img { width: 38%; max-width: 380px; }
 /* ════ src/css/168_v194-hdclear-css.css ════ */
 /* V194：〈論語選〉補充講義分條、原文上色、語譯底框（179_v194-hdclear-js）。字級不變，用顏色與底框區分。 */
 .wks-hd2 .hdx-cell > div + div { margin-top: .45em; }
