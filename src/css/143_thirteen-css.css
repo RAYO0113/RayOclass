@@ -45,3 +45,9 @@ body.dark-mode .t13-sum { background:var(--mk-paper-warm,#221d18); }
 body.dark-mode .t13-b.ren { border-color: #c8a2e8; color: #c8a2e8; }
 body.dark-mode .t13-ren-i b { color: #c8a2e8; }
 body.dark-mode .t13-ren-i .t13-ren-tag { background: #7c4da0; color: #fff; }
+/* V193：《爾雅》簡介（十二經那一步） */
+.t13-info { margin: 0 0 .5em; padding: .45em .8em; border-radius: .5em; background: rgba(192,57,43,.07); border-left: 5px solid var(--t13-add);
+  font-size: calc(var(--base-size) * 1.1); line-height: 1.75; color: var(--mk-ink, #33271a); }
+.t13-info-tag { color: var(--t13-add); margin-right: .4em; }
+#wk-fullscreen .t13-info { font-size: calc(var(--base-size) * 1.25); }
+body.dark-mode .t13-info { background: rgba(232,115,95,.12); }

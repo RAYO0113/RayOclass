@@ -58,9 +58,21 @@
       t: '孔子病逝，享年七十三歲。弟子感念師恩，在墓旁建屋守喪<b>三年</b>；三年後各奔東西，只有<b>子貢</b>又多住了三年。後世尊為「至聖先師」、「萬世師表」。' }
   ];
 
+  /* V193：底圖＝今省界（177_v193-kzlmap-data-js.js）＋右下角全中國小地圖（紅框＝本圖範圍）；只作示意，古今疆界不同 */
+  var PROV_LBL = [['今山西', 70, 92], ['今河北', 300, 44], ['今河南', 150, 222], ['今山東', 610, 232], ['今江蘇', 640, 392], ['今安徽', 500, 425]];
+  function baseMap() {
+    var M = window.KZL_MAP; if (!M) return '';
+    var s = '<g clip-path="url(#kzl-clip)"><g class="kzl-prov">' + M.prov.map(function (p) { return p.d ? '<path d="' + p.d + '"/>' : ''; }).join('') + '</g>' +
+      PROV_LBL.map(function (l) { return '<text class="kzl-prov-n" x="' + l[1] + '" y="' + l[2] + '" text-anchor="middle">' + l[0] + '</text>'; }).join('') + '</g>';
+    var ox = 712 - M.iw - 8, oy = 432 - M.ih - 8, b = M.ibox;
+    s += '<g class="kzl-inset" transform="translate(' + ox + ',' + oy + ')"><rect class="kzl-inset-bg" x="-6" y="-6" width="' + (M.iw + 12) + '" height="' + (M.ih + 12) + '" rx="6"/>' +
+      '<path class="kzl-inset-land" d="' + M.inset + '"/><rect class="kzl-inset-box" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] + '"/></g>';
+    return s;
+  }
   function svgHTML() {
     var s = '<svg class="kzl-map" viewBox="0 0 720 440" role="img" aria-label="孔子一生行跡示意地圖">' +
-      '<rect class="kzl-bg" x="2" y="2" width="716" height="436" rx="14"/>' +
+      '<defs><clipPath id="kzl-clip"><rect x="2" y="2" width="716" height="436" rx="14"/></clipPath></defs>' +
+      '<rect class="kzl-bg" x="2" y="2" width="716" height="436" rx="14"/>' + baseMap() +
       '<text class="kzl-compass" x="40" y="44" text-anchor="middle">北</text><path class="kzl-compass-a" d="M40 50 l-7 16 l7 -5 l7 5 z"/>' +
       '<g class="kzl-trail"></g><polyline class="kzl-cur" points=""/>';
     Object.keys(PL).forEach(function (k) {

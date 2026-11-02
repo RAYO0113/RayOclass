@@ -72,3 +72,33 @@ body.dark-mode .kzl-grp { background: #221d18; }
 body.dark-mode .rj-step, body.dark-mode .rj-f { background: #221d18; }
 .wks-info-body .rj-tb th, .wks-info-body .rj-tb td { width: 31%; }
 :is(#wk-fullscreen, #wk-slide-area) .wks-info-body .rj-tb tr > :first-child { white-space: nowrap !important; width: 1%; }
+
+/* V193：孔子的一生 地圖底圖（今省界）＋中國小地圖 */
+.kzl-bg { fill: #dfe9ee; }
+.kzl-prov path { fill: #f5ecd8; stroke: #c9b48c; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.kzl-prov-n { font-size: 20px; fill: #b3a283; font-family: "Noto Serif TC", serif; letter-spacing: 2px; }
+.kzl-inset-bg { fill: #fffdf8; stroke: #c9b48c; stroke-width: 1.5; opacity: .95; }
+.kzl-inset-land { fill: #e3d5b5; stroke: #b9a47c; stroke-width: .4; }
+.kzl-inset-box { fill: none; stroke: #d0312d; stroke-width: 2; }
+body.dark-mode .kzl-bg { fill: #1d2a30; }
+body.dark-mode .kzl-prov path { fill: #2a241c; stroke: #5a4a33; }
+body.dark-mode .kzl-prov-n { fill: #6e604c; }
+body.dark-mode .kzl-inset-bg { fill: #221d18; stroke: #5a4a33; }
+body.dark-mode .kzl-inset-land { fill: #4a3f30; stroke: #6e604c; }
+
+/* V193：弟子小檔案人物像（右浮動，每位弟子一張） */
+.wks-info-body b.dz-h { display: table; clear: both; }
+.wks-info-body .dz-img { float: right; width: 26%; max-width: 240px; margin: .2em 0 .6em 1em; border-radius: .6em; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+
+/* V193：〈論語選〉課前小標頁（178_v193-secpage-js） */
+.kz-sec { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 420px; padding: 2em 2.4em !important; }
+#wkfs-body .kz-sec { min-height: calc(100vh - 140px); }
+.kz-sec-head { display: flex; align-items: center; gap: .5em; padding-bottom: .35em; border-bottom: 4px solid var(--kzl-red, #b03a2e); margin-bottom: .9em; }
+.kz-sec-head-no { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border-radius: 50%; background: #b03a2e; color: #fff;
+  font-size: 44px; font-weight: 900; font-family: "Noto Serif TC", serif; }
+.kz-sec-title { font-size: 56px; font-weight: 900; color: #b03a2e; letter-spacing: .12em; font-family: "Noto Serif TC", serif; }
+.kz-sec-hint { display: flex; flex-wrap: wrap; gap: .5em .9em; font-size: 24px; color: var(--mk-ink-soft, #6b5a42); }
+.kz-sec-hint-i { display: inline-flex; align-items: center; gap: .35em; }
+.kz-sec-hint-i b { display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em; border-radius: 50%; border: 2px solid #b03a2e; color: #b03a2e; font-size: .8em; }
+body.dark-mode .kz-sec-title { color: #ff8a7a; }
+body.dark-mode .kz-sec-hint-i b { border-color: #ff8a7a; color: #ff8a7a; }

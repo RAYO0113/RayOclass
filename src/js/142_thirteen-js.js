@@ -35,7 +35,8 @@
     { era: '唐文宗．開成石經', name: '十二經', show: ['詩', '書', '周禮', '儀禮', '禮記', '易', '左傳', '公羊傳', '穀梁傳', '論語', '孝經', '爾雅'],
       add: ['論語', '孝經', '爾雅'],
       cap: '開成年間在國子學刻石（開成石經），九經之外加上《論語》《孝經》《爾雅》。',
-      note: '課本：《論語》「唐文宗時，列為十二經之一」。' },
+      note: '課本：《論語》「唐文宗時，列為十二經之一」。',
+      info: ['爾雅', '中國最早解釋詞義的書（訓詁書），可以說是最早的「字典」。「爾」是近、「雅」是正，意思是接近雅正的語言。現存 19 篇，把字詞按類別解釋：釋詁、釋言、釋訓、釋親、釋宮、釋器、釋樂、釋天、釋地、釋丘、釋山、釋水、釋草、釋木、釋蟲、釋魚、釋鳥、釋獸、釋畜。本來只是字書，和儒家無關，後來才被列入經書。'] },
     { era: '南宋光宗', name: '十三經', show: ALL13,
       add: ['孟子'],
       cap: '《孟子》由「子」書升格為「經」，十二經加《孟子》，成為流傳至今的「十三經」。',
@@ -62,7 +63,7 @@
         '<div class="t13-tl">' + tl + '</div>' +
         '<div class="t13-head"><span class="t13-era"></span><span class="t13-name"></span><span class="t13-count"></span></div>' +
         '<div class="t13-stage">' + books + '</div>' +
-        '<div class="t13-ren"></div>' +
+        '<div class="t13-ren"></div><div class="t13-info"></div>' +
         '<div class="t13-cap"></div><div class="t13-note"></div>' +
         '<div class="t13-sum">' + esc(SUMMARY) + '<br>' + esc(RENAMES) + '</div>' +
         '<div class="v73-ctrl"><button class="v73-btn t13-next" onclick="t13Step(this)">▶ 下一步</button>' +
@@ -90,6 +91,9 @@
       return '<div class="t13-ren-i"><b class="t13-ren-tag">改名</b><b>《' + esc(nameAt(b, i - 1)) + '》→《' + esc(nameAt(b, i)) + '》</b>' + esc(S.ren[id]) + '</div>';
     }).join('');
     ren.style.display = rk.length ? '' : 'none';
+    var inf = box.querySelector('.t13-info');
+    inf.innerHTML = S.info ? '<b class="t13-info-tag">《' + esc(S.info[0]) + '》是什麼書？</b>' + esc(S.info[1]) : '';
+    inf.style.display = S.info ? '' : 'none';
     box.querySelector('.t13-sum').classList.toggle('show', i === STEPS.length - 1);
     var nx = box.querySelector('.t13-next'); nx.disabled = i === STEPS.length - 1; nx.textContent = i === STEPS.length - 1 ? '✓ 完成' : '▶ 下一步';
     var splitFrom = {};
