@@ -6829,6 +6829,21 @@ body.dark-mode .tm-sup { color:#C9A8F0; }
 #wk-fullscreen .t13-cap { font-size:calc(var(--base-size) * 1.6); }
 body.dark-mode .t13 { --t13-c:#e0b070; --t13-add:#e8735f; --t13-split:#7fb2ee; }
 body.dark-mode .t13-sum { background:var(--mk-paper-warm,#221d18); }
+/* V192：書名依時代改名（先劃掉舊名，再換新名並標「改名」） */
+.t13-b.ren-old .t13-bn { text-decoration: line-through; text-decoration-color: var(--t13-add); text-decoration-thickness: .1em; color: #999; }
+.t13-b.ren { border-color: #7c4da0; color: #7c4da0; box-shadow: 0 0 0 3px rgba(124,77,160,.18); }
+.t13-b.ren::before { content: "改名"; position: absolute; top: -.95em; left: 50%; transform: translateX(-50%); font-size: .42em; font-weight: 700; color: #fff;
+  background: #7c4da0; border-radius: .4em; padding: 0 .4em; line-height: 1.5; opacity: 1; white-space: nowrap; }
+.t13-b.ren .t13-bn::before { content: "《"; opacity: .45; }
+.t13-stage { padding-top: .5em; }
+.t13-ren { margin: 0 0 .5em; }
+.t13-ren-i { font-size: calc(var(--base-size) * 1.1); line-height: 1.7; color: var(--mk-ink, #33271a); margin: .15em 0; }
+.t13-ren-i b { color: #7c4da0; margin-right: .4em; }
+.t13-ren-i .t13-ren-tag { display: inline-block; padding: 0 .45em; border-radius: .35em; background: #7c4da0; color: #fff; font-size: .85em; }
+#wk-fullscreen .t13-ren-i { font-size: calc(var(--base-size) * 1.3); }
+body.dark-mode .t13-b.ren { border-color: #c8a2e8; color: #c8a2e8; }
+body.dark-mode .t13-ren-i b { color: #c8a2e8; }
+body.dark-mode .t13-ren-i .t13-ren-tag { background: #7c4da0; color: #fff; }
 /* ════ src/css/145_swap-css.css ════ */
 /* V122 預先調課（144_swap-js）：外觀沿用 #v82-box */
 #v122-swap { padding:8px 12px; border-bottom:1px solid var(--border,#d4c4a8); background:var(--warm,#f5ede0); font-size:13px; }
