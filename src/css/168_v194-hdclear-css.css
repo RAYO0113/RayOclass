@@ -22,3 +22,21 @@ body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2.hdx-slide .jy-blank.show 
   font-size: 1.25em !important; color: #d0312d; background: #fff3b0; border-radius: .2em; padding: 0 .2em; line-height: 1.2;
 }
 body.dark-mode :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2.hdx-slide .jy-blank.show span.jy-blank-ans.jy-blank-ans { color: #ff8a7a; background: rgba(255,220,100,.18); }
+
+/* V198：答案再加紅色底線，更像「答案」（老師 11/2） */
+body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2.hdx-slide .jy-blank.show span.jy-blank-ans.jy-blank-ans {
+  text-decoration: underline; text-decoration-color: #d0312d; text-decoration-thickness: .09em; text-underline-offset: .2em;
+}
+
+/* V198：整課字級統一（同 166 的 V187 規則）套到還沒上的 L07～L10（老師 11/2：「要，也要一起統一」）。
+   166 原規則不改；這裡用同樣的選擇器，只換課名。 */
+:is(body[data-wk="樂府詩選—長干行"], body[data-wk="茫茫人海中的一名女孩"], body[data-wk="桃花源記"], body[data-wk="極短篇小說選"]) #wkfs-body .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide) { font-size: var(--student-read-size) !important; }
+:is(body[data-wk="樂府詩選—長干行"], body[data-wk="茫茫人海中的一名女孩"], body[data-wk="桃花源記"], body[data-wk="極短篇小說選"]) #wk-slide-area .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide) { font-size: calc(var(--base-size) * 1.2) !important; }
+:is(body[data-wk="樂府詩選—長干行"], body[data-wk="茫茫人海中的一名女孩"], body[data-wk="桃花源記"], body[data-wk="極短篇小說選"]) :is(#wkfs-body, #wk-slide-area) .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide)
+  *:not(h1, h2, h3, h4, h5, h6, button, summary, input, select, option, svg, svg *, rt, img,
+        [class*="head"], [class*="title"], [class*="badge"], [class*="-tag"], [class*="topbar"], [class*="book-page"], [class*="hint"], [class*="cov"],
+        [class*="v68-"], [class*="v61-"], .hd-mj, .hd-sub, .hd-page, .sec-mark, .sp-h, .dz-h, .au-cap, .sp-anno-mark, .sp-anno,
+        .tp-nn, .tp-gd, .jy-cir, .zy-ind, .ah-k, .gd-ek, .tp-pk, .hg-mk, .wk-appk, .aq-psgh, .tp-side-h, .tp-page, .mm-k, .mm-c) {
+  font-size: inherit !important;
+}
+:is(body[data-wk="樂府詩選—長干行"], body[data-wk="茫茫人海中的一名女孩"], body[data-wk="桃花源記"], body[data-wk="極短篇小說選"]) #wkfs-body .wks-textpage :is(.gd-q, .gd-sq) { font-size: var(--student-read-size) !important; }
