@@ -7436,3 +7436,15 @@ body.dark-mode .au-pop .au-frame{
 #wk-fullscreen .sp-box { font-size: 1em; }
 body.dark-mode .sp-anc { color: color-mix(in srgb, var(--sp-color, #7c4da0) 55%, #fff); }
 body.dark-mode .hd-anc { color: color-mix(in srgb, #7c4da0 55%, #fff); }
+
+/* V186：〈論語選〉弟子小檔案的人名小標題：改成有底色的標籤（字級不變，用顏色區分；老師 11/2「小標題換個顏色」） */
+.wks-info-body b.dz-h {
+  display: inline-block; padding: .08em .7em; margin: .2em 0 .25em; border-radius: 4px;
+  background: var(--sp-color, #2d7a4f); color: #fff; letter-spacing: .08em;
+}
+body.dark-mode .wks-info-body b.dz-h { background: color-mix(in srgb, var(--sp-color, #2d7a4f) 75%, #000); color: #fff; }
+
+/* V186：〈論語選〉延伸·孔子之為人（一）～（三）統一格式：每則原文框＋「顯示語譯」（語譯與內文同大）＋說明 */
+.wks-info-body .sp-anc + .sp-trans-toggle { margin-top: -6px; }
+.sp-trans-body { font-size: 1em; }
+.wks-info-body .kz-note { color: var(--sp-color, #2d7a4f); margin: 6px 0 2px; }
