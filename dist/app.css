@@ -7448,3 +7448,18 @@ body.dark-mode .wks-info-body b.dz-h { background: color-mix(in srgb, var(--sp-c
 .wks-info-body .sp-anc + .sp-trans-toggle { margin-top: -6px; }
 .sp-trans-body { font-size: 1em; }
 .wks-info-body .kz-note { color: var(--sp-color, #2d7a4f); margin: 6px 0 2px; }
+
+/* V187：〈論語選〉整課內文字級統一（老師 11/2：整課含補充講義都統一，大小標題可以不同；字級由 A−／A＋ 控制）。
+   作法：課文頁以外的每一頁，整頁內文＝全螢幕「學生閱讀字級」(--student-read-size，跟著 A−／A＋)、一般畫面＝基本字級 1.2 倍；
+   頁內所有內文元素跟著頁面字級（inherit），只有標題、標籤、按鈕、提示、注音等不跟。課文頁原本就統一，只把「提問」框拉成同大。
+   body[data-wk] 由 175_v187-lesson-attr-js.js 設定。 */
+body[data-wk="論語選—子路曾皙冉有公西華侍坐"] #wkfs-body .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide) { font-size: var(--student-read-size) !important; }
+body[data-wk="論語選—子路曾皙冉有公西華侍坐"] #wk-slide-area .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide) { font-size: calc(var(--base-size) * 1.2) !important; }
+body[data-wk="論語選—子路曾皙冉有公西華侍坐"] :is(#wkfs-body, #wk-slide-area) .wk-slide:not(.wks-textpage, .wks-cover, .t13-slide)
+  *:not(h1, h2, h3, h4, h5, h6, button, summary, input, select, option, svg, svg *, rt, img,
+        [class*="head"], [class*="title"], [class*="badge"], [class*="-tag"], [class*="topbar"], [class*="book-page"], [class*="hint"], [class*="cov"],
+        [class*="v68-"], [class*="v61-"], .hd-mj, .hd-sub, .hd-page, .sec-mark, .sp-h, .dz-h, .au-cap, .sp-anno-mark, .sp-anno,
+        .tp-nn, .tp-gd, .jy-cir, .zy-ind, .ah-k, .gd-ek, .tp-pk, .hg-mk, .wk-appk, .aq-psgh, .tp-side-h, .tp-page, .mm-k, .mm-c) {
+  font-size: inherit !important;
+}
+body[data-wk="論語選—子路曾皙冉有公西華侍坐"] #wkfs-body .wks-textpage :is(.gd-q, .gd-sq) { font-size: var(--student-read-size) !important; }

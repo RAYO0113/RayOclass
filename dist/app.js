@@ -11866,11 +11866,23 @@ try {
   };
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
+/* ════ src/js/175_v187-lesson-attr-js.js ════ */
+try {
+/* V187：把目前打開的課名寫到 <body data-wk="課名">，讓 CSS 可以只對某一課生效（〈論語選〉整課字級統一，166 css）。 */
+(function () {
+  function sync() {
+    var k = (typeof wkKey !== 'undefined' && wkKey) ? wkKey : '';
+    if (document.body && document.body.getAttribute('data-wk') !== k) document.body.setAttribute('data-wk', k);
+  }
+  setInterval(sync, 300);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync); else sync();
+})();
+} catch (e) { setTimeout(function () { throw e; }); }
 /* ════ src/js/136_v113-ver-js.js ════ */
 try {
 
 (function () {
-  window.APP_VERSION = 'V186';
+  window.APP_VERSION = 'V187';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
