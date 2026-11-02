@@ -1,0 +1,58 @@
+/* V190：〈論語選〉「孔子的一生」地圖動畫（176_v190-kzlife-js）。內文跟著頁面字級（V187 規則），標題類用 class 名含 head／title／hint 排除。 */
+.kzl { --kzl-c: var(--sp-color, #b03a2e); --kzl-red: #d0312d; margin-top: .2em; }
+.kzl-tl { display: flex; flex-wrap: wrap; gap: .25em .7em; align-items: flex-end; margin-bottom: .5em; }
+.kzl-grp { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .2em; padding: .15em .3em .25em; border-radius: .5em; background: var(--mk-paper-warm, #f7f2e6); }
+.kzl-grp-head { font-style: normal; font-size: 15px; color: var(--mk-ink-soft, #6b5a42); margin-right: .2em; }
+.kzl-tb { font-family: inherit; font-size: 15px; line-height: 1.2; padding: .3em .55em; min-width: 2.2em; border: 1.5px solid var(--mk-line, #e2d6bd);
+  border-radius: .5em; background: var(--surface, #fffdf8); color: var(--mk-ink-soft, #6b5a42); cursor: pointer; }
+.kzl-tb.zy { min-width: 1.9em; padding: .3em .35em; }
+.kzl-tb.done { border-color: var(--kzl-c); color: var(--kzl-c); }
+.kzl-tb.cur { background: var(--kzl-c); border-color: var(--kzl-c); color: #fff; font-weight: 700; }
+
+.kzl-main { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: .9em; align-items: start; }
+.kzl-mapbox { position: relative; }
+.kzl-map { display: block; width: 100%; height: auto; }
+.kzl-bg { fill: #f5ecd8; stroke: #d9c7a3; stroke-width: 2; }
+.kzl-compass { font-size: 22px; fill: #8a7a5e; font-family: "Noto Serif TC", serif; }
+.kzl-compass-a { fill: #8a7a5e; }
+.kzl-pl circle { fill: #fff; stroke: #9a8a6e; stroke-width: 2; }
+.kzl-pl text { font-size: 28px; font-weight: 700; fill: #9a8a6e; font-family: "Noto Serif TC", serif; paint-order: stroke; stroke: #f5ecd8; stroke-width: 5px; }
+.kzl-pl.sm text { font-size: 22px; font-weight: 400; }
+.kzl-pl.on circle { stroke: var(--kzl-red); }
+.kzl-pl.on text { fill: #5a3e22; }
+.kzl-pl.here text { fill: var(--kzl-red); }
+.kzl-trail polyline { fill: none; stroke: var(--kzl-red); stroke-opacity: .28; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.kzl-cur { fill: none; stroke: var(--kzl-red); stroke-width: 4; stroke-dasharray: 9 6; stroke-linejoin: round; stroke-linecap: round; }
+.kzl-dot circle { fill: var(--kzl-red); stroke: #fff; stroke-width: 2.5; }
+.kzl-dot .kzl-halo { fill: var(--kzl-red); stroke: none; opacity: .25; transform-origin: 0 0; animation: kzl-pulse 1.6s ease-out infinite; }
+@keyframes kzl-pulse { 0% { transform: scale(.55); opacity: .45; } 100% { transform: scale(1.5); opacity: 0; } }
+
+.kzl-side { line-height: 1.75; }
+.kzl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .6em; font-size: 1em; margin-bottom: .1em; }
+.kzl-age { color: var(--kzl-red); font-size: 1.15em; }
+.kzl-yr { color: var(--mk-ink-soft, #6b5a42); font-size: .8em; }
+.kzl-title { font-size: 1.05em; font-weight: 900; color: var(--kzl-c); border-bottom: 2px solid color-mix(in srgb, var(--kzl-c) 35%, transparent); padding-bottom: .15em; margin-bottom: .3em; }
+.kzl-txt b { color: var(--kzl-c); }
+.kzl-q { color: #7c4da0; }
+
+.kzl-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; margin-top: .6em; }
+.kzl-btn { font-family: inherit; font-size: 16px; padding: .35em .9em; border-radius: .5em; border: 1.5px solid var(--kzl-c); background: var(--surface, #fffdf8);
+  color: var(--kzl-c); cursor: pointer; }
+.kzl-btn.kzl-next { background: var(--kzl-c); color: #fff; }
+.kzl-btn:disabled { opacity: .35; cursor: default; }
+.kzl-hint-ind { font-size: 15px; color: var(--mk-ink-soft, #6b5a42); }
+
+#wk-fullscreen .kzl-tb, #wk-fullscreen .kzl-grp-head, #wk-fullscreen .kzl-hint-ind { font-size: 17px; }
+#wk-fullscreen .kzl-btn { font-size: 18px; }
+#wk-fullscreen .kzl-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+@media (max-width: 760px) { .kzl-main { grid-template-columns: 1fr; } }
+
+body.dark-mode .kzl { --kzl-red: #ff6b5e; }
+body.dark-mode .kzl-bg { fill: #2a241c; stroke: #5a4a33; }
+body.dark-mode .kzl-pl circle { fill: #2a241c; }
+body.dark-mode .kzl-pl text { stroke: #2a241c; fill: #8f8270; }
+body.dark-mode .kzl-pl.on text { fill: #e8d9bd; }
+body.dark-mode .kzl-pl.here text { fill: var(--kzl-red); }
+body.dark-mode .kzl-q { color: #c8a2e8; }
+body.dark-mode .kzl-grp { background: #221d18; }
