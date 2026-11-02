@@ -58,6 +58,9 @@
       t: '孔子病逝，享年七十三歲。弟子感念師恩，在墓旁建屋守喪<b>三年</b>；三年後各奔東西，只有<b>子貢</b>又多住了三年。後世尊為「至聖先師」、「萬世師表」。' }
   ];
 
+  /* V201：原典故事（老師 11/2：遇險、南子、身高等補原文；點開才顯示）。原文用維基文庫核對，出處見 docs/課文盤點/春秋的士與孔子遇險_資料整理.md */
+  var X = {"0": ["身高", "<div class=\"sp-anc\">孔子長九尺有六寸，人皆謂之「長人」而異之。（《史記．孔子世家》）</div>大家都叫他「長人」，覺得他高得出奇（古今尺長不同，換算說法不一）。"], "3": ["魯君出車", "<div class=\"sp-anc\">魯南宮敬叔言魯君曰：「請與孔子適周。」魯君與之一乘車，兩馬，一豎子俱，適周問禮，蓋見老子云。（《史記．孔子世家》）</div>學生南宮敬叔向魯君請求，魯君給了一輛車、兩匹馬、一個僮僕，讓孔子到周去問禮。"], "7": ["奉粟六萬", "<div class=\"sp-anc\">衛靈公問孔子：「居魯得祿幾何？」對曰：「奉粟六萬。」衛人亦致粟六萬。（《史記．孔子世家》）</div>衛靈公問他在魯國領多少俸祿，衛國就照樣給（「六萬」的單位說法不一）。"], "8": ["匡人圍孔子", "<div class=\"sp-anc\">子畏於匡。曰：「文王既沒，文不在茲乎？天之將喪斯文也，後死者不得與於斯文也；天之未喪斯文也，匡人其如予何？」（〈子罕〉）</div>被圍時孔子說：上天如果還不想讓這套文化滅亡，匡人又能拿我怎樣？<div class=\"sp-anc\">子畏於匡，顏淵後。子曰：「吾以女為死矣。」曰：「子在，回何敢死？」（〈先進〉）</div>顏淵落在後面才到，孔子以為他死了；顏淵說：老師還在，我怎麼敢死？"], "9": ["同車招搖過市", "<div class=\"sp-anc\">居衛月餘，靈公與夫人同車，宦者雍渠參乘，出，使孔子為次乘，招搖市過之。孔子曰：「吾未見好德如好色者也。」於是醜之，去衛，過曹。（《史記．孔子世家》）</div>衛靈公和夫人南子坐第一輛車、宦官陪坐，卻讓孔子坐後面那輛，在街上招搖而過。孔子覺得可恥，離開衛國。"], "10": ["靈公問陳", "<div class=\"sp-anc\">衛靈公問陳於孔子。孔子對曰：「俎豆之事，則嘗聞之矣；軍旅之事，未之學也。」明日遂行。（〈衛靈公〉）</div>衛靈公問排兵布陣，孔子說祭祀禮儀聽過，打仗的事沒學過，第二天就走了。"], "11": ["宋國拔樹", "<div class=\"sp-anc\">孔子去曹適宋，與弟子習禮大樹下。宋司馬桓魋欲殺孔子，拔其樹。孔子去。弟子曰：「可以速矣。」孔子曰：「天生德於予，桓魋其如予何！」（《史記．孔子世家》）</div>孔子在大樹下帶學生演習禮儀，桓魋想殺他，把樹拔了。學生催他快走，孔子說：上天給了我德行，桓魋能拿我怎樣？"], "13": ["陳蔡絕糧、蒲人圍困", "<div class=\"sp-anc\">在陳絕糧，從者病，莫能興。子路慍見曰：「君子亦有窮乎？」子曰：「君子固窮，小人窮斯濫矣。」（〈衛靈公〉）</div>斷糧時大家餓到爬不起來，子路生氣地問：君子也會這麼窮困嗎？孔子說：君子窮困時仍守得住，小人一窮就亂來。<div class=\"sp-anc\">於是使子貢至楚。楚昭王興師迎孔子，然後得免。（《史記．孔子世家》）</div>派子貢到楚國求救，楚王派兵來接，才脫險。<div class=\"sp-anc\">過蒲，會公叔氏以蒲畔，蒲人止孔子。弟子有公良孺者，以私車五乘從孔子。其為人長賢，有勇力，謂曰：「吾昔從夫子遇難於匡，今又遇難於此，命也已。吾與夫子再罹難，寧鬥而死。」鬥甚疾。蒲人懼，謂孔子曰：「苟毋適衛，吾出子。」與之盟，出孔子東門。孔子遂適衛。子貢曰：「盟可負耶？」孔子曰：「要盟也，神不聽。」（《史記．孔子世家》）</div>《史記》記在離開陳國回衛國的路上：經過蒲，碰上蒲人叛亂被攔下。弟子公良孺帶著自家五輛車，拚死奮戰；蒲人怕了，要孔子發誓不去衛國才放人。孔子一出城就去衛國。子貢問：誓言可以違背嗎？孔子說：被要脅立的誓，神不會理。"]};
+
   /* V193：底圖＝今省界（177_v193-kzlmap-data-js.js）＋右下角全中國小地圖（紅框＝本圖範圍）；只作示意，古今疆界不同 */
   var PROV_LBL = [['今山西', 70, 92], ['今河北', 300, 44], ['今河南', 150, 222], ['今山東', 610, 232], ['今江蘇', 640, 392], ['今安徽', 500, 425]];
   function baseMap() {
@@ -112,7 +115,7 @@
     box.querySelector('.kzl-age').textContent = S.zy ? '周遊列國 ' + S.tl + (S.age ? '　' + S.age : '') : age;
     var yr = box.querySelector('.kzl-yr'); yr.textContent = S.yr || ''; yr.style.display = S.yr ? '' : 'none';
     box.querySelector('.kzl-title').textContent = S.h;
-    box.querySelector('.kzl-txt').innerHTML = S.t;
+    var x = X[i]; box.querySelector('.kzl-txt').innerHTML = S.t + (x ? '<button class="kzl-xbtn" onclick="kzlX(this)">▸ 原典故事：' + x[0] + '</button><div class="kzl-x">' + x[1] + '</div>' : '');
     box.querySelector('.kzl-prev').disabled = i === 0;
     box.querySelector('.kzl-next').disabled = i === ST.length - 1;
     box.querySelector('.kzl-hint-ind').textContent = (i + 1) + ' / ' + ST.length;
@@ -155,6 +158,7 @@
   }
   function boxOf(el) { return el.closest('.kzl'); }
   function stop() { if (window.event) window.event.stopPropagation(); }
+  window.kzlX = function (btn) { stop(); var on = btn.classList.toggle('on'); btn.textContent = (on ? '▾' : '▸') + btn.textContent.slice(1); };
   window.kzlStep = function (btn, dir) { stop(); var box = boxOf(btn), i = +box.dataset.st + dir; if (i >= 0 && i < ST.length) render(box, i, dir > 0); };
   window.kzlGo = function (btn, i) { stop(); var box = boxOf(btn); render(box, i, i === +box.dataset.st + 1); };
   function initAll() {
