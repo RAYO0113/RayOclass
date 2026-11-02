@@ -1,5 +1,5 @@
 /* V194：〈論語選〉補充講義分條、原文上色、語譯底框（179_v194-hdclear-js）。字級不變，用顏色與底框區分。 */
-body[data-wk="論語選—子路曾皙冉有公西華侍坐"] .wks-hd2 .hdx-cell > div + div { margin-top: .45em; }
+.wks-hd2 .hdx-cell > div + div { margin-top: .45em; }
 .wks-hd2 .hdx-hd { color: #fff; background: #7c4da0; display: table; padding: 0 .6em; border-radius: .35em; margin-top: .6em; letter-spacing: .05em; }
 .wks-hd2 .hdx-cell > .hdx-hd:first-child { margin-top: 0; }
 .wks-hd2 .hdx-it { display: flex; gap: .45em; align-items: flex-start; }
@@ -11,14 +11,14 @@ body[data-wk="論語選—子路曾皙冉有公西華侍坐"] .wks-hd2 .hdx-cell
 .wks-hd2 .hdx-trk { display: inline-block; margin-right: .45em; padding: 0 .4em; border-radius: .3em; background: #2d7a4f; color: #fff; font-size: .82em; }
 .wks-hd2 .hdx-opts .hdx-opt { display: block; }
 .wks-hd2 .hdx-gap { display: inline-block; width: 4em; height: 1.1em; margin: 0 .2em; vertical-align: -.15em; border: 2px dashed #b03a2e; border-radius: .3em; background: rgba(176,58,46,.06); }
-body[data-wk="論語選—子路曾皙冉有公西華侍坐"] .wks-hd2 .hd-split-psg .hd-para { text-indent: 2em; }
+.wks-hd2.hdx-slide .hd-split-psg .hd-para { text-indent: 2em; }
 body.dark-mode .wks-hd2 .hdx-q { color: #c8a2e8; }
 body.dark-mode .wks-hd2 .hdx-tr { background: rgba(110,200,150,.1); border-left-color: #5fbf8a; color: #bfe6cf; }
 body.dark-mode .wks-hd2 .hdx-trk { background: #2d7a4f; }
 body.dark-mode .wks-hd2 .hdx-hd, body.dark-mode .wks-hd2 .hdx-n { background: #8d5cb5; }
 
 /* V196：補充講義填空答案放大＋亮紅＋淡黃底（老師 11/2：紫綠之後紅色答案不顯眼，答案字調大） */
-body[data-wk="論語選—子路曾皙冉有公西華侍坐"] :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2 .jy-blank.show span.jy-blank-ans.jy-blank-ans {
+body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2.hdx-slide .jy-blank.show span.jy-blank-ans.jy-blank-ans {
   font-size: 1.25em !important; color: #d0312d; background: #fff3b0; border-radius: .2em; padding: 0 .2em; line-height: 1.2;
 }
-body.dark-mode[data-wk="論語選—子路曾皙冉有公西華侍坐"] .wks-hd2 .jy-blank.show .jy-blank-ans { color: #ff8a7a; background: rgba(255,220,100,.18); }
+body.dark-mode :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-hd2.hdx-slide .jy-blank.show span.jy-blank-ans.jy-blank-ans { color: #ff8a7a; background: rgba(255,220,100,.18); }

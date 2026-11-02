@@ -12139,7 +12139,8 @@ try {
    2. 選項一行塞兩個（(A)…　(B)…）→ 一個選項一行。
    3. 閱讀文章的填空空白（連續空格）→ 畫成空格框；文章段落首行縮排。 */
 (function () {
-  var LESSON = '論語選—子路曾皙冉有公西華侍坐';
+  /* V197：老師要還沒上過的課也套用（技1 L07～L10：樂府詩選、茫茫人海、桃花源記、極短篇） */
+  var LESSONS = ['論語選—子路曾皙冉有公西華侍坐', '樂府詩選—長干行', '茫茫人海中的一名女孩', '桃花源記', '極短篇小說選'];
   var CIR = '①②③④⑤⑥⑦⑧⑨⑩';
   function txt(html) { var d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').replace(/ /g, ' ').trim(); }
   function quoteColor(html) { return html.replace(/「([^「」<>]{8,})」/g, '<span class="hdx-q">「$1」</span>'); }
@@ -12153,10 +12154,13 @@ try {
       return o;
     });
     /* 小標題：短、不以句號結尾、下一行是較長的內文 */
+    /* V197：至少兩個才算（「小標題／內文」交錯的格子），避免把一般短句誤當小標題 */
+    var hdIdx = [];
     L.forEach(function (o, i) {
       var nx = L[i + 1];
-      if (o.k === 'p' && o.t.length <= 14 && !/[。！？」）]$/.test(o.t) && nx && nx.k === 'p' && nx.t.length > 20) o.k = 'hd';
+      if (o.k === 'p' && o.t.length <= 14 && !/[。！？」）]$/.test(o.t) && !/^[\(（→]/.test(o.t) && !/[：:→]/.test(o.t) && nx && nx.k === 'p' && nx.t.length > 20) hdIdx.push(i);
     });
+    if (hdIdx.length >= 2) hdIdx.forEach(function (i) { L[i].k = 'hd'; });
     var hasTr = L.some(function (o) { return o.k === 'tr'; }), hasN = L.some(function (o) { return o.k === 'n'; });
     var pCount = L.filter(function (o) { return o.k === 'p'; }).length;
     var autoNum = hasTr && !hasN && pCount >= 2, c = 0;   /* 原文＋語譯成對、沒有原編號 → 自動加 ①② */
@@ -12180,9 +12184,11 @@ try {
     if (/[　 ]{6,}|(&nbsp;){4,}/.test(el.innerHTML)) el.innerHTML = el.innerHTML.replace(/(?:[　 ]|&nbsp;){6,}/g, '<span class="hdx-gap"></span>');
   }
   function run() {
-    if (document.body.getAttribute('data-wk') !== LESSON && (typeof wkKey === 'undefined' || wkKey !== LESSON)) return;
+    var k = (typeof wkKey !== 'undefined' && wkKey) || document.body.getAttribute('data-wk');
+    if (LESSONS.indexOf(k) < 0) return;
     document.querySelectorAll('.wks-hd2:not([data-hdx])').forEach(function (s) {
       s.setAttribute('data-hdx', '1');
+      s.classList.add('hdx-slide');
       s.querySelectorAll('.hd-body td').forEach(function (td) { if (/<br/i.test(td.innerHTML)) fixCell(td); });
       s.querySelectorAll('.hd-opt').forEach(fixOpt);
       s.querySelectorAll('.hd-para').forEach(fixPara);
@@ -12195,7 +12201,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V196';
+  window.APP_VERSION = 'V197';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
