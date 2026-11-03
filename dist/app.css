@@ -7672,3 +7672,21 @@ body[data-wk="論語選—子路曾皙冉有公西華侍坐"] #wkfs-body .wk-sli
 #wkfs-body .wks-textpage .gd { font-size: var(--student-read-size) !important; }
 #wkfs-body .wks-textpage .gd :is(.gd-q, .gd-sq, .gd-sa, .gd-qa, .gd-et, .gd-bh, .gd-bt, .gd-bt *) { font-size: 1em !important; }
 #wkfs-body .wks-textpage .gd table.ly-table { font-size: 1em !important; }
+/* ════ src/css/171_v203-iquiz-num-css.css ════ */
+/* V203：基礎練習考卷格式（180_v203-iquiz-num-js）：「(　) 1. 題目」，選項 (A)～(D) 對齊題目文字縮排；答案格答案出現才填。 */
+.wks-iquiz .iq-num { display: flex; align-items: baseline; }
+.wks-iquiz .iq-ab { flex: none; width: 3.4em; display: inline-flex; justify-content: space-between; }
+.wks-iquiz .iq-abv { visibility: hidden; color: var(--L-gloss, #1f6fb2); }
+.wks-iquiz.ans-on .iq-abv { visibility: visible; }
+.wks-iquiz .iq-qn { flex: none; width: 2em; margin-left: .3em; }
+.wks-iquiz .iq-qt { flex: 1; }
+/* 選項：縮排到題目文字下方；字母改成 (A)，不用圓圈；框線拿掉，點了才出現顏色 */
+.wks-iquiz .iq-opts { margin-left: calc(5.7em - 11px); gap: 2px; }   /* 5.7em＝答案格 3.4＋間距 .3＋題號 2；減掉選項的 padding 10px＋框線 1px，(A) 對齊題目第一個字 */
+.wks-iquiz .iq-opt { border-color: transparent; background: transparent; padding: 4px 10px; }
+.wks-iquiz .iq-opt:hover { border-color: var(--mk-line, #cabb96); }
+.wks-iquiz .iq-ok { width: auto; height: auto; line-height: inherit; border-radius: 0; background: none !important;
+  color: inherit; font-size: 1em; margin-right: .4em; }
+.wks-iquiz .iq-ok::before { content: "("; }
+.wks-iquiz .iq-ok::after { content: ")"; }
+.wks-iquiz .iq-opt.right.on .iq-ok { color: var(--L-gloss, #1f6fb2); font-weight: 700; }
+body.dark-mode .wks-iquiz .iq-opt { background: transparent; }
