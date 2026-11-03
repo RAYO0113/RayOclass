@@ -7704,3 +7704,8 @@ body.dark-mode .wks-iquiz .iq-opt:nth-child(even) { background: rgba(230, 200, 1
 .wks-iquiz .iq-all { background: var(--L-supp, #7c4da0); color: #fff; font-weight: 700; font-size: 1em;
   padding: 6px 18px; border-radius: 6px; letter-spacing: .1em; }
 .wks-iquiz .iq-all:hover { filter: brightness(1.1); }
+/* ════ src/css/173_v205-iquiz-top-css.css ════ */
+/* V205：基礎練習標題列只放課本頁碼（左）＋一鍵展開／收起（右）（182_v205-iquiz-top-js） */
+.wks-iquiz .iq-top { justify-content: space-between; }
+.wks-iquiz .iq-pg { font-family: "Noto Serif TC", serif; font-weight: 700; color: var(--mk-ink-soft, #6b5a42); letter-spacing: .05em; }
+.wks-iquiz .iq-pg:empty { visibility: hidden; }

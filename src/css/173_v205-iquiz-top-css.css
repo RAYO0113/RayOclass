@@ -1,0 +1,4 @@
+/* V205：基礎練習標題列只放課本頁碼（左）＋一鍵展開／收起（右）（182_v205-iquiz-top-js） */
+.wks-iquiz .iq-top { justify-content: space-between; }
+.wks-iquiz .iq-pg { font-family: "Noto Serif TC", serif; font-weight: 700; color: var(--mk-ink-soft, #6b5a42); letter-spacing: .05em; }
+.wks-iquiz .iq-pg:empty { visibility: hidden; }
