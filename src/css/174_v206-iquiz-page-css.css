@@ -1,0 +1,4 @@
+/* V206：基礎練習「開／關」按鈕放在題目那一行最右邊（183_v206-iquiz-page-js）；頁碼用原本的右上角浮框 .wks-book-page */
+.wks-iquiz .iq-num { align-items: center; }
+.wks-iquiz .iq-onoff { flex: none; margin-left: auto; padding: 2px 14px; font-size: .8em; letter-spacing: .15em; }
+#wk-fullscreen .wks-iquiz .iq-num { margin-top: 24px; }   /* 全螢幕：右上角頁碼浮框（top 52px）不要壓到題目行的「開」 */
