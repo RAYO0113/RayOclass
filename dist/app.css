@@ -7690,3 +7690,17 @@ body[data-wk="論語選—子路曾皙冉有公西華侍坐"] #wkfs-body .wk-sli
 .wks-iquiz .iq-ok::after { content: ")"; }
 .wks-iquiz .iq-opt.right.on .iq-ok { color: var(--L-gloss, #1f6fb2); font-weight: 700; }
 body.dark-mode .wks-iquiz .iq-opt { background: transparent; }
+/* ════ src/css/172_v204-iquiz-all-css.css ════ */
+/* V204：基礎練習（老師 11/3）：選項不縮排，改用淺淺的底色一列一列交替，學生看得清楚；「一鍵展開」按鈕放大、填色。
+   覆蓋 171_v203 的縮排與透明底（171 不改）。 */
+.wks-iquiz .iq-opts { margin-left: 0; gap: 0; }
+.wks-iquiz .iq-opt { border-color: transparent; padding: 6px 12px; }
+.wks-iquiz .iq-opt:nth-child(odd) { background: rgba(124, 77, 160, .08); }
+.wks-iquiz .iq-opt:nth-child(even) { background: rgba(201, 162, 39, .10); }
+.wks-iquiz .iq-opt:hover { border-color: var(--L-supp, #7c4da0); }
+.wks-iquiz .iq-opt.right.on { border-color: var(--L-gloss, #1f6fb2); background: rgba(31, 111, 178, .12); }
+body.dark-mode .wks-iquiz .iq-opt:nth-child(odd) { background: rgba(190, 150, 230, .10); }
+body.dark-mode .wks-iquiz .iq-opt:nth-child(even) { background: rgba(230, 200, 110, .08); }
+.wks-iquiz .iq-all { background: var(--L-supp, #7c4da0); color: #fff; font-weight: 700; font-size: 1em;
+  padding: 6px 18px; border-radius: 6px; letter-spacing: .1em; }
+.wks-iquiz .iq-all:hover { filter: brightness(1.1); }
