@@ -1,0 +1,8 @@
+/* V202：〈論語選〉版面修正（老師 11/3）
+   1.〈論語〉二十篇表（ly-grid）：每格都是篇名，不是「項目欄」，第一欄不要紫底紫字（023 的 .ly-table td:first-child 規則不套）。
+   2. 提問引導的追問、答案、小結論、板書字級統一：全螢幕課文頁原本只把 .gd-q／.gd-sq 拉到學生閱讀字級（166、168），
+      答案（.gd-sa）等沒跟上，變成問題大、答案小。改成整個 .gd 用學生閱讀字級，裡面的內文一律 1em。 */
+.ly-table.ly-grid td:first-child { background: none; color: inherit; font-weight: inherit; text-align: left; }
+#wkfs-body .wks-textpage .gd { font-size: var(--student-read-size) !important; }
+#wkfs-body .wks-textpage .gd :is(.gd-q, .gd-sq, .gd-sa, .gd-qa, .gd-et, .gd-bh, .gd-bt, .gd-bt *) { font-size: 1em !important; }
+#wkfs-body .wks-textpage .gd table.ly-table { font-size: 1em !important; }
