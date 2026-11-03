@@ -1,0 +1,10 @@
+/* V208：〈論語選〉「師」最上面的考試核心／可討論（老師 11/3「放進『師』」；資料由 lunyu_core_to_teacher_20261103.js 寫入 askT） */
+.tp-asktin .tk-core, .tp-asktin .tk-open { margin: 2px 0 4px; padding: 3px 8px; border-radius: 4px; line-height: 1.7; }
+.tp-asktin .tk-core { background: rgba(192, 57, 43, .08); border-left: 3px solid #c0392b; }
+.tp-asktin .tk-open { background: rgba(31, 111, 178, .07); border-left: 3px solid #1f6fb2; }
+.tp-asktin .tk-k { display: inline-block; margin-right: .5em; padding: 0 .45em; border-radius: 3px; color: #fff; font-size: .82em; font-weight: 700; letter-spacing: .05em; }
+.tp-asktin .tk-core .tk-k { background: #c0392b; }
+.tp-asktin .tk-open .tk-k { background: #1f6fb2; }
+.tp-asktin .tk-sep { height: 0; margin: 6px 0; border-top: 1px dashed rgba(107, 90, 66, .4); }
+body.dark-mode .tp-asktin .tk-core { background: rgba(231, 110, 95, .12); }
+body.dark-mode .tp-asktin .tk-open { background: rgba(120, 180, 240, .10); }
