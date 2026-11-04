@@ -7731,3 +7731,49 @@ body.dark-mode .tp-asktin .tk-open { background: rgba(120, 180, 240, .10); }
   margin: .4em auto .8em; background: #fff; border-radius: .4em; }
 #wkfs-body .wks-info-body img.shi-pyr-img { width: auto; max-width: 92%; height: 70vh; }
 body.dark-mode .wks-info-body img.shi-pyr-img { padding: .3em; }
+/* ════ src/css/177_v211-t13quiz-css.css ════ */
+/* V211：〈論語選〉十三經小考（177_v211-t13quiz-js） */
+#nq2-t13btn.on { background: var(--q-ink); color: var(--q-paper); }
+#nq2-t13 { display: none; }
+#nq2.t13q #nq2-t13 { display: block; }
+#nq2.t13q #nq2-setup .bar, #nq2.t13q #nq2-hint, #nq2.t13q #nq2-grid,
+#nq2.t13q .dock label, #nq2.t13q #nq2-bUnex, #nq2.t13q #nq2-v108vm { display: none !important; }
+#nq2-t13 .t13s-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 4px; font-size: 17px; }
+#nq2-t13 .t13s-bar b { font-size: 22px; }
+#nq2-t13 .t13s-bar input { width: 64px; font-size: 18px; padding: 4px 6px; border: 2px solid var(--q-line); border-radius: 8px; background: var(--q-surface); color: var(--q-ink); }
+#nq2-t13 .hint { margin: 4px 0 14px; }
+
+/* 書名格子（同「十三經的演變」：棕框、灰色《》、襯線粗體） */
+.t13s-c, .t13q-c { font-family: "Noto Serif TC", serif; font-weight: 700; color: var(--q-ink); background: var(--q-surface);
+  border: 2px solid #8a5a1f; border-radius: .35em; text-align: center; line-height: 1.3; position: relative; }
+.t13s-c .nm::before, .t13q-c .nm::before { content: "《"; opacity: .45; }
+.t13s-c .nm::after, .t13q-c .nm::after { content: "》"; opacity: .45; }
+#nq2-t13 .t13s-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px 12px; }
+.t13s-c { font-size: 28px; padding: .25em .3em; cursor: pointer; white-space: nowrap; }
+.t13s-c.on { border-color: var(--q-gold); background: var(--q-gold-soft); box-shadow: 0 0 0 3px var(--q-gold) inset; }
+.t13s-c.on::after { content: "抽到"; position: absolute; top: -11px; right: 8px; font-size: 13px; font-family: "Noto Sans TC", sans-serif;
+  background: var(--q-gold); color: #fff; border-radius: 6px; padding: 1px 6px; }
+.t13s-c.ex { border-style: dashed; color: var(--q-ex); background: var(--q-ex-bg); }
+.t13s-c.ex::after { content: "不抽"; position: absolute; top: -11px; right: 8px; font-size: 13px; font-family: "Noto Sans TC", sans-serif;
+  background: var(--q-ex); color: #fff; border-radius: 6px; padding: 1px 6px; }
+
+/* 考卷：13 格一樣寬（不讓三個字的書名格子變寬洩漏答案） */
+#nq2-qlist .t13q-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(5.6em), 1fr)); gap: .45em .4em;
+  font-size: calc(44px * var(--q-fs)); padding: .6em .5em .3em; }
+.t13q-c { padding: .2em .2em; white-space: nowrap; }
+.t13q-c.blank { cursor: pointer; border-style: dashed; border-color: var(--q-ink); background: var(--q-paper); }
+.t13q-c.blank .nm { visibility: hidden; }
+.t13q-c.blank.open .nm { visibility: visible; color: #c0392b; }
+.t13q-c .qn { position: absolute; left: -.35em; top: 50%; transform: translateY(-50%); width: 1.25em; height: 1.25em; border-radius: 50%;
+  display: grid; place-items: center; background: var(--q-ink); color: var(--q-paper); font-family: "Noto Sans TC", sans-serif; font-size: .62em; font-weight: 800; }
+#nq2-qlist .t13q-foot { padding: .2em .8em .8em; font-size: calc(24px * var(--q-fs)); color: var(--q-muted); text-align: center; }
+#nq2-qlist .t13q-foot b { color: var(--q-ink); }
+body.dark-mode .t13s-c, body.dark-mode .t13q-c { border-color: #e0b070; }
+body.dark-mode .t13q-c.blank { border-color: var(--q-ink); }
+body.dark-mode .t13q-c.blank.open .nm { color: #e8735f; }
+
+/* 小考紀錄面板（v108）：十三經那筆不能換題／編輯 */
+#v108-nqr .rec.t13 .sw, #v108-nqr .rec.t13 .v111-eb, #v108-nqr .rec.t13 .v109-cp { display: none !important; }
+/* 記錄視窗（v109）：十三經訂正固定全抄，藏「訂正要抄」 */
+#nq2.t13q .v109-dlg > div + div { display: none; }
+#nq2.t13q .v109-dlg::after { content: "訂正要抄：十三經全抄（《詩經》到《孟子》13 部依序）"; display: block; margin-top: 6px; font-weight: 700; }

@@ -275,11 +275,14 @@
     bx.innerHTML = h;
   }
   function recHTML(r) {
-    var id = esc(r.id || rid(r)), d = localDate(r.createdAt), pub = r.pub !== false;
-    var h = '<div class="rec' + (pub ? '' : ' hid') + '"><div class="rh"><b>' + (d ? md(d) + '（' + wdOf(d) + '）' : '') + '　〈' + esc(String(r.lesson).split('—')[0]) + '〉</b>' +
-      '<span>註' + esc(r.rangeStart) + '～註' + esc(r.rangeEnd) + '・' + r.questions.length + ' 題</span>' + (r.classes || []).map(tag).join(' ') +
+    var id = esc(r.id || rid(r)), d = localDate(r.createdAt), pub = r.pub !== false, t13 = r.kind === 't13';   /* V211：十三經小考 */
+    var h = '<div class="rec' + (pub ? '' : ' hid') + (t13 ? ' t13' : '') + '"><div class="rh"><b>' + (d ? md(d) + '（' + wdOf(d) + '）' : '') + '　〈' + esc(String(r.lesson).split('—')[0]) + '〉</b>' +
+      '<span>' + (t13 ? '十三經小考' : '註' + esc(r.rangeStart) + '～註' + esc(r.rangeEnd)) + '・' + r.questions.length + ' 題</span>' + (r.classes || []).map(tag).join(' ') +
       '<label class="pub"><input type="checkbox" data-pub="' + id + '"' + (pub ? ' checked' : '') + '>給學生看</label></div>';
     h += corrHTML(r);
+    if (t13) return h + '<ul class="qs">' + r.questions.slice().sort(function (a, b) { return (+a.ord || 0) - (+b.ord || 0); }).map(function (q) {
+      return '<li><span class="n">第 ' + esc(q.ord || '') + ' 格</span><span class="w">《' + esc(q.w) + '》</span><span class="a">答案不分順序</span></li>';
+    }).join('') + '<li><span class="a">訂正：十三經全抄</span></li></ul></div>';
     h += '<ul class="qs">' + r.questions.map(function (q, k) {
       var on = swapAt && swapAt.id === r.id && swapAt.k === k;
       return '<li><span class="n">註' + esc(q.no) + '</span><span class="w">' + esc(q.whole ? '整句' : q.w) + '</span>' +

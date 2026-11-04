@@ -21,6 +21,8 @@
     return s.options[s.selectedIndex].text.replace(/（\d+ 題）$/, '');
   }
   function snapshot(){
+    /* V211：十三經小考等特殊考卷由 window.nqRecOverride 提供本次紀錄（回傳 undefined＝照原本註釋小考） */
+    if (typeof window.nqRecOverride === 'function'){ var ov = window.nqRecOverride(); if (ov !== undefined) return ov; }
     var L = currentLesson();
     if (!L || typeof window.nq2BuildLesson !== 'function') return null;
     var items = window.nq2BuildLesson(L).items;
@@ -48,6 +50,8 @@
     };
   }
   function summary(r){
+    if (r.kind === 't13') return '〈論語選〉十三經小考，共 ' + r.questions.length + ' 題：' +
+      r.questions.map(function(q){ return '《' + q.w + '》'; }).join('、') + '（訂正：十三經全抄）';
     return '〈' + r.lesson.split('—')[0] + '〉註釋小考　註' + r.rangeStart + '～註' + r.rangeEnd + '，共 ' + r.questions.length + ' 題：' +
       r.questions.map(function(q){ return '註' + q.no + ' ' + q.w; }).join('、');
   }
@@ -71,6 +75,7 @@
     var classes = picked(); if (!classes.length || !rec) return;
     var r = { lesson: rec.lesson, rangeStart: rec.rangeStart, rangeEnd: rec.rangeEnd, questionKeys: rec.questionKeys,
               questions: rec.questions, classes: classes, createdAt: new Date().toISOString() };
+    if (rec.kind) r.kind = rec.kind;   /* V211 */
     var all = load(); all.push(r);
     try { localStorage.setItem(KEY, JSON.stringify(all)); } catch(e){ alert('儲存失敗，可能是瀏覽器限制。'); return; }
     // 班級進度面板：每班各一筆「考試」
