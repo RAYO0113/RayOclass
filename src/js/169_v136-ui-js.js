@@ -51,9 +51,10 @@
   function fixDash(root) {
     if (!root) return;
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, hit = [];
-    while ((n = w.nextNode())) if (n.data.indexOf('選—子') >= 0 && !(n.parentElement && n.parentElement.closest('textarea,script,style,[contenteditable]'))) hit.push(n);
+    while ((n = w.nextNode())) if (n.data.indexOf('選—子') >= 0 && !(n.parentElement && n.parentElement.closest('textarea,script,style,option,[contenteditable]'))) hit.push(n);
     hit.forEach(function (t) { t.data = t.data.replace(KEY_DASH, '$1——$2'); });
-    root.querySelectorAll && root.querySelectorAll('option').forEach(function (o) { if (o.text.indexOf('選—子') >= 0) o.text = o.text.replace(KEY_DASH, '$1——$2'); });
+    /* V210：下拉選單只改「顯示」（label），不改 option.text——註釋小考的記錄、編號、日曆開考都用 option.text 找課名，改了會找不到〈論語選〉 */
+    root.querySelectorAll && root.querySelectorAll('option').forEach(function (o) { if (o.text.indexOf('選—子') >= 0) o.label = o.text.replace(KEY_DASH, '$1——$2'); });
   }
   function fixAll() { fixDash(document.body); }
 
