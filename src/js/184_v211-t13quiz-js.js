@@ -39,7 +39,9 @@
     var ex = excl(), pool = BOOKS.filter(function (b) { return ex.indexOf(b) < 0; });
     picked = shuffle(pool).slice(0, n);
     paint();
+    if (!picked.length) { alert('13 部都設成「不抽」了，沒有可以抽的。'); return; }
     if (pool.length < n) alert('可以抽的只有 ' + pool.length + ' 格（其他設成不抽），已全部抽入。');
+    start();   /* V212（老師 11/4）：按「抽！」直接開考，不用再按「開始小考」 */
   }
   function box() { return $('t13'); }
   function setOn(v) {
@@ -90,8 +92,8 @@
     d.id = 'nq2-t13';
     d.innerHTML = '<div class="t13s-bar"><b class="serif">十三經小考</b><span style="flex:1"></span>' +
       '<span>隨機抽</span><input type="number" id="nq2-t13n" min="1" max="13" value="' + esc(jget(NK, 5)) + '"><span>格</span>' +
-      '<button type="button" class="btn dk" data-t="draw">抽！</button><button type="button" class="btn" data-t="clr">清除「不抽」</button></div>' +
-      '<div class="hint">點書名＝設成「不抽」（考卷上一定直接顯示）；再點一次恢復。按「抽！」從其餘的書隨機抽，抽到的在考卷上變成空格。考卷 13 格會打亂順序。</div>' +
+      '<button type="button" class="btn dk" data-t="draw">抽！開始小考 ▶</button><button type="button" class="btn" data-t="clr">清除「不抽」</button></div>' +
+      '<div class="hint">點書名＝設成「不抽」（考卷上一定直接顯示）；再點一次恢復。按「抽！開始小考」從其餘的書隨機抽，直接出考卷：抽到的變成空格，13 格打亂順序。</div>' +
       '<div class="t13s-grid"></div>';
     grid.parentNode.insertBefore(d, grid.nextSibling);
     d.addEventListener('click', function (e) {
