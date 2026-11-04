@@ -1,0 +1,5 @@
+/* V209：〈論語選〉作者·補充｜春秋的士：CSS 金字塔換成課本封建宗法圖（老師 11/4） */
+.wks-info-body img.shi-pyr-img { display: block; width: 70%; max-width: 760px; height: auto; max-height: 72vh; object-fit: contain;
+  margin: .4em auto .8em; background: #fff; border-radius: .4em; }
+#wkfs-body .wks-info-body img.shi-pyr-img { width: auto; max-width: 92%; height: 70vh; }
+body.dark-mode .wks-info-body img.shi-pyr-img { padding: .3em; }
