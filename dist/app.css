@@ -7777,3 +7777,11 @@ body.dark-mode .t13q-c.blank.open .nm { color: #e8735f; }
 /* 記錄視窗（v109）：十三經訂正固定全抄，藏「訂正要抄」 */
 #nq2.t13q .v109-dlg > div + div { display: none; }
 #nq2.t13q .v109-dlg::after { content: "訂正要抄：十三經全抄（《詩經》到《孟子》13 部依序）"; display: block; margin-top: 6px; font-weight: 700; }
+
+/* V214：聯合小考（註釋＋十三經加分）——下方工具列控制項、考卷最後的加分段 */
+#nq2-t13bw { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 2px dashed #8a5a1f; border-radius: 10px; }
+#nq2-t13bw input { width: 58px; font-size: 20px; padding: 4px 6px; border: 2px solid var(--q-line); border-radius: 8px; background: var(--q-paper); color: var(--q-ink); text-align: center; }
+#nq2.t13q #nq2-t13bw { display: none !important; }
+#nq2-qlist .t13b { margin: .6em 0 .4em; border-top: 3px double var(--q-line); padding-top: .4em; }
+#nq2-qlist .t13b-h { font-size: calc(26px * var(--q-fs)); font-weight: 800; padding: 0 .6em; color: var(--q-ink); }
+#nq2-qlist .t13b-h small { margin-left: .8em; font-size: .7em; font-weight: 400; color: var(--q-muted); }

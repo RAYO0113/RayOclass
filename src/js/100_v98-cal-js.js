@@ -52,7 +52,7 @@
     if (e.item === '十三經小考') return '十三經小考' + (e.quiz && e.quiz.n ? ' 抽' + e.quiz.n + '格' : '') + (e.note ? '（' + e.note + '）' : '');   /* V213 */
     if (e.item === '註釋小考') {
       var q = e.quiz || {}, np = (q.pick || []).length, nm = (q.must || []).length;
-      return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
+      return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) + (q.t13b ? '＋十三經' + q.t13b.n + '格（滿分' + (100 + (q.t13b.pts || 0)) + '）' : '') +
         (!np && nm ? '（必考' + nm + '）' : '') + (q.vm && Object.keys(q.vm).length ? '（指定小字詞' + Object.keys(q.vm).length + '）' : '') + (e.note ? '（' + e.note + '）' : '');
     }
     if (/檢討$/.test(e.item)) return disp(e.item) + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
@@ -66,7 +66,7 @@
   var view = null;           /* 目前月份第一天 */
   var sel = null;            /* 選取的日期字串 */
   var fCls = get(K.cls, '');  /* 篩選班級，空＝全部 */
-  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {}, qvm: {}, qv: -1 };   /* V143：qvm＝小字詞標記 { "註號|詞": { 字詞: must|ex } }，qv＝正在設定的題 */
+  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {}, qvm: {}, qv: -1, qt: '0', qtp: '20' };   /* V214：qt/qtp＝L6 註釋小考加考十三經的格數／分數 */   /* V143：qvm＝小字詞標記 { "註號|詞": { 字詞: must|ex } }，qv＝正在設定的題 */
 
   function ensure() {
     var m = document.getElementById('v98-cal'); if (m) return m;
@@ -98,7 +98,7 @@
       else if (t === 'qvx') { form.qv = -1; render(); }
     });
     m.addEventListener('input', function (e) { if (e.target.id === 'v98-note') { form.note = e.target.value; syncAdd(); }
-      else if (/^v98-q[abn]$/.test(e.target.id)) { form[e.target.id.slice(4)] = e.target.value; syncAdd(); } });
+      else if (/^v98-q(a|b|n|t|tp)$/.test(e.target.id)) { form[e.target.id.slice(4)] = e.target.value; syncAdd(); } });
     /* 不讓 ←→ 等鍵觸發課文換頁；Esc 關閉 */
     m.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } e.stopPropagation(); });
     return m;
@@ -137,7 +137,10 @@
     var r = form.les.length ? noteRange(form.les[0]) : null;
     return '<div class="v98-row v100-q"><span>註釋範圍與題數' + (r ? '（本課註' + r[0] + '～' + r[1] + '）' : (form.les.length ? '（這一課沒有註釋資料）' : '（先選一課）')) + '</span>' +
       '註 <input type="number" id="v98-qa" min="1" value="' + esc(form.qa) + '"> ～ <input type="number" id="v98-qb" min="1" value="' + esc(form.qb) + '">' +
-      '　抽 <input type="number" id="v98-qn" min="1" value="' + esc(form.qn) + '"> 題</div>' + chooser();
+      '　抽 <input type="number" id="v98-qn" min="1" value="' + esc(form.qn) + '"> 題</div>' +
+      (form.les[0] === T13L ? '<div class="v98-row v100-q"><span>聯合小考：加考十三經當加分（13 部照順序排，抽到的變空格；0＝不加考）</span>' +
+        '十三經 <input type="number" id="v98-qt" min="0" max="13" value="' + esc(form.qt) + '"> 格・共 <input type="number" id="v98-qtp" min="0" value="' + esc(form.qtp) + '"> 分' +
+        (+form.qt > 0 ? '　→ 滿分 ' + (100 + (+form.qtp || 0)) : '') + '</div>' : '') + chooser();   /* V214 */
   }
   /* v102：在日曆直接點題目（選題／必考／不考），存在這一筆 */
   function quizItems(n) { var k = QK[n]; try { return (k && typeof window.nq2BuildLesson === 'function') ? window.nq2BuildLesson(k).items : []; } catch (e) { return []; } }
@@ -238,6 +241,7 @@
     });
     if (typeof window.nq2SetVOverlay === 'function') window.nq2SetVOverlay(q.vm || null);   /* V143：這一筆指定的小字詞 */
     pend = [e.cls]; hookDlg();
+    if (typeof window.nq2T13Bonus === 'function') window.nq2T13Bonus(q.t13b ? q.t13b.n : 0, q.t13b ? q.t13b.pts : null);   /* V214：聯合小考 */
     document.getElementById('nq2-bGo').click();   /* V213（老師 11/5）：抽完直接出考卷，不先讓學生看到抽到哪幾題 */
   }
   /* V213：十三經小考——開註釋小考 → 選〈論語選〉→ 切到十三經小考 → 帶入格數 → 抽（184 的「抽！」會直接出考卷） */
@@ -294,10 +298,11 @@
       var q = form.item === '註釋小考', t13 = form.item === '十三經小考';
       if (t13) { a.push({ id: uid(), date: sel, cls: c, kind: '考試', item: form.item, lessons: [T13L], note: form.note.trim(), quiz: { t13: 1, n: +form.qn } }); return; }   /* V213 */
       a.push({ id: uid(), date: sel, cls: c, kind: q ? '考試' : (/檢討$/.test(form.item) ? '檢討' : form.kind), item: form.item, lessons: form.les.slice(), note: form.note.trim(),
-        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined } : undefined });
+        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined,
+          t13b: form.les[0] === T13L && +form.qt > 0 ? { n: Math.min(13, +form.qt), pts: Math.max(0, +form.qtp || 0) } : undefined } : undefined });   /* V214：聯合小考加考十三經 */
     });
     put(K.data, a);
-    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick';
+    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; form.qt = '0';
     render();
   }
   function del(id) {

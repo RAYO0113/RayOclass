@@ -41,19 +41,24 @@
       return { no: it[0], w: w };
     });
     var nos = idx.map(function(i){ return items[i][0]; });
-    return {
+    var out = {
       lesson: L,
       rangeStart: Math.min.apply(null, nos),
       rangeEnd: Math.max.apply(null, nos),
       questionKeys: idx.map(function(i){ return items[i][0] + '|' + items[i][1]; }),
       questions: questions
     };
+    /* V214：聯合小考（註釋＋十三經加分）——184 提供 bonus，照樣是一筆註釋小考紀錄 */
+    if (typeof window.nqRecExtra === 'function'){ var ex = window.nqRecExtra(); if (ex && ex.bonus) out.bonus = ex.bonus; }
+    return out;
   }
   function summary(r){
     if (r.kind === 't13') return '〈論語選〉十三經小考，共 ' + r.questions.length + ' 題：' +
       r.questions.map(function(q){ return '《' + q.w + '》'; }).join('、') + '（訂正：十三經全抄）';
     return '〈' + r.lesson.split('—')[0] + '〉註釋小考　註' + r.rangeStart + '～註' + r.rangeEnd + '，共 ' + r.questions.length + ' 題：' +
-      r.questions.map(function(q){ return '註' + q.no + ' ' + q.w; }).join('、');
+      r.questions.map(function(q){ return '註' + q.no + ' ' + q.w; }).join('、') +
+      (r.bonus && r.bonus.questions && r.bonus.questions.length ? '；加分題十三經 ' + r.bonus.questions.length + ' 格' + (r.bonus.pts ? '（' + r.bonus.pts + ' 分，滿分 ' + (100 + r.bonus.pts) + '）' : '') + '：' +
+        r.bonus.questions.map(function(q){ return '《' + q.w + '》'; }).join('、') : '');   /* V214 */
   }
 
   function resetBtn(){
@@ -76,6 +81,7 @@
     var r = { lesson: rec.lesson, rangeStart: rec.rangeStart, rangeEnd: rec.rangeEnd, questionKeys: rec.questionKeys,
               questions: rec.questions, classes: classes, createdAt: new Date().toISOString() };
     if (rec.kind) r.kind = rec.kind;   /* V211 */
+    if (rec.bonus) r.bonus = rec.bonus;   /* V214：十三經加分題 */
     var all = load(); all.push(r);
     try { localStorage.setItem(KEY, JSON.stringify(all)); } catch(e){ alert('儲存失敗，可能是瀏覽器限制。'); return; }
     // 班級進度面板：每班各一筆「考試」

@@ -1408,19 +1408,24 @@ try {
       return { no: it[0], w: w };
     });
     var nos = idx.map(function(i){ return items[i][0]; });
-    return {
+    var out = {
       lesson: L,
       rangeStart: Math.min.apply(null, nos),
       rangeEnd: Math.max.apply(null, nos),
       questionKeys: idx.map(function(i){ return items[i][0] + '|' + items[i][1]; }),
       questions: questions
     };
+    /* V214：聯合小考（註釋＋十三經加分）——184 提供 bonus，照樣是一筆註釋小考紀錄 */
+    if (typeof window.nqRecExtra === 'function'){ var ex = window.nqRecExtra(); if (ex && ex.bonus) out.bonus = ex.bonus; }
+    return out;
   }
   function summary(r){
     if (r.kind === 't13') return '〈論語選〉十三經小考，共 ' + r.questions.length + ' 題：' +
       r.questions.map(function(q){ return '《' + q.w + '》'; }).join('、') + '（訂正：十三經全抄）';
     return '〈' + r.lesson.split('—')[0] + '〉註釋小考　註' + r.rangeStart + '～註' + r.rangeEnd + '，共 ' + r.questions.length + ' 題：' +
-      r.questions.map(function(q){ return '註' + q.no + ' ' + q.w; }).join('、');
+      r.questions.map(function(q){ return '註' + q.no + ' ' + q.w; }).join('、') +
+      (r.bonus && r.bonus.questions && r.bonus.questions.length ? '；加分題十三經 ' + r.bonus.questions.length + ' 格' + (r.bonus.pts ? '（' + r.bonus.pts + ' 分，滿分 ' + (100 + r.bonus.pts) + '）' : '') + '：' +
+        r.bonus.questions.map(function(q){ return '《' + q.w + '》'; }).join('、') : '');   /* V214 */
   }
 
   function resetBtn(){
@@ -1443,6 +1448,7 @@ try {
     var r = { lesson: rec.lesson, rangeStart: rec.rangeStart, rangeEnd: rec.rangeEnd, questionKeys: rec.questionKeys,
               questions: rec.questions, classes: classes, createdAt: new Date().toISOString() };
     if (rec.kind) r.kind = rec.kind;   /* V211 */
+    if (rec.bonus) r.bonus = rec.bonus;   /* V214：十三經加分題 */
     var all = load(); all.push(r);
     try { localStorage.setItem(KEY, JSON.stringify(all)); } catch(e){ alert('儲存失敗，可能是瀏覽器限制。'); return; }
     // 班級進度面板：每班各一筆「考試」
@@ -4887,7 +4893,7 @@ try {
     if (e.item === '十三經小考') return '十三經小考' + (e.quiz && e.quiz.n ? ' 抽' + e.quiz.n + '格' : '') + (e.note ? '（' + e.note + '）' : '');   /* V213 */
     if (e.item === '註釋小考') {
       var q = e.quiz || {}, np = (q.pick || []).length, nm = (q.must || []).length;
-      return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
+      return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) + (q.t13b ? '＋十三經' + q.t13b.n + '格（滿分' + (100 + (q.t13b.pts || 0)) + '）' : '') +
         (!np && nm ? '（必考' + nm + '）' : '') + (q.vm && Object.keys(q.vm).length ? '（指定小字詞' + Object.keys(q.vm).length + '）' : '') + (e.note ? '（' + e.note + '）' : '');
     }
     if (/檢討$/.test(e.item)) return disp(e.item) + ' ' + lesText(e.lessons) + (e.note ? '（' + e.note + '）' : '');
@@ -4901,7 +4907,7 @@ try {
   var view = null;           /* 目前月份第一天 */
   var sel = null;            /* 選取的日期字串 */
   var fCls = get(K.cls, '');  /* 篩選班級，空＝全部 */
-  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {}, qvm: {}, qv: -1 };   /* V143：qvm＝小字詞標記 { "註號|詞": { 字詞: must|ex } }，qv＝正在設定的題 */
+  var form = { cls: [], kind: '考試', item: 'A卷', les: [], note: '', qa: '', qb: '', qn: '5', qmode: 'pick', qs: {}, qvm: {}, qv: -1, qt: '0', qtp: '20' };   /* V214：qt/qtp＝L6 註釋小考加考十三經的格數／分數 */   /* V143：qvm＝小字詞標記 { "註號|詞": { 字詞: must|ex } }，qv＝正在設定的題 */
 
   function ensure() {
     var m = document.getElementById('v98-cal'); if (m) return m;
@@ -4933,7 +4939,7 @@ try {
       else if (t === 'qvx') { form.qv = -1; render(); }
     });
     m.addEventListener('input', function (e) { if (e.target.id === 'v98-note') { form.note = e.target.value; syncAdd(); }
-      else if (/^v98-q[abn]$/.test(e.target.id)) { form[e.target.id.slice(4)] = e.target.value; syncAdd(); } });
+      else if (/^v98-q(a|b|n|t|tp)$/.test(e.target.id)) { form[e.target.id.slice(4)] = e.target.value; syncAdd(); } });
     /* 不讓 ←→ 等鍵觸發課文換頁；Esc 關閉 */
     m.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } e.stopPropagation(); });
     return m;
@@ -4972,7 +4978,10 @@ try {
     var r = form.les.length ? noteRange(form.les[0]) : null;
     return '<div class="v98-row v100-q"><span>註釋範圍與題數' + (r ? '（本課註' + r[0] + '～' + r[1] + '）' : (form.les.length ? '（這一課沒有註釋資料）' : '（先選一課）')) + '</span>' +
       '註 <input type="number" id="v98-qa" min="1" value="' + esc(form.qa) + '"> ～ <input type="number" id="v98-qb" min="1" value="' + esc(form.qb) + '">' +
-      '　抽 <input type="number" id="v98-qn" min="1" value="' + esc(form.qn) + '"> 題</div>' + chooser();
+      '　抽 <input type="number" id="v98-qn" min="1" value="' + esc(form.qn) + '"> 題</div>' +
+      (form.les[0] === T13L ? '<div class="v98-row v100-q"><span>聯合小考：加考十三經當加分（13 部照順序排，抽到的變空格；0＝不加考）</span>' +
+        '十三經 <input type="number" id="v98-qt" min="0" max="13" value="' + esc(form.qt) + '"> 格・共 <input type="number" id="v98-qtp" min="0" value="' + esc(form.qtp) + '"> 分' +
+        (+form.qt > 0 ? '　→ 滿分 ' + (100 + (+form.qtp || 0)) : '') + '</div>' : '') + chooser();   /* V214 */
   }
   /* v102：在日曆直接點題目（選題／必考／不考），存在這一筆 */
   function quizItems(n) { var k = QK[n]; try { return (k && typeof window.nq2BuildLesson === 'function') ? window.nq2BuildLesson(k).items : []; } catch (e) { return []; } }
@@ -5073,6 +5082,7 @@ try {
     });
     if (typeof window.nq2SetVOverlay === 'function') window.nq2SetVOverlay(q.vm || null);   /* V143：這一筆指定的小字詞 */
     pend = [e.cls]; hookDlg();
+    if (typeof window.nq2T13Bonus === 'function') window.nq2T13Bonus(q.t13b ? q.t13b.n : 0, q.t13b ? q.t13b.pts : null);   /* V214：聯合小考 */
     document.getElementById('nq2-bGo').click();   /* V213（老師 11/5）：抽完直接出考卷，不先讓學生看到抽到哪幾題 */
   }
   /* V213：十三經小考——開註釋小考 → 選〈論語選〉→ 切到十三經小考 → 帶入格數 → 抽（184 的「抽！」會直接出考卷） */
@@ -5129,10 +5139,11 @@ try {
       var q = form.item === '註釋小考', t13 = form.item === '十三經小考';
       if (t13) { a.push({ id: uid(), date: sel, cls: c, kind: '考試', item: form.item, lessons: [T13L], note: form.note.trim(), quiz: { t13: 1, n: +form.qn } }); return; }   /* V213 */
       a.push({ id: uid(), date: sel, cls: c, kind: q ? '考試' : (/檢討$/.test(form.item) ? '檢討' : form.kind), item: form.item, lessons: form.les.slice(), note: form.note.trim(),
-        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined } : undefined });
+        quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined,
+          t13b: form.les[0] === T13L && +form.qt > 0 ? { n: Math.min(13, +form.qt), pts: Math.max(0, +form.qtp || 0) } : undefined } : undefined });   /* V214：聯合小考加考十三經 */
     });
     put(K.data, a);
-    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick';
+    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; form.qt = '0';
     render();
   }
   function del(id) {
@@ -12320,9 +12331,55 @@ try {
     $('quiz').classList.add('show');
     $('qlist').scrollTop = 0;
   }
-  function blanks() { return Array.prototype.slice.call(document.querySelectorAll('#nq2-qlist .t13q-c.blank')); }
+  function blanks() { return Array.prototype.slice.call(document.querySelectorAll('#nq2-qlist > .t13q-board .t13q-c.blank')); }
   function syncAll() { var bs = blanks(), b = $('bAll'); if (b && bs.length) b.textContent = bs.every(function (c) { return c.classList.contains('open'); }) ? '全部隱藏答案' : '全部顯示答案'; }
-  function isT13Quiz() { return !!document.querySelector('#nq2-qlist .t13q-board'); }
+  function isT13Quiz() { return !!document.querySelector('#nq2-qlist > .t13q-board'); }   /* V214：加分段（.t13b 裡的 board）不算 */
+
+  /* ── V214（老師 11/5）聯合小考：〈論語選〉註釋小考＋十三經加分 ──
+     下方工具列「＋十三經加分 N 格・共 P 分」（N＝0 不加；每次打開註釋小考都回到 0，日曆那筆有設才帶入）。
+     註釋考卷出來後，在最後接一段十三經：13 格「照順序」排（詩經→孟子），抽 N 格變空格，題號接在註釋後面；點空格看答案。
+     「不抽」設定沿用十三經小考的。註釋題每題 100÷題數 分，加分題共 P 分，標題寫滿分（100＋P）。
+     記錄：仍是一筆註釋小考紀錄（編號、訂正、成績都照註釋小考），另外帶 bonus＝{ kind:'t13', pts, questions:[{no,w,a,ord}] }。 */
+  var bonusRec = null;
+  function bn() { var i = $('t13bn'); return i ? Math.max(0, Math.min(13, Math.round(+i.value) || 0)) : 0; }
+  function bp() { var i = $('t13bp'); return i ? Math.max(0, Math.round(+i.value) || 0) : 0; }
+  function syncBonusUi() { var w = $('t13bw'); if (w) w.style.display = isLunyu() ? '' : 'none'; }
+  function addBonus() {
+    var ql = $('qlist'); if (!ql) return;
+    var cards = ql.querySelectorAll('.qc');
+    if (!cards.length || ql.querySelector('.t13b') || !isLunyu() || on) { if (!ql.querySelector('.t13b')) bonusRec = null; return; }
+    var n = bn(); if (!n) { bonusRec = null; return; }
+    var ex = excl(), pool = BOOKS.filter(function (b) { return ex.indexOf(b) < 0; });
+    var pk = shuffle(pool).slice(0, n), base = cards.length, k = 0, qs = [], pts = bp();
+    var cells = BOOKS.map(function (b) {
+      if (pk.indexOf(b) < 0) return '<div class="t13q-c"><span class="nm">' + esc(b) + '</span></div>';
+      k++;
+      qs.push({ no: BOOKS.indexOf(b) + 1, w: b, a: b, ord: base + k });
+      return '<div class="t13q-c blank" data-k="' + (base + k) + '"><span class="qn">' + (base + k) + '</span><span class="nm">' + esc(b) + '</span></div>';
+    }).join('');
+    if (!k) { bonusRec = null; return; }
+    bonusRec = { kind: 't13', pts: pts, questions: qs };
+    var per = 100 / base, perT = per === Math.round(per) ? '每題 ' + per + ' 分，' : '';
+    var sec = document.createElement('div'); sec.className = 't13b';   /* 不用 <section>：全域 section{display:none} */
+    sec.innerHTML = '<div class="t13b-h">加分題・十三經' + (pts ? '（共 ' + pts + ' 分）' : '') + '<small>依順序排列，空格寫出書名' +
+      '（註釋 ' + base + ' 題' + (perT ? '・' + perT.replace(/，$/, '') : '') + '・共 100 分＋加分 ' + pts + '＝滿分 ' + (100 + pts) + '）</small></div>' +
+      '<div class="t13q-board">' + cells + '</div>';
+    var end = ql.querySelector('.qend'); if (end) ql.insertBefore(sec, end); else ql.appendChild(sec);
+    var t = $('qTitle'), sm = t && t.querySelector(':scope > small');
+    if (sm) sm.textContent = base + ' 題＋加分 ' + k + ' 格・滿分 ' + (100 + pts);
+  }
+  function bonusBlanks() { return Array.prototype.slice.call(document.querySelectorAll('#nq2-qlist .t13b .t13q-c.blank')); }
+
+  /* 日曆「開始小考」用：設好加分格數與分數（之後再出考卷） */
+  window.nq2T13Bonus = function (n, pts) {
+    var i = $('t13bn'), p = $('t13bp');
+    if (i) i.value = Math.max(0, Math.min(13, +n || 0));
+    if (p && pts != null) p.value = Math.max(0, +pts || 0);
+    syncBonusUi();
+  };
+
+  /* 043「記錄本次小考」掛勾：註釋小考紀錄另外帶上十三經加分題 */
+  window.nqRecExtra = function () { return bonusRec && document.querySelector('#nq2-qlist .t13b') ? { bonus: JSON.parse(JSON.stringify(bonusRec)) } : null; };
 
   /* 043「記錄本次小考」掛勾：考卷是十三經時回傳本次紀錄；否則 undefined（走原本註釋小考） */
   window.nqRecOverride = function () { return isT13Quiz() ? JSON.parse(JSON.stringify(curRec)) : undefined; };
@@ -12369,14 +12426,35 @@ try {
       if (c) { c.classList.toggle('open'); syncAll(); }
     }, true);
 
-    sel.addEventListener('change', function () { if (on) setOn(false); syncBtn(); });
+    /* V214：聯合小考（註釋＋十三經加分）控制項放在下方工具列 */
+    var dock = root.querySelector('.dock'), go0 = $('bGo');
+    if (dock && go0) {
+      var w = document.createElement('span'); w.id = 'nq2-t13bw';
+      w.innerHTML = '＋十三經加分<input type="number" id="nq2-t13bn" min="0" max="13" value="0">格・共<input type="number" id="nq2-t13bp" min="0" value="' + esc(jget('nq-t13-bp', 20)) + '">分';
+      dock.insertBefore(w, go0);
+      w.addEventListener('change', function (e) { if (e.target.id === 'nq2-t13bp') jput('nq-t13-bp', bp()); });
+    }
+    new MutationObserver(addBonus).observe($('qlist'), { childList: true });
+    $('qlist').addEventListener('click', function (e) {
+      var c = e.target.closest('.t13b .t13q-c.blank'); if (c) c.classList.toggle('open');
+    });
+    $('bAll').addEventListener('click', function () {   /* 等 036 切好註釋題卡，加分格跟著一樣 */
+      if (isT13Quiz()) return;
+      setTimeout(function () {
+        var cs = Array.prototype.slice.call(document.querySelectorAll('#nq2-qlist .qc'));
+        var o = cs.length && cs.every(function (c) { return c.classList.contains('open'); });
+        bonusBlanks().forEach(function (c) { c.classList.toggle('open', !!o); });
+      }, 0);
+    });
+
+    sel.addEventListener('change', function () { if (on) setOn(false); syncBtn(); syncBonusUi(); });
     var wasOpen = root.classList.contains('open');   /* 只在面板「剛打開」時回到註釋小考（自己切 t13q class 也會觸發） */
     new MutationObserver(function () {
       var o = root.classList.contains('open');
-      if (o && !wasOpen) { if (on) setOn(false); syncBtn(); }
+      if (o && !wasOpen) { if (on) setOn(false); syncBtn(); var bi = $('t13bn'); if (bi) bi.value = 0; syncBonusUi(); }   /* V214：每次打開都不加考 */
       wasOpen = o;
     }).observe(root, { attributes: true, attributeFilter: ['class'] });
-    syncBtn();
+    syncBtn(); syncBonusUi();
     return true;
   }
   (function tryInit(n) { if (!init() && n < 40) setTimeout(function () { tryInit(n + 1); }, 500); })(0);
@@ -12480,7 +12558,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V213';
+  window.APP_VERSION = 'V214';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
