@@ -5,8 +5,9 @@
   var MAXL = 12;
   var KINDS = ['考試', '交作業'];
   function disp(k) { return String(k).replace('課後習題', '課本後習題'); }   /* V123：畫面上叫「課本後習題」（基礎練習＋進階練習）；存的值仍是「課後習題」 */
-  var ITEMS = ['A卷', 'A卷檢討', '習作', '習作檢討', '註釋小考', '課後習題', '課後習題檢討', '其他'];   /* V123：加習作檢討、課後習題檢討（重要進度檢核「檢討」格） */   /* v102：加 A卷檢討 */   /* v100：加註釋小考 */
+  var ITEMS = ['A卷', 'A卷檢討', '習作', '習作檢討', '註釋小考', '十三經小考', '課後習題', '課後習題檢討', '其他'];   /* V123：加習作檢討、課後習題檢討（重要進度檢核「檢討」格） */   /* v102：加 A卷檢討 */   /* v100：加註釋小考 */
   var QK = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '臺灣最美麗的火車線', 6: '論語選—子路曾皙冉有公西華侍坐', 7: '樂府詩選—長干行', 8: '茫茫人海中的一名女孩', 9: '桃花源記', 10: '極短篇小說選' };
+  var T13L = 6;   /* V213：十三經小考固定 L6〈論語選〉 */
   var CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];   /* 四班顏色，依 CLS_LIST 順序 */
   var K = { data: 'exam_cal_v1', cls: 'exam_cal_cls_v1' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];   /* v103：星期日開頭 */
@@ -48,6 +49,7 @@
       .map(function (n) { return 'L' + n + (LESSONS[n] ? ' ' + LESSONS[n] : ''); }).join('、');
   }
   function label(e) {
+    if (e.item === '十三經小考') return '十三經小考' + (e.quiz && e.quiz.n ? ' 抽' + e.quiz.n + '格' : '') + (e.note ? '（' + e.note + '）' : '');   /* V213 */
     if (e.item === '註釋小考') {
       var q = e.quiz || {}, np = (q.pick || []).length, nm = (q.must || []).length;
       return '小考 ' + lesText(e.lessons) + (np ? ' 選' + (np + nm) + '題' : (e.quiz ? ' 註' + q.a + '–' + q.b + ' 抽' + q.n : '')) +
@@ -83,8 +85,9 @@
       else if (t === 'fc') { tog(form.cls, a[1]); render(); }
       else if (t === 'fca') { form.cls = form.cls.length === classes().length ? [] : classes().slice(); render(); }
       else if (t === 'fk') { form.kind = a[1]; render(); }
-      else if (t === 'fi') { form.item = a[1]; if (a[1] === '註釋小考') { form.kind = '考試'; form.les = form.les.slice(0, 1); qDefault(); } render(); }
-      else if (t === 'fl') { if (form.item === '註釋小考') { form.les = form.les[0] === +a[1] ? [] : [+a[1]]; form.qa = form.qb = ''; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; qDefault(); } else tog(form.les, +a[1]); render(); }
+      else if (t === 'fi') { if (form.item === '十三經小考' && a[1] !== '十三經小考') form.qn = '5'; form.item = a[1]; if (a[1] === '十三經小考') { form.kind = '考試'; form.les = [T13L]; form.qn = String(get('nq-t13-n', 5) || 5); }   /* V213 */
+        if (a[1] === '註釋小考') { form.kind = '考試'; form.les = form.les.slice(0, 1); qDefault(); } render(); }
+      else if (t === 'fl') { if (form.item === '十三經小考') return; if (form.item === '註釋小考') { form.les = form.les[0] === +a[1] ? [] : [+a[1]]; form.qa = form.qb = ''; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; qDefault(); } else tog(form.les, +a[1]); render(); }
       else if (t === 'add') add();
       else if (t === 'del') del(a[1]);
       else if (t === 'quiz') startQuiz(a[1]);
@@ -113,6 +116,7 @@
   }
 
   function valid() {
+    if (form.item === '十三經小考') { var tn = +form.qn; return !!(sel && form.cls.length && tn >= 1 && tn <= 13); }   /* V213 */
     if (form.item === '註釋小考') { var qa = +form.qa, qb = +form.qb, qn = +form.qn;
       return !!(sel && form.cls.length && form.les.length === 1 && (qKeys('pick').length || (qa > 0 && qb >= qa && qn > 0))); }
     return sel && form.cls.length && (form.item !== '其他' ? form.les.length : form.note.trim());
@@ -200,10 +204,11 @@
       : '從註' + (form.qa || '?') + '～' + (form.qb || '?') + ' 隨機抽 ' + (form.qn || '?') + ' 題' + (nm ? '，必考 ' + nm + ' 題一定在內' : '') + (nx ? '，不考 ' + nx + ' 題不會抽到' : '') + '。') + (nv ? '指定小字詞 ' + nv + ' 題。' : '') + '</div>';
     return h;
   }
-  function qBtn(e) { return e.item === '註釋小考' && e.quiz ? '<button type="button" class="v100-qgo" data-v98="quiz|' + e.id + '">開始小考</button>' : ''; }
+  function qBtn(e) { return (e.item === '註釋小考' || e.item === '十三經小考') && e.quiz ? '<button type="button" class="v100-qgo" data-v98="quiz|' + e.id + '">開始小考</button>' : ''; }
   /* 開始小考：關日曆 → 開註釋小考 → 帶入課次、範圍、題數並抽題（老師按「開始小考」出題） */
   function startQuiz(id) {
     var e = list().filter(function (x) { return x.id === id; })[0]; if (!e || !e.quiz) return;
+    if (e.item === '十三經小考') { t13Quiz(e); return; }   /* V213 */
     var k = QK[e.lessons[0]];
     if (typeof window.nq2Open !== 'function' || !k) { alert('這一課目前沒有註釋小考資料。'); return; }
     close();
@@ -233,6 +238,24 @@
     });
     if (typeof window.nq2SetVOverlay === 'function') window.nq2SetVOverlay(q.vm || null);   /* V143：這一筆指定的小字詞 */
     pend = [e.cls]; hookDlg();
+    document.getElementById('nq2-bGo').click();   /* V213（老師 11/5）：抽完直接出考卷，不先讓學生看到抽到哪幾題 */
+  }
+  /* V213：十三經小考——開註釋小考 → 選〈論語選〉→ 切到十三經小考 → 帶入格數 → 抽（184 的「抽！」會直接出考卷） */
+  function t13Quiz(e) {
+    var k = QK[T13L];
+    if (typeof window.nq2Open !== 'function') { alert('找不到註釋小考。'); return; }
+    close();
+    var p = document.getElementById('cls-panel'); if (p && p.classList.contains('open')) clsToggle();
+    window.nq2Open();
+    var s = document.getElementById('nq2-lesson'), hit = -1;
+    for (var i = 0; i < s.options.length; i++) if (s.options[i].text.replace(/（\d+ 題）$/, '') === k) hit = i;
+    if (hit < 0) { alert('註釋小考找不到〈' + k + '〉。'); return; }
+    s.selectedIndex = hit; s.dispatchEvent(new Event('change'));
+    var tb = document.getElementById('nq2-t13btn'); if (!tb) { alert('找不到「十三經小考」按鈕。'); return; }
+    if (!tb.classList.contains('on')) tb.click();
+    var ni = document.getElementById('nq2-t13n'); if (ni && e.quiz.n) ni.value = e.quiz.n;
+    pend = [e.cls]; hookDlg();
+    var go = document.querySelector('#nq2-t13 [data-t="draw"]'); if (go) go.click();
   }
   /* 從日曆開的小考：「記錄本次小考」視窗自動勾好該班 */
   var pend = null;
@@ -252,10 +275,11 @@
     var recs = get('nq-records-v1', []); if (!Array.isArray(recs) || !recs.length) return;
     var a = list(), ch = false;
     a.forEach(function (e) {
-      if (e.item !== '註釋小考' || e.done) return;
+      if ((e.item !== '註釋小考' && e.item !== '十三經小考') || e.done) return;
       var k = QK[(e.lessons || [])[0]]; if (!k) return;
       recs.forEach(function (r) {
         if (e.done || !r || r.lesson !== k || (r.classes || []).indexOf(e.cls) < 0 || !r.createdAt) return;
+        if ((r.kind === 't13') !== (e.item === '十三經小考')) return;   /* V213：十三經小考與註釋小考各算各的 */
         if (ymd(new Date(r.createdAt)) === e.date) { e.done = e.date; ch = true; }
       });
     });
@@ -267,7 +291,8 @@
     if (!valid()) return;
     var a = list();
     form.cls.forEach(function (c) {
-      var q = form.item === '註釋小考';
+      var q = form.item === '註釋小考', t13 = form.item === '十三經小考';
+      if (t13) { a.push({ id: uid(), date: sel, cls: c, kind: '考試', item: form.item, lessons: [T13L], note: form.note.trim(), quiz: { t13: 1, n: +form.qn } }); return; }   /* V213 */
       a.push({ id: uid(), date: sel, cls: c, kind: q ? '考試' : (/檢討$/.test(form.item) ? '檢討' : form.kind), item: form.item, lessons: form.les.slice(), note: form.note.trim(),
         quiz: q ? { a: +form.qa, b: +form.qb, n: +form.qn, pick: qKeys('pick'), must: qKeys('must'), ex: qKeys('ex'), vm: Object.keys(form.qvm).length ? JSON.parse(JSON.stringify(form.qvm)) : undefined } : undefined });
     });
@@ -312,7 +337,7 @@
         .map(function (c) { return '<i class="v98-dot" title="' + esc(c) + ' 有課" style="background:' + ccol(c) + '"></i>'; }).join('');
       h += '<div class="' + cl + '" data-v98="d|' + ds + '"><div class="v98-dn"><b>' + d.getDate() + '</b><span class="v98-dots">' + dots + '</span></div>' +
         (days[ds] || []).map(function (e) {
-          return '<div class="v98-pill ' + (e.kind === '考試' ? 'ex' : 'hw') + (e.item === '註釋小考' ? ' qz' : /檢討$/.test(e.item) ? ' rvw' : '') + '" data-cid="' + e.id + '" style="border-left-color:' + ccol(e.cls) + '" title="' + esc(e.cls + '・' + label(e)) + '">' +
+          return '<div class="v98-pill ' + (e.kind === '考試' ? 'ex' : 'hw') + (e.item === '註釋小考' || e.item === '十三經小考' ? ' qz' : /檢討$/.test(e.item) ? ' rvw' : '') + '" data-cid="' + e.id + '" style="border-left-color:' + ccol(e.cls) + '" title="' + esc(e.cls + '・' + label(e)) + '">' +
             (fCls ? '' : esc(e.cls.replace('一', '')) + ' ') + esc(label(e)) + '</div>';
         }).join('') + '</div>';
     }
@@ -329,11 +354,15 @@
       return '<button type="button" data-v98="fc|' + esc(c) + '"' + (form.cls.indexOf(c) >= 0 ? ' class="on"' : '') + '>' +
         (mt[c] ? '<i class="v98-dot" style="background:' + ccol(c) + ';margin-right:3px"></i>' : '') + esc(c) + '</button>';
     }).join('') + '<button type="button" data-v98="fca">' + (form.cls.length === cs.length ? '全不選' : '四班') + '</button></div>';
-    if (form.item !== '註釋小考' && !/檢討$/.test(form.item)) h += '<div class="v98-row"><span>類型</span>' + KINDS.map(function (k) { return '<button type="button" data-v98="fk|' + k + '"' + (form.kind === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
+    if (form.item !== '註釋小考' && form.item !== '十三經小考' && !/檢討$/.test(form.item)) h += '<div class="v98-row"><span>類型</span>' + KINDS.map(function (k) { return '<button type="button" data-v98="fk|' + k + '"' + (form.kind === k ? ' class="on"' : '') + '>' + k + '</button>'; }).join('') + '</div>';
     h += '<div class="v98-row"><span>項目</span>' + ITEMS.map(function (k) { return '<button type="button" data-v98="fi|' + k + '"' + (form.item === k ? ' class="on"' : '') + '>' + disp(k) + '</button>'; }).join('') + '</div>';
+    if (form.item === '十三經小考') h += '<div class="v98-row v100-q"><span>L' + T13L + ' 論語選・十三經小考（13 部隨機抽，「不抽」設定沿用註釋小考裡的）</span>' +
+      '抽 <input type="number" id="v98-qn" min="1" max="13" value="' + esc(form.qn) + '"> 格</div>';   /* V213 */
+    else {
     h += '<div class="v98-row"><span>第幾課' + (form.item === '註釋小考' ? '（單選）' : '（可複選）') + '</span>';
     for (var n = 1; n <= MAXL; n++) h += '<button type="button" class="v98-l' + (form.les.indexOf(n) >= 0 ? ' on' : '') + '" data-v98="fl|' + n + '">L' + n + (LESSONS[n] ? '<small>' + esc(LESSONS[n]) + '</small>' : '') + '</button>';
     h += '</div>';
+    }
     if (form.item === '註釋小考') h += quizRow();
     h += '<div class="v98-row"><input type="text" id="v98-note" value="' + esc(form.note) + '" placeholder="' + (form.item === '其他' ? '內容（必填，例：第一次段考）' : '備註（可不填）') + '"></div>';
     h += '<button type="button" class="v98-add" data-v98="add">＋ 加入</button>';

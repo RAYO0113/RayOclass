@@ -421,6 +421,7 @@
       sel = withMust(shuffle(rangePool().filter(function(i){ return !must.has(i); })).slice(0, rest));
       render();
       if (must.size > n) alert('必考題有 ' + must.size + ' 題，超過設定的 ' + n + ' 題，已全部放入。');
+      if (sel.length) startQuiz();   /* V213（老師 11/5）：抽完直接出考卷，不先在選題格顯示抽到哪幾題 */
     };
     $('bClear').onclick = function(){ sel = Array.from(must).sort(byIdx); render(); };
     $('bUnex').onclick = function(){

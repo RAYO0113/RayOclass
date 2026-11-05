@@ -106,7 +106,7 @@
     var live = jget('tp_live_v1', null), t = ymd(new Date());
     if (live && live.date === t && live.classId && classes().indexOf(live.classId) >= 0) return [live.classId];
     var n = lnum(L), cal = jget('exam_cal_v1', []);
-    var today = (Array.isArray(cal) ? cal : []).filter(function (e) { return e && e.date === t && e.item === '註釋小考' && (e.lessons || []).indexOf(n) >= 0; })
+    var today = (Array.isArray(cal) ? cal : []).filter(function (e) { return e && e.date === t && (e.item === '註釋小考' || e.item === '十三經小考') && (e.lessons || []).indexOf(n) >= 0; })
       .map(function (e) { return e.cls; }).filter(function (c, i, a) { return a.indexOf(c) === i; });
     if (today.length) return today;
     var last = jget(CLS_LAST, []);

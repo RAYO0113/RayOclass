@@ -136,7 +136,7 @@
   }
   function eLabel(e) {
     var ls = (e.lessons || []).map(function (n) { return 'L' + n; }).join('、');
-    return String(e.item).replace('課後習題', '課本後習題') + (e.kind === '考試' && !/檢討$/.test(e.item) && e.item !== '註釋小考' ? '（考試）' : e.kind === '交作業' ? '（交作業）' : '') + (ls ? ' ' + ls : '') + (e.note ? '・' + e.note : '');
+    return String(e.item).replace('課後習題', '課本後習題') + (e.kind === '考試' && !/檢討$/.test(e.item) && e.item !== '註釋小考' && e.item !== '十三經小考' ? '（考試）' : e.kind === '交作業' ? '（交作業）' : '') + (ls ? ' ' + ls : '') + (e.note ? '・' + e.note : '');
   }
   function markAsked(id) { var A = asked(); A[id] = ymd(now()); var keep = {}, lim = ymd(new Date(now().getTime() - 30 * 864e5)); Object.keys(A).forEach(function (k) { if (A[k] >= lim) keep[k] = A[k]; }); put(ASK, keep); }
   function answer(id, ok) {
