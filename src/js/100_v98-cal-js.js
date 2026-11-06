@@ -302,7 +302,7 @@
           t13b: form.les[0] === T13L && +form.qt > 0 ? { n: Math.min(13, +form.qt), pts: Math.max(0, +form.qtp || 0) } : undefined } : undefined });   /* V214：聯合小考加考十三經 */
     });
     put(K.data, a);
-    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick'; form.qt = '0';
+    form.note = ''; form.les = []; form.qs = {}; form.qvm = {}; form.qv = -1; form.qmode = 'pick';   /* V216：十三經格數（qt）不清掉，一班一班加時每筆都帶得到 */
     render();
   }
   function del(id) {

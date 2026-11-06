@@ -7785,6 +7785,9 @@ body.dark-mode .t13q-c.blank.open .nm { color: #e8735f; }
 #nq2-qlist .t13b { margin: .6em 0 .4em; border-top: 3px double var(--q-line); padding-top: .4em; }
 #nq2-qlist .t13b-h { font-size: calc(26px * var(--q-fs)); font-weight: 800; padding: 0 .6em; color: var(--q-ink); }
 #nq2-qlist .t13b-h small { margin-left: .8em; font-size: .7em; font-weight: 400; color: var(--q-muted); }
+/* V216：打亂順序勾選 */
+.t13-sh { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }
+.t13-sh input { width: 20px !important; height: 20px; margin: 0; padding: 0 !important; accent-color: #8a5a1f; }
 /* ════ src/css/178_v215-quickpts-css.css ════ */
 /* V215（老師 11/6）浮動加分盤：⭐ 可拖曳；小盤不加遮罩，只佔一小塊，課文照常看得到、點得到 */
 #qp-fab { position:fixed; z-index:9596; width:52px; height:52px; border-radius:50%; border:2px solid #c9a227; background:rgba(255,250,235,.9);

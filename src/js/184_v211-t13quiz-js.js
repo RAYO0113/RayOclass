@@ -12,6 +12,9 @@
   var LIST = BOOKS.join('、');
   var EXK = 'nq-t13-ex', NK = 'nq-t13-n';
   var on = false, picked = [], curRec = null;
+  /* V216（老師 11/6）：老師自選要不要打亂 13 格順序。十三經小考預設打亂、加分題預設照順序；各記在本機 */
+  var SHK = 'nq-t13-sh', BSHK = 'nq-t13-bsh';
+  function shOn(k, d) { return !!jget(k, d); }
 
   function $(id) { return document.getElementById('nq2-' + id); }
   function jget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
@@ -56,7 +59,7 @@
 
   /* ── 考卷 ── */
   function start() {
-    var order = shuffle(BOOKS), k = 0, qs = [];
+    var mix = shOn(SHK, true), order = mix ? shuffle(BOOKS) : BOOKS.slice(), k = 0, qs = [];   /* V216 */
     var cells = order.map(function (b) {
       if (picked.indexOf(b) < 0) return '<div class="t13q-c"><span class="nm">' + esc(b) + '</span></div>';
       k++;
@@ -68,7 +71,7 @@
       questionKeys: qs.map(function (q) { return 't13|' + q.w; }), questions: qs };
     $('qTitle').innerHTML = '〈論語選〉十三經小考<small>共 ' + k + ' 題・點空格看答案</small>';
     $('qlist').innerHTML = '<div class="t13q-board">' + cells + '</div>' +
-      '<div class="t13q-foot">空格裡缺的是哪 ' + k + ' 部？寫出書名就對，<b>不分順序</b></div>';
+      '<div class="t13q-foot">' + (mix ? '空格裡缺的是哪 ' + k + ' 部？寫出書名就對，<b>不分順序</b>' : '13 部<b>依順序排列</b>，空格寫出書名') + '</div>';
     syncAll();
     $('quiz').classList.add('show');
     $('qlist').scrollTop = 0;
@@ -93,7 +96,8 @@
     var n = bn(); if (!n) { bonusRec = null; return; }
     var ex = excl(), pool = BOOKS.filter(function (b) { return ex.indexOf(b) < 0; });
     var pk = shuffle(pool).slice(0, n), base = cards.length, k = 0, qs = [], pts = bp();
-    var cells = BOOKS.map(function (b) {
+    var mix = shOn(BSHK, false), order = mix ? shuffle(BOOKS) : BOOKS;   /* V216：加分題也可打亂 */
+    var cells = order.map(function (b) {
       if (pk.indexOf(b) < 0) return '<div class="t13q-c"><span class="nm">' + esc(b) + '</span></div>';
       k++;
       qs.push({ no: BOOKS.indexOf(b) + 1, w: b, a: b, ord: base + k });
@@ -103,7 +107,7 @@
     bonusRec = { kind: 't13', pts: pts, questions: qs };
     var per = 100 / base, perT = per === Math.round(per) ? '每題 ' + per + ' 分，' : '';
     var sec = document.createElement('div'); sec.className = 't13b';   /* 不用 <section>：全域 section{display:none} */
-    sec.innerHTML = '<div class="t13b-h">加分題・十三經' + (pts ? '（共 ' + pts + ' 分）' : '') + '<small>依順序排列，空格寫出書名' +
+    sec.innerHTML = '<div class="t13b-h">加分題・十三經' + (pts ? '（共 ' + pts + ' 分）' : '') + '<small>' + (mix ? '順序已打亂，空格寫出書名（不分順序）' : '依順序排列，空格寫出書名') +
       '（註釋 ' + base + ' 題' + (perT ? '・' + perT.replace(/，$/, '') : '') + '・共 100 分＋加分 ' + pts + '＝滿分 ' + (100 + pts) + '）</small></div>' +
       '<div class="t13q-board">' + cells + '</div>';
     var end = ql.querySelector('.qend'); if (end) ql.insertBefore(sec, end); else ql.appendChild(sec);
@@ -113,8 +117,10 @@
   function bonusBlanks() { return Array.prototype.slice.call(document.querySelectorAll('#nq2-qlist .t13b .t13q-c.blank')); }
 
   /* 日曆「開始小考」用：設好加分格數與分數（之後再出考卷） */
+  var keepOnce = false;   /* V216：日曆剛帶入的格數，不要被「剛打開就歸 0」蓋掉 */
   window.nq2T13Bonus = function (n, pts) {
     var i = $('t13bn'), p = $('t13bp');
+    keepOnce = true; setTimeout(function () { keepOnce = false; }, 0);
     if (i) i.value = Math.max(0, Math.min(13, +n || 0));
     if (p && pts != null) p.value = Math.max(0, +pts || 0);
     syncBonusUi();
@@ -138,10 +144,12 @@
     d.id = 'nq2-t13';
     d.innerHTML = '<div class="t13s-bar"><b class="serif">十三經小考</b><span style="flex:1"></span>' +
       '<span>隨機抽</span><input type="number" id="nq2-t13n" min="1" max="13" value="' + esc(jget(NK, 5)) + '"><span>格</span>' +
+      '<label class="t13-sh"><input type="checkbox" id="nq2-t13sh"' + (shOn(SHK, true) ? ' checked' : '') + '>打亂順序</label>' +
       '<button type="button" class="btn dk" data-t="draw">抽！開始小考 ▶</button><button type="button" class="btn" data-t="clr">清除「不抽」</button></div>' +
-      '<div class="hint">點書名＝設成「不抽」（考卷上一定直接顯示）；再點一次恢復。按「抽！開始小考」從其餘的書隨機抽，直接出考卷：抽到的變成空格，13 格打亂順序。</div>' +
+      '<div class="hint">點書名＝設成「不抽」（考卷上一定直接顯示）；再點一次恢復。按「抽！開始小考」從其餘的書隨機抽，直接出考卷：抽到的變成空格；勾「打亂順序」13 格會打亂，不勾就照《詩經》到《孟子》排。</div>' +
       '<div class="t13s-grid"></div>';
     grid.parentNode.insertBefore(d, grid.nextSibling);
+    d.addEventListener('change', function (e) { if (e.target.id === 'nq2-t13sh') jput(SHK, e.target.checked); });   /* V216 */
     d.addEventListener('click', function (e) {
       var t = e.target.closest('[data-t]');
       if (t) {
@@ -172,9 +180,13 @@
     var dock = root.querySelector('.dock'), go0 = $('bGo');
     if (dock && go0) {
       var w = document.createElement('span'); w.id = 'nq2-t13bw';
-      w.innerHTML = '＋十三經加分<input type="number" id="nq2-t13bn" min="0" max="13" value="0">格・共<input type="number" id="nq2-t13bp" min="0" value="' + esc(jget('nq-t13-bp', 20)) + '">分';
+      w.innerHTML = '＋十三經加分<input type="number" id="nq2-t13bn" min="0" max="13" value="0">格・共<input type="number" id="nq2-t13bp" min="0" value="' + esc(jget('nq-t13-bp', 20)) + '">分' +
+        '<label class="t13-sh"><input type="checkbox" id="nq2-t13bsh"' + (shOn(BSHK, false) ? ' checked' : '') + '>打亂</label>';   /* V216 */
       dock.insertBefore(w, go0);
-      w.addEventListener('change', function (e) { if (e.target.id === 'nq2-t13bp') jput('nq-t13-bp', bp()); });
+      w.addEventListener('change', function (e) {
+        if (e.target.id === 'nq2-t13bp') jput('nq-t13-bp', bp());
+        if (e.target.id === 'nq2-t13bsh') jput(BSHK, e.target.checked);
+      });
     }
     new MutationObserver(addBonus).observe($('qlist'), { childList: true });
     $('qlist').addEventListener('click', function (e) {
@@ -193,7 +205,7 @@
     var wasOpen = root.classList.contains('open');   /* 只在面板「剛打開」時回到註釋小考（自己切 t13q class 也會觸發） */
     new MutationObserver(function () {
       var o = root.classList.contains('open');
-      if (o && !wasOpen) { if (on) setOn(false); syncBtn(); var bi = $('t13bn'); if (bi) bi.value = 0; syncBonusUi(); }   /* V214：每次打開都不加考 */
+      if (o && !wasOpen) { if (on) setOn(false); syncBtn(); var bi = $('t13bn'); if (bi && !keepOnce) bi.value = 0; syncBonusUi(); }   /* V214：每次自己打開都不加考；V216：日曆剛帶入的保留（重抽也還在） */
       wasOpen = o;
     }).observe(root, { attributes: true, attributeFilter: ['class'] });
     syncBtn(); syncBonusUi();
