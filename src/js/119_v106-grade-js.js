@@ -225,10 +225,11 @@
       if (Object.keys(pend).length) flush();
     }).catch(function (e) { flushing = false; setSt('⚠ 未儲存 ' + Object.keys(pend).length + ' 筆（' + e.message + '）點此重試', true); });
   }
+  function qpPing() { try { window.dispatchEvent(new Event('v106gr-data')); } catch (e) {} }   /* V215：資料變了 → 浮動加分盤重畫 */
   function save(table, rows, msg) {
     setSt('儲存中…');
     return call({ action: 'put', table: table, rows: rows }).then(function (r) {
-      if (!r.ok) throw new Error(r.error || '儲存失敗'); setSt('✓ ' + (msg || '已儲存')); return r;
+      if (!r.ok) throw new Error(r.error || '儲存失敗'); setSt('✓ ' + (msg || '已儲存')); if (table === 'points') qpPing(); return r;
     }).catch(function (e) { setSt('⚠ ' + e.message, true); alert('儲存失敗：' + e.message); throw e; });
   }
   function remove(table, keys) {
@@ -251,6 +252,7 @@
       norm(r); S.admin = !!r.admin; S.loaded = true; S.loadedAt = Date.now();
       if (!r.admin && pw() && !isDemo()) { sput(K.pw, ''); put(K.pw, null); S.loadErr = '登記密碼已失效，請重新登入'; }
       render();
+      qpPing();   /* V215：通知浮動加分盤 */
     }).catch(function (e) { S.loading = false; S.loadErr = '讀取失敗：' + e.message + (isDemo() ? '' : '（請確認網路與 Apps Script 網址）'); render(); });
   }
   function login(p, remember) {
@@ -988,7 +990,7 @@
   function undoPoint() {
     var id = S.undo.pop(); if (!id) return;
     var p = D.points.filter(function (x) { return x.id === id; })[0];
-    remove('points', [id]).then(function () { D.points = D.points.filter(function (x) { return x.id !== id; }); setSt('已復原 ' + (p ? p.seat + '號 ' + (p.delta > 0 ? '+1' : '−1') : '')); render(); })
+    return remove('points', [id]).then(function () { D.points = D.points.filter(function (x) { return x.id !== id; }); setSt('已復原 ' + (p ? p.seat + '號 ' + (p.delta > 0 ? '+1' : '−1') : '')); render(); return p; })   /* V215：回傳 promise＋那一筆，給浮動加分盤用 */
       .catch(function () { S.undo.push(id); });
   }
 
@@ -1620,4 +1622,24 @@
   window.V106GR = { open: open, close: close, data: function () { return D; }, summary: summary, lateOf: lateOf, finalOf: finalOf,
     nextLesson: nextLesson, schoolDaysBetween: schoolDaysBetween, parsePaste: parsePaste, isDemo: isDemo, addFromCal: addFromCal,
     voParse: voParse, voHeard: voHeard };   /* voHeard：測試時模擬「聽到」一句話 */
+
+  /* V215（老師 11/6）浮動加分盤（185）用：不開成績大視窗，邊投影邊加減分。紀錄格式、復原堆疊與「⭐ 課堂加減分」頁共用 */
+  function qpAdd(cls, seat, delta, reason) {
+    var p = { id: uid('p'), ts: new Date().toISOString(), date: today(), period: curPeriod(cls), cls: cls, seat: seat,
+      delta: delta > 0 ? 1 : -1, reason: delta > 0 ? '' : (reason || '其他') };
+    D.points.push(p); S.undo.push(p.id); qpPing();
+    return save('points', [p], (p.delta > 0 ? '+1 ' : '−1 ') + cls + ' ' + seat + '號').then(function () { return p; }, function (e) {
+      D.points = D.points.filter(function (x) { return x.id !== p.id; }); S.undo = S.undo.filter(function (x) { return x !== p.id; }); qpPing(); throw e; });
+  }
+  window.V106GR.qp = {
+    ready: function () { return S.loaded; }, loading: function () { return S.loading; }, err: function () { return S.loadErr; },
+    canWrite: function () { return S.admin || isDemo(); },
+    load: function (force) { load(!!force); }, open: open, today: today, classes: classes, reasons: REASONS.slice(),
+    cls: function () { return S.cls; }, curCls: function () { try { var c = window.V82 && V82.currentSlot && V82.currentSlot(); return c && c.cls || ''; } catch (e) { return ''; } },
+    roster: function (cls) { return roster(cls).map(function (s) { return s.seat; }); },
+    layout: function (cls) { var L = seatOf(cls, roster(cls)); return { rows: L.rows, cols: L.cols, grid: L.grid.map(function (r) { return r.slice(); }) }; },
+    totals: function (cls) { var td = today(), t = {}; D.points.forEach(function (p) { if (p.cls === cls && p.date === td) t[p.seat] = (t[p.seat] || 0) + p.delta; }); return t; },
+    add: qpAdd, undo: function () { var r = undoPoint(); return r && r.then ? r.then(function (p) { qpPing(); return p; }) : Promise.resolve(null); },
+    canUndo: function () { return S.undo.length > 0; }
+  };
 })();
