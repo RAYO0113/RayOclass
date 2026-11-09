@@ -269,9 +269,15 @@ details.blk[open]>summary:after{content:" ▾"}
     if (P.qa && P.qa.length) h += '<div class="ln"><span class="k a">問答</span>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</div>';
     if (P.xi) h += '<div class="ln"><span class="k t">析</span>' + clean(P.xi) + '</div>';
     if (A && A.notes.length) h += '<div class="sec-h kh">本段考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('');
+    if (!unlocked) h += lockedHTML();
     return h;
   }
 
+  function lockedHTML() {
+    return '<div class="sec-h kh">考點</div><div class="card"><div style="font-size:15px;color:var(--mut);margin-bottom:8px">🔒 考點已上鎖（學生打開這頁也看不到）。用老師的專屬網址打開會自動解鎖，或在這裡輸入一次講稿密碼。</div>' +
+      '<div class="row"><input class="unlock-in" type="password" autocomplete="current-password" style="flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)">' +
+      '<button type="button" class="btn on unlock-go">解鎖</button></div></div>';
+  }
   function pageList(L) {   /* 本課所有頁：課文段落（網站資料）＋有講稿的說明頁 */
     var seen = {}, list = [];
     var d = TB[L.k];
@@ -296,6 +302,7 @@ details.blk[open]>summary:after{content:" ▾"}
     } else {
       if (A) h += A.notes.map(noteHTML).join('');
       else if (L && /^seg:/.test(id) && LESSON_FILE[L.k] && !TB[L.k]) h += '<div class="empty">課文資料載入中…</div>';
+      else if (!unlocked) h += lockedHTML();
       else if (S.follow && S.pos && lessonOf(S.pos.k)) h += '<div class="empty">這頁沒有特別提醒</div>';
     }
     if (L) {
@@ -307,7 +314,7 @@ details.blk[open]>summary:after{content:" ▾"}
     h += '<details class="blk"><summary>怎麼用</summary><div class="howto">' +
       '① 平板開教學網站並登入登記密碼（成績系統的那組）。<br>② 手機開這頁，保持「跟著平板」。平板翻到哪頁，這裡就跳到哪頁。<br>' +
       '③ 平板上點某一句（或它的修辭、句意按鈕），這裡會捲到那一句並標黃。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
-      '⑤ 備課時不用開平板，直接選課、選頁就能看。</div></details>';
+      '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
     S.rendered = (L ? L.k : '') + '|' + id;
     S.li = -1;
@@ -377,22 +384,47 @@ details.blk[open]>summary:after{content:" ▾"}
   $('lsel').onchange = function () { S.follow = false; S.viewK = this.value; S.viewId = ''; render(); scrollTo(0, 0); };
   $('lockb').onclick = function () { if (!confirm('鎖上後要重新輸入講稿密碼，確定？')) return; lrm(PASS_K); location.reload(); };
 
+  /* V221（老師 11/9「為什麼要上鎖，很麻煩」）：打開就能看句意、字義、修辭、翻譯、提問（網站本來就公開的內容）；
+     只有「考點」加密。專屬網址 …/tn/#k=<講稿密碼> 打開就自動解鎖（# 後面不會傳到網路上），加到主畫面後點圖示即可。
+     沒有鑰匙時，考點的位置顯示一個小解鎖框。 */
+  var BASE = { lessons: [
+    { k: '論語選—子路曾皙冉有公西華侍坐', name: 'L6 論語選〈侍坐〉', overview: [], anchors: [] },
+    { k: '樂府詩選—長干行', name: 'L7 樂府詩選〈長干行〉', overview: [], anchors: [] },
+    { k: '茫茫人海中的一名女孩', name: 'L8 茫茫人海中的一名女孩', overview: [], anchors: [] },
+    { k: '桃花源記', name: 'L9 桃花源記', overview: [], anchors: [] },
+    { k: '極短篇小說選', name: 'L10 極短篇小說選', overview: [], anchors: [] }
+  ] };
+  var unlocked = false;
+  function hashKey() { var m = String(location.hash || '').match(/[#&]k=([^&]+)/); try { return m ? decodeURIComponent(m[1]) : ''; } catch (e) { return ''; } }
   function start(data) {
     D = data;
     $('lock').classList.add('hide'); $('app').classList.remove('hide');
+    var cur = $('lsel').value;
     $('lsel').innerHTML = D.lessons.map(function (L) { return '<option value="' + esc(L.k) + '">' + esc(L.name) + '</option>'; }).join('');
-    render(); poll(); wake();
+    if (cur) $('lsel').value = cur;
+    $('lockb').textContent = unlocked ? '鎖上考點' : '🔒 考點';
+    render();
   }
   function tryPass(p, quiet) {
-    $('perr').textContent = quiet ? '' : '解開中…';
-    return decrypt(p).then(function (d) { lset(PASS_K, p); start(d); })
-      .catch(function (e) { lrm(PASS_K); $('lock').classList.remove('hide'); $('perr').textContent = quiet ? '' : (/講稿檔/.test(e && e.message) ? e.message : '密碼不對'); });
+    if (!window.crypto || !crypto.subtle) { if (!quiet) alert('這個瀏覽器不支援解密，請用 Safari 或 Chrome 打開'); return Promise.resolve(); }
+    return decrypt(p).then(function (d) { lset(PASS_K, p); unlocked = true; start(d); })
+      .catch(function (e) { lrm(PASS_K); if (!quiet) alert(/講稿檔/.test(e && e.message) ? e.message : '密碼不對'); });
   }
-  $('pgo').onclick = function () { var p = $('pass').value.trim(); if (p) tryPass(p); };
-  $('pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('pgo').onclick(); });
-  if (!window.crypto || !crypto.subtle) { $('lock').classList.remove('hide'); $('perr').textContent = '這個瀏覽器不支援解密，請用 Safari 或 Chrome（https 網址）'; return; }
-  var saved = lget(PASS_K);
-  if (saved) tryPass(saved, true); else $('lock').classList.remove('hide');
+  /* 考點區沒解鎖時的小框（在 render 產生，這裡處理按鈕） */
+  $('main').addEventListener('click', function (e) {
+    if (!e.target.closest('.unlock-go')) return;
+    var inp = $('main').querySelector('.unlock-in'); var p = inp && inp.value.trim(); if (p) tryPass(p);
+  });
+  $('lockb').onclick = function () {
+    if (!unlocked) { var p = prompt('輸入講稿密碼解鎖考點（只要一次，這支手機會記住）'); if (p) tryPass(p.trim()); return; }
+    if (!confirm('鎖上考點？（句意、修辭、提問照樣看得到）')) return;
+    lrm(PASS_K); unlocked = false;
+    if (hashKey()) history.replaceState(null, '', location.pathname + location.search);
+    start(BASE);
+  };
+  start(BASE); poll(); wake();
+  var key0 = hashKey() || lget(PASS_K);
+  if (key0) tryPass(key0, true);
 })();
 </script>
 </body>
