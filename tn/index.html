@@ -6,23 +6,24 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2b2420">
 <title>講稿</title>
-<!-- V217（老師 11/9）手機講稿：平板投影翻頁，這頁跟著跳到同一頁的「上課提醒」。
-     ・講稿內容加密存在 notes.enc.json（AES-GCM，金鑰由講稿密碼經 PBKDF2 產生）；倉庫裡沒有明文。
-       正本＝教學系統 OneDrive data/115-1/高職/第一冊/老師講稿_上課提醒.json → scripts/RayOclass/tnote_build_20261109.js 加密產生。
-     ・位置：Apps Script liveGet（gr-21 起，不用密碼、只回位置）。平板端 src/js/186_v217-tnote-js.js 換頁時 liveSet。
-     ・頁面代號（sid）：課文頁 seg:第三段；說明頁 info:<label>；練習題 q:<題號>；其他 <type>:<label>。
-     ・密碼只存在這支手機（localStorage tn_pass_v1），按「鎖上」就清掉。 -->
+<!-- 手機講稿（V217 起；V219 改成逐句講稿）
+     ・平板投影翻頁 → 這頁跟著跳；平板點了某一句 → 這頁捲到那一句並標亮（位置代號 seg:第三段#2，#後面是句子序號）。
+     ・課文頁＝逐句講稿：本段考點（加密講稿）＋每一句的 句意／修辭（短版，長版可展開）、翻譯、提問（含答案與「師」）、統測；
+       段末：本段統整、問答、注釋、析。句意修辭提問直接讀網站 data/lessons/NN.js，網站改了這裡自動跟著變。
+     ・其他頁（作者、題解、說明頁…）＝該頁考點＋本課總提醒。
+     ・講稿內容加密存在 notes.enc.json（AES-GCM，PBKDF2）；正本＝教學系統 OneDrive data/115-1/高職/第一冊/老師講稿_上課提醒.json
+       → scripts/RayOclass/tnote_build_20261109.js 加密。位置：Apps Script liveGet（gr-21）。密碼只存這支手機（tn_pass_v1）。 -->
 <style>
 :root{--bg:#f7f2ea;--card:#fff;--ink:#2f2620;--mut:#85766a;--line:#e5dacb;--pri:#9a4a26;--pri2:#f4e4d6;
-  --tc:#b3261e;--tcbg:#fde8e6;--aq:#b45f06;--aqbg:#fdf0dd;--jia:#5b4b9a;--jiabg:#ece8f8;--wb:#2e6b4f;--wbbg:#e3f2ea;--ex:#1f5f8b;--exbg:#e2eef7;--say:#fffbe8;--saybd:#e9d48a}
+  --tc:#b3261e;--tcbg:#fde8e6;--aq:#b45f06;--aqbg:#fdf0dd;--jia:#5b4b9a;--jiabg:#ece8f8;--wb:#2e6b4f;--wbbg:#e3f2ea;--ex:#1f5f8b;--exbg:#e2eef7;--say:#fffbe8;--saybd:#e9d48a;--hl:#fff1b8}
 :root[data-theme="dark"]{--bg:#1d1916;--card:#2a2420;--ink:#efe6dc;--mut:#a8998c;--line:#3d352f;--pri:#e59a6d;--pri2:#3d2c22;
-  --tc:#ff8f86;--tcbg:#47231f;--aq:#f2b25c;--aqbg:#42311a;--jia:#b5a6f0;--jiabg:#302a47;--wb:#7fd1a8;--wbbg:#1f3b2f;--ex:#8cc3ea;--exbg:#1d3343;--say:#332d1d;--saybd:#6b5c2a}
+  --tc:#ff8f86;--tcbg:#47231f;--aq:#f2b25c;--aqbg:#42311a;--jia:#b5a6f0;--jiabg:#302a47;--wb:#7fd1a8;--wbbg:#1f3b2f;--ex:#8cc3ea;--exbg:#1d3343;--say:#332d1d;--saybd:#6b5c2a;--hl:#4a3f12}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1d1916;--card:#2a2420;--ink:#efe6dc;--mut:#a8998c;--line:#3d352f;--pri:#e59a6d;--pri2:#3d2c22;
-  --tc:#ff8f86;--tcbg:#47231f;--aq:#f2b25c;--aqbg:#42311a;--jia:#b5a6f0;--jiabg:#302a47;--wb:#7fd1a8;--wbbg:#1f3b2f;--ex:#8cc3ea;--exbg:#1d3343;--say:#332d1d;--saybd:#6b5c2a}}
+  --tc:#ff8f86;--tcbg:#47231f;--aq:#f2b25c;--aqbg:#42311a;--jia:#b5a6f0;--jiabg:#302a47;--wb:#7fd1a8;--wbbg:#1f3b2f;--ex:#8cc3ea;--exbg:#1d3343;--say:#332d1d;--saybd:#6b5c2a;--hl:#4a3f12}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-text-size-adjust:100%}
 button,select,input{font:inherit;color:inherit}
-button{cursor:pointer}
+button,summary{cursor:pointer}
 .top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top)) 16px 8px}
 .row{display:flex;align-items:center;gap:8px}
 .live{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);flex:1;min-width:0}
@@ -37,19 +38,23 @@ button{cursor:pointer}
 .where .pg{font-size:21px;font-weight:700;line-height:1.35}
 main{padding:12px 16px 120px;max-width:720px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px}
-.note .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .tag{font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px}
 .tag.tc{color:var(--tc);background:var(--tcbg)}.tag.aq{color:var(--aq);background:var(--aqbg)}
 .tag.jia{color:var(--jia);background:var(--jiabg)}.tag.wb{color:var(--wb);background:var(--wbbg)}
 .tag.ex{color:var(--ex);background:var(--exbg)}.tag.tip{color:var(--pri);background:var(--pri2)}.tag.basic{color:var(--mut);background:var(--line)}
+.note .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .note .t{font-weight:600}
 .note .say{margin-top:8px;background:var(--say);border-left:4px solid var(--saybd);border-radius:6px;padding:6px 10px;font-size:16px}
 .note .say:before{content:"可以這樣說：";font-size:12px;color:var(--mut);display:block}
 .note .src{margin-top:6px;font-size:12px;color:var(--mut)}
+details.kd .card.note{padding:8px 12px;margin-bottom:8px;font-size:15.5px}
+details.kd .note .t{font-weight:600}
 .sec-h{font-size:14px;color:var(--mut);margin:20px 0 8px;font-weight:700;letter-spacing:.05em}
 .empty{color:var(--mut);text-align:center;padding:18px 0}
+details>summary{list-style:none}
+details>summary::-webkit-details-marker{display:none}
 details.all{margin-top:8px}
-details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 0}
+details.all>summary{color:var(--pri);font-weight:700;padding:6px 0}
 .alist button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 4px}
 .alist button.cur{color:var(--pri);font-weight:700}
 .alist small{color:var(--mut);margin-left:6px}
@@ -60,30 +65,55 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
 .bar select{flex:1;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .hide{display:none!important}
-/* V218 提問預覽（網站課文資料的提問引導，答案全部展開） */
-.seg{display:flex;gap:6px;margin:0 0 12px}
-.seg button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 0;font-size:15px;font-weight:700;color:var(--mut)}
-.seg button.on{background:var(--pri);border-color:var(--pri);color:#fff}
-.ask-line{font-size:14px;color:var(--mut);border-left:3px solid var(--line);padding:2px 0 2px 8px;margin:4px 0 8px}
-.qcard .gd-q{font-weight:700;margin-bottom:6px}
-.qcard .gd-tag{display:inline-block;min-width:1.5em;color:var(--pri);font-weight:700}
-.qcard .gd-s{padding:5px 0;border-top:1px dashed var(--line)}
-.qcard .gd-sq{display:block}
-.qcard .gd-sq:before{content:"問　";color:var(--mut);font-size:13px}
-.qcard .gd-sa{display:block;color:var(--wb);font-weight:600}
-.qcard .gd-sa:before{content:"答　";color:var(--mut);font-size:13px;font-weight:400}
-.qcard .gd-end{margin-top:6px;background:var(--say);border-left:4px solid var(--saybd);border-radius:6px;padding:6px 10px}
-.qcard .gd-ek{display:block;font-size:12px;color:var(--mut)}
-.qcard table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0;display:block;overflow-x:auto}
-.qcard th,.qcard td{border:1px solid var(--line);padding:4px 6px;vertical-align:top}
-.qcard .jy-blank-ph{display:none}.qcard .jy-blank-ans{color:var(--wb);font-weight:600}
-.qcard .teach{margin-top:8px;border-top:2px solid var(--line);padding-top:6px;font-size:15px}
-.qcard .teach:before{content:"師";display:inline-block;background:var(--pri);color:#fff;border-radius:6px;padding:0 6px;font-size:12px;margin-bottom:4px}
-.qcard .tk-core,.qcard .tk-open{margin:3px 0}
-.qcard .tk-k{font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:4px;color:var(--tc);background:var(--tcbg)}
-.qcard .tk-open .tk-k{color:var(--ex);background:var(--exbg)}
-.qcard .tk-sep{border-top:1px dashed var(--line);margin:6px 0}
-.qa-a{color:var(--wb);font-weight:600;margin-top:4px}
+/* ── 逐句講稿 ── */
+.pian{font-size:15px;color:var(--mut);margin:0 0 10px}
+.pian b{color:var(--ink)}
+details.kd{margin:0 0 12px}
+details.kd>summary{font-weight:700;color:var(--tc);padding:4px 0}
+details.kd>summary:after{content:" ▾";color:var(--mut);font-weight:400}
+details.kd:not([open])>summary:after{content:" ▸"}
+.ln{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 10px;transition:background .3s,border-color .3s}
+.ln.cur{background:var(--hl);border-color:var(--pri)}
+.ln .tx{font-size:18px;font-weight:600;line-height:1.55}
+.ln .tx .no{display:inline-block;min-width:1.4em;color:var(--mut);font-size:13px;font-weight:400}
+.it{margin-top:7px;font-size:15.5px}
+.k{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:5px;vertical-align:1px}
+.k.m{color:#fff;background:#3f7d5c}.k.r{color:#fff;background:#b0563a}.k.t{color:#fff;background:#6d6157}.k.a{color:#fff;background:#3d6aa8}.k.g{color:#fff;background:#b3261e}.k.s{color:#fff;background:#7a5aa6}
+.it .cite{color:var(--mut)}
+.it details>summary{display:inline}
+.it details>summary .more{font-size:12px;color:var(--pri);margin-left:4px}
+.it details[open]>summary .more{display:none}
+.it .long{margin-top:4px;color:var(--mut);font-size:14.5px;border-left:3px solid var(--line);padding-left:8px}
+.tp-rq,.rq-hi{font-weight:700;text-decoration:underline;text-decoration-color:var(--pri);text-underline-offset:3px}
+details.ask>summary{color:#3d6aa8;font-weight:600}
+details.ask>summary .cnt{font-size:12px;color:var(--mut);font-weight:400;margin-left:4px}
+.qbody{margin-top:6px;border-left:3px solid #3d6aa8;padding-left:8px}
+.qbody .gd{margin-bottom:8px}
+.qbody .gd-q{font-weight:700}
+.qbody .gd-tag{display:inline-block;min-width:1.5em;color:var(--pri);font-weight:700}
+.qbody .gd-s{padding:4px 0;border-top:1px dashed var(--line)}
+.qbody .gd-sq{display:block}
+.qbody .gd-sq:before{content:"問　";color:var(--mut);font-size:12px}
+.qbody .gd-sa{display:block;color:var(--wb);font-weight:600}
+.qbody .gd-sa:before{content:"答　";color:var(--mut);font-size:12px;font-weight:400}
+.qbody .gd-end{margin-top:5px;background:var(--say);border-left:4px solid var(--saybd);border-radius:6px;padding:5px 9px}
+.qbody .gd-ek{display:block;font-size:12px;color:var(--mut)}
+.qbody table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0;display:block;overflow-x:auto}
+.qbody th,.qbody td{border:1px solid var(--line);padding:4px 6px;vertical-align:top}
+.qbody .jy-blank-ph{display:none}.qbody .jy-blank-ans{color:var(--wb);font-weight:600}
+.qbody .teach{margin-top:6px;border-top:2px solid var(--line);padding-top:6px;font-size:14.5px}
+.qbody .teach:before{content:"師";display:inline-block;background:var(--pri);color:#fff;border-radius:6px;padding:0 6px;font-size:12px;margin-bottom:3px}
+.qbody .tk-core,.qbody .tk-open{margin:3px 0}
+.qbody .tk-k{font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:4px;color:var(--tc);background:var(--tcbg)}
+.qbody .tk-open .tk-k{color:var(--ex);background:var(--exbg)}
+.qbody .tk-sep{border-top:1px dashed var(--line);margin:6px 0}
+.qa-a{color:var(--wb);font-weight:600}
+.notes div{font-size:15px;padding:3px 0;border-bottom:1px dashed var(--line)}
+details.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin:0 0 10px}
+details.blk>summary{font-weight:700;color:var(--pri)}
+details.blk>summary:after{content:" ▸";color:var(--mut);font-weight:400}
+details.blk[open]>summary:after{content:" ▾"}
+.howto{font-size:14px;color:var(--mut);line-height:1.7}
 </style>
 </head>
 <body>
@@ -117,12 +147,12 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
   'use strict';
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';
   var PASS_K = 'tn_pass_v1', THEME_K = 'tn_theme_v1', POLL = 2500;
+  var LESSON_FILE = { '論語選—子路曾皙冉有公西華侍坐': '01', '桃花源記': '07', '樂府詩選—長干行': '30', '茫茫人海中的一名女孩': '31', '極短篇小說選': '32' };
   var $ = function (id) { return document.getElementById(id); };
   function lget(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lset(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function lrm(k) { try { localStorage.removeItem(k); } catch (e) {} }
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  /* 講稿文字可用 **粗體**、「」照原樣；其餘一律轉義 */
   function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>'); }
 
   /* ── 主題 ── */
@@ -143,8 +173,7 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
   }
   function decrypt(pass) {
     return loadEnc().then(function (e) {
-      var enc = new TextEncoder();
-      return crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']).then(function (base) {
+      return crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']).then(function (base) {
         return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(e.salt), iterations: e.iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
       }).then(function (key) {
         var raw = b64(e.ct), tag = b64(e.tag), all = new Uint8Array(raw.length + tag.length); all.set(raw); all.set(tag, raw.length);
@@ -153,21 +182,8 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
     });
   }
 
-  /* ── 狀態 ── */
-  var D = null, S = { follow: true, pos: null, viewK: '', viewId: '', lastOk: 0, err: '' };
-  function lessonOf(k) { if (!D) return null; for (var i = 0; i < D.lessons.length; i++) if (D.lessons[i].k === k) return D.lessons[i]; return null; }
-  function anchorOf(L, id) { if (!L || !id) return null; for (var i = 0; i < L.anchors.length; i++) { var a = L.anchors[i]; if (a.id === id || (a.ids && a.ids.indexOf(id) >= 0)) return a; } return null; }
-
-  var TAG = { tc: '統測', aq: 'A卷有考', jia: '甲卷', wb: '習作', basic: '課本練習', ex: '延伸', tip: '提醒' };
-  function noteHTML(n) {
-    var tags = (n.tag || ['tip']).map(function (t) { return '<span class="tag ' + esc(t) + '">' + esc(TAG[t] || t) + '</span>'; }).join('');
-    return '<div class="card note"><div class="tags">' + tags + '</div><div class="t">' + fmt(n.t) + '</div>' +
-      (n.say ? '<div class="say">' + fmt(n.say) + '</div>' : '') + (n.src ? '<div class="src">' + fmt(n.src) + '</div>' : '') + '</div>';
-  }
-
-  /* ── V218 提問預覽：直接讀網站的課文資料（../data/lessons/NN.js），提問改了這裡自動跟著變 ── */
-  var LESSON_FILE = { '論語選—子路曾皙冉有公西華侍坐': '01', '桃花源記': '07', '樂府詩選—長干行': '30', '茫茫人海中的一名女孩': '31', '極短篇小說選': '32' };
-  var TB = {}, tbLoading = {}, idxP = null, TAB_K = 'tn_tab_v1';
+  /* ── 網站課文資料（句意、修辭、提問…）── */
+  var TB = {}, tbLoading = {}, idxP = null;
   function idxHtml() { if (!idxP) idxP = fetch('../index.html', { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }); return idxP; }
   function loadLesson(k) {
     if (TB[k] || tbLoading[k] || !LESSON_FILE[k]) return;
@@ -181,66 +197,122 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
       document.head.appendChild(s);
     });
   }
-  /* 網站的提問 HTML：拿掉按鈕與 onclick，答案全部顯示 */
-  function clean(html) {
+  function clean(html) {   /* 網站 HTML：拿掉按鈕、onclick；答案全部顯示 */
     var doc = new DOMParser().parseFromString('<div>' + String(html || '') + '</div>', 'text/html'), root = doc.body.firstChild;
-    root.querySelectorAll('script,button,style').forEach(function (e) { e.remove(); });
+    root.querySelectorAll('script,button,style,a.tp-more').forEach(function (e) { e.remove(); });
     root.querySelectorAll('*').forEach(function (e) { for (var i = e.attributes.length - 1; i >= 0; i--) { var n = e.attributes[i].name; if (/^on/i.test(n)) e.removeAttribute(n); } });
     return root.innerHTML;
   }
-  function plainLine(t) {
+  function plain(t) {   /* 課文：{n:18|方六、七十}→方六、七十；{g:春服|解釋}→春服 */
     t = String(t || '');
     for (var i = 0; i < 3; i++) t = t.replace(/\{([a-z]+):([^{}|]*)(?:\|([^{}]*))?\}/g, function (m, ty, a, b) { return /^\d+$/.test(a) ? (b || '') : a; });
     return t.replace(/<[^>]+>/g, '');
   }
-  function askOf(k, id) {
-    var R = { n: 0, html: '' }, d = TB[k];
-    if (!d || !d.textPages || !/^seg:/.test(id || '')) return R;
-    var seg = id.slice(4), P = d.textPages.filter(function (p) { return p.seg === seg; })[0];
-    if (!P) return R;
-    function card(head, asks, askT) {
-      R.n += asks.length || 1;
-      return '<div class="card qcard">' + (head ? '<div class="ask-line">' + esc(head) + '</div>' : '') + asks.map(clean).join('') +
-        (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div>';
-    }
-    (P.lines || []).forEach(function (l) { if (l.ask && l.ask.length) { var tx = plainLine(l.text); R.html += card(tx.length > 60 ? tx.slice(0, 60) + '…' : tx, l.ask, l.askT); } });
-    if (P.ask && P.ask.length) R.html += card('本段統整', P.ask, P.askT);
-    (P.qa || []).forEach(function (q, i) { R.n++; R.html += '<div class="card qcard"><div class="ask-line">問答 ' + (i + 1) + '</div><div class="gd-q">' + clean(q[0]) + '</div><div class="qa-a">' + clean(q[1]) + '</div></div>'; });
-    (P.boxes || []).forEach(function (b) { R.html += card(b.label || '統整', b.ask || [], b.askT); });
-    return R;
+  function pageOf(k, seg) { var d = TB[k]; if (!d || !d.textPages) return null; return d.textPages.filter(function (p) { return p.seg === seg; })[0] || null; }
+
+  /* ── 狀態 ── */
+  var D = null, S = { follow: true, pos: null, viewK: '', viewId: '', err: '', li: -1, rendered: '' };
+  function lessonOf(k) { if (!D) return null; for (var i = 0; i < D.lessons.length; i++) if (D.lessons[i].k === k) return D.lessons[i]; return null; }
+  function anchorOf(L, id) { if (!L || !id) return null; for (var i = 0; i < L.anchors.length; i++) { var a = L.anchors[i]; if (a.id === id || (a.ids && a.ids.indexOf(id) >= 0)) return a; } return null; }
+  function splitId(id) { var m = String(id || '').match(/^(.*?)(?:#(\d+))?$/); return { id: m[1], li: m[2] == null ? -1 : +m[2] }; }
+
+  var TAG = { tc: '統測', aq: 'A卷有考', jia: '甲卷', wb: '習作', basic: '課本練習', ex: '延伸', tip: '提醒' };
+  function noteHTML(n) {
+    var tags = (n.tag || ['tip']).map(function (t) { return '<span class="tag ' + esc(t) + '">' + esc(TAG[t] || t) + '</span>'; }).join('');
+    return '<div class="card note"><div class="tags">' + tags + '</div><div class="t">' + fmt(n.t) + '</div>' +
+      (n.say ? '<div class="say">' + fmt(n.say) + '</div>' : '') + (n.src ? '<div class="src">' + fmt(n.src) + '</div>' : '') + '</div>';
+  }
+  function shortLong(kcls, kname, shortHtml, longHtml) {
+    if (!longHtml || shortHtml === longHtml) return '<div class="it"><span class="k ' + kcls + '">' + kname + '</span>' + (shortHtml || longHtml) + '</div>';
+    return '<div class="it"><details><summary><span class="k ' + kcls + '">' + kname + '</span>' + shortHtml + '<span class="more">長版▸</span></summary><div class="long">' + longHtml + '</div></details></div>';
+  }
+  function askBlock(asks, askT, label) {
+    var heads = asks.map(function (a) { var dd = new DOMParser().parseFromString(a, 'text/html'), q = dd.querySelector('.gd-q'); return q ? q.textContent.trim() : ''; }).filter(Boolean);
+    var sum = heads.length ? esc(heads.join('｜')) : esc(label || '提問');
+    return '<div class="it"><details class="ask"><summary><span class="k a">' + esc(label || '提問') + '</span>' + sum + '<span class="cnt">（點開看答案）</span></summary>' +
+      '<div class="qbody">' + asks.map(clean).join('') + (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div></details></div>';
+  }
+
+  /* 逐句講稿（課文頁） */
+  function segHTML(L, A, P) {
+    var h = '';
+    if (P.pian) h += '<div class="pian"><b>段旨</b>　' + clean(P.pian) + '</div>';
+    if (A && A.notes.length) h += '<details class="kd" open><summary>本段考點（' + A.notes.length + '）</summary>' + A.notes.map(noteHTML).join('') + '</details>';
+    (P.lines || []).forEach(function (l, i) {
+      var b = '<div class="ln" data-li="' + i + '"><div class="tx"><span class="no">' + (i + 1) + '</span>' + esc(plain(l.text)) + '</div>';
+      if (l.mean) b += shortLong('m', '句意', (l.cite ? '<span class="cite">' + clean(l.cite) + '──</span>' : '') + clean(l.meanShort || l.mean), l.meanShort ? clean(l.mean) : '');
+      if (l.mean2) b += shortLong('m', '句意', (l.cite2 ? '<span class="cite">' + clean(l.cite2) + '──</span>' : '') + clean(l.mean2Short || l.mean2), l.mean2Short ? clean(l.mean2) : '');
+      (l.rhet || []).forEach(function (r, ri) {
+        var sh = l.rhetShort && l.rhetShort[ri];
+        b += shortLong('r', '修辭', '<b>' + esc(r[0]) + '</b>　' + (sh ? clean(sh) : clean(r[1])), sh ? clean(r[1]) : '');
+      });
+      (l.style || []).forEach(function (r) { b += '<div class="it"><span class="k s">筆法</span><b>' + clean(r[0]) + '</b>　' + clean(r[1]) + '</div>'; });
+      if (l.tr) b += '<div class="it"><details><summary><span class="k t">翻譯</span><span class="more">點開▸</span></summary><div class="long">' + clean(l.tr) + '</div></details></div>';
+      if (l.ask && l.ask.length) b += askBlock(l.ask, l.askT, '提問');
+      if (l.tongT) b += '<div class="it"><span class="k g">統測</span>' + clean(l.tongT) + '</div>';
+      h += b + '</div>';
+    });
+    if (P.ask && P.ask.length) h += '<div class="ln">' + askBlock(P.ask, P.askT, P.askLabel || '本段統整') + '</div>';
+    (P.boxes || []).forEach(function (bx) { h += '<div class="ln">' + askBlock(bx.ask || [], bx.askT, bx.label || '統整') + '</div>'; });
+    if (P.qa && P.qa.length) h += '<details class="blk"><summary>問答（' + P.qa.length + '）</summary>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</details>';
+    if (P.notes && P.notes.length) h += '<details class="blk"><summary>注釋（' + P.notes.length + '）</summary><div class="notes">' + P.notes.map(function (n) { return '<div><b>' + clean(n[0]) + '</b>：' + clean(n[1]) + '</div>'; }).join('') + '</div></details>';
+    if (P.xi) h += '<details class="blk"><summary>析</summary><div class="it">' + clean(P.xi) + '</div></details>';
+    return h;
+  }
+
+  function pageList(L) {   /* 本課所有頁：課文段落（網站資料）＋有講稿的說明頁 */
+    var seen = {}, list = [];
+    var d = TB[L.k];
+    if (d && d.textPages) d.textPages.forEach(function (p) { var id = 'seg:' + p.seg, a = anchorOf(L, id); seen[id] = 1; list.push({ id: id, h: a ? a.h : p.seg, n: a ? a.notes.length : 0 }); });
+    L.anchors.forEach(function (a) { if (!seen[a.id]) { seen[a.id] = 1; list.push({ id: a.id, h: a.h, n: a.notes.length }); } });
+    return list;
   }
 
   function render() {
-    var k = S.follow && S.pos ? S.pos.k : S.viewK, id = S.follow && S.pos ? S.pos.id : S.viewId;
+    var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
+    var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
     var L = lessonOf(k) || (D && D.lessons[0]);
     if (!S.viewK && L) S.viewK = L.k;
-    var A = anchorOf(L, id);
-    $('wls').textContent = L ? L.name : '';
-    $('wpg').textContent = A ? A.h : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
-    var h = '';
     if (L) loadLesson(L.k);
-    var Q = L ? askOf(L.k, A ? A.id : id) : { n: 0 };
-    if (!Q.n && A && A.ids) for (var qi = 0; qi < A.ids.length && !Q.n; qi++) Q = askOf(L.k, A.ids[qi]);
-    var tab = lget(TAB_K) === 'ask' ? 'ask' : 'note';
-    if (Q.n) {
-      h += '<div class="seg"><button type="button" data-tab="note" class="' + (tab === 'note' ? 'on' : '') + '">提醒</button>' +
-        '<button type="button" data-tab="ask" class="' + (tab === 'ask' ? 'on' : '') + '">提問與答案</button></div>';
-      if (tab === 'ask') { $('main').innerHTML = h + Q.html; $('lsel').value = L.k; $('follow').classList.toggle('on', S.follow); $('follow').textContent = S.follow ? '跟著平板' : '自己翻（點我跟回）'; return; }
-    }
-    if (A) {
-      h += A.notes.length ? A.notes.map(noteHTML).join('') : '<div class="empty">這頁沒有特別提醒</div>';
-    } else if (S.follow && S.pos && lessonOf(S.pos.k)) {
-      h += '<div class="empty">這頁沒有特別提醒</div>';
+    var A = anchorOf(L, id);
+    var P = (L && /^seg:/.test(id)) ? pageOf(L.k, id.slice(4)) : null;
+    $('wls').textContent = L ? L.name : '';
+    $('wpg').textContent = A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
+    var h = '';
+    if (P) {
+      h += segHTML(L, A, P);
+    } else {
+      if (A) h += A.notes.map(noteHTML).join('');
+      else if (L && /^seg:/.test(id) && LESSON_FILE[L.k] && !TB[L.k]) h += '<div class="empty">課文資料載入中…</div>';
+      else if (S.follow && S.pos && lessonOf(S.pos.k)) h += '<div class="empty">這頁沒有特別提醒</div>';
     }
     if (L) {
-      if (L.overview && L.overview.length) h += '<div class="sec-h">本課總提醒</div>' + L.overview.map(noteHTML).join('');
-      h += '<details class="all"' + (A ? '' : ' open') + '><summary>本課所有頁面（' + L.anchors.length + '）</summary><div class="alist">' +
-        L.anchors.map(function (a) { return '<button type="button" data-id="' + esc(a.id) + '" class="' + (A === a ? 'cur' : '') + '">' + esc(a.h) + '<small>' + a.notes.length + ' 則</small></button>'; }).join('') + '</div></details>';
+      if (L.overview && L.overview.length) h += '<details class="blk"' + (A || P ? '' : ' open') + '><summary>本課總提醒（' + L.overview.length + '）</summary>' + L.overview.map(noteHTML).join('') + '</details>';
+      var list = pageList(L);
+      h += '<details class="all"' + (A || P ? '' : ' open') + '><summary>本課所有頁面（' + list.length + '）▸</summary><div class="alist">' +
+        list.map(function (a) { return '<button type="button" data-id="' + esc(a.id) + '" class="' + (a.id === id ? 'cur' : '') + '">' + esc(a.h) + (a.n ? '<small>考點 ' + a.n + '</small>' : '') + '</button>'; }).join('') + '</div></details>';
     }
+    h += '<details class="blk"><summary>怎麼用</summary><div class="howto">' +
+      '① 平板開教學網站並登入登記密碼（成績系統的那組）。<br>② 手機開這頁，保持「跟著平板」。平板翻到哪頁，這裡就跳到哪頁。<br>' +
+      '③ 平板上點某一句（或它的修辭、句意按鈕），這裡會捲到那一句並標黃。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
+      '⑤ 備課時不用開平板，直接選課、選頁就能看。</div></details>';
     $('main').innerHTML = h;
+    S.rendered = (L ? L.k : '') + '|' + id;
+    S.li = -1;
     $('lsel').value = L ? L.k : '';
     $('follow').classList.toggle('on', S.follow);
     $('follow').textContent = S.follow ? '跟著平板' : '自己翻（點我跟回）';
+    markLine(sp.li, false);
+  }
+  function markLine(li, smooth) {
+    if (li === S.li) return;
+    S.li = li;
+    var all = $('main').querySelectorAll('.ln.cur'); for (var i = 0; i < all.length; i++) all[i].classList.remove('cur');
+    if (li < 0) return;
+    var el = $('main').querySelector('.ln[data-li="' + li + '"]'); if (!el) return;
+    el.classList.add('cur');
+    var top = el.getBoundingClientRect().top + scrollY - $('app').querySelector('.top').offsetHeight - 8;
+    scrollTo(0, Math.max(0, top));   /* 不用 smooth：部分瀏覽器在背景輪詢時不會真的捲動 */
   }
 
   function paintLive() {
@@ -262,11 +334,15 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
         .then(function (r) { return r.json(); })
         .then(function (r) {
           if (!r.ok) throw new Error(/不明的動作/.test(r.error || '') ? 'Google 後台還沒更新到 gr-21' : (r.error || '讀不到位置'));
-          S.err = ''; S.lastOk = Date.now();
-          var p = r.pos, old = S.pos;
-          if (p && r.now) p.t = p.t + (Date.now() - r.now);   /* 用伺服器時間差修正手機時鐘 */
+          S.err = '';
+          var p = r.pos;
+          if (p && r.now) p.t = p.t + (Date.now() - r.now);
           S.pos = p || null;
-          if (!old || !p || old.k !== p.k || old.id !== p.id || old.i !== p.i) { if (S.follow) { render(); scrollTo(0, 0); } }
+          if (S.follow && p) {
+            var sp = splitId(p.id);
+            if (S.rendered !== p.k + '|' + sp.id) { render(); if (sp.li < 0) scrollTo(0, 0); }
+            else markLine(sp.li, true);
+          }
         })
         .catch(function (e) { S.err = (e && e.message) || '連不上'; if (/Failed to fetch|NetworkError|Load failed/i.test(S.err)) S.err = '網路連不上，稍後自動重試'; })
         .then(function () { inflight = false; paintLive(); });
@@ -276,19 +352,17 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { poll(); wake(); } });
   setInterval(paintLive, 15000);
 
-  /* 上課時手機不要自己暗掉 */
   var lockW = null;
   function wake() { try { if (navigator.wakeLock && !lockW) navigator.wakeLock.request('screen').then(function (w) { lockW = w; w.addEventListener('release', function () { lockW = null; }); }).catch(function () {}); } catch (e) {} }
 
   /* ── 互動 ── */
-  $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = S.pos.id; } render(); };
+  $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) scrollTo(0, 0); };
   $('main').addEventListener('click', function (e) {
-    var tb = e.target.closest('.seg button'); if (tb) { lset(TAB_K, tb.getAttribute('data-tab')); render(); return; }
     var b = e.target.closest('.alist button'); if (!b) return;
     var cur = S.follow && S.pos ? S.pos.k : S.viewK;
     S.follow = false; S.viewK = lessonOf(cur) ? cur : S.viewK; S.viewId = b.getAttribute('data-id'); render(); scrollTo(0, 0);
   });
-  $('lsel').onchange = function () { S.follow = false; S.viewK = this.value; S.viewId = ''; render(); };
+  $('lsel').onchange = function () { S.follow = false; S.viewK = this.value; S.viewId = ''; render(); scrollTo(0, 0); };
   $('lockb').onclick = function () { if (!confirm('鎖上後要重新輸入講稿密碼，確定？')) return; lrm(PASS_K); location.reload(); };
 
   function start(data) {

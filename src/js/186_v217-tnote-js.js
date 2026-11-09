@@ -30,13 +30,14 @@
     return String(s.head || (s.page && (s.page.title || s.page.seg)) || (s.sec && s.sec.title) || s.label || s.title || TYPE_NAME[s.type] || s.type || '').slice(0, 60);
   }
 
-  var timer = 0, lastSent = '', busy = false, again = false;
+  var timer = 0, lastSent = '', busy = false, again = false, curLi = -1;
   function send() {
     if (jget(OFF_K, 0) == 1 || !pw() || typeof wkKey === 'undefined') return;
     var k = wkKey;
     if (!k || typeof wkSlides === 'undefined' || !wkSlides.length) return;
     var s = wkSlides[wkIdx];
-    var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: sid(s), h: head(s) };
+    var id = sid(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
+    var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: id, h: head(s) };
     var sig = JSON.stringify(pos);
     if (sig === lastSent) return;
     if (busy) { again = true; return; }
@@ -52,12 +53,19 @@
   function hook() {
     if (typeof wkRenderCurrent !== 'function' || wkRenderCurrent._v217) return;
     var r0 = wkRenderCurrent;
-    wkRenderCurrent = function () { var v = r0.apply(this, arguments); try { soon(); } catch (e) {} return v; };
+    wkRenderCurrent = function () { var v = r0.apply(this, arguments); try { curLi = -1; soon(); } catch (e) {} return v; };
     wkRenderCurrent._v217 = true;
   }
   hook();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook);
   window.addEventListener('load', hook);
+  /* V219：課文頁點了某一句（句子本身或它的修辭／句意／翻譯／提問按鈕）→ 送句子序號，手機捲到那一句 */
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var ln = t.closest('.tp-line'); if (!ln || !ln.closest('#wk-slide-area, #wkfs-body')) return;
+    var li = parseInt(ln.getAttribute('data-li'), 10); if (isNaN(li) || li === curLi) return;
+    curLi = li; clearTimeout(timer); timer = setTimeout(send, 300);
+  }, true);
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
   window.V217TN = { sid: sid, send: function () { lastSent = ''; send(); } };
