@@ -78,6 +78,8 @@ details.kd:not([open])>summary:after{content:" ▸"}
 .ln .tx .no{display:inline-block;min-width:1.4em;color:var(--mut);font-size:13px;font-weight:400}
 .it{margin-top:7px;font-size:15.5px}
 .k{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:5px;vertical-align:1px}
+.k.w{color:#fff;background:#8a6d1f}.words{margin-top:2px}.words div{padding:1px 0}.trx{color:var(--mut)}
+.sec-h.kh{color:var(--tc);font-size:16px;border-top:2px solid var(--line);padding-top:12px}
 .k.m{color:#fff;background:#3f7d5c}.k.r{color:#fff;background:#b0563a}.k.t{color:#fff;background:#6d6157}.k.a{color:#fff;background:#3d6aa8}.k.g{color:#fff;background:#b3261e}.k.s{color:#fff;background:#7a5aa6}
 .it .cite{color:var(--mut)}
 .it details>summary{display:inline}
@@ -222,41 +224,51 @@ details.blk[open]>summary:after{content:" ▾"}
     return '<div class="card note"><div class="tags">' + tags + '</div><div class="t">' + fmt(n.t) + '</div>' +
       (n.say ? '<div class="say">' + fmt(n.say) + '</div>' : '') + (n.src ? '<div class="src">' + fmt(n.src) + '</div>' : '') + '</div>';
   }
+  /* V220（老師 11/9）：全部預設展開；短版在前、長版接在下面 */
   function shortLong(kcls, kname, shortHtml, longHtml) {
     if (!longHtml || shortHtml === longHtml) return '<div class="it"><span class="k ' + kcls + '">' + kname + '</span>' + (shortHtml || longHtml) + '</div>';
-    return '<div class="it"><details><summary><span class="k ' + kcls + '">' + kname + '</span>' + shortHtml + '<span class="more">長版▸</span></summary><div class="long">' + longHtml + '</div></details></div>';
+    return '<div class="it"><details open><summary><span class="k ' + kcls + '">' + kname + '</span>' + shortHtml + '<span class="more">長版▸</span></summary><div class="long">' + longHtml + '</div></details></div>';
   }
   function askBlock(asks, askT, label) {
-    var heads = asks.map(function (a) { var dd = new DOMParser().parseFromString(a, 'text/html'), q = dd.querySelector('.gd-q'); return q ? q.textContent.trim() : ''; }).filter(Boolean);
-    var sum = heads.length ? esc(heads.join('｜')) : esc(label || '提問');
-    return '<div class="it"><details class="ask"><summary><span class="k a">' + esc(label || '提問') + '</span>' + sum + '<span class="cnt">（點開看答案）</span></summary>' +
-      '<div class="qbody">' + asks.map(clean).join('') + (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div></details></div>';
+    return '<div class="it"><span class="k a">' + esc(label || '提問') + '</span>' +
+      '<div class="qbody">' + asks.map(clean).join('') + (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div></div>';
+  }
+  /* 這一句的字義：課文裡的 {n:號|字}（對注釋 P.notes）與 {g:字|解釋} */
+  function wordsOf(l, P) {
+    var out = [], st = P.noteStart || 1, t = String(l.text || ''), m, re = /\{([a-z]+):([^{}|]*)\|([^{}]*)\}/g;
+    while ((m = re.exec(t))) {
+      if (/^\d+$/.test(m[2])) { var n = (P.notes || [])[+m[2] - st]; if (n) out.push([n[0], n[1]]); }
+      else if (m[1] === 'g') out.push([m[2], m[3]]);
+    }
+    return out;
   }
 
   /* 逐句講稿（課文頁） */
   function segHTML(L, A, P) {
     var h = '';
+    /* V220 順序（老師 11/9）：每一句 句意→字義→修辭→翻譯→提問（全部展開）；段末統整、問答、析；本段考點放最後 */
     if (P.pian) h += '<div class="pian"><b>段旨</b>　' + clean(P.pian) + '</div>';
-    if (A && A.notes.length) h += '<details class="kd" open><summary>本段考點（' + A.notes.length + '）</summary>' + A.notes.map(noteHTML).join('') + '</details>';
     (P.lines || []).forEach(function (l, i) {
       var b = '<div class="ln" data-li="' + i + '"><div class="tx"><span class="no">' + (i + 1) + '</span>' + esc(plain(l.text)) + '</div>';
       if (l.mean) b += shortLong('m', '句意', (l.cite ? '<span class="cite">' + clean(l.cite) + '──</span>' : '') + clean(l.meanShort || l.mean), l.meanShort ? clean(l.mean) : '');
       if (l.mean2) b += shortLong('m', '句意', (l.cite2 ? '<span class="cite">' + clean(l.cite2) + '──</span>' : '') + clean(l.mean2Short || l.mean2), l.mean2Short ? clean(l.mean2) : '');
+      var ws = wordsOf(l, P);
+      if (ws.length) b += '<div class="it"><span class="k w">字義</span><div class="words">' + ws.map(function (w) { return '<div><b>' + clean(w[0]) + '</b>：' + clean(w[1]) + '</div>'; }).join('') + '</div></div>';
       (l.rhet || []).forEach(function (r, ri) {
         var sh = l.rhetShort && l.rhetShort[ri];
         b += shortLong('r', '修辭', '<b>' + esc(r[0]) + '</b>　' + (sh ? clean(sh) : clean(r[1])), sh ? clean(r[1]) : '');
       });
       (l.style || []).forEach(function (r) { b += '<div class="it"><span class="k s">筆法</span><b>' + clean(r[0]) + '</b>　' + clean(r[1]) + '</div>'; });
-      if (l.tr) b += '<div class="it"><details><summary><span class="k t">翻譯</span><span class="more">點開▸</span></summary><div class="long">' + clean(l.tr) + '</div></details></div>';
+      if (l.tr) b += '<div class="it"><span class="k t">翻譯</span><span class="trx">' + clean(l.tr) + '</span></div>';
       if (l.ask && l.ask.length) b += askBlock(l.ask, l.askT, '提問');
       if (l.tongT) b += '<div class="it"><span class="k g">統測</span>' + clean(l.tongT) + '</div>';
       h += b + '</div>';
     });
     if (P.ask && P.ask.length) h += '<div class="ln">' + askBlock(P.ask, P.askT, P.askLabel || '本段統整') + '</div>';
     (P.boxes || []).forEach(function (bx) { h += '<div class="ln">' + askBlock(bx.ask || [], bx.askT, bx.label || '統整') + '</div>'; });
-    if (P.qa && P.qa.length) h += '<details class="blk"><summary>問答（' + P.qa.length + '）</summary>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</details>';
-    if (P.notes && P.notes.length) h += '<details class="blk"><summary>注釋（' + P.notes.length + '）</summary><div class="notes">' + P.notes.map(function (n) { return '<div><b>' + clean(n[0]) + '</b>：' + clean(n[1]) + '</div>'; }).join('') + '</div></details>';
-    if (P.xi) h += '<details class="blk"><summary>析</summary><div class="it">' + clean(P.xi) + '</div></details>';
+    if (P.qa && P.qa.length) h += '<div class="ln"><span class="k a">問答</span>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</div>';
+    if (P.xi) h += '<div class="ln"><span class="k t">析</span>' + clean(P.xi) + '</div>';
+    if (A && A.notes.length) h += '<div class="sec-h kh">本段考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('');
     return h;
   }
 
