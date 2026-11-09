@@ -60,6 +60,30 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
 .bar select{flex:1;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .hide{display:none!important}
+/* V218 提問預覽（網站課文資料的提問引導，答案全部展開） */
+.seg{display:flex;gap:6px;margin:0 0 12px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 0;font-size:15px;font-weight:700;color:var(--mut)}
+.seg button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.ask-line{font-size:14px;color:var(--mut);border-left:3px solid var(--line);padding:2px 0 2px 8px;margin:4px 0 8px}
+.qcard .gd-q{font-weight:700;margin-bottom:6px}
+.qcard .gd-tag{display:inline-block;min-width:1.5em;color:var(--pri);font-weight:700}
+.qcard .gd-s{padding:5px 0;border-top:1px dashed var(--line)}
+.qcard .gd-sq{display:block}
+.qcard .gd-sq:before{content:"問　";color:var(--mut);font-size:13px}
+.qcard .gd-sa{display:block;color:var(--wb);font-weight:600}
+.qcard .gd-sa:before{content:"答　";color:var(--mut);font-size:13px;font-weight:400}
+.qcard .gd-end{margin-top:6px;background:var(--say);border-left:4px solid var(--saybd);border-radius:6px;padding:6px 10px}
+.qcard .gd-ek{display:block;font-size:12px;color:var(--mut)}
+.qcard table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0;display:block;overflow-x:auto}
+.qcard th,.qcard td{border:1px solid var(--line);padding:4px 6px;vertical-align:top}
+.qcard .jy-blank-ph{display:none}.qcard .jy-blank-ans{color:var(--wb);font-weight:600}
+.qcard .teach{margin-top:8px;border-top:2px solid var(--line);padding-top:6px;font-size:15px}
+.qcard .teach:before{content:"師";display:inline-block;background:var(--pri);color:#fff;border-radius:6px;padding:0 6px;font-size:12px;margin-bottom:4px}
+.qcard .tk-core,.qcard .tk-open{margin:3px 0}
+.qcard .tk-k{font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:4px;color:var(--tc);background:var(--tcbg)}
+.qcard .tk-open .tk-k{color:var(--ex);background:var(--exbg)}
+.qcard .tk-sep{border-top:1px dashed var(--line);margin:6px 0}
+.qa-a{color:var(--wb);font-weight:600;margin-top:4px}
 </style>
 </head>
 <body>
@@ -141,6 +165,51 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
       (n.say ? '<div class="say">' + fmt(n.say) + '</div>' : '') + (n.src ? '<div class="src">' + fmt(n.src) + '</div>' : '') + '</div>';
   }
 
+  /* ── V218 提問預覽：直接讀網站的課文資料（../data/lessons/NN.js），提問改了這裡自動跟著變 ── */
+  var LESSON_FILE = { '論語選—子路曾皙冉有公西華侍坐': '01', '桃花源記': '07', '樂府詩選—長干行': '30', '茫茫人海中的一名女孩': '31', '極短篇小說選': '32' };
+  var TB = {}, tbLoading = {}, idxP = null, TAB_K = 'tn_tab_v1';
+  function idxHtml() { if (!idxP) idxP = fetch('../index.html', { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }); return idxP; }
+  function loadLesson(k) {
+    if (TB[k] || tbLoading[k] || !LESSON_FILE[k]) return;
+    tbLoading[k] = 1; var f = LESSON_FILE[k];
+    idxHtml().then(function (html) {
+      var m = html.match(new RegExp('data/lessons/' + f + '\\.js\\?v=([0-9a-f]+)'));
+      var s = document.createElement('script');
+      s.src = '../data/lessons/' + f + '.js' + (m ? '?v=' + m[1] : '?t=' + Date.now());
+      s.onload = function () { var hit = (window.TB_LESSONS || []).filter(function (x) { return x[0] === k; })[0]; TB[k] = hit ? hit[1] : {}; render(); };
+      s.onerror = function () { TB[k] = {}; };
+      document.head.appendChild(s);
+    });
+  }
+  /* 網站的提問 HTML：拿掉按鈕與 onclick，答案全部顯示 */
+  function clean(html) {
+    var doc = new DOMParser().parseFromString('<div>' + String(html || '') + '</div>', 'text/html'), root = doc.body.firstChild;
+    root.querySelectorAll('script,button,style').forEach(function (e) { e.remove(); });
+    root.querySelectorAll('*').forEach(function (e) { for (var i = e.attributes.length - 1; i >= 0; i--) { var n = e.attributes[i].name; if (/^on/i.test(n)) e.removeAttribute(n); } });
+    return root.innerHTML;
+  }
+  function plainLine(t) {
+    t = String(t || '');
+    for (var i = 0; i < 3; i++) t = t.replace(/\{([a-z]+):([^{}|]*)(?:\|([^{}]*))?\}/g, function (m, ty, a, b) { return /^\d+$/.test(a) ? (b || '') : a; });
+    return t.replace(/<[^>]+>/g, '');
+  }
+  function askOf(k, id) {
+    var R = { n: 0, html: '' }, d = TB[k];
+    if (!d || !d.textPages || !/^seg:/.test(id || '')) return R;
+    var seg = id.slice(4), P = d.textPages.filter(function (p) { return p.seg === seg; })[0];
+    if (!P) return R;
+    function card(head, asks, askT) {
+      R.n += asks.length || 1;
+      return '<div class="card qcard">' + (head ? '<div class="ask-line">' + esc(head) + '</div>' : '') + asks.map(clean).join('') +
+        (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div>';
+    }
+    (P.lines || []).forEach(function (l) { if (l.ask && l.ask.length) { var tx = plainLine(l.text); R.html += card(tx.length > 60 ? tx.slice(0, 60) + '…' : tx, l.ask, l.askT); } });
+    if (P.ask && P.ask.length) R.html += card('本段統整', P.ask, P.askT);
+    (P.qa || []).forEach(function (q, i) { R.n++; R.html += '<div class="card qcard"><div class="ask-line">問答 ' + (i + 1) + '</div><div class="gd-q">' + clean(q[0]) + '</div><div class="qa-a">' + clean(q[1]) + '</div></div>'; });
+    (P.boxes || []).forEach(function (b) { R.html += card(b.label || '統整', b.ask || [], b.askT); });
+    return R;
+  }
+
   function render() {
     var k = S.follow && S.pos ? S.pos.k : S.viewK, id = S.follow && S.pos ? S.pos.id : S.viewId;
     var L = lessonOf(k) || (D && D.lessons[0]);
@@ -149,6 +218,15 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
     $('wls').textContent = L ? L.name : '';
     $('wpg').textContent = A ? A.h : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     var h = '';
+    if (L) loadLesson(L.k);
+    var Q = L ? askOf(L.k, A ? A.id : id) : { n: 0 };
+    if (!Q.n && A && A.ids) for (var qi = 0; qi < A.ids.length && !Q.n; qi++) Q = askOf(L.k, A.ids[qi]);
+    var tab = lget(TAB_K) === 'ask' ? 'ask' : 'note';
+    if (Q.n) {
+      h += '<div class="seg"><button type="button" data-tab="note" class="' + (tab === 'note' ? 'on' : '') + '">提醒</button>' +
+        '<button type="button" data-tab="ask" class="' + (tab === 'ask' ? 'on' : '') + '">提問與答案</button></div>';
+      if (tab === 'ask') { $('main').innerHTML = h + Q.html; $('lsel').value = L.k; $('follow').classList.toggle('on', S.follow); $('follow').textContent = S.follow ? '跟著平板' : '自己翻（點我跟回）'; return; }
+    }
     if (A) {
       h += A.notes.length ? A.notes.map(noteHTML).join('') : '<div class="empty">這頁沒有特別提醒</div>';
     } else if (S.follow && S.pos && lessonOf(S.pos.k)) {
@@ -205,6 +283,7 @@ details.all>summary{cursor:pointer;color:var(--pri);font-weight:700;padding:6px 
   /* ── 互動 ── */
   $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = S.pos.id; } render(); };
   $('main').addEventListener('click', function (e) {
+    var tb = e.target.closest('.seg button'); if (tb) { lset(TAB_K, tb.getAttribute('data-tab')); render(); return; }
     var b = e.target.closest('.alist button'); if (!b) return;
     var cur = S.follow && S.pos ? S.pos.k : S.viewK;
     S.follow = false; S.viewK = lessonOf(cur) ? cur : S.viewK; S.viewId = b.getAttribute('data-id'); render(); scrollTo(0, 0);
