@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2b2420">
-<title>講稿</title>
+<title>無腦上課</title>
 <!-- 手機講稿（V217 起；V219 改成逐句講稿）
      ・平板投影翻頁 → 這頁跟著跳；平板點了某一句 → 這頁捲到那一句並標亮（位置代號 seg:第三段#2，#後面是句子序號）。
      ・課文頁＝逐句講稿：本段考點（加密講稿）＋每一句的 句意／修辭（短版，長版可展開）、翻譯、提問（含答案與「師」）、統測；
@@ -251,7 +251,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     <div class="cv-date" id="cvDate"></div>
     <div class="seal" aria-hidden="true"><span>瑞</span><span>媛</span><span>講</span><span>稿</span></div>
   </div>
-  <div class="cv-title">國文講稿</div>
+  <div class="cv-title">無腦上課</div>
   <div class="cv-sub">逐句　考點　同步平板</div>
   <button class="cv-go" id="cvGo" type="button">開始上課<small>手機跟著平板投影跳頁、捲到那一句</small></button>
   <div class="cv-grid">
@@ -261,7 +261,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     <button class="cv-card" id="cvKey" type="button"><div class="ic">考點</div><div class="nm" id="cvKeyNm">已上鎖</div><div class="ds" id="cvKeyDs">點這裡輸入講稿密碼</div></button>
   </div>
   <div class="cv-today" id="cvToday"><div class="h">今日</div><div class="muted">輸入登記密碼後顯示今天的考試／作業</div></div>
-  <div class="cv-foot"><span>手機講稿 <span class="ver" id="cvVer"></span></span><span><button class="btn" id="cvTheme" type="button">◐</button> <button class="btn" id="cvReload" type="button">↻ 更新</button></span></div>
+  <div class="cv-foot"><span>無腦上課 <span class="ver" id="cvVer"></span></span><span><button class="btn" id="cvTheme" type="button">◐</button> <button class="btn" id="cvReload" type="button">↻ 更新</button></span></div>
 </div>
 
 <div id="panel" class="hide">
@@ -659,7 +659,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V223', TN_DATE = '2026-11-10';
+  var TN_VER = 'V224', TN_DATE = '2026-11-10';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
