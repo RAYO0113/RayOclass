@@ -7848,3 +7848,6 @@ body.dark-mode #qp-pad .qp-mode .p:not(.on) { color:#6fc184; } body.dark-mode #q
 .tn-dot.ok::before { background:#2e9d5b; opacity:.85; transform:scale(1.5); }
 .tn-dot.bad::before { background:#c0392b; opacity:.85; transform:scale(1.5); }
 @media print { .tn-dot { display:none !important; } }
+/* ════ src/css/180_v227-cbloc-css.css ════ */
+/* V227 字詞辨析例句後的（第幾段，P.頁）：小字、淡色 */
+.jy-table .cb-loc { font-size: .72em; color: #8a7f72; margin-left: .35em; white-space: nowrap; font-weight: normal; }
