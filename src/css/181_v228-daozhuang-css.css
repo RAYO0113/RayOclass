@@ -37,3 +37,10 @@ body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-keyrhet .dz-ex .dz-tr { font-
 body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-keyrhet .dz-leg,
 body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-keyrhet .dz-leg span { font-size: .85em !important; }
 body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-keyrhet .dz-leg span { font-size: 1em !important; }
+/* V229 主語／述語／賓語 ↔ 英文 S／V／O 對照表與英文類比句 */
+.dz-svo { border-collapse: collapse; margin: .2em 0 .8em; }
+.dz-svo th, .dz-svo td { border: 1px solid #e3d7c5; padding: .25em .7em; text-align: center; }
+.dz-svo th { background: #f6efe3; color: #5a4a3a; font-weight: 700; }
+.dz-s { color: #2e7d4f; font-weight: 700; }
+.dz-en { display: inline-block; margin-top: .25em; font-weight: 400; color: #4a4038; font-size: .92em; }
+.dz-en b { color: #c0392b; }
