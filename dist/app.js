@@ -6397,13 +6397,62 @@ try {
   setTimeout(autoCal, 4000); setInterval(autoCal, 60000);
 
   /* ── 投影（v110：只顯示座號、已交／未交逾期扣分／請假、訂正加分；不顯示分數） ── */
+  /* ── V230（11/10 老師）：投影「刷題排行」——各班每位學生總共刷了幾題（學生網頁練習區，做完一輪才算）
+     由高排到低，下面只標座號、座號預設遮住（點一下看單一個，或「顯示座號」全開）；不顯示姓名。
+     後台 gr-22 drillStat：快照每 7 天自動重算，「立即更新」＝force。本機也存一份（gr_drill_v1），沒登入時照樣顯示上次的數據。 */
+  var DRILL_K = 'gr_drill_v1';
+  if (!S.drill) S.drill = get(DRILL_K, null);
+  function demoDrill() {
+    var rows = [];
+    classes().forEach(function (c, ci) { for (var i = 1; i <= 35; i++) { var q = (i * 37 + ci * 11) % 9 ? ((i * 53 + ci * 29) % 97) * 3 : 0; rows.push([c, i, q, Math.ceil(q / 12)]); } });
+    return { ok: true, api: 'demo', t: Date.now(), days: 7, rows: rows };
+  }
+  function loadDrill(force) {
+    if (S.drillBusy) return;
+    S.drillBusy = true; S.drillErr = ''; S.drillAsked = true; render();
+    (isDemo() ? Promise.resolve(demoDrill()) : call({ action: 'drillStat', force: !!force })).then(function (r) {
+      S.drillBusy = false;
+      if (!r.ok) { S.drillErr = r.auth === false ? '要先登入才能' + (force ? '更新' : '讀取最新數據') : (/不明的動作/.test(r.error || '') ? '後台還沒更新到 gr-22' : (r.error || '讀取失敗')); render(); return; }
+      S.drill = { t: r.t, days: r.days || 7, rows: r.rows || [] }; put(DRILL_K, S.drill);
+      if (force) setSt('✓ 刷題數據已更新'); render();
+    }).catch(function (e) { S.drillBusy = false; S.drillErr = '讀取失敗：' + e.message; render(); });
+  }
+  function drillHTML() {
+    if (!S.drillAsked && !S.drillBusy) setTimeout(function () { loadDrill(false); }, 0);   /* 每次打開成績系統問一次後台（後台 7 天內直接回快照） */
+    var D = S.drill, cls = S.cls, h = '<div class="gr-dr">';
+    var rows = D ? D.rows.filter(function (x) { return x[0] === cls; }).sort(function (a, b) { return b[2] - a[2] || a[1] - b[1]; }) : [];
+    var tot = rows.reduce(function (s, x) { return s + x[2]; }, 0), done = rows.filter(function (x) { return x[2] > 0; }).length;
+    h += '<div class="gr-dr-top"><span class="gr-dr-sum">' + esc(cls) + '　總共刷了 <b>' + tot + '</b> 題　·　有刷題 <b>' + done + '</b>／' + rows.length + ' 人</span>' +
+      '<button class="gr-btn" data-g="dseatall">' + (S.dSeatAll ? '🙈 遮住座號' : '👁 顯示座號') + '</button>' +
+      '<button class="gr-btn" data-g="drup"' + (S.drillBusy ? ' disabled' : '') + '>' + (S.drillBusy ? '更新中…' : '🔄 立即更新') + '</button></div>';
+    var t = D && D.t ? new Date(D.t) : null, nx = t ? new Date(D.t + (D.days || 7) * 864e5) : null;
+    h += '<p class="gr-muted gr-dr-when">' + (t ? '數據時間 ' + (t.getMonth() + 1) + '/' + t.getDate() + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) +
+      '　·　每 ' + (D.days || 7) + ' 天自動更新（下次約 ' + (nx.getMonth() + 1) + '/' + nx.getDate() + '）' : (S.drillBusy ? '讀取中…' : '還沒有數據')) +
+      (S.drillErr ? '　<span class="late">' + esc(S.drillErr) + '</span>' : '') + '</p>';
+    if (D && D.rows.length) {   /* 四班互比：總題數 */
+      var by = {}; D.rows.forEach(function (x) { by[x[0]] = (by[x[0]] || 0) + x[2]; });
+      h += '<p class="gr-dr-cmp">' + classes().filter(function (c) { return c in by; }).sort(function (a, b) { return by[b] - by[a]; })
+        .map(function (c) { return '<span' + (c === cls ? ' class="on"' : '') + '>' + esc(c) + ' ' + by[c] + '</span>'; }).join('') + '</p>';
+    }
+    if (!rows.length) return h + (D ? '<p class="gr-muted">這班沒有數據。</p>' : '') + '</div>';
+    var max = Math.max(1, rows[0][2]);
+    h += '<div class="gr-dr-chart" style="--n:' + rows.length + '">' + rows.map(function (x) {
+      var key = cls + '|' + x[1], shown = S.dSeatAll || (S.dSeat && S.dSeat[key]);
+      return '<div class="gr-dr-col"><div class="gr-dr-bar-w"><span class="gr-dr-v">' + x[2] + '</span><div class="gr-dr-bar' + (x[2] ? '' : ' z') + '" style="height:' + (x[2] ? Math.max(2, x[2] / max * 100) : 0) + '%"></div></div>' +
+        '<div class="gr-dr-seat gr-mask' + (shown ? '' : ' m') + '" data-g="dseat|' + esc(key) + '"><span>' + x[1] + '</span></div></div>';
+    }).join('') + '</div>';
+    return h + '<p class="gr-muted">題數＝學生網頁練習區（快速刷題、練點速度、修復舊傷、注釋刷題、注釋訂正）每做完一輪的題數加總；中途離開的不算。點座號格可單獨顯示。</p></div>';
+  }
+
   function projHTML() {
     var its = itemsOf(S.cls), st = roster(S.cls), td = today();
     if (!st.length) return '<div class="gr-main"><div class="gr-pane"><p class="gr-muted">這班還沒有學生名單。</p></div></div>';
     if (!S.projItem || !itemById(S.projItem) || itemById(S.projItem).cls !== S.cls) S.projItem = its[0] ? its[0].id : '';
     var h = '<div class="gr-main"><div class="gr-pane"><div class="gr-h">' +
       '<button class="gr-chip' + (S.projView === 'item' ? ' on' : '') + '" data-g="pv|item">單份考卷</button>' +
+      '<button class="gr-chip' + (S.projView === 'drill' ? ' on' : '') + '" data-g="pv|drill">📈 刷題排行</button>' +   /* V230 */
       '';   /* v110：投影不顯示成績，拿掉「各項平均」 */
+    if (S.projView === 'drill') return h + '</div>' + drillHTML() + '</div></div>';
     S.projView = 'item';
     if (S.projView === 'item') {
       h += '<select id="gr-pitem" style="font-size:16px;max-width:420px">' + its.map(function (it) { return '<option value="' + it.id + '"' + (it.id === S.projItem ? ' selected' : '') + '>' +
@@ -7124,6 +7173,9 @@ try {
     else if (t === 'pv') { S.projView = v; render(); }
     else if (t === 'rev') { S.reveal[v] = !S.reveal[v]; b.classList.toggle('m', !(S.revealAll || S.reveal[v])); }
     else if (t === 'revall') { S.revealAll = !S.revealAll; S.reveal = {}; render(); }
+    else if (t === 'drup') loadDrill(true);   /* V230 刷題排行 */
+    else if (t === 'dseat') { S.dSeat = S.dSeat || {}; S.dSeat[v] = !S.dSeat[v]; b.classList.toggle('m', !(S.dSeatAll || S.dSeat[v])); }
+    else if (t === 'dseatall') { S.dSeatAll = !S.dSeatAll; S.dSeat = {}; render(); }
     else if (t === 'ptv') { S.ptView = v; put('gr_ptview_v1', v); S.seatEdit = false; render(); }
     else if (t === 'seatedit') { S.seatEdit = v === '1'; render(); }
     else if (t === 'seatdim') seatDim(v);
@@ -12954,7 +13006,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V229';
+  window.APP_VERSION = 'V230';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
