@@ -116,6 +116,46 @@ details.blk>summary{font-weight:700;color:var(--pri)}
 details.blk>summary:after{content:" ▸";color:var(--mut);font-weight:400}
 details.blk[open]>summary:after{content:" ▾"}
 .howto{font-size:14px;color:var(--mut);line-height:1.7}
+/* ── V222（老師 11/10「分類不夠明顯，很難快速抓到重點」）：每一類一個顏色，整塊上色（左色條＋淡底＋實心標籤）── */
+:root{--cm:#23744a;--cmb:#e7f5ed;--cw:#9a6200;--cwb:#fdf2da;--cr:#8e3fb0;--crb:#f4e9fa;--cs:#0e7c86;--csb:#e0f3f4;
+  --ct:#6d6157;--ctb:#f2ede7;--ca:#1f5fbf;--cab:#e6effc;--cg:#c62828;--cgb:#fde8e6}
+:root[data-theme="dark"]{--cm:#6fd39f;--cmb:#17332a;--cw:#f2c06b;--cwb:#3a2e14;--cr:#d7a3f0;--crb:#33223d;--cs:#7fd6dd;--csb:#173539;
+  --ct:#c9bcb0;--ctb:#302925;--ca:#8cb8f5;--cab:#1a2b45;--cg:#ff8f86;--cgb:#47231f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--cm:#6fd39f;--cmb:#17332a;--cw:#f2c06b;--cwb:#3a2e14;--cr:#d7a3f0;--crb:#33223d;--cs:#7fd6dd;--csb:#173539;
+  --ct:#c9bcb0;--ctb:#302925;--ca:#8cb8f5;--cab:#1a2b45;--cg:#ff8f86;--cgb:#47231f}}
+.c-m{--c:var(--cm);--cb:var(--cmb)}.c-w{--c:var(--cw);--cb:var(--cwb)}.c-r{--c:var(--cr);--cb:var(--crb)}.c-s{--c:var(--cs);--cb:var(--csb)}
+.c-t{--c:var(--ct);--cb:var(--ctb)}.c-a{--c:var(--ca);--cb:var(--cab)}.c-g{--c:var(--cg);--cb:var(--cgb)}
+.ln .tx{font-family:"Noto Serif TC","Songti TC",serif;font-size:19px;padding-bottom:4px;border-bottom:1px dashed var(--line)}
+.it[class*="c-"]{border-left:5px solid var(--c);background:var(--cb);border-radius:4px 10px 10px 4px;padding:6px 10px 7px;margin-top:6px}
+.it[class*="c-"]>.k,.it[class*="c-"]>details>summary>.k{background:var(--c);color:#fff;font-size:13px;padding:1px 7px}
+:root[data-theme="dark"] .it[class*="c-"]>.k,:root[data-theme="dark"] .it[class*="c-"]>details>summary>.k{color:#1d1916}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .it[class*="c-"]>.k,:root:not([data-theme="light"]) .it[class*="c-"]>details>summary>.k{color:#1d1916}}
+.it.c-m{font-weight:500}
+.it.c-r b,.it.c-s b{color:var(--c)}
+.it.c-w .words b{color:var(--c)}
+.it.c-t .trx{color:var(--ink);opacity:.85}
+.it.c-a .qbody{border-left-color:var(--c)}
+.it.c-a>.k{margin-bottom:2px}
+.it .long{border-left-color:var(--c)}
+.ln.cur{box-shadow:0 0 0 3px var(--pri)}
+/* 整段的區塊（統整、問答、析）也標顏色 */
+.ln.blkln{border-left:5px solid var(--c);background:var(--card)}
+.ln.blkln>.k{background:var(--c);color:#fff}
+/* 本段考點：紅色區塊 */
+.kdz{border:2px solid var(--cg);border-radius:14px;padding:4px 10px 2px;margin:16px 0 12px;background:var(--cgb)}
+.kdz .sec-h.kh{border-top:0;margin:6px 0 8px;color:var(--cg)}
+.kdz .card.note{border-color:transparent}
+/* ── 只看某幾類（上方色塊開關；記在這支手機）── */
+.flt{display:flex;gap:6px;overflow-x:auto;margin-top:7px;padding-bottom:2px;scrollbar-width:none}
+.flt::-webkit-scrollbar{display:none}
+.flt button{flex:none;border:2px solid var(--c);background:var(--c);color:#fff;border-radius:999px;padding:1px 9px;font-size:13.5px;font-weight:700}
+:root[data-theme="dark"] .flt button{color:#1d1916}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .flt button{color:#1d1916}}
+.flt button.off{background:transparent;color:var(--c)!important;opacity:.55;text-decoration:line-through}
+main.no-m .c-m,main.no-w .c-w,main.no-r .c-r,main.no-r .c-s,main.no-t .c-t,main.no-a .c-a,main.no-g .c-g,main.no-g .kdz{display:none!important}
+main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){display:none!important}
+/* 字級 */
+.bar .fs{padding:5px 10px}
 </style>
 </head>
 <body>
@@ -135,10 +175,12 @@ details.blk[open]>summary:after{content:" ▾"}
       <button class="btn on" id="follow" type="button">跟著平板</button>
     </div>
     <div class="where"><div class="ls" id="wls"></div><div class="pg" id="wpg"></div></div>
+    <div class="flt" id="flt"><button type="button" class="c-m" data-c="m">句意</button><button type="button" class="c-w" data-c="w">字義</button><button type="button" class="c-r" data-c="r">修辭</button><button type="button" class="c-t" data-c="t">翻譯</button><button type="button" class="c-a" data-c="a">提問</button><button type="button" class="c-g" data-c="g">考點</button></div>
   </div>
   <main id="main"></main>
   <div class="bar">
     <select id="lsel" aria-label="選課"></select>
+    <button class="btn fs" id="fsm" type="button" title="字小一點">A−</button><button class="btn fs" id="fsp" type="button" title="字大一點">A+</button>
     <button class="btn" id="theme" type="button" title="深淺色">◐</button>
     <button class="btn" id="lockb" type="button">鎖上</button>
   </div>
@@ -164,6 +206,27 @@ details.blk[open]>summary:after{content:" ▾"}
     var dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!lget(THEME_K) && matchMedia('(prefers-color-scheme: dark)').matches);
     lset(THEME_K, dark ? 'light' : 'dark'); applyTheme();
   };
+
+  /* ── V222 分類開關（只看某幾類）與字級；都記在這支手機 ── */
+  var SHOW_K = 'tn_hide_v1', FS_K = 'tn_fs_v1';
+  function hidden() { try { return JSON.parse(lget(SHOW_K) || '[]'); } catch (e) { return []; } }
+  function applyShow() {
+    var hs = hidden(), m = $('main');
+    ['m', 'w', 'r', 't', 'a', 'g'].forEach(function (c) { m.classList.toggle('no-' + c, hs.indexOf(c) >= 0); });
+    var bs = $('flt').querySelectorAll('button'); for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('off', hs.indexOf(bs[i].getAttribute('data-c')) >= 0);
+  }
+  $('flt').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var c = b.getAttribute('data-c'), hs = hidden(), i = hs.indexOf(c);
+    if (i >= 0) hs.splice(i, 1); else hs.push(c);
+    lset(SHOW_K, JSON.stringify(hs)); applyShow();
+    if (S.li >= 0) { var li = S.li; S.li = -2; markLine(li); }   /* 收起某類後，目前那句仍留在畫面上 */
+  });
+  function applyFs() { var z = parseFloat(lget(FS_K)) || 1; $('main').style.zoom = z; }
+  function bumpFs(d) { var z = Math.round(((parseFloat(lget(FS_K)) || 1) + d) * 10) / 10; z = Math.max(0.8, Math.min(1.6, z)); lset(FS_K, String(z)); applyFs(); }
+  $('fsm').onclick = function () { bumpFs(-0.1); };
+  $('fsp').onclick = function () { bumpFs(0.1); };
+  applyShow(); applyFs();
 
   /* ── 解密 ── */
   function b64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
@@ -226,11 +289,11 @@ details.blk[open]>summary:after{content:" ▾"}
   }
   /* V220（老師 11/9）：全部預設展開；短版在前、長版接在下面 */
   function shortLong(kcls, kname, shortHtml, longHtml) {
-    if (!longHtml || shortHtml === longHtml) return '<div class="it"><span class="k ' + kcls + '">' + kname + '</span>' + (shortHtml || longHtml) + '</div>';
-    return '<div class="it"><details open><summary><span class="k ' + kcls + '">' + kname + '</span>' + shortHtml + '<span class="more">長版▸</span></summary><div class="long">' + longHtml + '</div></details></div>';
+    if (!longHtml || shortHtml === longHtml) return '<div class="it c-' + kcls + '"><span class="k ' + kcls + '">' + kname + '</span>' + (shortHtml || longHtml) + '</div>';
+    return '<div class="it c-' + kcls + '"><details open><summary><span class="k ' + kcls + '">' + kname + '</span>' + shortHtml + '<span class="more">長版▸</span></summary><div class="long">' + longHtml + '</div></details></div>';
   }
   function askBlock(asks, askT, label) {
-    return '<div class="it"><span class="k a">' + esc(label || '提問') + '</span>' +
+    return '<div class="it c-a"><span class="k a">' + esc(label || '提問') + '</span>' +
       '<div class="qbody">' + asks.map(clean).join('') + (askT ? '<div class="teach">' + clean(askT) + '</div>' : '') + '</div></div>';
   }
   /* 這一句的字義：課文裡的 {n:號|字}（對注釋 P.notes）與 {g:字|解釋} */
@@ -253,22 +316,22 @@ details.blk[open]>summary:after{content:" ▾"}
       if (l.mean) b += shortLong('m', '句意', (l.cite ? '<span class="cite">' + clean(l.cite) + '──</span>' : '') + clean(l.meanShort || l.mean), l.meanShort ? clean(l.mean) : '');
       if (l.mean2) b += shortLong('m', '句意', (l.cite2 ? '<span class="cite">' + clean(l.cite2) + '──</span>' : '') + clean(l.mean2Short || l.mean2), l.mean2Short ? clean(l.mean2) : '');
       var ws = wordsOf(l, P);
-      if (ws.length) b += '<div class="it"><span class="k w">字義</span><div class="words">' + ws.map(function (w) { return '<div><b>' + clean(w[0]) + '</b>：' + clean(w[1]) + '</div>'; }).join('') + '</div></div>';
+      if (ws.length) b += '<div class="it c-w"><span class="k w">字義</span><div class="words">' + ws.map(function (w) { return '<div><b>' + clean(w[0]) + '</b>：' + clean(w[1]) + '</div>'; }).join('') + '</div></div>';
       (l.rhet || []).forEach(function (r, ri) {
         var sh = l.rhetShort && l.rhetShort[ri];
         b += shortLong('r', '修辭', '<b>' + esc(r[0]) + '</b>　' + (sh ? clean(sh) : clean(r[1])), sh ? clean(r[1]) : '');
       });
-      (l.style || []).forEach(function (r) { b += '<div class="it"><span class="k s">筆法</span><b>' + clean(r[0]) + '</b>　' + clean(r[1]) + '</div>'; });
-      if (l.tr) b += '<div class="it"><span class="k t">翻譯</span><span class="trx">' + clean(l.tr) + '</span></div>';
+      (l.style || []).forEach(function (r) { b += '<div class="it c-s"><span class="k s">筆法</span><b>' + clean(r[0]) + '</b>　' + clean(r[1]) + '</div>'; });
+      if (l.tr) b += '<div class="it c-t"><span class="k t">翻譯</span><span class="trx">' + clean(l.tr) + '</span></div>';
       if (l.ask && l.ask.length) b += askBlock(l.ask, l.askT, '提問');
-      if (l.tongT) b += '<div class="it"><span class="k g">統測</span>' + clean(l.tongT) + '</div>';
+      if (l.tongT) b += '<div class="it c-g"><span class="k g">統測</span>' + clean(l.tongT) + '</div>';
       h += b + '</div>';
     });
     if (P.ask && P.ask.length) h += '<div class="ln">' + askBlock(P.ask, P.askT, P.askLabel || '本段統整') + '</div>';
     (P.boxes || []).forEach(function (bx) { h += '<div class="ln">' + askBlock(bx.ask || [], bx.askT, bx.label || '統整') + '</div>'; });
-    if (P.qa && P.qa.length) h += '<div class="ln"><span class="k a">問答</span>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</div>';
-    if (P.xi) h += '<div class="ln"><span class="k t">析</span>' + clean(P.xi) + '</div>';
-    if (A && A.notes.length) h += '<div class="sec-h kh">本段考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('');
+    if (P.qa && P.qa.length) h += '<div class="ln blkln c-a"><span class="k a">問答</span>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</div>';
+    if (P.xi) h += '<div class="ln blkln c-t"><span class="k t">析</span>' + clean(P.xi) + '</div>';
+    if (A && A.notes.length) h += '<div class="kdz"><div class="sec-h kh">★ 本段考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('') + '</div>';
     if (!unlocked) h += lockedHTML();
     return h;
   }
@@ -313,7 +376,8 @@ details.blk[open]>summary:after{content:" ▾"}
     }
     h += '<details class="blk"><summary>怎麼用</summary><div class="howto">' +
       '① 平板開教學網站並登入登記密碼（成績系統的那組）。<br>② 手機開這頁，保持「跟著平板」。平板翻到哪頁，這裡就跳到哪頁。<br>' +
-      '③ 平板上點某一句（或它的修辭、句意按鈕），這裡會捲到那一句並標黃。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
+      '③ 平板上點句子開頭那顆淡淡的小點（或句子本身），這裡會捲到那一句並框起來；小點閃綠＝手機收到了。<br>' +
+      '　上方色塊＝分類開關：句意綠、字義黃、修辭紫、翻譯灰、提問藍、考點紅框；點一下收起那一類，再點打開。下面 A−／A+ 調字級。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
       '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
     S.rendered = (L ? L.k : '') + '|' + id;

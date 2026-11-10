@@ -30,7 +30,7 @@
     return String(s.head || (s.page && (s.page.title || s.page.seg)) || (s.sec && s.sec.title) || s.label || s.title || TYPE_NAME[s.type] || s.type || '').slice(0, 60);
   }
 
-  var timer = 0, lastSent = '', busy = false, again = false, curLi = -1;
+  var timer = 0, lastSent = '', busy = false, again = false, curLi = -1, doneCb = null;
   function send() {
     if (jget(OFF_K, 0) == 1 || !pw() || typeof wkKey === 'undefined') return;
     var k = wkKey;
@@ -44,8 +44,8 @@
     busy = true;
     fetch(url(), { method: 'POST', body: JSON.stringify({ action: 'liveSet', pw: pw(), pos: pos }), redirect: 'follow' })
       .then(function (r) { return r.json(); })
-      .then(function (r) { if (r && r.ok) lastSent = sig; })
-      .catch(function () {})
+      .then(function (r) { if (r && r.ok) lastSent = sig; if (doneCb) { doneCb(!!(r && r.ok)); doneCb = null; } })
+      .catch(function () { if (doneCb) { doneCb(false); doneCb = null; } })
       .then(function () { busy = false; if (again) { again = false; send(); } });
   }
   function soon() { clearTimeout(timer); timer = setTimeout(send, 600); }
@@ -68,5 +68,8 @@
   }, true);
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
-  window.V217TN = { sid: sid, send: function () { lastSent = ''; send(); } };
+  window.V217TN = { sid: sid, send: function () { lastSent = ''; send(); },
+    /* V222：句首小點強制送這一句（就算剛剛點過，手機可能已被滑走）；cb(ok) 給小點閃綠／紅 */
+    sendLine: function (li, cb) { curLi = li; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
+    on: function () { return jget(OFF_K, 0) != 1 && !!pw(); } };
 })();

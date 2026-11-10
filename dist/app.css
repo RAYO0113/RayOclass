@@ -7836,3 +7836,15 @@ body.dark-mode #qp-pad .qp-c, body.dark-mode #qp-pad .qp-top button, body.dark-m
 body.dark-mode #qp-pad .qp-rs button:not(.on), body.dark-mode #qp-pad .qp-top select { background:#2a2118; color:#efe6d4; border-color:#5a4a35; }
 body.dark-mode #qp-pad .qp-c i.p { color:#6fc184; } body.dark-mode #qp-pad .qp-c i.m { color:#e0796d; }
 body.dark-mode #qp-pad .qp-mode .p:not(.on) { color:#6fc184; } body.dark-mode #qp-pad .qp-mode .m:not(.on), body.dark-mode #qp-pad .qp-rs button:not(.on) { color:#e0796d; }
+/* ════ src/css/179_v222-tnote-dot-css.css ════ */
+/* V222（老師 11/10）平板課文每句開頭的同步小點：點了手機講稿捲到這一句。
+   要不突兀、學生在投影上看不清楚 → 很淡的小圓點，放在句子左邊的留白；只有登入登記密碼（講稿同步開著）才出現。 */
+.tn-dot { position:absolute; left:-27px; top:0; width:26px; height:var(--tn-lh, 2.15em); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; z-index:1; font-size:16px; line-height:1; }
+.tn-dot::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; color:var(--mk-ink-soft,#6b5a42); opacity:.16; transition:opacity .25s, transform .25s, background .25s; }
+.tn-dot:hover::before { opacity:.35; }
+/* 手機目前停在這句：稍微深一點點（老師自己看得出來，學生看起來只是個點） */
+.tn-dot.cur::before { opacity:.32; }
+.tn-dot.ok::before { background:#2e9d5b; opacity:.85; transform:scale(1.5); }
+.tn-dot.bad::before { background:#c0392b; opacity:.85; transform:scale(1.5); }
+@media print { .tn-dot { display:none !important; } }
