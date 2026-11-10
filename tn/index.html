@@ -233,6 +233,26 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 .sech{font-weight:800;color:var(--pri);margin:4px 0 6px}
 .snote{font-size:14px;color:var(--mut);margin-bottom:4px}
 .home{font-size:17px;padding:4px 11px}
+/* V231 教師講稿（〈侍坐〉Excel）：學生題 → 講稿（大字）→ 追問 → 重點 → 補充 → 避免；平板點題 → 最上方「平板正在這題」 */
+.tg{margin-top:8px;border:2px solid #3d6aa8;border-radius:12px;padding:8px 10px;background:var(--card)}
+.tg.cur{border-color:var(--pri);box-shadow:0 0 0 3px var(--hl)}
+.tg+.tg{margin-top:12px}
+.tg-h{font-weight:800;color:#3d6aa8;font-size:15px;margin-bottom:4px}
+.tgl{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:6px;color:#fff;background:#6d6157;vertical-align:2px}
+.tg-q{font-size:15px;color:var(--mut)}
+.tg-a{color:var(--wb);font-weight:600;margin-top:2px}
+.tg-say{margin-top:7px;font-size:18.5px;line-height:1.7;font-weight:600;background:var(--say);border-left:4px solid var(--saybd);border-radius:6px;padding:6px 10px}
+.tg-say .tgl{background:#9a4a26}
+.tg-r{margin-top:7px;font-size:16px;line-height:1.65}
+.tg-r.ask .tgl{background:#3d6aa8}.tg-r.pts .tgl{background:#3f7d5c}.tg-r.ref .tgl{background:#7a5aa6}.tg-r.avoid .tgl{background:#b3261e}
+.tg-r.ref,.tg-r.avoid{font-size:14.5px;color:var(--mut)}
+.tgt{margin-top:8px;font-size:14px;color:var(--mut)}
+.tgt>summary{color:var(--pri);font-weight:700}
+.nowc{border:3px solid var(--pri);border-radius:14px;padding:8px 10px 10px;margin:0 0 14px;background:var(--hl)}
+.nowh{font-size:14px;color:var(--pri);font-weight:800}
+.nowc .tg{margin-top:6px}
+:root[data-theme="dark"] .tg-h{color:#8cb4ea}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tg-h{color:#8cb4ea}}
 </style>
 </head>
 <body>
@@ -294,7 +314,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 (function () {
   'use strict';
   var GS_URL = 'https://script.google.com/macros/s/AKfycbxfJoT1iS5tIzXtShetthjspMQ-yUwgUkiPfWc2nBEDNwYgs49u87eKvAJo5x73k7K1/exec';
-  var PASS_K = 'tn_pass_v1', THEME_K = 'tn_theme_v1', POLL = 2500;
+  var PASS_K = 'tn_pass_v1', THEME_K = 'tn_theme_v1', POLL = 1000;   /* V231：2.5 秒 → 1 秒 */
   var LESSON_FILE = { '論語選—子路曾皙冉有公西華侍坐': '01', '桃花源記': '07', '樂府詩選—長干行': '30', '茫茫人海中的一名女孩': '31', '極短篇小說選': '32' };
   var $ = function (id) { return document.getElementById(id); };
   function lget(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -324,7 +344,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     var c = b.getAttribute('data-c'), hs = hidden(), i = hs.indexOf(c);
     if (i >= 0) hs.splice(i, 1); else hs.push(c);
     lset(SHOW_K, JSON.stringify(hs)); applyShow();
-    if (S.li >= 0) { var li = S.li; S.li = -2; markLine(li); }   /* 收起某類後，目前那句仍留在畫面上 */
+    if (S.sp) { S.li = null; markLine(S.sp); }   /* 收起某類後，目前那句仍留在畫面上 */
   });
   function applyFs() { var z = parseFloat(lget(FS_K)) || 1; $('main').style.zoom = z; }
   function bumpFs(d) { var z = Math.round(((parseFloat(lget(FS_K)) || 1) + d) * 10) / 10; z = Math.max(0.8, Math.min(1.6, z)); lset(FS_K, String(z)); applyFs(); }
@@ -383,7 +403,24 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   var D = null, S = { follow: true, pos: null, viewK: '', viewId: '', err: '', li: -1, rendered: '' };
   function lessonOf(k) { if (!D) return null; for (var i = 0; i < D.lessons.length; i++) if (D.lessons[i].k === k) return D.lessons[i]; return null; }
   function anchorOf(L, id) { if (!L || !id) return null; for (var i = 0; i < L.anchors.length; i++) { var a = L.anchors[i]; if (a.id === id || (a.ids && a.ids.indexOf(id) >= 0)) return a; } return null; }
-  function splitId(id) { var m = String(id || '').match(/^(.*?)(?:#(\d+))?$/); return { id: m[1], li: m[2] == null ? -1 : +m[2] }; }
+  /* V231：代號尾巴 @題號（點了提問／統整框 @end）、~m~r~t~a~s（點了句意／修辭／翻譯／提問／筆法按鈕） */
+  function splitId(id) { var m = String(id || '').match(/^(.*?)(?:#(\d+))?([@~][\w]+)?$/); return { id: m[1], li: m[2] == null ? -1 : +m[2], tag: m[3] || '' }; }
+
+  /* ── V231 教師講稿（網站課文資料 tGuide：老師 Excel〈侍坐〉講稿＋課後引導） ── */
+  function guideOf(k) { var d = TB[k]; return d && d.tGuide ? d.tGuide : null; }
+  function nodeOf(G, id) { if (!G) return null; var all = G.nodes.concat(G.after || []); for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }
+  function nodeHTML(n, after) {
+    function row(c, k, v) { return v ? '<div class="tg-r ' + c + '"><span class="tgl">' + k + '</span>' + clean(v) + '</div>' : ''; }
+    return '<div class="tg" data-gq="' + esc(n.id) + '"><div class="tg-h">' + esc(n.title) + '</div>' +
+      '<div class="tg-q"><span class="tgl">學生題</span>' + clean(n.q) + '<div class="tg-a">' + clean(n.a) + '</div></div>' +
+      '<div class="tg-say"><span class="tgl">' + (after ? '話術' : '講稿') + '</span>' + clean(n.say) + '</div>' +
+      row('ask', '追問', n.ask) + row('pts', after ? '收束' : '重點', n.pts) + row('ref', '補充', n.ref) + row('avoid', after ? '提醒' : '避免', n.avoid) + '</div>';
+  }
+  function guideBlock(ns, askT, after) {
+    return '<div class="it c-a">' + ns.map(function (n) { return nodeHTML(n, after); }).join('') +
+      (askT ? '<details class="tgt"><summary>師（原有補充）</summary>' + clean(askT) + '</details>' : '') + '</div>';
+  }
+  function nodesAt(G, seg, at) { return G ? G.nodes.filter(function (n) { return n.seg === seg && n.at === at; }) : []; }
 
   var TAG = { tc: '統測', aq: 'A卷有考', jia: '甲卷', wb: '習作', basic: '課本練習', ex: '延伸', tip: '提醒' };
   function noteHTML(n) {
@@ -412,7 +449,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 
   /* 逐句講稿（課文頁） */
   function segHTML(L, A, P) {
-    var h = '';
+    var h = '', G = guideOf(L.k);
     /* V220 順序（老師 11/9）：每一句 句意→字義→修辭→翻譯→提問（全部展開）；段末統整、問答、析；本段考點放最後 */
     if (P.pian) h += '<div class="pian"><b>段旨</b>　' + clean(P.pian) + '</div>';
     (P.lines || []).forEach(function (l, i) {
@@ -427,12 +464,15 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       });
       (l.style || []).forEach(function (r) { b += '<div class="it c-s"><span class="k s">筆法</span><b>' + clean(r[0]) + '</b>　' + clean(r[1]) + '</div>'; });
       if (l.tr) b += '<div class="it c-t"><span class="k t">翻譯</span><span class="trx">' + clean(l.tr) + '</span></div>';
-      if (l.ask && l.ask.length) b += askBlock(l.ask, l.askT, '提問');
+      var gn = nodesAt(G, P.seg, i);   /* V231：有教師講稿就顯示講稿（取代網站提問） */
+      if (gn.length) b += guideBlock(gn, l.askT);
+      else if (l.ask && l.ask.length) b += askBlock(l.ask, l.askT, '提問');
       if (l.tongT) b += '<div class="it c-g"><span class="k g">統測</span>' + clean(l.tongT) + '</div>';
       h += b + '</div>';
     });
-    if (P.ask && P.ask.length) h += '<div class="ln">' + askBlock(P.ask, P.askT, P.askLabel || '本段統整') + '</div>';
-    (P.boxes || []).forEach(function (bx) { h += '<div class="ln">' + askBlock(bx.ask || [], bx.askT, bx.label || '統整') + '</div>'; });
+    var sn = nodesAt(G, P.seg, 'sum'), bn = nodesAt(G, P.seg, 'box');
+    if (P.ask && P.ask.length) h += '<div class="ln endln">' + askBlock(P.ask, sn.length ? '' : P.askT, P.askLabel || '本段統整') + (sn.length ? guideBlock(sn, P.askT) : '') + '</div>';
+    (P.boxes || []).forEach(function (bx, bi) { h += '<div class="ln endln">' + askBlock(bx.ask || [], bi || !bn.length ? bx.askT : '', bx.label || '統整') + (!bi && bn.length ? guideBlock(bn, bx.askT) : '') + '</div>'; });
     if (P.qa && P.qa.length) h += '<div class="ln blkln c-a"><span class="k a">問答</span>' + P.qa.map(function (q, i) { return '<div class="it"><b>' + (i + 1) + '. ' + clean(q[0]) + '</b><div class="qa-a">' + clean(q[1]) + '</div></div>'; }).join('') + '</div>';
     if (P.xi) h += '<div class="ln blkln c-t"><span class="k t">析</span>' + clean(P.xi) + '</div>';
     if (A && A.notes.length) h += '<div class="kdz"><div class="sec-h kh">★ 本段考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('') + '</div>';
@@ -449,6 +489,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     var seen = {}, list = [];
     var d = TB[L.k];
     if (d && d.textPages) d.textPages.forEach(function (p) { var id = 'seg:' + p.seg, a = anchorOf(L, id); seen[id] = 1; list.push({ id: id, h: a ? a.h : p.seg, n: a ? a.notes.length : 0 }); });
+    var GL = guideOf(L.k); if (GL && GL.afterLabel && !seen['info:' + GL.afterLabel]) { seen['info:' + GL.afterLabel] = 1; list.push({ id: 'info:' + GL.afterLabel, h: '課後延伸｜談志（教師引導）' }); }   /* V231 */
     L.anchors.forEach(function (a) { if (!seen[a.id]) { seen[a.id] = 1; list.push({ id: a.id, h: a.h, n: a.notes.length }); } });
     if (d) {   /* V223：課後習題、習作、A卷（點了看題目＋答案＋解析） */
       if (d.basicQ && d.basicQ.length) list.push({ id: 'qall:', h: '課後習題　基礎練習（' + d.basicQ.length + ' 題）' });
@@ -531,6 +572,8 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       if (A) h += '<div class="kdz"><div class="sec-h kh">★ 這頁考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('') + '</div>';
       h += X.h;
     } else {
+      var GA = L ? guideOf(L.k) : null;   /* V231：課後延伸頁 → 課後教師引導 6 題 */
+      if (GA && GA.after && id === 'info:' + GA.afterLabel) h += '<div class="ln endln">' + guideBlock(GA.after, '', true) + '</div>';
       if (A) h += A.notes.map(noteHTML).join('');
       else if (L && /^seg:/.test(id) && LESSON_FILE[L.k] && !TB[L.k]) h += '<div class="empty">課文資料載入中…</div>';
       else if (!unlocked) h += lockedHTML();
@@ -549,19 +592,40 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
     S.rendered = (L ? L.k : '') + '|' + id;
-    S.li = -1;
+    S.li = null;
     $('lsel').value = L ? L.k : '';
     $('follow').classList.toggle('on', S.follow);
     $('follow').textContent = S.follow ? '跟著平板' : '自己翻（點我跟回）';
-    markLine(sp.li, false);
+    markLine(sp, false);
   }
-  function markLine(li, smooth) {
-    if (li === S.li) return;
-    S.li = li;
-    var all = $('main').querySelectorAll('.ln.cur'); for (var i = 0; i < all.length; i++) all[i].classList.remove('cur');
-    if (li < 0) return;
-    var el = $('main').querySelector('.ln[data-li="' + li + '"]'); if (!el) return;
-    el.classList.add('cur');
+  /* V231：sp＝{li, tag}。@題號 → 最上方「現在問」大卡（不用滑）；@end → 段末統整；~x → 那句的句意／修辭／翻譯…那一塊；其他 → 那一句 */
+  function markLine(sp, smooth) {
+    if (typeof sp === 'number') sp = { li: sp, tag: '' };
+    var key = sp.li + (sp.tag || '');
+    if (key === S.li) return;
+    S.li = key; S.sp = sp;
+    var m = $('main');
+    var all = m.querySelectorAll('.ln.cur, .tg.cur'); for (var i = 0; i < all.length; i++) all[i].classList.remove('cur');
+    var old = $('nowc'); if (old) old.remove();
+    var tag = sp.tag || '', el = null;
+    if (tag.charAt(0) === '@' && tag !== '@end') {
+      var k = S.follow && S.pos ? S.pos.k : S.viewK, n = nodeOf(guideOf(k), tag.slice(1));
+      if (n) {
+        var G = guideOf(k), isAfter = (G.after || []).indexOf(n) >= 0;
+        var c = document.createElement('div'); c.id = 'nowc'; c.className = 'nowc';
+        c.innerHTML = '<div class="nowh">▶ 平板正在這題</div>' + nodeHTML(n, isAfter);
+        m.insertBefore(c, m.firstChild);
+        var inl = m.querySelectorAll('.ln .tg[data-gq="' + n.id + '"]'); for (var j = 0; j < inl.length; j++) inl[j].classList.add('cur');
+        scrollTo(0, 0); return;
+      }
+    }
+    if (tag.charAt(0) === '@') { tag = '@end'; el = m.querySelector('.ln.endln'); }   /* @end、或沒有講稿的統整框（@sum2…）→ 段末 */
+    if (!el && sp.li >= 0) {
+      var ln = m.querySelector('.ln[data-li="' + sp.li + '"]');
+      if (ln) { ln.classList.add('cur'); el = (tag.charAt(0) === '~' && ln.querySelector('.c-' + tag.slice(1))) || ln; }
+    }
+    if (tag === '@end' && el) el.classList.add('cur');
+    if (!el) return;
     var top = el.getBoundingClientRect().top + scrollY - $('app').querySelector('.top').offsetHeight - 8;
     scrollTo(0, Math.max(0, top));   /* 不用 smooth：部分瀏覽器在背景輪詢時不會真的捲動 */
   }
@@ -591,8 +655,8 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
           S.pos = p || null;
           if (S.follow && p) {
             var sp = splitId(p.id);
-            if (S.rendered !== p.k + '|' + sp.id) { render(); if (sp.li < 0) scrollTo(0, 0); }
-            else markLine(sp.li, true);
+            if (S.rendered !== p.k + '|' + sp.id) { render(); if (sp.li < 0 && !sp.tag) scrollTo(0, 0); }
+            else markLine(sp, true);
           }
         })
         .catch(function (e) { S.err = (e && e.message) || '連不上'; if (/Failed to fetch|NetworkError|Load failed/i.test(S.err)) S.err = '網路連不上，稍後自動重試'; })
@@ -659,7 +723,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V225', TN_DATE = '2026-11-10';
+  var TN_VER = 'V231', TN_DATE = '2026-11-10';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];

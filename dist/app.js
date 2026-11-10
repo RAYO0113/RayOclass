@@ -12890,12 +12890,23 @@ try {
   }
 
   var timer = 0, lastSent = '', busy = false, again = false, curLi = -1, doneCb = null;
+  /* V231（老師 11/10「我點提問，手機要直接跳到提問的地方；點到哪手機都要迅速對應」）：
+     代號後面再加「點了什麼」：@題號（.gd[data-gq] 提問）、@end（本段統整框）、~m／~r／~t／~a／~s（句意／修辭／翻譯／提問／筆法按鈕）。
+     點提問立刻送（不等 0.3 秒）。 */
+  var curTag = '';
+  function tagOf(t) {
+    var g = t.closest('.gd[data-gq]'); if (g) return '@' + g.getAttribute('data-gq');
+    var b = t.closest('.tp-lb'); if (b) { var m = b.className.match(/tp-lb-([a-z])/); if (m) return '~' + m[1]; }
+    if (t.closest('.tp-sumbox')) return '@end';
+    return '';
+  }
   function send() {
     if (jget(OFF_K, 0) == 1 || !pw() || typeof wkKey === 'undefined') return;
     var k = wkKey;
     if (!k || typeof wkSlides === 'undefined' || !wkSlides.length) return;
     var s = wkSlides[wkIdx];
     var id = sid(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
+    if (curTag) id += curTag;   /* V231 */
     var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: id, h: head(s) };
     var sig = JSON.stringify(pos);
     if (sig === lastSent) return;
@@ -12912,7 +12923,7 @@ try {
   function hook() {
     if (typeof wkRenderCurrent !== 'function' || wkRenderCurrent._v217) return;
     var r0 = wkRenderCurrent;
-    wkRenderCurrent = function () { var v = r0.apply(this, arguments); try { curLi = -1; soon(); } catch (e) {} return v; };
+    wkRenderCurrent = function () { var v = r0.apply(this, arguments); try { curLi = -1; curTag = ''; soon(); } catch (e) {} return v; };
     wkRenderCurrent._v217 = true;
   }
   hook();
@@ -12921,15 +12932,19 @@ try {
   /* V219：課文頁點了某一句（句子本身或它的修辭／句意／翻譯／提問按鈕）→ 送句子序號，手機捲到那一句 */
   document.addEventListener('click', function (e) {
     var t = e.target; if (!t || !t.closest) return;
-    var ln = t.closest('.tp-line'); if (!ln || !ln.closest('#wk-slide-area, #wkfs-body')) return;
-    var li = parseInt(ln.getAttribute('data-li'), 10); if (isNaN(li) || li === curLi) return;
-    curLi = li; clearTimeout(timer); timer = setTimeout(send, 300);
+    if (!t.closest('#wk-slide-area, #wkfs-body')) return;
+    var ln = t.closest('.tp-line'), tag = tagOf(t);   /* V231：句子以外（本段統整框、課後延伸頁）的提問也送 */
+    if (!ln && !tag) return;
+    var li = ln ? parseInt(ln.getAttribute('data-li'), 10) : -1; if (isNaN(li)) return;
+    if (li === curLi && tag === curTag) return;
+    curLi = li; curTag = tag; clearTimeout(timer);
+    if (tag) send(); else timer = setTimeout(send, 100);
   }, true);
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
   window.V217TN = { sid: sid, send: function () { lastSent = ''; send(); },
     /* V222：句首小點強制送這一句（就算剛剛點過，手機可能已被滑走）；cb(ok) 給小點閃綠／紅 */
-    sendLine: function (li, cb) { curLi = li; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
+    sendLine: function (li, cb) { curLi = li; curTag = ''; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
     on: function () { return jget(OFF_K, 0) != 1 && !!pw(); } };
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
@@ -13006,7 +13021,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V230';
+  window.APP_VERSION = 'V231';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
