@@ -156,6 +156,83 @@ main.no-m .c-m,main.no-w .c-w,main.no-r .c-r,main.no-r .c-s,main.no-t .c-t,main.
 main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){display:none!important}
 /* 字級 */
 .bar .fs{padding:5px 10px}
+/* ── V223 封面（中國風：宣紙底、朱印、墨色標題）── */
+:root{--paper:#f6efe1;--ink2:#2b2420;--zhu:#b8322a}
+:root[data-theme="dark"]{--paper:#1f1a16;--ink2:#efe6dc;--zhu:#e2574c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#1f1a16;--ink2:#efe6dc;--zhu:#e2574c}}
+.cover{min-height:100vh;min-height:100dvh;padding:calc(28px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+  background:radial-gradient(ellipse at 15% 0%,rgba(180,140,90,.16),transparent 55%),radial-gradient(ellipse at 100% 100%,rgba(120,90,60,.14),transparent 50%),var(--paper);
+  font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;max-width:560px;margin:0 auto}
+.cv-top{display:flex;justify-content:space-between;align-items:flex-start}
+.cv-date{font-size:15px;color:var(--mut);letter-spacing:.1em;line-height:1.7}
+.cv-date b{display:block;font-size:30px;color:var(--ink2);letter-spacing:.05em}
+.seal{width:60px;height:60px;border:3px solid var(--zhu);border-radius:8px;color:var(--zhu);display:flex;flex-direction:column;flex-wrap:wrap-reverse;
+  align-content:center;justify-content:center;font-size:21px;font-weight:900;line-height:1.05;transform:rotate(-4deg);opacity:.9}
+.cv-title{margin:34px 0 4px;font-size:44px;font-weight:900;letter-spacing:.3em;color:var(--ink2);line-height:1.2}
+.cv-sub{color:var(--mut);letter-spacing:.25em;font-size:15px;padding-bottom:14px;
+  background:linear-gradient(var(--zhu),var(--zhu)) bottom left/46px 3px no-repeat,linear-gradient(var(--line),var(--line)) bottom left/100% 1px no-repeat}
+.cv-go{display:block;width:100%;margin:26px 0 14px;padding:16px 10px;border:0;border-radius:14px;background:var(--zhu);color:#fff;
+  font:inherit;font-size:26px;font-weight:900;letter-spacing:.4em;box-shadow:0 6px 18px rgba(184,50,42,.28)}
+.cv-go small{display:block;font-size:13px;font-weight:400;letter-spacing:.1em;opacity:.9;margin-top:2px}
+.cv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cv-card{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:13px 12px;text-align:left;font:inherit;color:var(--ink2);min-height:92px;display:flex;flex-direction:column;justify-content:flex-start}
+.cv-card .ic{font-size:13px;color:var(--zhu);letter-spacing:.2em;font-weight:700}
+.cv-card .nm{font-size:21px;font-weight:900;letter-spacing:.12em;margin-top:2px}
+.cv-card .ds{font-size:13px;color:var(--mut);margin-top:4px;line-height:1.5;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif}
+.cv-card .ds b{color:var(--zhu)}
+.cv-today{margin-top:14px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 14px;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;font-size:15px}
+.cv-today .h{font-family:"Noto Serif TC",serif;font-weight:900;color:var(--zhu);letter-spacing:.2em;font-size:14px;margin-bottom:4px}
+.cv-foot{margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-family:-apple-system,"PingFang TC",sans-serif}
+.cv-foot .ver{font-weight:700;color:var(--ink2)}
+/* ── 日曆、缺交面板 ── */
+.pnl{max-width:720px;margin:0 auto;padding:0 16px 40px}
+.pnl-h{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 0 10px;border-bottom:1px solid var(--line)}
+.pnl-h .t{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:900;letter-spacing:.15em;flex:1}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.seg button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px;font-size:15px}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.day{margin:14px 0 6px;font-weight:800;font-size:16px;display:flex;gap:8px;align-items:baseline}
+.day.today{color:var(--zhu)}
+.day small{color:var(--mut);font-weight:400;font-size:13px}
+.ev{display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--cc,#888);border-radius:6px 12px 12px 6px;padding:7px 10px;margin:0 0 6px}
+.ev .cl{flex:none;font-size:13px;font-weight:800;color:var(--cc);min-width:3.2em}
+.ev .w{flex:1;min-width:0}
+.ev .kd{font-size:12px;border-radius:5px;padding:0 5px;margin-right:4px;font-weight:700;color:#fff;background:var(--cg)}
+.ev .kd.hw{background:var(--ca)}.ev .kd.rv{background:var(--ct)}
+.ev .nt{font-size:13px;color:var(--mut)}
+.mi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 8px}
+.mi .h{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.mi .h b{font-size:16px}
+.mi .h span{font-size:13px;color:var(--mut);flex:none}
+.cnt{display:inline-block;font-weight:800;color:#fff;background:var(--cg);border-radius:999px;padding:0 8px;font-size:13px;margin-left:4px}
+.cnt.z{background:var(--cm)}
+.mi .who{margin-top:5px;display:flex;flex-wrap:wrap;gap:5px}
+.mi .who i{font-style:normal;font-size:14px;border-radius:6px;padding:1px 7px;background:var(--cgb);color:var(--cg);font-weight:700}
+.mi .who i.sub{background:var(--ctb);color:var(--ct);font-weight:400}
+.mi .who i.lv{background:var(--cab);color:var(--ca);font-weight:400}
+.stu{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:0 0 6px}
+.stu .n{flex:none;font-weight:800;min-width:5.5em}
+.stu .l{flex:1;font-size:14px;color:var(--mut)}
+.pw{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px}
+.pw input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin:8px 0;font-size:17px}
+.muted{color:var(--mut);font-size:14px}
+/* ── 練習／習作／A卷 答案頁 ── */
+.qz .qn{color:var(--mut);font-size:13px}
+.qz .stem{font-size:17px;font-weight:600;line-height:1.6}
+.ops{list-style:none;margin:6px 0 0;padding:0}
+.ops li{padding:5px 8px;border-radius:8px;margin:3px 0;font-size:15.5px}
+.ops li.ok{background:var(--cmb);border-left:5px solid var(--cm);font-weight:700}
+.ops li.ok>.ol:after{content:" ✓";color:var(--cm)}
+.ops .oe{font-weight:400;font-size:14px;color:var(--mut);margin-top:2px}
+.ansb{display:inline-block;background:var(--cm);color:#fff;border-radius:8px;padding:1px 10px;font-weight:800;margin-right:6px}
+.psg{font-size:14.5px;color:var(--mut);line-height:1.75;margin-top:6px}
+.psg>summary{color:var(--pri);font-weight:700}
+.wtab{border-collapse:collapse;width:100%;font-size:14.5px;margin:6px 0;display:block;overflow-x:auto}
+.wtab th,.wtab td{border:1px solid var(--line);padding:4px 6px;vertical-align:top}
+.wk-a{color:var(--cm);font-weight:800}
+.sech{font-weight:800;color:var(--pri);margin:4px 0 6px}
+.snote{font-size:14px;color:var(--mut);margin-bottom:4px}
+.home{font-size:17px;padding:4px 11px}
 </style>
 </head>
 <body>
@@ -166,6 +243,32 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   <input id="pass" type="password" autocomplete="current-password" enterkeyhint="go">
   <div id="perr" class="err"></div>
   <button class="go" id="pgo" type="button">打開</button>
+</div>
+
+<!-- V223（老師 11/10）封面：開始上課、備課、考試日曆、缺交；版本號 -->
+<div id="cover" class="cover hide">
+  <div class="cv-top">
+    <div class="cv-date" id="cvDate"></div>
+    <div class="seal" aria-hidden="true"><span>瑞</span><span>媛</span><span>講</span><span>稿</span></div>
+  </div>
+  <div class="cv-title">國文講稿</div>
+  <div class="cv-sub">逐句　考點　同步平板</div>
+  <button class="cv-go" id="cvGo" type="button">開始上課<small>手機跟著平板投影跳頁、捲到那一句</small></button>
+  <div class="cv-grid">
+    <button class="cv-card" id="cvPrep" type="button"><div class="ic">備課</div><div class="nm">自己翻</div><div class="ds">不開平板，選課選頁看講稿</div></button>
+    <button class="cv-card" id="cvCal" type="button"><div class="ic">考試</div><div class="nm">日曆</div><div class="ds" id="cvCalDs">各班考試、交作業</div></button>
+    <button class="cv-card" id="cvMiss" type="button"><div class="ic">考卷</div><div class="nm">缺交</div><div class="ds" id="cvMissDs">依考卷／依學生</div></button>
+    <button class="cv-card" id="cvKey" type="button"><div class="ic">考點</div><div class="nm" id="cvKeyNm">已上鎖</div><div class="ds" id="cvKeyDs">點這裡輸入講稿密碼</div></button>
+  </div>
+  <div class="cv-today" id="cvToday"><div class="h">今日</div><div class="muted">輸入登記密碼後顯示今天的考試／作業</div></div>
+  <div class="cv-foot"><span>手機講稿 <span class="ver" id="cvVer"></span></span><span><button class="btn" id="cvTheme" type="button">◐</button> <button class="btn" id="cvReload" type="button">↻ 更新</button></span></div>
+</div>
+
+<div id="panel" class="hide">
+  <div class="pnl">
+    <div class="pnl-h"><button class="btn home" id="pnlBack" type="button">⌂</button><div class="t" id="pnlT"></div><button class="btn" id="pnlRe" type="button">↻</button></div>
+    <div id="pnlB"></div>
+  </div>
 </div>
 
 <div id="app" class="hide">
@@ -179,9 +282,10 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   </div>
   <main id="main"></main>
   <div class="bar">
+    <button class="btn home" id="homeb" type="button" title="回封面">⌂</button>
     <select id="lsel" aria-label="選課"></select>
     <button class="btn fs" id="fsm" type="button" title="字小一點">A−</button><button class="btn fs" id="fsp" type="button" title="字大一點">A+</button>
-    <button class="btn" id="theme" type="button" title="深淺色">◐</button>
+    <button class="btn hide" id="theme" type="button" title="深淺色">◐</button>
     <button class="btn" id="lockb" type="button">鎖上</button>
   </div>
 </div>
@@ -346,7 +450,67 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     var d = TB[L.k];
     if (d && d.textPages) d.textPages.forEach(function (p) { var id = 'seg:' + p.seg, a = anchorOf(L, id); seen[id] = 1; list.push({ id: id, h: a ? a.h : p.seg, n: a ? a.notes.length : 0 }); });
     L.anchors.forEach(function (a) { if (!seen[a.id]) { seen[a.id] = 1; list.push({ id: a.id, h: a.h, n: a.notes.length }); } });
+    if (d) {   /* V223：課後習題、習作、A卷（點了看題目＋答案＋解析） */
+      if (d.basicQ && d.basicQ.length) list.push({ id: 'qall:', h: '課後習題　基礎練習（' + d.basicQ.length + ' 題）' });
+      (d.advQ || []).forEach(function (sec) { list.push({ id: 'iadv:' + (sec.head || ''), h: '課後習題　' + plain(sec.head || '進階練習') }); });
+      if (d.workbook) { list.push({ id: 'work_answers:', h: '習作　答案總覽' }); (d.workbook.sections || []).forEach(function (sec) { list.push({ id: 'work:' + (sec.head || ''), h: '習作　' + plain(sec.head || '') }); }); }
+      if (d.aQuiz || d.aHand) list.push({ id: 'asheet:', h: 'A卷　全部答案' + (unlocked ? '' : '（考點解鎖後才看得到）') });
+    }
     return list;
+  }
+
+  /* ── V223（老師 11/10「能同步到課後習題、習作、A卷講解嗎」）：題目＋答案＋解析
+     資料＝網站 data/lessons/NN.js（網站改了這裡跟著變）；A卷要先解鎖考點才顯示 ── */
+  function quizHTML(q, tag) {
+    var stem = q.q || q.stem || '', ans = String(q.ans || ''), per = q.per || {};
+    var h = '<div class="ln qz"><div class="qn">' + esc(tag || '') + ' 第 ' + esc(q.n) + ' 題</div>';
+    if (q.psg) h += '<details class="psg"><summary>題組文章</summary>' + clean(q.psg) + '</details>';
+    h += '<div class="stem">' + clean(stem) + '</div><ol class="ops">';
+    (q.opts || []).forEach(function (o) {
+      var L0 = String(o[0]), ok = ans.indexOf(L0) >= 0, ex = o[2] || per[L0] || '';
+      h += '<li class="' + (ok ? 'ok' : '') + '"><span class="ol">(' + esc(L0) + ')</span> ' + clean(o[1]) + (ex ? '<div class="oe">' + clean(ex) + '</div>' : '') + '</li>';
+    });
+    h += '</ol><div class="it c-m"><span class="ansb">答 ' + esc(ans) + '</span>' + (q.exp ? clean(q.exp) : '') + '</div>';
+    if (q.trans) h += '<div class="it c-t"><span class="k t">翻譯</span>' + clean(q.trans) + '</div>';
+    if (q.appraise) h += '<div class="it c-t"><span class="k t">賞析</span>' + clean(q.appraise) + '</div>';
+    return h + '</div>';
+  }
+  function tableHTML(sec) {
+    var h = '';
+    if (sec.note) h += '<div class="snote">' + clean(sec.note) + '</div>';
+    h += '<table class="wtab">' + (sec.cols ? '<tr>' + sec.cols.map(function (c) { return '<th>' + clean(c) + '</th>'; }).join('') + '</tr>' : '') +
+      (sec.rows || []).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + clean(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
+    return h;
+  }
+  function secHTML(sec, tag) {
+    var h = '<div class="ln"><div class="sech">' + clean(sec.head || '') + '</div>';
+    if (sec.rows) h += tableHTML(sec);
+    if (sec.passage) h += '<details class="psg"><summary>閱讀文章</summary>' + clean(sec.passage) + '</details>';
+    if (sec.appraise) h += '<div class="it c-t"><span class="k t">賞析</span>' + clean(sec.appraise) + '</div>';
+    h += '</div>';
+    (sec.items || []).forEach(function (q) { h += quizHTML(q, tag); });
+    return h;
+  }
+  function aHandHTML(a) {
+    if (!a) return '';
+    return '<div class="ln"><div class="sech">' + clean(a.title || 'A卷 非選擇題') + '</div>' + (a.secs || []).map(function (s) {
+      return '<div class="it c-m"><b>' + clean(s.h || '') + '</b>' + (s.items || []).map(function (r) { return '<div>' + esc(r[0]) + '. ' + clean(r[1]) + '　<span class="wk-a">' + clean(r[2]) + '</span></div>'; }).join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  function practice(k, id) {
+    var m = String(id || '').match(/^(q|qall|iadv|work|work_answers|aq|asheet|ahand):(.*)$/); if (!m) return null;
+    var d = TB[k]; if (!d) return { t: '', h: LESSON_FILE[k] ? '<div class="empty">資料載入中…</div>' : '<div class="empty">這課沒有網站資料</div>' };
+    var ty = m[1], v = m[2], h = '', t = '';
+    if (/^a/.test(ty) && !unlocked) return { t: 'A卷', h: '<div class="empty">A卷答案要先解鎖考點才看得到（避免學生看到）。</div>' + lockedHTML() };
+    if (ty === 'q') { var q = (d.basicQ || []).filter(function (x) { return String(x.n) === v; })[0]; t = '基礎練習 第 ' + v + ' 題'; h = q ? quizHTML(q, '基礎練習') : ''; }
+    else if (ty === 'qall') { t = '課後習題　基礎練習'; h = (d.basicQ || []).map(function (x) { return quizHTML(x, '基礎練習'); }).join(''); }
+    else if (ty === 'iadv') { var s1 = (d.advQ || []).filter(function (x) { return (x.head || '') === v; })[0] || (d.advQ || [])[0]; t = plain(s1 ? s1.head : '進階練習'); h = s1 ? secHTML(s1, '進階') : ''; }
+    else if (ty === 'work') { var s2 = ((d.workbook && d.workbook.sections) || []).filter(function (x) { return (x.head || '') === v; })[0]; t = '習作　' + plain(s2 ? s2.head : ''); h = s2 ? secHTML(s2, '習作') : ''; }
+    else if (ty === 'work_answers') { t = '習作　答案總覽'; h = ((d.workbook && d.workbook.sections) || []).map(function (x) { return secHTML(x, '習作'); }).join(''); }
+    else if (ty === 'aq') { var q2 = (d.aQuiz || []).filter(function (x) { return String(x.n) === v; })[0]; t = 'A卷 第 ' + v + ' 題'; h = q2 ? quizHTML(q2, 'A卷') : ''; }
+    else if (ty === 'ahand') { t = 'A卷　非選擇題'; h = aHandHTML(d.aHand); }
+    else if (ty === 'asheet') { t = 'A卷　全部答案'; h = aHandHTML(d.aHand) + (d.aQuiz || []).map(function (x) { return quizHTML(x, 'A卷'); }).join(''); }
+    return { t: t, h: h || '<div class="empty">找不到這頁的資料</div>' };
   }
 
   function render() {
@@ -357,11 +521,15 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (L) loadLesson(L.k);
     var A = anchorOf(L, id);
     var P = (L && /^seg:/.test(id)) ? pageOf(L.k, id.slice(4)) : null;
+    var X = L ? practice(L.k, id) : null;   /* V223：課後習題／習作／A卷頁 */
     $('wls').textContent = L ? L.name : '';
-    $('wpg').textContent = A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
+    $('wpg').textContent = X && X.t ? X.t : A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     var h = '';
     if (P) {
       h += segHTML(L, A, P);
+    } else if (X) {
+      if (A) h += '<div class="kdz"><div class="sec-h kh">★ 這頁考點（' + A.notes.length + '）</div>' + A.notes.map(noteHTML).join('') + '</div>';
+      h += X.h;
     } else {
       if (A) h += A.notes.map(noteHTML).join('');
       else if (L && /^seg:/.test(id) && LESSON_FILE[L.k] && !TB[L.k]) h += '<div class="empty">課文資料載入中…</div>';
@@ -369,9 +537,9 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       else if (S.follow && S.pos && lessonOf(S.pos.k)) h += '<div class="empty">這頁沒有特別提醒</div>';
     }
     if (L) {
-      if (L.overview && L.overview.length) h += '<details class="blk"' + (A || P ? '' : ' open') + '><summary>本課總提醒（' + L.overview.length + '）</summary>' + L.overview.map(noteHTML).join('') + '</details>';
+      if (L.overview && L.overview.length) h += '<details class="blk"' + (A || P || X ? '' : ' open') + '><summary>本課總提醒（' + L.overview.length + '）</summary>' + L.overview.map(noteHTML).join('') + '</details>';
       var list = pageList(L);
-      h += '<details class="all"' + (A || P ? '' : ' open') + '><summary>本課所有頁面（' + list.length + '）▸</summary><div class="alist">' +
+      h += '<details class="all"' + (A || P || X ? '' : ' open') + '><summary>本課所有頁面（' + list.length + '）▸</summary><div class="alist">' +
         list.map(function (a) { return '<button type="button" data-id="' + esc(a.id) + '" class="' + (a.id === id ? 'cur' : '') + '">' + esc(a.h) + (a.n ? '<small>考點 ' + a.n + '</small>' : '') + '</button>'; }).join('') + '</div></details>';
     }
     h += '<details class="blk"><summary>怎麼用</summary><div class="howto">' +
@@ -410,7 +578,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   var pollT = 0, inflight = false;
   function poll() {
     clearTimeout(pollT);
-    if (document.hidden) return;
+    if (document.hidden || VIEW !== 'app' || !S.follow) return;   /* V223：只有「開始上課」（跟著平板）時才輪詢 */
     if (!inflight) {
       inflight = true;
       fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'liveGet' }), redirect: 'follow' })
@@ -439,7 +607,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   function wake() { try { if (navigator.wakeLock && !lockW) navigator.wakeLock.request('screen').then(function (w) { lockW = w; w.addEventListener('release', function () { lockW = null; }); }).catch(function () {}); } catch (e) {} }
 
   /* ── 互動 ── */
-  $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) scrollTo(0, 0); };
+  $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) { scrollTo(0, 0); poll(); wake(); } };
   $('main').addEventListener('click', function (e) {
     var b = e.target.closest('.alist button'); if (!b) return;
     var cur = S.follow && S.pos ? S.pos.k : S.viewK;
@@ -462,7 +630,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   function hashKey() { var m = String(location.hash || '').match(/[#&]k=([^&]+)/); try { return m ? decodeURIComponent(m[1]) : ''; } catch (e) { return ''; } }
   function start(data) {
     D = data;
-    $('lock').classList.add('hide'); $('app').classList.remove('hide');
+    $('lock').classList.add('hide'); if (VIEW === 'app') $('app').classList.remove('hide'); else if (VIEW === 'cover') paintCover();   /* V223：有封面 */
     var cur = $('lsel').value;
     $('lsel').innerHTML = D.lessons.map(function (L) { return '<option value="' + esc(L.k) + '">' + esc(L.name) + '</option>'; }).join('');
     if (cur) $('lsel').value = cur;
@@ -486,7 +654,210 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (hashKey()) history.replaceState(null, '', location.pathname + location.search);
     start(BASE);
   };
-  start(BASE); poll(); wake();
+  /* ── V223（老師 11/10）封面＋考試日曆＋缺交 ──
+     ・打開先到封面（版本號、今日考試）；按「開始上課」才開始跟平板同步（不上課不輪詢，省電）。
+     ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
+       兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
+     ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
+  var TN_VER = 'V223', TN_DATE = '2026-11-10';
+  var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
+  var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
+  var WD = ['日', '一', '二', '三', '四', '五', '六'];
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function pd(s) { var a = String(s).split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
+  function md(s) { var a = String(s || '').split('-'); return a.length < 3 ? String(s || '') : (+a[1]) + '/' + (+a[2]); }
+  function ccol(c) { var i = CLS.indexOf(c); return CCOL[i < 0 ? 0 : i]; }
+  function grPw() { return lget(GRPW_K) || ''; }
+  function api(body) {
+    return fetch(GS_URL, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' }).then(function (r) { return r.json(); });
+  }
+
+  /* ── 畫面切換 ── */
+  var VIEW = 'cover';
+  function go(v) {
+    VIEW = v;
+    ['cover', 'panel', 'app'].forEach(function (x) { $(x).classList.toggle('hide', x !== v); });
+    $('lock').classList.add('hide');
+    S.live = v === 'app' && S.follow;
+    if (v === 'cover') paintCover();
+    if (S.live) { poll(); wake(); }
+    scrollTo(0, 0);
+  }
+
+  /* ── 資料（快取 3 分鐘）── */
+  var CACHE = { cal: null, calT: 0, ld: null, ldT: 0 };
+  function getCal(force) {
+    if (!grPw()) return Promise.reject(new Error('nopw'));
+    if (!force && CACHE.cal && Date.now() - CACHE.calT < 180000) return Promise.resolve(CACHE.cal);
+    return api({ action: 'syncGet', pw: grPw(), keys: ['exam_cal_v1'] }).then(function (r) {
+      if (!r.ok) { if (r.auth === false) { lrm(GRPW_K); throw new Error('nopw'); } throw new Error(r.error || '讀不到日曆'); }
+      var e = r.items && r.items.exam_cal_v1, a = [];
+      try { a = e && e.data ? JSON.parse(e.data) : []; } catch (x) { a = []; }
+      CACHE.cal = Array.isArray(a) ? a : []; CACHE.calT = Date.now(); return CACHE.cal;
+    });
+  }
+  function getLoad(force) {
+    if (!grPw()) return Promise.reject(new Error('nopw'));
+    if (!force && CACHE.ld && Date.now() - CACHE.ldT < 180000) return Promise.resolve(CACHE.ld);
+    return api({ action: 'load', pw: grPw() }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '讀不到成績系統');
+      if (!r.admin) { lrm(GRPW_K); throw new Error('nopw'); }
+      CACHE.ld = r; CACHE.ldT = Date.now(); return r;
+    });
+  }
+
+  /* ── 封面 ── */
+  function paintCover() {
+    var d = new Date(), td = ymd(d);
+    $('cvDate').innerHTML = d.getFullYear() + ' 年<b>' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日</b>星期' + WD[d.getDay()];
+    $('cvVer').textContent = TN_VER + '（' + md(TN_DATE) + '）';
+    $('cvKeyNm').textContent = unlocked ? '已解鎖' : '已上鎖';
+    $('cvKeyDs').innerHTML = unlocked ? '考點、A卷答案看得到<br>點這裡鎖上' : '點這裡輸入講稿密碼';
+    if (!grPw()) { $('cvToday').innerHTML = '<div class="h">今日</div><div class="muted">點「日曆」或「缺交」輸入一次登記密碼（成績系統那組），這裡就會顯示今天的考試／作業。</div>'; return; }
+    getCal().then(function (a) {
+      var tm = ymd(new Date(d.getTime() + 86400000));
+      var t0 = a.filter(function (e) { return e.date === td; }), t1 = a.filter(function (e) { return e.date === tm; });
+      var line = function (e) { return '<div><b style="color:' + ccol(e.cls) + '">' + esc(e.cls) + '</b>　' + esc(evName(e)) + '</div>'; };
+      $('cvToday').innerHTML = '<div class="h">今日</div>' + (t0.length ? t0.map(line).join('') : '<div class="muted">今天沒有考試／作業</div>') +
+        (t1.length ? '<div class="h" style="margin-top:6px">明日</div>' + t1.map(line).join('') : '');
+      var wk = a.filter(function (e) { return e.date >= td && e.date <= ymd(new Date(d.getTime() + 6 * 86400000)); }).length;
+      $('cvCalDs').innerHTML = '這 7 天 <b>' + wk + '</b> 項';
+    }).catch(function () {});
+    getLoad().then(function (ld) {
+      var n = 0; CLS.forEach(function (c) { n += missOf(ld, c).total; });
+      $('cvMissDs').innerHTML = '四班共 <b>' + n + '</b> 件未交';
+    }).catch(function () {});
+  }
+  function evName(e) {
+    var les = (e.lessons || []).map(function (n) { return 'L' + n + (LES[n] ? LES[n] : ''); }).join('、');
+    return String(e.item || '').replace('課後習題', '課本後習題') + (les ? '（' + les + '）' : '');
+  }
+
+  /* ── 面板共用 ── */
+  function panel(title, body) { $('pnlT').textContent = title; $('pnlB').innerHTML = body; go('panel'); }
+  function pwHTML(msg) {
+    return '<div class="pw"><b>輸入登記密碼</b><div class="muted">成績系統的那組密碼。只存在這支手機，只用來讀日曆和缺交，不會改任何資料。</div>' +
+      '<input id="grIn" type="password" autocomplete="current-password" enterkeyhint="go"><div class="err" id="grErr">' + esc(msg || '') + '</div>' +
+      '<button class="cv-go" id="grGo" type="button" style="font-size:18px;letter-spacing:.2em;margin:6px 0 0;padding:10px">確定</button></div>';
+  }
+  var PNL = '';
+  function needPw(then, msg) {
+    $('pnlB').innerHTML = pwHTML(msg);
+    $('grGo').onclick = function () {
+      var p = $('grIn').value.trim(); if (!p) return;
+      $('grErr').textContent = '確認中…';
+      api({ action: 'check', pw: p }).then(function (r) {
+        if (r && r.admin) { lset(GRPW_K, p); then(); } else $('grErr').textContent = '密碼不對';
+      }).catch(function () { $('grErr').textContent = '連不上，稍後再試'; });
+    };
+  }
+  function fail(e, again) {
+    if (e && e.message === 'nopw') needPw(again);
+    else $('pnlB').innerHTML = '<div class="empty">' + esc((e && e.message) || '讀不到') + '</div>';
+  }
+
+  /* ── 考試日曆（只看）── */
+  var calCls = '';
+  function showCal(force) {
+    PNL = 'cal'; panel('考試日曆', '<div class="empty">讀取中…</div>');
+    getCal(force).then(function (a) {
+      var td = ymd(new Date()), from = ymd(new Date(Date.now() - 3 * 86400000)), to = ymd(new Date(Date.now() + 28 * 86400000));
+      var h = '<div class="seg" id="calSeg">' + ['', ...CLS].map(function (c) { return '<button type="button" data-c="' + c + '" class="' + (c === calCls ? 'on' : '') + '">' + (c || '全部') + '</button>'; }).join('') + '</div>';
+      var list = a.filter(function (e) { return e.date >= from && e.date <= to && (!calCls || e.cls === calCls); })
+        .sort(function (x, y) { return x.date < y.date ? -1 : x.date > y.date ? 1 : CLS.indexOf(x.cls) - CLS.indexOf(y.cls); });
+      var last = '';
+      list.forEach(function (e) {
+        if (e.date !== last) { last = e.date; h += '<div class="day' + (e.date === td ? ' today' : '') + '">' + md(e.date) + '（' + WD[pd(e.date).getDay()] + '）' + (e.date === td ? '<small>今天</small>' : e.date < td ? '<small>已過</small>' : '') + '</div>'; }
+        var kc = e.kind === '交作業' ? 'hw' : e.kind === '檢討' ? 'rv' : '';
+        h += '<div class="ev" style="--cc:' + ccol(e.cls) + '"><span class="cl">' + esc(e.cls) + '</span><div class="w"><span class="kd ' + kc + '">' + esc(e.kind || '') + '</span>' + esc(evName(e)) +
+          (e.note ? '<div class="nt">' + esc(e.note) + '</div>' : '') + '</div></div>';
+      });
+      if (!list.length) h += '<div class="empty">這段期間（前 3 天～後 4 週）沒有項目</div>';
+      h += '<div class="muted" style="margin-top:14px">只看不改；要新增或改日期請到教學網站的日曆。</div>';
+      $('pnlB').innerHTML = h;
+      $('calSeg').onclick = function (ev) { var b = ev.target.closest('button'); if (!b) return; calCls = b.getAttribute('data-c'); showCal(); };
+    }).catch(function (e) { fail(e, function () { showCal(true); }); });
+  }
+
+  /* ── 缺交 ── */
+  var TRANS_MAX = 3, TRANS_MIN = 10;
+  function lesNums(it) {
+    var L = String(it.lessons || '').split(',').filter(Boolean).map(Number), m = /L(\d+)/.exec(it.title || '');
+    return L.length ? L : (m ? [m[1].length >= 3 ? +m[1].slice(0, 2) : +m[1]] : []);
+  }
+  function isTrans(it) { var L = lesNums(it); return L.length > 0 && L.every(function (n) { return n >= 1 && n <= TRANS_MAX; }); }
+  function missOf(ld, c) {
+    var td = ymd(new Date());
+    var stu = (ld.students || []).filter(function (s) { return s.cls === c && String(s.active) !== '0'; }).sort(function (a, b) { return a.seat - b.seat; });
+    var sc = {}; (ld.scores || []).forEach(function (s) { if (s.cls === c) (sc[s.item] = sc[s.item] || {})[+s.seat] = s; });
+    var out = [], open = [], wait = [], total = 0;
+    (ld.items || []).filter(function (it) { return it.cls === c && it.type !== '態度'; }).forEach(function (it) {
+      var due = it.due || it.issued || '';
+      var m = sc[it.id] || {}, n = 0; Object.keys(m).forEach(function (k) { if (String(m[k].raw || '') !== '') n++; });
+      if (!due || due >= td) { open.push(it); return; }
+      if (isTrans(it) ? n < TRANS_MIN : n === 0) { wait.push(it); return; }
+      var miss = [], sub = [], lv = [];
+      stu.forEach(function (s) {
+        var x = m[+s.seat];
+        if (x && String(x.raw || '') !== '') return;
+        if (x && x.sub) sub.push(s); else if (x && x.leave) lv.push(s); else miss.push(s);
+      });
+      total += miss.length;
+      out.push({ it: it, due: due, miss: miss, sub: sub, lv: lv });
+    });
+    out.sort(function (a, b) { return a.due < b.due ? 1 : a.due > b.due ? -1 : 0; });
+    return { list: out, open: open, wait: wait, total: total, stu: stu };
+  }
+  var missCls = CLS[0], missTab = 'item';
+  function showMiss(force) {
+    PNL = 'miss'; panel('缺交狀況', '<div class="empty">讀取中…</div>');
+    getLoad(force).then(function (ld) {
+      var R = missOf(ld, missCls);
+      var h = '<div class="seg" id="mcSeg">' + CLS.map(function (c) { var t = missOf(ld, c).total; return '<button type="button" data-c="' + c + '" class="' + (c === missCls ? 'on' : '') + '">' + c + (t ? ' <span class="cnt">' + t + '</span>' : '') + '</button>'; }).join('') + '</div>' +
+        '<div class="seg" id="mtSeg"><button type="button" data-t="item" class="' + (missTab === 'item' ? 'on' : '') + '">依考卷</button><button type="button" data-t="stu" class="' + (missTab === 'stu' ? 'on' : '') + '">依學生</button></div>';
+      var nm = function (s) { return esc(s.seat) + ' ' + esc(s.name); };
+      if (missTab === 'item') {
+        var has = R.list.filter(function (x) { return x.miss.length || x.sub.length || x.lv.length; }), ok = R.list.filter(function (x) { return !(x.miss.length || x.sub.length || x.lv.length); });
+        has.forEach(function (x) {
+          h += '<div class="mi"><div class="h"><b>' + esc(x.it.title || x.it.type) + (x.miss.length ? '<span class="cnt">缺 ' + x.miss.length + '</span>' : '<span class="cnt z">齊</span>') + '</b><span>' + esc(x.it.type) + '｜期限 ' + md(x.due) + '</span></div>' +
+            '<div class="who">' + x.miss.map(function (s) { return '<i>' + nm(s) + '</i>'; }).join('') +
+            x.sub.map(function (s) { return '<i class="sub">' + nm(s) + '（已交待登分）</i>'; }).join('') +
+            x.lv.map(function (s) { return '<i class="lv">' + nm(s) + '（請假）</i>'; }).join('') + '</div></div>';
+        });
+        if (!has.length) h += '<div class="empty">這班過期限的考卷都交齊了 🎉</div>';
+        if (ok.length) h += '<details class="blk"><summary>已交齊（' + ok.length + '）</summary>' + ok.map(function (x) { return '<div class="muted">' + esc(x.it.title || x.it.type) + '｜' + md(x.due) + '</div>'; }).join('') + '</details>';
+      } else {
+        var by = {};
+        R.list.forEach(function (x) { x.miss.forEach(function (s) { (by[s.seat] = by[s.seat] || { s: s, a: [] }).a.push(x); }); });
+        var arr = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.a.length - a.a.length || a.s.seat - b.s.seat; });
+        arr.forEach(function (o) {
+          h += '<div class="stu"><span class="n">' + nm(o.s) + '</span><span class="cnt">' + o.a.length + '</span><span class="l">' + o.a.map(function (x) { return esc(x.it.title || x.it.type) + '（' + md(x.due) + '）'; }).join('、') + '</span></div>';
+        });
+        if (!arr.length) h += '<div class="empty">這班沒有人缺交 🎉</div>';
+      }
+      if (R.open.length) h += '<details class="blk"><summary>還沒到期限（' + R.open.length + '）</summary>' + R.open.map(function (it) { return '<div class="muted">' + esc(it.title || it.type) + '｜期限 ' + md(it.due || it.issued) + '</div>'; }).join('') + '</details>';
+      if (R.wait.length) h += '<details class="blk"><summary>過期限但還沒登分（' + R.wait.length + '）</summary><div class="muted">全班都沒分數（或 L1～L3 不到 10 人有分數），先不算缺交。</div>' + R.wait.map(function (it) { return '<div class="muted">' + esc(it.title || it.type) + '｜' + md(it.due || it.issued) + '</div>'; }).join('') + '</details>';
+      h += '<div class="muted" style="margin-top:12px">規則同成績系統：過期限、沒分數、沒繳交日、沒請假＝缺交。只看不改。</div>';
+      $('pnlB').innerHTML = h;
+      $('mcSeg').onclick = function (ev) { var b = ev.target.closest('button'); if (!b) return; missCls = b.getAttribute('data-c'); showMiss(); };
+      $('mtSeg').onclick = function (ev) { var b = ev.target.closest('button'); if (!b) return; missTab = b.getAttribute('data-t'); showMiss(); };
+    }).catch(function (e) { fail(e, function () { showMiss(true); }); });
+  }
+
+  /* ── 按鈕 ── */
+  $('cvGo').onclick = function () { S.follow = true; render(); go('app'); };
+  $('cvPrep').onclick = function () { S.follow = false; render(); go('app'); };
+  $('cvCal').onclick = function () { showCal(); };
+  $('cvMiss').onclick = function () { showMiss(); };
+  $('cvKey').onclick = function () { $('lockb').click(); };
+  $('cvTheme').onclick = function () { $('theme').click(); };
+  $('cvReload').onclick = function () { location.replace(location.pathname + '?t=' + Date.now() + location.hash); };
+  $('homeb').onclick = function () { go('cover'); };
+  $('pnlBack').onclick = function () { go('cover'); };
+  $('pnlRe').onclick = function () { if (PNL === 'cal') showCal(true); else if (PNL === 'miss') showMiss(true); };
+
+  start(BASE); go('cover');
   var key0 = hashKey() || lget(PASS_K);
   if (key0) tryPass(key0, true);
 })();

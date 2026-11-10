@@ -12816,6 +12816,13 @@ try {
       case 'info': return 'info:' + (s.label || s.head || '');
       case 'kzsec': return 'sec:' + ((s.sec && s.sec.title) || '');
       case 'iquiz': return 'q:' + (s.q && s.q.n);
+      /* V223（老師 11/10「能同步到課後習題、習作、A卷講解嗎」）：這幾種頁面各自有代號，手機顯示該頁題目＋答案＋解析 */
+      case 'iadv': return 'iadv:' + ((s.sec && s.sec.head) || '');
+      case 'work': return 'work:' + ((s.sec && s.sec.head) || '');
+      case 'work_answers': return 'work_answers:';
+      case 'aq': return 'aq:' + (s.q && s.q.n);
+      case 'asheet': return 'asheet:';
+      case 'ahand': return 'ahand:';
       default: return s.type + ':' + (s.label || s.title || s.head || '');
     }
   }
@@ -12824,6 +12831,9 @@ try {
   function head(s) {
     if (!s) return '';
     if (s.type === 'iquiz' && s.q) return '練習 第 ' + s.q.n + ' 題';
+    if (s.type === 'aq' && s.q) return 'A卷 第 ' + s.q.n + ' 題';
+    if ((s.type === 'work' || s.type === 'iadv') && s.sec) return String(s.sec.head || '').slice(0, 60);
+    if (s.type === 'work_answers') return '習作答案總覽';
     return String(s.head || (s.page && (s.page.title || s.page.seg)) || (s.sec && s.sec.title) || s.label || s.title || TYPE_NAME[s.type] || s.type || '').slice(0, 60);
   }
 
@@ -12944,7 +12954,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V222';
+  window.APP_VERSION = 'V223';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

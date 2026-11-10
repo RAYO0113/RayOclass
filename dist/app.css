@@ -7841,10 +7841,10 @@ body.dark-mode #qp-pad .qp-mode .p:not(.on) { color:#6fc184; } body.dark-mode #q
    要不突兀、學生在投影上看不清楚 → 很淡的小圓點，放在句子左邊的留白；只有登入登記密碼（講稿同步開著）才出現。 */
 .tn-dot { position:absolute; left:-27px; top:0; width:26px; height:var(--tn-lh, 2.15em); display:flex; align-items:center; justify-content:center;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; z-index:1; font-size:16px; line-height:1; }
-.tn-dot::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; color:var(--mk-ink-soft,#6b5a42); opacity:.16; transition:opacity .25s, transform .25s, background .25s; }
+.tn-dot::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; color:var(--mk-ink-soft,#6b5a42); opacity:.16; }
 .tn-dot:hover::before { opacity:.35; }
-/* 手機目前停在這句：稍微深一點點（老師自己看得出來，學生看起來只是個點） */
-.tn-dot.cur::before { opacity:.32; }
+/* 手機目前停在這句：V223（老師 11/10「不確定有沒有按到，正使用的變綠色」）→ 一直亮綠，換句才換 */
+.tn-dot.cur::before { background:#2e9d5b; opacity:.75; transform:scale(1.25); }
 .tn-dot.ok::before { background:#2e9d5b; opacity:.85; transform:scale(1.5); }
 .tn-dot.bad::before { background:#c0392b; opacity:.85; transform:scale(1.5); }
 @media print { .tn-dot { display:none !important; } }
