@@ -26,8 +26,30 @@
       case 'aq': return 'aq:' + (s.q && s.q.n);
       case 'asheet': return 'asheet:';
       case 'ahand': return 'ahand:';
+      /* V232（老師 11/11「手機版補充的地方怎麼沒有跟上」）：補充講義、字義辨析、修辭、修辭總表、問題、統測題原本代號都是空的
+         （14 張補充講義全叫 hd2:），手機分不出哪一張 → 改送它在課文資料裡的序號（0 起算），手機照序號畫出那一頁 */
+      case 'hd2': return 'hd2:' + dataIdx(function (d) { return d.handoutV2 || []; }, function (p) { return p === s.page; });
+      case 'charbian': return 'charbian:' + dataIdx(function (d) { return flat(d.charBian); }, function (p) { return p.body === s.body; });
+      case 'keyrhet': return 'keyrhet:' + dataIdx(function (d) { return flat(d.keyRhetoric); }, function (p) { return p.body === s.body; });
+      case 'rhet_table': return 'rhet_table:' + dataIdx(function (d) { return (d.rhetTable && d.rhetTable.pages) || []; }, function (p) { return p.body === s.body; });
+      case 'question': return 'question:' + dataIdx(function (d) { return (d.extras && d.extras.questions) || []; }, function (p) { return p.q === s.q; });
+      case 'exam': return 'exam:' + dataIdx(function (d) { return (d.extras && d.extras.exams) || []; }, function (p) { return p.stem === s.stem; });
       default: return s.type + ':' + (s.label || s.title || s.head || '');
     }
+  }
+  function flat(arr) { var o = []; (arr || []).forEach(function (x) { (x.pages || []).forEach(function (p) { o.push(p); }); }); return o; }
+  function dataIdx(listOf, hit) {
+    var d = (typeof TEXTBOOK !== 'undefined' && typeof wkKey !== 'undefined') ? TEXTBOOK[wkKey] : null; if (!d) return '';
+    var a = listOf(d); for (var i = 0; i < a.length; i++) if (hit(a[i])) return String(i);
+    return '';
+  }
+  /* V232：同名說明頁（〈侍坐〉三張「賞析」、〈桃花源記〉兩張「作者·生平概覽」）第 2 張起加 |1、|2…；第 1 張代號不變（舊講稿 anchors 照用） */
+  function sidN(s) {
+    var id = sid(s);
+    if (!s || s.type !== 'info' || typeof wkSlides === 'undefined') return id;
+    var n = 0, at = wkSlides.indexOf(s);
+    for (var i = 0; i < at; i++) if (wkSlides[i] && wkSlides[i].type === 'info' && sid(wkSlides[i]) === id) n++;
+    return n ? id + '|' + n : id;
   }
   var TYPE_NAME = { cover: '封面', aq: 'A卷', ahand: 'A卷', asheet: 'A卷', work: '習作', work_answers: '習作答案', hd2: '補充講義',
     iadv: '進階練習', question: '提問', exam: '考題', structure: '結構', keyrhet: '修辭', rhet_table: '修辭表', t13anim: '十三經' };
@@ -56,7 +78,7 @@
     var k = wkKey;
     if (!k || typeof wkSlides === 'undefined' || !wkSlides.length) return;
     var s = wkSlides[wkIdx];
-    var id = sid(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
+    var id = sidN(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
     if (curTag) id += curTag;   /* V231 */
     var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: id, h: head(s) };
     var sig = JSON.stringify(pos);
@@ -93,7 +115,7 @@
   }, true);
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
-  window.V217TN = { sid: sid, send: function () { lastSent = ''; send(); },
+  window.V217TN = { sid: sidN, send: function () { lastSent = ''; send(); },
     /* V222：句首小點強制送這一句（就算剛剛點過，手機可能已被滑走）；cb(ok) 給小點閃綠／紅 */
     sendLine: function (li, cb) { curLi = li; curTag = ''; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
     on: function () { return jget(OFF_K, 0) != 1 && !!pw(); } };

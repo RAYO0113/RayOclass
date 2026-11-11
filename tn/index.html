@@ -251,6 +251,31 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 .nowc{border:3px solid var(--pri);border-radius:14px;padding:8px 10px 10px;margin:0 0 14px;background:var(--hl)}
 .nowh{font-size:14px;color:var(--pri);font-weight:800}
 .nowc .tg{margin-top:6px}
+/* V232 補充／說明頁（網站 HTML 搬過來）：答案、解析、語譯、追問全部打開；動畫停在最後一格 */
+.ib{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:16px;line-height:1.75;overflow-wrap:anywhere}
+.ib img{max-width:100%;height:auto;display:block;margin:6px auto}
+.ib table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;font-size:14.5px;margin:6px 0}
+.ib th,.ib td{border:1px solid var(--line);padding:4px 6px;vertical-align:top}
+.ib th{min-width:3.3em}
+.ib .dz-o,.ib .dz-en b,.ib .rj-k{color:var(--tc);font-weight:700}.ib .dz-v{color:var(--ex);font-weight:700}.ib .dz-s,.ib .dz-l2,.ib .dz-tr{color:var(--wb);font-weight:700}
+.ib .dz-l1{color:var(--mut)}.ib .dz-rule{font-weight:700;border-left:4px solid #d9a54a;background:var(--aqbg);padding:4px 8px;margin:4px 0;border-radius:4px}
+.ib .jy-blank-ph,.ib .ah-cov,.ib .tp-acov,.ib .hd-cov,.ib .sp-trans-toggle,.ib .hd-trans-toggle,.ib .ah-next,.ib .ah-btn,.ib .ah-link,.ib .ah-back,.ib .wc-add{display:none!important}
+.ib .jy-blank-ans,.ib .ah-val,.ib .gd-et{display:inline!important;color:var(--cm);font-weight:800}
+.ib .jy-cir{color:var(--mut);font-size:.85em;margin-right:1px}
+.ib .sp-trans-body,.ib .hd-trans-body,.ib .tp-a,.ib .tp-asktin,.ib .ah-step,.ib .gd-s,.ib .gd-sa,.ib .gd-qa,.ib .gd-end,.ib .gd-board,.ib .gd-bt,.ib .mm-n>ul,.ib .hd-in{display:block!important}
+.ib .sp-trans-body,.ib .hd-trans-body{border-left:3px solid var(--ct);padding:4px 10px;margin:4px 0 8px;color:var(--mut)}
+.ib .ah-step{border-left:3px solid var(--line);padding:4px 10px;margin:6px 0}
+.ib .gd-sa,.ib .gd-qa{color:var(--wb);font-weight:600}
+.ib .tp-gd,.ib .tp-pd{display:inline!important;position:static!important;transform:none!important;width:auto!important;max-width:none!important;max-height:none!important;border:0;background:none;padding:0;color:var(--mut);font-size:.85em}
+.ib .tp-gd:before,.ib .tp-pd:before{content:"（"}.ib .tp-gd:after,.ib .tp-pd:after{content:"）"}
+.ib .wc{display:flex!important;flex-wrap:wrap;gap:4px 12px}
+.ib *{animation:none!important;transition:none!important}
+.ib .wc-w,.ib .dz-l1,.ib .dz-l2,.ib .dz-t,.ib .ah-flow span,.ib .ah-flow i{opacity:1!important;transform:none!important}
+.ib .dz-row{display:flex;flex-wrap:wrap;gap:2px;font-size:1.3em}
+.ib .sp-anc{border-left:3px solid var(--line);padding:2px 10px;margin:4px 0;color:var(--mut)}
+.ib .cb-loc{color:var(--mut);font-size:.85em}
+.ib b.dz-h,.ib .hd-mj{display:block;font-weight:900;color:var(--pri);margin:8px 0 4px}
+.ib .hd-q{margin-top:10px;font-weight:600}.ib .hd-opt{padding-left:1em}
 :root[data-theme="dark"] .tg-h{color:#8cb4ea}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tg-h{color:#8cb4ea}}
 </style>
@@ -487,9 +512,12 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   }
   function pageList(L) {   /* 本課所有頁：課文段落（網站資料）＋有講稿的說明頁 */
     var seen = {}, list = [];
-    var d = TB[L.k];
+    var d = TB[L.k], ext = d ? extraList(d) : [];   /* V232：補充、說明頁也列進來（課前／作者／題解放課文前） */
+    function addX(pre) { ext.forEach(function (a) { if (!!a.pre === pre && !seen[a.id]) { seen[a.id] = 1; var an = anchorOf(L, a.id); list.push({ id: a.id, h: a.h, n: an ? an.notes.length : 0 }); } }); }
+    addX(true);
     if (d && d.textPages) d.textPages.forEach(function (p) { var id = 'seg:' + p.seg, a = anchorOf(L, id); seen[id] = 1; list.push({ id: id, h: a ? a.h : p.seg, n: a ? a.notes.length : 0 }); });
     var GL = guideOf(L.k); if (GL && GL.afterLabel && !seen['info:' + GL.afterLabel]) { seen['info:' + GL.afterLabel] = 1; list.push({ id: 'info:' + GL.afterLabel, h: '課後延伸｜談志（教師引導）' }); }   /* V231 */
+    addX(false);
     L.anchors.forEach(function (a) { if (!seen[a.id]) { seen[a.id] = 1; list.push({ id: a.id, h: a.h, n: a.notes.length }); } });
     if (d) {   /* V223：課後習題、習作、A卷（點了看題目＋答案＋解析） */
       if (d.basicQ && d.basicQ.length) list.push({ id: 'qall:', h: '課後習題　基礎練習（' + d.basicQ.length + ' 題）' });
@@ -554,6 +582,103 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     return { t: t, h: h || '<div class="empty">找不到這頁的資料</div>' };
   }
 
+  /* ── V232（老師 11/11「手機版補充的地方怎麼就沒有跟上？補做，一樣先給我看答案」）──
+     投影上作者、題解、課後統整／補充、賞析、字義辨析、修辭、修辭總表、補充講義、問題、統測題、結構表、延伸閱讀
+     → 手機畫出同一頁內容，填空、答案、解析、語譯、追問全部直接打開（不用點）。資料＝網站 data/lessons/NN.js。
+     代號（平板 186 sid）：info:<label>（同名第 2 張起 |1、|2）、hd2:<序>、charbian:<序>、keyrhet:<序>、rhet_table:<序>、
+     question:<序>、exam:<序>、structure:、sec:<標題>。序＝在課文資料陣列裡的位置（0 起算）。 */
+  function flatPages(a) { var o = []; (a || []).forEach(function (x) { (x.pages || []).forEach(function (p) { o.push({ name: x.name, sub: p.sub, body: p.body }); }); }); return o; }
+  function infoPages(d) {   /* 順序同網站 wkParseSlides */
+    var ex = d.extras || {}, o = [];
+    function add(p, kind) { if (p) o.push({ label: p.label || p.head || '', head: p.head || '', body: p.body || '', kind: kind }); }
+    add(ex.lead, '課前');
+    (ex.authorPages || []).forEach(function (p) { add(p, '作者'); });
+    (ex.intro || []).filter(function (p) { return (p.label || '').indexOf('背景') < 0; }).forEach(function (p) { add(p, '題解'); });
+    (ex.intro || []).filter(function (p) { return (p.label || '').indexOf('背景') >= 0; }).forEach(function (p) { add(p, '背景'); });
+    (ex.supplement || []).forEach(function (p) { add(p, '補充'); });
+    (ex.appreciation || []).forEach(function (p) { add(p, '賞析'); });
+    (ex.thinking || []).forEach(function (p) { add(p, '延伸'); });
+    (ex.reading || []).forEach(function (p) { add(p, '延伸'); });
+    add(ex.media, '影音');
+    var cnt = {};
+    o.forEach(function (p) { var b = 'info:' + p.label, n = cnt[b] || 0; cnt[b] = n + 1; p.id = n ? b + '|' + n : b; });
+    return o;
+  }
+  function body(html) {   /* clean＋圖片路徑（手機頁在 tn/，圖片在上一層） */
+    var h = clean(html);
+    return h.replace(/(<img[^>]*\ssrc=")(?!https?:|data:|\/|\.\.\/)/g, '$1../');
+  }
+  function hd2HTML(P) {   /* 補充講義（同網站 015_main.js hd2 渲染；答案、解析、語譯直接顯示） */
+    return (P.blocks || []).map(function (b) {
+      if (b[0] === 'table') {
+        var cc = Math.max.apply(null, [1].concat(b[2].map(function (r) { return r.length; })));
+        return '<table class="wtab">' + b[2].map(function (r) {
+          if (r.length === 1) return '<tr><th colspan="' + cc + '">' + r[0] + '</th></tr>';
+          return '<tr><th>' + r[0] + '</th>' + r.slice(1).map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>';
+        }).join('') + '</table>';
+      }
+      var k = b[1], t = String(b[2] || '');
+      if (k === 'html') return t;
+      if (k === 'mj') return '<div class="hd-mj">' + t + '</div>';
+      if (k === 'sub') return '<div class="sech">' + t + '</div>';
+      if (k === 'q') return '<div class="hd-q">' + t.replace(/^【\s*\(?([A-E、,，]+)\)?\s*】/, '<span class="ansb">答 $1</span>') + '</div>';
+      if (k === 'opt') return '<div class="hd-opt">' + t + '</div>';
+      if (k === 'exp') return '<div class="it c-m"><span class="k m">解析</span>' + t.replace('【解析】', '') + '</div>';
+      if (k === 'trans') return '<div class="it c-t"><span class="k t">語譯</span>' + t.replace('【語譯】', '') + '</div>';
+      if (k === 'ans') return '<div class="wk-a">' + t + '</div>';
+      if (k === 'note') return '<div class="snote">' + t + '</div>';
+      return '<div class="hd-para">' + t + '</div>';
+    }).join('');
+  }
+  function structHTML(S0) {
+    return (S0.title ? '<div class="sech">' + S0.title + '</div>' : '') + (S0.groups || []).map(function (g) {
+      return '<div class="sech">' + (g.head || '') + '</div><table class="wtab">' + (g.rows || []).map(function (r) { return '<tr><th>' + r[0] + '</th>' + r.slice(1).map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
+    }).join('');
+  }
+  function extraList(d) {   /* 給「本課所有頁面」：[{id, h, pre}]；pre＝放在課文前（課前、作者、題解、背景） */
+    var o = [];
+    infoPages(d).forEach(function (p) { o.push({ id: p.id, h: p.label + (p.id.indexOf('|') > 0 ? '（' + (+p.id.split('|')[1] + 1) + '）' : ''), pre: /課前|作者|題解|背景/.test(p.kind) }); });
+    flatPages(d.charBian).forEach(function (p, i) { o.push({ id: 'charbian:' + i, h: '字義辨析　' + plain(p.name) + '·' + plain(p.sub) }); });
+    flatPages(d.keyRhetoric).forEach(function (p, i) { o.push({ id: 'keyrhet:' + i, h: '修辭　' + plain(p.name) + '·' + plain(p.sub) }); });
+    if (d.structure) o.push({ id: 'structure:', h: '結構表' });
+    ((d.rhetTable && d.rhetTable.pages) || []).forEach(function (p, i) { o.push({ id: 'rhet_table:' + i, h: '修辭總表　' + plain(p.name) }); });
+    (d.handoutV2 || []).forEach(function (p, i) { o.push({ id: 'hd2:' + i, h: '補充講義　' + plain(p.title) }); });
+    var ex = d.extras || {};
+    (ex.questions || []).forEach(function (q, i) { o.push({ id: 'question:' + i, h: '問題　' + plain(q.q).slice(0, 18) + '…' }); });
+    (ex.exams || []).forEach(function (e, i) { o.push({ id: 'exam:' + i, h: '考題　' + plain(e.year || '') + '　' + plain(e.stem).slice(0, 12) + '…' }); });
+    return o;
+  }
+  function extraPage(k, id) {
+    var m = String(id || '').match(/^(info|hd2|charbian|keyrhet|rhet_table|question|exam|structure|sec):(.*)$/); if (!m) return null;
+    var d = TB[k]; if (!d) return LESSON_FILE[k] ? { t: '', h: '<div class="empty">資料載入中…</div>' } : null;
+    var ty = m[1], v = m[2], t = '', h = '';
+    var G = guideOf(k); if (ty === 'info' && G && G.after && id === 'info:' + G.afterLabel) return null;   /* V231 課後延伸頁：顯示教師引導（原本那段） */
+    if (ty === 'info') {
+      var p = infoPages(d).filter(function (x) { return x.id === id; })[0];
+      if (!p) return null;
+      t = p.label; h = (p.head && p.head !== p.label ? '<div class="sech">' + p.head + '</div>' : '') + '<div class="ib">' + body(p.body) + '</div>';
+    } else if (ty === 'hd2') {
+      var P = (d.handoutV2 || [])[+v]; if (P) { t = '補充講義　' + plain(P.title); h = '<div class="ib">' + (P.page ? '<div class="snote">補充講義 ' + esc(P.page) + '</div>' : '') + body(hd2HTML(P)) + '</div>'; }
+    } else if (ty === 'charbian' || ty === 'keyrhet') {
+      var c = flatPages(ty === 'charbian' ? d.charBian : d.keyRhetoric)[+v];
+      if (c) { t = (ty === 'charbian' ? '字義辨析　' : '修辭　') + plain(c.name) + '·' + plain(c.sub); h = '<div class="ib">' + body(c.body) + '</div>'; }
+    } else if (ty === 'rhet_table') {
+      var r = ((d.rhetTable && d.rhetTable.pages) || [])[+v];
+      if (r) { t = '修辭總表　' + plain(r.name); h = '<div class="ib">' + body(r.body) + '</div>'; }
+    } else if (ty === 'question') {
+      var q = ((d.extras && d.extras.questions) || [])[+v];
+      if (q) { t = '問題（' + esc(q.seg || '') + '）'; h = '<div class="ln"><div class="stem">' + body(q.q) + '</div><div class="it c-a"><span class="k a">答</span>' + body(q.a) + '</div></div>'; }
+    } else if (ty === 'exam') {
+      var e = ((d.extras && d.extras.exams) || [])[+v];
+      if (e) { t = '考題　' + plain(e.year || ''); h = '<div class="ln qz"><div class="qn">' + esc(e.year || '') + (e.seg ? '　' + esc(e.seg) : '') + '</div><div class="stem">' + body(e.stem) + '</div><div class="it c-m"><span class="ansb">答 ' + esc(e.ans || '') + '</span>' + body(e.exp || '') + '</div></div>'; }
+    } else if (ty === 'structure') {
+      if (d.structure) { t = '結構表'; h = '<div class="ib">' + body(structHTML(d.structure)) + '</div>'; }
+    } else if (ty === 'sec') {
+      return null;   /* 章節標題頁：只有標題，照舊顯示考點／總提醒 */
+    }
+    return { t: t, h: h || '<div class="empty">找不到這頁的資料（網站可能剛改過，按封面「↻ 更新」）</div>' };
+  }
+
   function render() {
     var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
     var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
@@ -562,7 +687,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (L) loadLesson(L.k);
     var A = anchorOf(L, id);
     var P = (L && /^seg:/.test(id)) ? pageOf(L.k, id.slice(4)) : null;
-    var X = L ? practice(L.k, id) : null;   /* V223：課後習題／習作／A卷頁 */
+    var X = L ? (practice(L.k, id) || extraPage(L.k, id)) : null;   /* V223：課後習題／習作／A卷頁；V232：補充、說明頁 */
     $('wls').textContent = L ? L.name : '';
     $('wpg').textContent = X && X.t ? X.t : A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     var h = '';
@@ -723,7 +848,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V231', TN_DATE = '2026-11-10';
+  var TN_VER = 'V232', TN_DATE = '2026-11-11';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
