@@ -1,0 +1,2 @@
+/* V240：〈長干行〉課文詩句行距加寬，方便老師在投影上手寫（老師 11/12）。只作用在這一課（body.l7-wide 由 188_v240-l7-tabs-js 加）。 */
+body.l7-wide .tp-body .tp-line { margin-bottom: 72px; }
