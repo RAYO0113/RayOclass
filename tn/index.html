@@ -481,6 +481,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       var b = '<div class="ln" data-li="' + i + '"><div class="tx"><span class="no">' + (i + 1) + '</span>' + esc(plain(l.text)) + '</div>';
       if (l.mean) b += shortLong('m', '句意', (l.cite ? '<span class="cite">' + clean(l.cite) + '──</span>' : '') + clean(l.meanShort || l.mean), l.meanShort ? clean(l.mean) : '');
       if (l.mean2) b += shortLong('m', '句意', (l.cite2 ? '<span class="cite">' + clean(l.cite2) + '──</span>' : '') + clean(l.mean2Short || l.mean2), l.mean2Short ? clean(l.mean2) : '');
+      if (l.mean3) b += shortLong('m', '句意', (l.cite3 ? '<span class="cite">' + clean(l.cite3) + '──</span>' : '') + clean(l.mean3Short || l.mean3), l.mean3Short ? clean(l.mean3) : '');   /* V237 第三條句意 */
       var ws = wordsOf(l, P);
       if (ws.length) b += '<div class="it c-w"><span class="k w">字義</span><div class="words">' + ws.map(function (w) { return '<div><b>' + clean(w[0]) + '</b>：' + clean(w[1]) + '</div>'; }).join('') + '</div></div>';
       (l.rhet || []).forEach(function (r, ri) {
@@ -854,7 +855,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V234', TN_DATE = '2026-11-11';
+  var TN_VER = 'V237', TN_DATE = '2026-11-12';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];

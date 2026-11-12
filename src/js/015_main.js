@@ -1701,6 +1701,7 @@ function wkRenderSlideHTML(slide) {
       const meanLayers = [];
       if (L.cite) meanLayers.push({ id:'m' + li + '_0', phrase:String(L.cite) });
       if (L.cite2) meanLayers.push({ id:'m' + li + '_1', phrase:String(L.cite2) });
+      if (L.cite2 && L.cite3) meanLayers.push({ id:'m' + li + '_2', phrase:String(L.cite3) });   /* V237：一行第三條句意（〈桃花源記〉） */
 
       const rhetLayers = rhetItems.map(function(r, ri){
         const q = visibleRhetQuote(r[1]);
@@ -1821,6 +1822,11 @@ function wkRenderSlideHTML(slide) {
         if (cite2Html && m1) {
           const tog1 = m1.matched ? ' tp-item-tog" data-lid="' + m1.id + '" onclick="tpLayerToggle(\'' + m1.id + '\',this)"' : ' tp-item-static"';
           mn += '<div class="tp-mean tp-mean2' + tog1 + '><span class="tp-mk">句意</span><span class="tp-citetxt">' + L.cite2 + '</span>──' + (L.mean2||'') + '</div>';
+          const m2 = state.meanLayers[2];
+          if (L.cite3 && m2) {
+            const tog2 = m2.matched ? ' tp-item-tog" data-lid="' + m2.id + '" onclick="tpLayerToggle(\'' + m2.id + '\',this)"' : ' tp-item-static"';
+            mn += '<div class="tp-mean tp-mean2' + tog2 + '><span class="tp-mk">句意</span><span class="tp-citetxt">' + L.cite3 + '</span>──' + (L.mean3||'') + '</div>';
+          }
         }
       }
 
