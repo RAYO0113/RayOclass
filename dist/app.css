@@ -7913,5 +7913,51 @@ body :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-keyrhet .dz-leg span { font-s
 .dz-en { display: inline-block; margin-top: .25em; font-weight: 400; color: #4a4038; font-size: .92em; }
 .dz-en b { color: #c0392b; }
 /* ════ src/css/182_v240-l7-wide-css.css ════ */
-/* V240：〈長干行〉課文詩句行距加寬，方便老師在投影上手寫（老師 11/12）。只作用在這一課（body.l7-wide 由 188_v240-l7-tabs-js 加）。 */
+/* V240：〈長干行〉（老師 11/12）。只作用在這一課（body.l7-wide 由 188_v240-l7-tabs-js 加；l7- 開頭的元件只出現在這課題解區）。 */
+/* 課文詩句行距加寬，方便在投影上手寫 */
 body.l7-wide .tp-body .tp-line { margin-bottom: 72px; }
+
+/* 題解區：小標、跳轉按鈕、頁頂導覽 */
+.l7-sub { display: table; margin: .2em 0 .5em; padding: .15em .7em; border-radius: 4px; background: #8a3b2e; color: #fff; font-weight: 700; letter-spacing: .1em; }
+.l7-jump { display: flex; flex-wrap: wrap; gap: .5em; margin: .9em 0 1.4em; }
+.l7-nav { display: flex; flex-wrap: wrap; gap: .4em; margin: 0 0 .8em; }
+.l7-go { display: inline-block; cursor: pointer; padding: .2em .75em; margin: .15em .2em; border: 1.5px solid #b98b4e; border-radius: 999px; color: #7a4a14; background: #fbf4e6; font-size: .85em; text-decoration: none; white-space: nowrap; user-select: none; }
+.l7-go:hover { background: #f3e2c2; }
+.l7-jump .l7-go { font-size: 1em; padding: .35em 1em; background: #8a3b2e; border-color: #8a3b2e; color: #fff; font-weight: 700; }
+.l7-trb.on { background: #2d6b4f; border-color: #2d6b4f; color: #fff; }
+
+/* 收合區塊 */
+details.l7d { border: 1px solid #d9c7a3; border-radius: 8px; margin: .55em 0; background: #fffdf8; }
+details.l7d > summary { cursor: pointer; padding: .55em .9em; font-weight: 700; list-style: none; }
+details.l7d > summary::-webkit-details-marker { display: none; }
+details.l7d > summary::before { content: '▸'; display: inline-block; width: 1.1em; color: #b98b4e; transition: transform .15s; }
+details.l7d[open] > summary::before { transform: rotate(90deg); }
+details.l7d[open] > summary { border-bottom: 1px dashed #d9c7a3; }
+.l7d-b { padding: .7em 1em .9em; line-height: 1.9; }
+.l7-era { display: inline-block; min-width: 3.2em; margin-right: .5em; padding: 0 .4em; border-radius: 4px; background: #efe3cc; color: #6b4a1e; font-size: .85em; text-align: center; }
+table.l7t { border-collapse: collapse; width: 100%; }
+table.l7t th, table.l7t td { border: 1px solid #c9b99a; padding: .4em .6em; vertical-align: top; text-align: left; }
+table.l7t th { white-space: nowrap; background: #f6eedd; }
+
+/* 小封面 */
+.l7-cv-t { font-size: 2.4em; font-weight: 900; letter-spacing: .3em; color: #8a3b2e; text-align: center; margin: .2em 0 0; }
+.l7-cv-s { text-align: center; color: #8b7355; letter-spacing: .4em; margin-bottom: 1em; }
+#wkfs-body .l7-cover, #wk-slide-area .l7-cover { font-size: .8em; }
+.l7-cover { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .8em; align-items: start; }
+.l7-cover .l7-cv-t, .l7-cover .l7-cv-s { grid-column: 1 / -1; }
+.l7-cover .l7-cv-t { font-size: 1.8em; }
+.l7-cover .l7-cv-s { margin-bottom: .4em; }
+.l7-cover details.l7d { margin: .3em 0; font-size: .82em; }
+.l7-cover details.l7d > summary { padding: .35em .7em; }
+.l7-cover .l7d-b { padding: .35em .6em .5em; line-height: 1.7; }
+.l7-cover .l7-go { font-size: .9em; padding: .1em .6em; margin: .12em .15em; }
+@media (max-width: 700px) { .l7-cover { grid-template-columns: 1fr; } }
+
+/* 代表作：原文分段、翻譯（按「翻譯」才出現） */
+.l7-who { color: #8b7355; margin-bottom: .4em; }
+.l7-note { font-size: .85em; color: #8b7355; background: #f6eedd; padding: .3em .7em; border-radius: 6px; margin-bottom: .6em; }
+.l7-st { margin: 0 0 1.6em; }
+.l7-o { font-size: 1.25em; line-height: 2.1; letter-spacing: .06em; }
+.l7-o.l7-pre { font-size: 1em; color: #6b5a44; }
+.l7-y { display: none; margin-top: .4em; padding: .5em .9em; border-left: 4px solid #2d6b4f; background: #f1f7f3; color: #24563f; line-height: 1.85; font-size: .95em; }
+.l7-y.show { display: block; }
