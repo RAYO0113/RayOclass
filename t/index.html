@@ -390,7 +390,7 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
 
   /* ── 語音登分（10/25 老師；GitHub 版才有）：說「5號14分」→ 暫存清單、大字核對 → 按「全部寫入」才存（同 commitRaw：queue＋setSc，後台照記登記者與修改紀錄）。
      解析同老師端 grade.js voNorm／voParse；「四／十」「一／七」可能聽錯，所以聽到的不直接存。 ── */
-  var VO = { rec: null, on: false, want: false }, VMAX = 100;   /* 語音只收 100 以內（手打照舊 0～200） */
+  var VO = { rec: null, on: false, want: false }, VMAX = 150;   /* 語音只收 150 以內（11/12 老師：開放到 150；手打照舊 0～200） */
   var CN_D = { '零': 0, '〇': 0, '一': 1, '壹': 1, '二': 2, '兩': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
   function cnNum(s) {   /* 「二十三」→23、「十四」→14、「一百」→100、沒有十百的逐字念：「三五」→35 */
     var i, n = 0, cur = 0, seen = false;
