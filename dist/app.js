@@ -3272,14 +3272,27 @@ try {
   }
   function ensureLive() {
     if (!isOn()) return null;
-    var d = now(), live = loadLive(), cur = currentSlot(d);
-    if (live && (!cur || cur.key !== live.key)) { finalize(live); live = null; }
+    var d = now(), live = loadLive(), cur = currentSlot(d), prev = null;
+    if (live && (!cur || cur.key !== live.key)) { prev = live; finalize(live); live = null; }
     if (!cur || !cur.cls || isPrep()) return live && cur && cur.key === live.key ? live : null;
-    if (!live) { live = newLive(cur, d); saveLive(live); }
+    if (!live) { live = newLive(cur, d); carryOver(live, prev); saveLive(live); }
     else if (live.classId !== cur.cls || live.classSource !== cur.source) {
       live.classId = cur.cls; live.classSource = cur.source; saveLive(live);
     }
     return live;
+  }
+  /* V236（老師 11/12：11/11 第3節冷一孝上完直接拿 iPad 去隔壁上冷一忠，第4節整節沒換頁、沒點句子 → 沒有紀錄）：
+     連堂接著上（上一節是同一天的前一節、有記到課文），新的一節一開始就先記「畫面上這一頁」，不必等翻頁或點句子。
+     畫面上這一頁就是剛才點過的那一頁時，沿用點到的那一句。 */
+  function carryOver(live, prev) {
+    if (!prev || !prev.lessonId || prev.date !== live.date || +prev.period !== +live.period - 1 || V.restoring) return;
+    var p = null; try { p = pagePos(); } catch (e) {}
+    if (!p) return;
+    var s = V.lastSeen;
+    if (s && s.k === p.k && s.sid === p.sid) p = s;
+    var t = now().toISOString();
+    live.parts[p.k] = { start: p, max: p.r ? p : null, last: p, firstAt: t, lastAt: t, carried: true };
+    live.lessonId = p.k; live.lastAt = t;
   }
   function tick() { ensureLive(); renderChip(); }
   V.tick = tick;
@@ -3346,7 +3359,7 @@ try {
     if (afterBell(live)) { renderChip(); return; }   /* v100：下課後不自動記錄 */
     var t = now().toISOString();
     var part = live.parts[pos.k];
-    if (!part) part = live.parts[pos.k] = { start: pos, max: pos.r ? pos : null, last: pos, firstAt: t, lastAt: t };
+    if (!part || part.carried) part = live.parts[pos.k] = { start: pos, max: pos.r ? pos : null, last: pos, firstAt: t, lastAt: t };   /* V236：接續的暫記一碰就換成真的起點 */
     else {
       /* 剛翻到某段、尚未點句子就點了該段的句子 → 起點精確到這一句 */
       if (pos.li != null && part.start.li == null && part.start.sid === pos.sid && part.last.sid === pos.sid && part.last.li == null) part.start = pos;
@@ -3413,12 +3426,12 @@ try {
       Object.keys(r.parts || {}).forEach(function (k) { out.push({ rec: r, k: k, part: r.parts[k], live: false }); });
     });
     var live = loadLive();
-    if (live && live.classId === cls) Object.keys(live.parts || {}).forEach(function (k) { out.push({ rec: live, k: k, part: live.parts[k], live: true }); });
+    if (live && live.classId === cls) Object.keys(live.parts || {}).forEach(function (k) { if (!live.parts[k].carried) out.push({ rec: live, k: k, part: live.parts[k], live: true }); });   /* V236：本節接續的暫記不當成「上次」 */
     out.sort(function (a, b) { return String(b.part.lastAt).localeCompare(String(a.part.lastAt)); });
     return out;
   }
   function lastFor(cls, lesson) {
-    var e = entries(cls).filter(function (x) { return !lesson || x.k === lesson; });
+    var e = entries(cls).filter(function (x) { return (!lesson || x.k === lesson) && !x.part.carried; });   /* V236：接續上節畫面的紀錄不當「繼續上課」的起點 */
     return e[0] || null;
   }
   V.lastFor = lastFor;
@@ -3442,7 +3455,7 @@ try {
     renderChip(); if (typeof clsRender === 'function') clsRender();
   };
   /* v100：最近三筆（同班同課）可選擇從哪一筆繼續 */
-  function top3(cls, lesson) { return entries(cls).filter(function (x) { return x.k === lesson; }).slice(0, 3); }
+  function top3(cls, lesson) { return entries(cls).filter(function (x) { return x.k === lesson && !x.part.carried; }).slice(0, 3); }
   function closeMenu() { var m = document.getElementById('v100-rmenu'); if (m) m.remove(); }
   V.resumeEntry = function (cls, lesson, i) {
     var e = top3(cls, lesson)[i || 0]; if (!e) return;
@@ -3450,6 +3463,15 @@ try {
     var panel = document.getElementById('cls-panel');
     if (panel && panel.classList.contains('open')) clsToggle();
     var p = resumePos(e.part);
+    restore(p);
+    record(p);
+  };
+  /* V236：接續紀錄不會自動被選，但老師在清單上點「從這繼續」可以用 */
+  V.resumeCarried = function (id, lesson) {
+    var r = loadHist().filter(function (x) { return x.id === id; })[0], part = r && r.parts && r.parts[lesson]; if (!part) return;
+    var panel = document.getElementById('cls-panel');
+    if (panel && panel.classList.contains('open')) clsToggle();
+    var p = resumePos(part);
     restore(p);
     record(p);
   };
@@ -3505,7 +3527,7 @@ try {
     else {
       cls = 'live';
       var head = cur.cls + (cur.source === 'manual' ? '（調課）' : '') + '｜第' + cur.period + '節';
-      if (live && live.key === cur.key && live.lessonId) txt = head + '｜' + live.lessonId + ' ' + posText(live.parts[live.lessonId].last) + (afterBell(live) ? '｜已下課' : '');
+      if (live && live.key === cur.key && live.lessonId && !live.parts[live.lessonId].carried) txt = head + '｜' + live.lessonId + ' ' + posText(live.parts[live.lessonId].last) + (afterBell(live) ? '｜已下課' : '');
       else {
         var e = lastFor(cur.cls, cur.lesson);
         txt = head + (e ? '｜上次：' + e.k + ' ' + posText(resumePos(e.part)) : '');
@@ -3626,16 +3648,19 @@ try {
     var h = '<div class="v82-h">' + esc(clsCur) + '・自動上課進度</div>';
     if (!order.length) h += '<div class="v82-empty">尚無自動紀錄（上課時間開啟課文後會自動記錄）</div>';
     order.forEach(function (k) {
-      var list = by[k], last = list[0];
+      var list = by[k], last = list.filter(function (e) { return !e.part.carried; })[0] || list[0], ri = 0;
       h += '<div class="v82-les"><div class="v82-les-h"><span>《' + esc(k) + '》</span>' +
         '<button type="button" onclick="V82.pickResume(' + esc(JSON.stringify(clsCur)) + ',' + esc(JSON.stringify(k)) + ',this)">繼續上課</button></div>' +
         '<div>最近一次：' + fmtDate(last.rec) + ' 第' + last.rec.period + '節　上到：' + esc(posText(resumePos(last.part))) +
         (last.live ? '<span class="v82-live">本節進行中</span>' : '') + '</div><ul>' +
         list.slice(0, 12).map(function (e, i) {
+          var j = e.part.carried ? 99 : ri++;   /* V236：「從這繼續」編號跳過接續紀錄，和 top3 對齊 */
           return (i === 3 ? '</ul><details class="v100-older"><summary>更早的紀錄（' + (Math.min(list.length, 12) - 3) + '）</summary><ul>' : '') +
             '<li>' + fmtDate(e.rec) + ' 第' + e.rec.period + '節 → ' + esc(rangeText(e.part)) +
             (e.rec.manualAt ? '<span class="v82-tag">手動更新</span>' : '') +
-            (i < 3 ? '<button type="button" class="v100-from" onclick="V82.resumeEntry(' + esc(JSON.stringify(clsCur)) + ',' + esc(JSON.stringify(k)) + ',' + i + ')">從這繼續</button>' : '') +
+            (e.part.carried ? '<span class="v82-tag" title="這節沒換頁也沒點句子，記的是上一節結束時的畫面">接續上節畫面</span>' : '') +
+            (j < 3 ? '<button type="button" class="v100-from" onclick="V82.resumeEntry(' + esc(JSON.stringify(clsCur)) + ',' + esc(JSON.stringify(k)) + ',' + j + ')">從這繼續</button>' :
+              e.part.carried && i < 3 && !e.live ? '<button type="button" class="v100-from" onclick="V82.resumeCarried(' + esc(JSON.stringify(e.rec.id)) + ',' + esc(JSON.stringify(k)) + ')">從這繼續</button>' : '') +
             (e.rec.classSource === 'manual' ? '<span class="v82-tag">調課</span>' : '') +
             (e.live ? '<span class="v82-live">進行中</span>' : '<button type="button" class="v82-del" onclick="V82.delRec(' + esc(JSON.stringify(e.rec.id)) + ')">✕</button>') + '</li>';
         }).join('') + '</ul>' + (list.length > 3 ? '</details>' : '') + '</div>';
@@ -8731,7 +8756,8 @@ try {
     if (Array.isArray(h)) h.forEach(function (x) { if (x && x.date === s.date && x.period === s.p && x.classId === c && x.parts && x.parts[k]) parts = x.parts; });
     if (!parts) { var lv = get('tp_live_v1', null); if (lv && lv.key === s.key && lv.classId === c && lv.parts && lv.parts[k]) parts = lv.parts; }
     if (!parts) return null;
-    var pt = parts[k], a = pt.last && (pt.last.ord || pt.last.r), b = pt.max && (pt.max.ord || pt.max.r);
+    var pt = parts[k]; if (pt.carried) return null;   /* V236：接續上節畫面（整節沒碰）不拿來判斷進度，照舊當作沒紀錄 */
+    var a = pt.last && (pt.last.ord || pt.last.r), b = pt.max && (pt.max.ord || pt.max.r);
     return a || b || null;
   }
   /* 自動判斷：回傳 {s, n, stop, to} 或 null */
@@ -13043,7 +13069,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V235';
+  window.APP_VERSION = 'V236';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

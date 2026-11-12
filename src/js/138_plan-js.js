@@ -131,7 +131,8 @@
     if (Array.isArray(h)) h.forEach(function (x) { if (x && x.date === s.date && x.period === s.p && x.classId === c && x.parts && x.parts[k]) parts = x.parts; });
     if (!parts) { var lv = get('tp_live_v1', null); if (lv && lv.key === s.key && lv.classId === c && lv.parts && lv.parts[k]) parts = lv.parts; }
     if (!parts) return null;
-    var pt = parts[k], a = pt.last && (pt.last.ord || pt.last.r), b = pt.max && (pt.max.ord || pt.max.r);
+    var pt = parts[k]; if (pt.carried) return null;   /* V236：接續上節畫面（整節沒碰）不拿來判斷進度，照舊當作沒紀錄 */
+    var a = pt.last && (pt.last.ord || pt.last.r), b = pt.max && (pt.max.ord || pt.max.r);
     return a || b || null;
   }
   /* 自動判斷：回傳 {s, n, stop, to} 或 null */
