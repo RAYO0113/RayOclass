@@ -80,7 +80,9 @@ ul.pts{margin:.2em 0;padding-left:1.2em;line-height:1.75}
 .tl{position:relative;margin-top:.3em}
 .tl-axis{display:grid;grid-template-columns:repeat(9,1fr);font-size:.75em;color:var(--muted);border-bottom:2px solid var(--ink);padding-bottom:.2em}
 .tl-axis span{text-align:center}
-.tl-lanes{display:grid;grid-template-columns:repeat(9,1fr);grid-auto-rows:3.4em;gap:.55em .3em;margin-top:.8em}
+.tl-lanes{display:grid;grid-template-columns:repeat(9,1fr);grid-auto-rows:2.9em;gap:.45em .3em;margin-top:.6em}
+.tl-axis span{white-space:nowrap;font-size:.85em}
+.fu-card{white-space:nowrap;overflow:hidden}
 .node{border:2.5px solid var(--c);color:var(--ink);background:#fffdf8;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-weight:800;font-size:1.05em;padding:0 .3em;transition:background .2s,transform .2s;white-space:nowrap;overflow:hidden;opacity:0;transform:translateY(8px)}
 .play .node,.play .fu-card{opacity:1;transform:none;transition:opacity .4s,transform .4s,background .2s}
 .node:hover,.node.sel{background:color-mix(in srgb,var(--c) 20%,#fff)}
@@ -146,9 +148,29 @@ table.sum td:first-child{font-weight:800;border-left:5px solid var(--c)}
 .q .fb{min-height:1.4em;font-size:.85em;margin-top:.35em}
 .q .opt.ok{background:#2d6b4f;color:#fff;border-color:#2d6b4f}
 .q .opt.no{background:#efe6e2;border-color:#b0796a}
+/* 投影放大（老師 11/12：字太小，後面看不見）——基準字級約 1.35 倍，小字不小於 0.9 倍、顏色加深 */
+:root{--fs:clamp(18px, 2.4vw, 34px); --muted:#4a463d}
+.hint,.tag,.note,.small,.lab,.tl-note,.tl-axis,.node small,.fu-card,.q .fb,header .crumb,footer .pg,.evo .cap,.ci-line .n,.lian,.dz-tag{font-size:.9em}
+.card,.expl,ul.pts,.l7-st{line-height:1.6}
+table.sum{font-size:.88em}
+.slide{padding:.8em 1.2em .8em}
+h1{font-size:1.55em;margin:0 0 .2em}
+.grid2{gap:.9em}
+footer .hint{font-size:.72em}
+.btn{font-size:.85em}
+.ch{font-size:1em;width:1.75em;height:1.75em}
+.branch .ch{width:1.5em;height:1.5em;font-size:.9em}
+.branch .lab{font-size:.75em}
+.evo .bar{height:.6em}
+.evo{margin:.6em 0;gap:1.1em}
+.cover h1{font-size:2.3em}
+.jt-grid .row .ch{width:1.4em;height:1.4em;font-size:.95em}
+.jt-grid{gap:.18em}
+.jt-ctrl{margin-bottom:.35em}
+.qu-demo .ch{width:1.6em;height:1.6em}
 /* 手機直式 */
 @media (max-width: 760px){
-  :root{--fs:15px}
+  :root{--fs:16px}
   .slide{padding:.8em .9em}
   .grid2,.fork,.style2,.qu-tree,.quiz{grid-template-columns:1fr}
   .fork .mid{flex-direction:row;justify-content:center}
@@ -161,6 +183,8 @@ table.sum td:first-child{font-weight:800;border-left:5px solid var(--c)}
   .ch{width:1.7em;height:1.7em;font-size:1em}
   footer .hint{display:none}
   table.sum{font-size:.72em}
+  .qu-demo .row{flex-wrap:wrap;row-gap:.25em}
+  .qu-demo .ch{width:1.45em;height:1.45em}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
 </style>
@@ -211,7 +235,7 @@ P('cover', '封面', `
   <div class="sub">從《詩經》到新詩的千年旅程</div>
   <div class="evo" id="evo">
     ${[['四言', C.sj, [4, 4, 4, 4]], ['長短句', C.cc, [7, 5, 8, 6]], ['方格律詩', C.jt, [5, 5, 5, 5]], ['詞的長短句', C.ci, [4, 7, 3, 6]], ['自由分行', C.xs, [6, 2, 9, 4]]]
-      .map(([cap, c, ls], i) => `<div class="blk" style="--c:${c};transition-delay:${i * .22}s">${ls.map(n => `<div class="bar" style="width:${n * 1.25}em"></div>`).join('')}<div class="cap">${cap}</div></div>`).join('')}
+      .map(([cap, c, ls], i) => `<div class="blk" style="--c:${c};transition-delay:${i * .22}s">${ls.map(n => `<div class="bar" style="width:${n * .8}em"></div>`).join('')}<div class="cap">${cap}</div></div>`).join('')}
   </div>
   <div class="note">每一條線代表一句詩的長短：形式一直在變</div>
   <button class="btn pri" onclick="go(1)">開始探索 →</button>
@@ -235,7 +259,7 @@ P('map', '總覽', `
   <div class="tl-axis">${['先秦', '戰國', '西漢', '東漢', '魏晉南北朝', '唐', '宋', '元', '五四以來'].map(t => `<span>${t}</span>`).join('')}</div>
   <div class="tl-lanes">
     ${NODES.map(([id, n, t, c, col, row]) => `<div class="node" data-go="${id}" style="--c:${c};grid-column:${col};grid-row:${row}">${n}<small>${t}</small></div>`).join('')}
-    <div class="fu-card" data-go="four" style="grid-column:3/5;grid-row:4"><b>漢賦</b>　與詩並列的漢代文體 ▸</div>
+    <div class="fu-card" data-go="four" style="grid-column:4/6;grid-row:1"><b>漢賦</b><span>　並列文體 ▸</span></div>
   </div>
   <div class="tl-note">● 樂府詩與古詩<b>同在兩漢出現、時間交疊</b>，是兩條並行的路線，不是「樂府結束後才有古詩」。<br>● 虛線卡「漢賦」：漢代最重要的文體之一，鋪陳文采、韻散結合；它和詩並列，不是詩歌主線上的一站，最後「四大韻文」會再出現。</div>
 </div>`, el => {
@@ -545,7 +569,7 @@ function pending() { return $$('.st:not(.show):not([data-click])', cur()); }   /
 function updNext() { $('#bNext').textContent = pending().length ? '下一步 ▸' : (state.i < PAGES.length - 1 ? '下一頁 →' : '完'); }
 function next() {
   const p = pending();
-  if (p.length) { p[0].classList.add('show'); updNext(); return; }
+  if (p.length) { p[0].classList.add('show'); updNext(); setTimeout(() => p[0].scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60); return; }
   if (state.i < PAGES.length - 1) go(state.i + 1);
 }
 function prev() { if (state.i > 0) go(state.i - 1); }

@@ -7942,15 +7942,18 @@ table.l7t th { white-space: nowrap; background: #f6eedd; }
 /* 小封面 */
 .l7-cv-t { font-size: 2.4em; font-weight: 900; letter-spacing: .3em; color: #8a3b2e; text-align: center; margin: .2em 0 0; }
 .l7-cv-s { text-align: center; color: #8b7355; letter-spacing: .4em; margin-bottom: 1em; }
-#wkfs-body .l7-cover, #wk-slide-area .l7-cover { font-size: .8em; }
+#wkfs-body .l7-cover, #wk-slide-area .l7-cover { font-size: 1em; }   /* 11/12 老師：字太小 → 不再縮小 */
 .l7-cover { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .8em; align-items: start; }
 .l7-cover .l7-cv-t, .l7-cover .l7-cv-s { grid-column: 1 / -1; }
 .l7-cover .l7-cv-t { font-size: 1.8em; }
 .l7-cover .l7-cv-s { margin-bottom: .4em; }
-.l7-cover details.l7d { margin: .3em 0; font-size: .82em; }
+.l7-cover details.l7d { margin: .3em 0; font-size: .95em; }
 .l7-cover details.l7d > summary { padding: .35em .7em; }
 .l7-cover .l7d-b { padding: .35em .6em .5em; line-height: 1.7; }
-.l7-cover .l7-go { font-size: .9em; padding: .1em .6em; margin: .12em .15em; }
+.l7-cover .l7-go { font-size: 1em; padding: .1em .6em; margin: .12em .15em; }
+.l7-go { font-size: .95em; }
+.l7-era { font-size: .95em; }
+.l7-who, .l7-note { font-size: 1em; }
 @media (max-width: 700px) { .l7-cover { grid-template-columns: 1fr; } }
 .l7-cover .l7-anim-row { grid-column: 1 / -1; justify-content: center; margin: .2em 0 .6em; }
 /* 流變動畫蓋版 */
