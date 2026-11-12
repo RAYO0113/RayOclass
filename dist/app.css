@@ -7952,6 +7952,10 @@ table.l7t th { white-space: nowrap; background: #f6eedd; }
 .l7-cover .l7d-b { padding: .35em .6em .5em; line-height: 1.7; }
 .l7-cover .l7-go { font-size: .9em; padding: .1em .6em; margin: .12em .15em; }
 @media (max-width: 700px) { .l7-cover { grid-template-columns: 1fr; } }
+.l7-cover .l7-anim-row { grid-column: 1 / -1; justify-content: center; margin: .2em 0 .6em; }
+/* 流變動畫蓋版 */
+#l7-anim { position: fixed; inset: 0; z-index: 2147483647; background: #F4F0E7; }
+#l7-anim iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 /* 代表作：原文分段、翻譯（按「翻譯」才出現） */
 .l7-who { color: #8b7355; margin-bottom: .4em; }

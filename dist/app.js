@@ -13131,6 +13131,18 @@ try {
     slide.querySelectorAll('.l7-y').forEach(function (y) { y.classList.toggle('show', on); });
   };
 
+  /* 〈詩的變形記〉流變動畫（lb/index.html）：蓋在畫面最上層開，頁內「✕ 回課文」或 Esc 關掉，回到原本那一頁 */
+  window.l7Anim = function () {
+    if (document.getElementById('l7-anim')) return;
+    var box = document.createElement('div');
+    box.id = 'l7-anim';
+    box.innerHTML = '<iframe src="lb/index.html#map" title="詩的變形記" allow="fullscreen"></iframe>';
+    document.body.appendChild(box);
+    setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
+  };
+  function closeAnim() { var b = document.getElementById('l7-anim'); if (b) b.remove(); }
+  window.addEventListener('message', function (e) { if (e.data && e.data.lbClose) closeAnim(); });
+
   var _render = wkRenderCurrent;
   wkRenderCurrent = function () {
     document.body.classList.toggle('l7-wide', wkKey === KEY);
