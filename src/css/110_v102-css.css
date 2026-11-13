@@ -7,7 +7,7 @@
 #v98-cal .v102-qgrid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px; margin:2px 0 6px; max-height:260px; overflow-y:auto;
   padding:2px; border:1px solid var(--border,#e4d8c4); border-radius:4px; }
 #v98-cal .v102-qc { display:flex; align-items:center; gap:5px; min-width:0; border:1px solid var(--border,#d4c4a8); border-radius:4px;
-  background:transparent; color:var(--ink,#3a3f45); padding:6px 5px; cursor:pointer; font-family:"Noto Serif TC",serif; font-size:14px; text-align:left;
+  background:transparent; color:var(--ink,#1a1209); padding:6px 5px; cursor:pointer; font-family:"Noto Serif TC",serif; font-size:14px; text-align:left;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; -webkit-tap-highlight-color:transparent; }
 #v98-cal .v102-qc b { flex:none; min-width:24px; height:24px; border-radius:12px; display:grid; place-items:center; font-size:12px;
   background:var(--warm,#f5ede0); color:var(--muted,#7a6a55); }
@@ -38,7 +38,7 @@ body.dark-mode #v98-cal .v102-qsum { color:#d6c2f5; }
 #v98-cal .v143-hint { font-size:13px; color:#8a6512; margin:0 0 4px; }
 #v98-cal .v143-vp { border:2px solid #b8861b; border-radius:6px; padding:6px 8px; margin:0 0 8px; background:var(--card,#fffdf8); }
 #v98-cal .v143-vh { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted,#7a6a55); margin-bottom:4px; }
-#v98-cal .v143-vh b { font-size:15px; color:var(--ink,#3a3f45); white-space:nowrap; }
+#v98-cal .v143-vh b { font-size:15px; color:var(--ink,#1a1209); white-space:nowrap; }
 #v98-cal .v143-vn { font-size:12px; color:var(--muted,#7a6a55); margin:0 0 4px; }
 #v98-cal .v143-vh button { margin-left:auto; flex:none; }
 #v98-cal .v143-vr { display:flex; align-items:center; gap:4px; padding:3px 0; border-top:1px dashed var(--border,#e4d8c4); }

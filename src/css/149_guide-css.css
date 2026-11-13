@@ -2,7 +2,7 @@
    資料是 ask 陣列裡的 HTML：.gd > .gd-q（主問題）＋ .gd-s×N（追問，.gd-sq 問／.gd-sa 答）＋ .gd-end（小結論）＋ .gd-all（全部展開） */
 .gd { margin:2px 0 14px; }
 .tp-askl li:has(> .gd) { list-style:none; margin-left:-1.5em; }
-.gd-q { font-weight:700; color:var(--mk-ink-deep,#3a3f45); }
+.gd-q { font-weight:700; color:var(--mk-ink-deep,#211710); }
 .gd-tag { display:inline-block; margin-right:.45em; padding:0 .5em; border-radius:4px; font-size:.95em; line-height:1.45;
   background:var(--L-supp,#7c4da0); color:#fff; font-weight:700; letter-spacing:.05em; }
 .gd-s { display:none; margin:6px 0 0 1.2em; padding:4px 10px; border-radius:6px; cursor:pointer;

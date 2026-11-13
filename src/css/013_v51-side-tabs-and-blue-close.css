@@ -17,7 +17,7 @@
   border:1px solid rgba(200,147,26,.35);
   border-right:none;
   border-radius:10px 0 0 10px;
-  background:var(--ink,#555b62);
+  background:var(--ink,#33271a);
   color:var(--gold,#c8931a);
   font-family:"Noto Serif TC",serif;
   font-size:12px;
@@ -41,7 +41,7 @@
 #wk-ink-tab:hover,
 #tp-close-blue-tab:hover,
 #wk-ink-tab.on {
-  background:#4a5057;
+  background:#2c2218;
   color:#fff;
   opacity:1;
 }

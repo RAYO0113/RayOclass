@@ -12,7 +12,7 @@ body.v137-fs #wk-ink-layer #wk-ink-toolbar > * { pointer-events:auto; }
 body.v137-fs #wk-ink-layer #wk-ink-extra, body.v137-fs #wk-ink-grp-l { display:flex !important; align-items:center; gap:6px; }
 body.v137-fs #wk-ink-toolbar .wk-ink-btn { min-height:0 !important; height:30px; padding:0 10px !important; font-size:13px !important; line-height:1; }
 body.v137-fs #wk-ink-toolbar .wk-ink-color { width:26px !important; height:26px !important; min-width:26px !important; }
-body.v137-fs #v137-touch.on { background:#efe6d2 !important; color:#3a3f45 !important; border-color:#efe6d2 !important; }
+body.v137-fs #v137-touch.on { background:#efe6d2 !important; color:#14100a !important; border-color:#efe6d2 !important; }
 body.v137-fs #wk-ink-canvas { display:block !important; }                  /* 觸控筆模式也看得到筆跡（畫布不攔觸控） */
 body.v137-fs #wk-ink-layer:not(.active) #wk-ink-canvas { pointer-events:none !important; }
 body.v137-fs #wk-ink-layer:not(.active), body.v137-fs #wk-ink-layer:not(.active) * { -webkit-user-select:auto; user-select:auto; }

@@ -5,14 +5,14 @@
 #v98-open:hover { background:#7a2e2e; color:#fff; }
 #v98-cal { position:fixed; inset:0; z-index:9700; background:rgba(30,20,10,.45); display:none; align-items:center; justify-content:center; }
 #v98-cal.open { display:flex; }
-#v98-cal .v98-box { background:var(--surface,#fff); color:var(--ink,#3a3f45); width:min(1120px,96vw); height:min(800px,94vh);
+#v98-cal .v98-box { background:var(--surface,#fff); color:var(--ink,#1a1209); width:min(1120px,96vw); height:min(800px,94vh);
   border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; overflow:hidden; font-size:14px; }
 #v98-cal .v98-top { display:flex; align-items:center; gap:8px; padding:10px 14px; background:#7a2e2e; color:#fff; flex-wrap:wrap; }
 #v98-cal .v98-top h3 { margin:0; font-family:"Noto Serif TC",serif; font-size:18px; letter-spacing:2px; min-width:130px; text-align:center; }
 #v98-cal .v98-top button { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6); border-radius:4px; padding:4px 10px; cursor:pointer; font-size:14px; }
 #v98-cal .v98-top .v98-sp { flex:1; }
 #v98-cal .v98-cls { display:flex; gap:4px; padding:8px 12px; flex-wrap:wrap; border-bottom:1px solid var(--border,#d4c4a8); align-items:center; }
-#v98-cal .v98-cls button { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#3a3f45); border-radius:14px;
+#v98-cal .v98-cls button { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#1a1209); border-radius:14px;
   padding:4px 12px; cursor:pointer; font-family:"Noto Serif TC",serif; font-size:14px; }
 #v98-cal .v98-cls button.on { background:#7a2e2e; color:#fff; border-color:#7a2e2e; font-weight:700; }
 #v98-cal .v98-cls button i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
@@ -41,13 +41,13 @@
 #v98-cal .v98-ed h4, #v98-cal .v98-up h4 { margin:0 0 6px; font-family:"Noto Serif TC",serif; font-size:15px; color:#7a2e2e; }
 #v98-cal .v98-row { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 8px; align-items:center; }
 #v98-cal .v98-row > span { font-size:12px; color:var(--muted,#7a6a55); width:100%; }
-#v98-cal .v98-row button { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#3a3f45); border-radius:4px;
+#v98-cal .v98-row button { border:1px solid var(--border,#d4c4a8); background:transparent; color:var(--ink,#1a1209); border-radius:4px;
   padding:5px 9px; cursor:pointer; font-size:14px; font-family:"Noto Serif TC",serif; }
 #v98-cal .v98-row button.on { background:#7a2e2e; color:#fff; border-color:#7a2e2e; font-weight:700; }
 #v98-cal .v98-row button.v98-l { min-width:38px; padding:5px 4px; }
 #v98-cal .v98-row button.v98-l small { display:block; font-size:10px; opacity:.8; max-width:52px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 #v98-cal .v98-row input[type=text] { flex:1; min-width:120px; padding:5px 8px; border:1px solid var(--border,#d4c4a8); border-radius:4px;
-  font-size:14px; background:var(--surface,#fff); color:var(--ink,#3a3f45); }
+  font-size:14px; background:var(--surface,#fff); color:var(--ink,#1a1209); }
 #v98-cal .v98-add { width:100%; background:#7a2e2e; color:#fff; border:none; border-radius:4px; padding:8px; cursor:pointer;
   font-size:15px; font-family:"Noto Serif TC",serif; font-weight:700; letter-spacing:2px; }
 #v98-cal .v98-add:disabled { opacity:.4; cursor:default; }

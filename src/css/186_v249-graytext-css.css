@@ -1,0 +1,11 @@
+/* V249（2026-11-13）課文內文改鐵灰：只動內文區與注釋浮框，
+   課文標題（.tp-title）、頁首、左側課文清單、右側籤頁維持原色；深色模式不動。 */
+body:not(.dark-mode) .tp-main,
+body:not(.dark-mode) .tp-side,
+body:not(.dark-mode) .tp-panel {
+  --mk-ink-deep: #3a3f45;
+  --mk-ink:      #555b62;
+  --ink:         #3a3f45;
+}
+body:not(.dark-mode) .tp-main .tp-ruby-book { color: #3a3f45; }
+body:not(.dark-mode) .tp-side { color: #3a3f45; }  /* 注釋欄文字是繼承外層顏色，需直接指定 */

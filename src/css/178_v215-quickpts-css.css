@@ -5,13 +5,13 @@
 #qp-fab:hover, #qp-fab.on { opacity:1; }
 #qp-fab.on { background:#c9a227; }
 #qp-pad { position:fixed; z-index:9595; display:none; width:260px; max-width:calc(100vw - 8px); max-height:calc(100vh - 8px); overflow:auto;
-  background:rgba(255,252,244,.96); color:#3a3f45; border:2px solid #2f7d43; border-radius:12px; box-shadow:0 4px 18px rgba(0,0,0,.28);
+  background:rgba(255,252,244,.96); color:#1a1209; border:2px solid #2f7d43; border-radius:12px; box-shadow:0 4px 18px rgba(0,0,0,.28);
   padding:6px; font:14px/1.3 system-ui,"Microsoft JhengHei",sans-serif; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 #qp-pad.open { display:block; }
 #qp-pad.minus { border-color:#b03a2e; }
 #qp-pad button { font:inherit; color:inherit; cursor:pointer; touch-action:manipulation; }
 #qp-pad .qp-top { display:flex; align-items:center; gap:3px; margin-bottom:5px; }
-#qp-pad .qp-top select { font:inherit; font-size:14px; padding:2px; max-width:96px; border:1px solid #c9bba3; border-radius:5px; background:#fff; color:#3a3f45; }
+#qp-pad .qp-top select { font:inherit; font-size:14px; padding:2px; max-width:96px; border:1px solid #c9bba3; border-radius:5px; background:#fff; color:#1a1209; }
 #qp-pad .qp-auto { font-size:11px; background:#2c6e91; color:#fff; border-radius:7px; padding:0 5px; }
 #qp-pad .qp-sp { flex:1; }
 #qp-pad .qp-top button { min-width:30px; height:30px; border:1px solid #c9bba3; border-radius:6px; background:#fff; padding:0 4px; font-size:15px; }

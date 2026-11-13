@@ -11,7 +11,7 @@
 table.v75-yb { width:100%; border-collapse:collapse; table-layout:auto; font-size:var(--v75-fs); line-height:1.8; background:var(--surface,#fffdf8); }
 table.v75-yb th { background:linear-gradient(135deg,var(--L-gloss,#1f6fb2),#4a90c8); color:#fff; font-weight:700; padding:6px 12px;
   letter-spacing:.3em; text-align:center; border:1px solid #c9d8e8; font-size:var(--v75-fs); }
-table.v75-yb td { border:1px solid #c9d8e8; padding:8px 14px; vertical-align:middle; color:var(--mk-ink,#555b62); font-size:var(--v75-fs); }
+table.v75-yb td { border:1px solid #c9d8e8; padding:8px 14px; vertical-align:middle; color:var(--mk-ink,#33271a); font-size:var(--v75-fs); }
 table.v75-yb td.v75-x { text-align:center; font-family:"Noto Serif TC",serif; font-weight:900; font-size:calc(var(--v75-fs) * 1.5);
   color:var(--L-gloss,#1f6fb2); background:rgba(31,111,178,.06); white-space:nowrap; width:1%; vertical-align:top; padding-top:14px; }
 table.v75-yb .v75-ex2 { display:grid; grid-template-columns:1fr 1fr; column-gap:1.4em; }

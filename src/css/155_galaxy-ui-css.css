@@ -8,7 +8,7 @@
   border-radius: 16px; background: var(--gold); box-shadow: 0 1px 4px rgba(0,0,0,.45); transition: transform .3s ease; }
 body.mode-senior .mode-switch::before { transform: translateX(100%); }
 .mode-switch button { position: relative; z-index: 1; flex: 1 1 0; border-radius: 16px; padding: 5px 16px; transition: color .3s; }
-.mode-switch button.active { background: transparent; color: #3a3f45; }
+.mode-switch button.active { background: transparent; color: #1a1209; }
 
 /* ④ 作業完成格：方框 → 勾勾（改自 G4b413l smooth-duck-62）。
    原本的 ✓／○ 字藏起來，改用框線畫；顏色沿用原本的完成色（綠＝完成、藍＝檢討）。只有剛點的那格（.v130-just）播動畫。 */

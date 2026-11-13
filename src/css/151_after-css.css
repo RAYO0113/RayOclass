@@ -1,6 +1,6 @@
 /* V126 課後引導與心智圖（150_after-js） */
 .ah { font-family:"Noto Sans TC",sans-serif; }
-.ah-q { font-family:"Noto Serif TC",serif; font-size:calc(var(--base-size,20px)*1.6); font-weight:700; color:var(--mk-ink-deep,#3a3f45);
+.ah-q { font-family:"Noto Serif TC",serif; font-size:calc(var(--base-size,20px)*1.6); font-weight:700; color:var(--mk-ink-deep,#211710);
   text-align:center; margin:4px 0 14px; letter-spacing:.06em; }
 .ah-step { display:none; margin:0 0 18px; padding:14px 18px; border-radius:10px; background:rgba(255,255,255,.6); border:1px solid rgba(124,77,160,.25); }
 .ah-step.on { display:block; animation:ahIn .5s ease both; }
@@ -53,7 +53,7 @@ body.dark-mode .ah-end { background:#2e2610; }
 .mm-side > ul > .mm-n > .mm-k::after { color:#fff; }
 .mm-side > ul > .mm-n > ul > .mm-n > .mm-k { border-color:#7c4da0; color:#5b3680; }
 .mm-side > ul > .mm-n > ul > .mm-n > .mm-k::after { color:#7c4da0; }
-.mm-side > ul > .mm-n > ul > .mm-n > ul > .mm-n > .mm-k { cursor:default; border:1px solid #d8cbb0; background:#fffaf0; color:#555b62; font-weight:400; }
+.mm-side > ul > .mm-n > ul > .mm-n > ul > .mm-n > .mm-k { cursor:default; border:1px solid #d8cbb0; background:#fffaf0; color:#33271a; font-weight:400; }
 /* 右側往右長、左側往左長（連接線） */
 .mm-r ul ul { padding-left:22px; border-left:2px solid #c9d9d4; margin-left:14px; }
 .mm-l { text-align:right; }

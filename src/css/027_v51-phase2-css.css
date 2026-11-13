@@ -8,7 +8,7 @@
 .tp-ruby-char{ display:block; line-height:1.04; }
 .tp-ruby-tone{ position:absolute; left:.73em; top:0; display:block; line-height:1; }
 .tp-ruby-tone-light{ top:-1.05em; }
-.tp-ruby-book{ color:#3a3f45; }
+.tp-ruby-book{ color:#111; }
 .tp-ruby-note{ color:#7a2e2e; }
 /* {n} 專用：保留原文字大小，為深紅直式注音與註號保留獨立的右側空間。 */
 .tp-n > .tp-ruby-note{ width:1.48em; margin-left:.24em; margin-right:.32em; }

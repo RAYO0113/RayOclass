@@ -5,13 +5,13 @@
 #v84-hw .v84-h i { font-style:normal; font-weight:400; color:var(--muted,#7a6a55); font-size:12px; }
 #v84-hw .v84-les { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0 6px; }
 #v84-hw .v84-les button { flex:1 1 30%; min-width:0; padding:6px 2px; border:1px solid var(--border,#d4c4a8); border-radius:4px;
-  background:transparent; color:var(--ink,#3a3f45); font-family:"Noto Serif TC",serif; font-size:13px; cursor:pointer;
+  background:transparent; color:var(--ink,#1a1209); font-family:"Noto Serif TC",serif; font-size:13px; cursor:pointer;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #v84-hw .v84-les button.on { background:#7a2e2e; color:#fff; border-color:#7a2e2e; font-weight:700; }
 #v84-hw .v84-les button b { font-weight:400; font-size:11px; opacity:.75; margin-right:2px; }
 #v84-hw table { width:100%; border-collapse:collapse; table-layout:fixed; }
 #v84-hw th, #v84-hw td { border:1px solid var(--border,#d4c4a8); text-align:center; padding:0; }
-#v84-hw th { font-weight:700; font-size:12px; padding:3px 0; background:var(--warm,#f5ede0); color:var(--ink,#3a3f45); }
+#v84-hw th { font-weight:700; font-size:12px; padding:3px 0; background:var(--warm,#f5ede0); color:var(--ink,#1a1209); }
 #v84-hw th.v84-g { font-size:13px; }
 #v84-hw th.v84-sub { font-weight:400; color:var(--muted,#7a6a55); }
 #v84-hw td.v84-cls { font-family:"Noto Serif TC",serif; font-weight:700; font-size:13px; width:58px; background:var(--warm,#f5ede0); }
