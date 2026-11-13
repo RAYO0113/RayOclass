@@ -44,3 +44,6 @@ table.l7t .l7-erab { font-size: 1.15em; border-bottom-width: 3px; }
 
 /* 比較表頁有旁邊結構圖 → 欄名不要被擠成直排 */
 :is(#wk-fullscreen, #wkfs-body, #wk-slide-area, .wk-slide-area) .l7-lf table.l7t th { white-space: nowrap !important; }
+
+/* 11/13 晚 老師：旁邊結構圖沒必要 → 資料已拿掉，內容改全寬 */
+.l7-lf { display: block; }
