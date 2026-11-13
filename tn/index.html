@@ -36,6 +36,7 @@ button,summary{cursor:pointer}
 .where{margin-top:6px}
 .where .ls{font-size:13px;color:var(--mut)}
 .where .pg{font-size:21px;font-weight:700;line-height:1.35}
+body.selfb main{padding-bottom:200px}
 main{padding:12px 16px 120px;max-width:720px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px}
 .tag{font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px}
@@ -62,6 +63,9 @@ details.all>summary{color:var(--pri);font-weight:700;padding:6px 0}
 .lock input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin:14px 0 10px;font-size:18px;text-align:center}
 .lock .go{width:100%;padding:12px;border-radius:10px;border:0;background:var(--pri);color:#fff;font-weight:700}
 .err{color:var(--tc);font-size:14px;min-height:1.4em}
+.backf{position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:6;padding:12px 14px;border:0;border-radius:14px;background:#d9480f;color:#fff;font-size:1.05em;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25);text-align:left;line-height:1.35}
+.backf small{display:block;font-weight:400;opacity:.9;font-size:.82em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.backf.hide{display:none}
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
 .bar select{flex:1;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .hide{display:none!important}
@@ -326,6 +330,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     <div class="flt" id="flt"><button type="button" class="c-m" data-c="m">句意</button><button type="button" class="c-w" data-c="w">字義</button><button type="button" class="c-r" data-c="r">修辭</button><button type="button" class="c-t" data-c="t">翻譯</button><button type="button" class="c-a" data-c="a">提問</button><button type="button" class="c-g" data-c="g">考點</button></div>
   </div>
   <main id="main"></main>
+  <button type="button" class="backf hide" id="backf">↩ 跟回平板<small id="backfw"></small></button>
   <div class="bar">
     <button class="btn home" id="homeb" type="button" title="回封面">⌂</button>
     <select id="lsel" aria-label="選課"></select>
@@ -425,7 +430,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   function pageOf(k, seg) { var d = TB[k]; if (!d || !d.textPages) return null; return d.textPages.filter(function (p) { return p.seg === seg; })[0] || null; }
 
   /* ── 狀態 ── */
-  var D = null, S = { follow: true, pos: null, viewK: '', viewId: '', err: '', li: -1, rendered: '' };
+  var D = null, S = { cls: false, follow: true, pos: null, viewK: '', viewId: '', err: '', li: -1, rendered: '' };
   function lessonOf(k) { if (!D) return null; for (var i = 0; i < D.lessons.length; i++) if (D.lessons[i].k === k) return D.lessons[i]; return null; }
   function anchorOf(L, id) { if (!L || !id) return null; for (var i = 0; i < L.anchors.length; i++) { var a = L.anchors[i]; if (a.id === id || (a.ids && a.ids.indexOf(id) >= 0)) return a; } return null; }
   /* V231：代號尾巴 @題號（點了提問／統整框 @end）、~m~r~t~a~s（點了句意／修辭／翻譯／提問／筆法按鈕） */
@@ -521,9 +526,9 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     addX(false);
     L.anchors.forEach(function (a) { if (!seen[a.id]) { seen[a.id] = 1; list.push({ id: a.id, h: a.h, n: a.notes.length }); } });
     if (d) {   /* V223：課後習題、習作、A卷（點了看題目＋答案＋解析） */
-      if (d.basicQ && d.basicQ.length) list.push({ id: 'qall:', h: '課後習題　基礎練習（' + d.basicQ.length + ' 題）' });
+      (d.basicQ || []).forEach(function (q) { list.push({ id: 'q:' + q.n, h: '課後習題　基礎練習 第 ' + q.n + ' 題' }); });   /* V243：一題一項（同平板一題一頁） */
       (d.advQ || []).forEach(function (sec) { list.push({ id: 'iadv:' + (sec.head || ''), h: '課後習題　' + plain(sec.head || '進階練習') }); });
-      if (d.workbook) { list.push({ id: 'work_answers:', h: '習作　答案總覽' }); (d.workbook.sections || []).forEach(function (sec) { list.push({ id: 'work:' + (sec.head || ''), h: '習作　' + plain(sec.head || '') }); }); }
+      if (d.workbook) { list.push({ id: 'work_answers:', h: '習作　答案總覽' }); (d.workbook.sections || []).forEach(function (sec) { if (wkSplit(sec)) sec.items.forEach(function (q) { list.push({ id: 'work:' + (sec.head || '') + '|' + q.n, h: '習作　' + plain(wkShort(sec.head)) + '　第 ' + q.n + ' 題' }); }); else list.push({ id: 'work:' + (sec.head || ''), h: '習作　' + plain(sec.head || '') }); }); }
       if (d.aQuiz || d.aHand) list.push({ id: 'asheet:', h: 'A卷　全部答案' + (unlocked ? '' : '（考點解鎖後才看得到）') });
     }
     return list;
@@ -567,6 +572,8 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       return '<div class="it c-m"><b>' + clean(s.h || '') + '</b>' + (s.items || []).map(function (r) { return '<div>' + esc(r[0]) + '. ' + clean(r[1]) + '　<span class="wk-a">' + clean(r[2]) + '</span></div>'; }).join('') + '</div>';
     }).join('') + '</div>';
   }
+  function wkSplit(sec) { return sec && (sec.kind === 'quiz' || sec.kind === 'read') && (sec.items || []).length > 1; }
+  function wkShort(hd) { return String(hd || '').replace(/^\s*[壹貳參肆伍]\s*\S*站\s*/, '').replace(/[（(]每[題格答][^）)]*[）)]/g, '').trim(); }
   function practice(k, id) {
     var m = String(id || '').match(/^(q|qall|iadv|work|work_answers|aq|asheet|ahand):(.*)$/); if (!m) return null;
     var d = TB[k]; if (!d) return { t: '', h: LESSON_FILE[k] ? '<div class="empty">資料載入中…</div>' : '<div class="empty">這課沒有網站資料</div>' };
@@ -575,6 +582,17 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (ty === 'q') { var q = (d.basicQ || []).filter(function (x) { return String(x.n) === v; })[0]; t = '基礎練習 第 ' + v + ' 題'; h = q ? quizHTML(q, '基礎練習') : ''; }
     else if (ty === 'qall') { t = '課後習題　基礎練習'; h = (d.basicQ || []).map(function (x) { return quizHTML(x, '基礎練習'); }).join(''); }
     else if (ty === 'iadv') { var s1 = (d.advQ || []).filter(function (x) { return (x.head || '') === v; })[0] || (d.advQ || [])[0]; t = plain(s1 ? s1.head : '進階練習'); h = s1 ? secHTML(s1, '進階') : ''; }
+    else if (ty === 'work' && /\|[^|]+$/.test(v)) {   /* V243：習作選擇題一題一頁 work:<區標題>|<題號> */
+      var cut = v.lastIndexOf('|'), hd = v.slice(0, cut), qn = v.slice(cut + 1);
+      var s3 = ((d.workbook && d.workbook.sections) || []).filter(function (x) { return (x.head || '') === hd; })[0];
+      var it = s3 ? (s3.items || []).filter(function (x) { return String(x.n) === qn; })[0] : null;
+      t = '習作 第 ' + qn + ' 題　' + plain(wkShort(hd));
+      if (it) {
+        var lastQ = s3.items[s3.items.length - 1] === it;
+        h = '<div class="ln"><div class="sech">' + clean(s3.head || '') + '</div>' + (s3.passage ? '<details class="psg"><summary>閱讀文章</summary>' + clean(s3.passage) + '</details>' : '') + '</div>' +
+          quizHTML(it, '習作') + (lastQ && s3.appraise ? '<div class="ln"><div class="it c-t"><span class="k t">賞析</span>' + clean(s3.appraise) + '</div></div>' : '');
+      }
+    }
     else if (ty === 'work') { var s2 = ((d.workbook && d.workbook.sections) || []).filter(function (x) { return (x.head || '') === v; })[0]; t = '習作　' + plain(s2 ? s2.head : ''); h = s2 ? secHTML(s2, '習作') : ''; }
     else if (ty === 'work_answers') { t = '習作　答案總覽'; h = ((d.workbook && d.workbook.sections) || []).map(function (x) { return secHTML(x, '習作'); }).join(''); }
     else if (ty === 'aq') { var q2 = (d.aQuiz || []).filter(function (x) { return String(x.n) === v; })[0]; t = 'A卷 第 ' + v + ' 題'; h = q2 ? quizHTML(q2, 'A卷') : ''; }
@@ -723,6 +741,15 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     $('follow').classList.toggle('on', S.follow);
     $('follow').textContent = S.follow ? '跟著平板' : '自己翻（點我跟回）';
     markLine(sp, false);
+    paintBack();
+  }
+  /* V243（老師 11/13「不小心按到閱讀測驗，手機稿就切不回單選題」）：在「本課所有頁面」點了別頁會切成自己翻、不再跟平板；
+     原本只有上方小字「自己翻（點我跟回）」，上課時看不到 → 上課中自己翻時，底部浮一顆大的橘色「↩ 跟回平板」，並寫出平板現在在哪一頁 */
+  function paintBack() {
+    var b = $('backf'); if (!b) return;
+    var on = !S.follow && S.cls && VIEW === 'app';
+    b.classList.toggle('hide', !on); document.body.classList.toggle('selfb', on);
+    if (on) $('backfw').textContent = S.pos ? '平板現在在：' + (S.pos.h || ('第 ' + (S.pos.i + 1) + ' 頁')) : '';
   }
   /* V231：sp＝{li, tag}。@題號 → 最上方「現在問」大卡（不用滑）；@end → 段末統整；~x → 那句的句意／修辭／翻譯…那一塊；其他 → 那一句 */
   function markLine(sp, smooth) {
@@ -768,7 +795,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   var pollT = 0, inflight = false;
   function poll() {
     clearTimeout(pollT);
-    if (document.hidden || VIEW !== 'app' || !S.follow) return;   /* V223：只有「開始上課」（跟著平板）時才輪詢 */
+    if (document.hidden || VIEW !== 'app' || !(S.follow || S.cls)) return;   /* V223：只有「開始上課」時才輪詢；V243：上課中自己翻也繼續問，才能顯示「平板在哪」 */
     if (!inflight) {
       inflight = true;
       fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'liveGet' }), redirect: 'follow' })
@@ -786,7 +813,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
           }
         })
         .catch(function (e) { S.err = (e && e.message) || '連不上'; if (/Failed to fetch|NetworkError|Load failed/i.test(S.err)) S.err = '網路連不上，稍後自動重試'; })
-        .then(function () { inflight = false; paintLive(); });
+        .then(function () { inflight = false; paintLive(); paintBack(); });
     }
     pollT = setTimeout(poll, POLL);
   }
@@ -797,7 +824,9 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   function wake() { try { if (navigator.wakeLock && !lockW) navigator.wakeLock.request('screen').then(function (w) { lockW = w; w.addEventListener('release', function () { lockW = null; }); }).catch(function () {}); } catch (e) {} }
 
   /* ── 互動 ── */
-  $('follow').onclick = function () { S.follow = !S.follow; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) { scrollTo(0, 0); poll(); wake(); } };
+  function followBack() { S.follow = true; S.cls = true; render(); scrollTo(0, 0); poll(); wake(); }
+  $('backf').onclick = followBack;
+  $('follow').onclick = function () { if (!S.follow) { followBack(); return; } S.follow = false; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) { scrollTo(0, 0); poll(); wake(); } };
   $('main').addEventListener('click', function (e) {
     var b = e.target.closest('.alist button'); if (!b) return;
     var cur = S.follow && S.pos ? S.pos.k : S.viewK;
@@ -855,7 +884,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V239', TN_DATE = '2026-11-12';
+  var TN_VER = 'V243', TN_DATE = '2026-11-13';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
@@ -875,7 +904,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     VIEW = v;
     ['cover', 'panel', 'app'].forEach(function (x) { $(x).classList.toggle('hide', x !== v); });
     $('lock').classList.add('hide');
-    S.live = v === 'app' && S.follow;
+    S.live = v === 'app' && (S.follow || S.cls);
     if (v === 'cover') paintCover();
     if (S.live) { poll(); wake(); }
     scrollTo(0, 0);
@@ -1042,8 +1071,8 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   }
 
   /* ── 按鈕 ── */
-  $('cvGo').onclick = function () { S.follow = true; render(); go('app'); };
-  $('cvPrep').onclick = function () { S.follow = false; render(); go('app'); };
+  $('cvGo').onclick = function () { S.follow = true; S.cls = true; render(); go('app'); };
+  $('cvPrep').onclick = function () { S.follow = false; S.cls = false; render(); go('app'); };
   $('cvCal').onclick = function () { showCal(); };
   $('cvMiss').onclick = function () { showMiss(); };
   $('cvKey').onclick = function () { $('lockb').click(); };

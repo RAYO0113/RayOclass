@@ -7969,3 +7969,7 @@ table.l7t th { white-space: nowrap; background: #f6eedd; }
 .l7-y { display: none; margin-top: .4em; padding: .5em .9em; border-left: 4px solid #2d6b4f; background: #f1f7f3; color: #24563f; line-height: 1.85; font-size: .95em; }
 .l7-y.show { display: block; }
 .l7-nav-end { margin: 1.4em 0 .4em; padding-top: .8em; border-top: 1px dashed #d9c7a3; justify-content: center; }
+/* ════ src/css/183_v243-wk-split-css.css ════ */
+/* V243 習作選擇題一題一頁：標題列後的題號（同 A卷「第 N 題 / 共 M 題」位置） */
+.wks-wq1 .wk-qpos{margin-left:12px;padding:2px 10px;border-radius:999px;background:rgba(0,0,0,.06);font-size:.8em;font-weight:700;white-space:nowrap}
+body.dark-mode .wks-wq1 .wk-qpos{background:rgba(255,255,255,.12)}

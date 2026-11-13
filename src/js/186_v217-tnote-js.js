@@ -21,7 +21,7 @@
       case 'iquiz': return 'q:' + (s.q && s.q.n);
       /* V223（老師 11/10「能同步到課後習題、習作、A卷講解嗎」）：這幾種頁面各自有代號，手機顯示該頁題目＋答案＋解析 */
       case 'iadv': return 'iadv:' + ((s.sec && s.sec.head) || '');
-      case 'work': return 'work:' + ((s.sec && s.sec.head) || '');
+      case 'work': return 'work:' + ((s.sec && s.sec.head) || '') + (s.item ? '|' + s.item.n : '');   /* V243：習作選擇題一題一頁 → |題號 */
       case 'work_answers': return 'work_answers:';
       case 'aq': return 'aq:' + (s.q && s.q.n);
       case 'asheet': return 'asheet:';
@@ -57,6 +57,7 @@
     if (!s) return '';
     if (s.type === 'iquiz' && s.q) return '練習 第 ' + s.q.n + ' 題';
     if (s.type === 'aq' && s.q) return 'A卷 第 ' + s.q.n + ' 題';
+    if (s.type === 'work' && s.item) return '習作 第 ' + s.item.n + ' 題　' + String(s.sec.head || '').replace(/[（(]每[題格答][^）)]*[）)]/g, '').slice(0, 40);   /* V243 */
     if ((s.type === 'work' || s.type === 'iadv') && s.sec) return String(s.sec.head || '').slice(0, 60);
     if (s.type === 'work_answers') return '習作答案總覽';
     return String(s.head || (s.page && (s.page.title || s.page.seg)) || (s.sec && s.sec.title) || s.label || s.title || TYPE_NAME[s.type] || s.type || '').slice(0, 60);
