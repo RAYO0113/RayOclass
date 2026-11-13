@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>樂府長卷</title>
+<!-- V251（2026-11-13 老師：不要只是加點圖，要大破大立，做成更優秀的互動網頁；不要標楷體）
+     〈長干行〉樂府詩文體的互動版「樂府長卷」：一個時代一幅徽宗工筆畫（img/ui/bg），重點字先藏、按了才揭曉，
+     點作品名進讀詩模式（一段一段聚焦、點段落看翻譯），最後「樂府還是古詩？」分類挑戰。
+     內容不另抄：全部執行時讀 data/lessons/30.js 的 extras.intro（樂府詩·名稱／特色／發展／新樂府／新樂府作品／影響／與古詩、代表作·○○），
+     課檔改了這裡自動跟著變。字體＝源流明體；讀詩可切「書法」（這台電腦有華康歐陽詢體才出現，商業字型不能放上網站）。
+     從網站開（188 的 l7-anim 蓋版）時右上有「✕ 回課文」。iPad 11（1194×834）為主、手機直式可用。 -->
+<style>
+:root{
+  --fs:clamp(19px,2.5vw,36px);
+  --paper:247,238,214; --ink:#2a2521; --mute:#6a5a45; --zhu:#a8352a; --zhu-d:#7f241c; --gold:#b08d57; --line:rgba(107,74,43,.32);
+  --card:rgba(255,251,240,.86); --key:#17675a; --yi:#2f4a35; --yi-bg:rgba(93,122,95,.13); --yi-bd:#5d7a5f;
+  --seal:linear-gradient(135deg,#b83f31,#98291f);
+  --ming:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;
+  --shu:"DFOYangXunW5-B5","華康歐陽詢體W5","DFPOYangXunW5-B5","RayGenRyuRead","Noto Serif TC",serif;
+}
+body.night{--paper:16,18,26; --ink:#f1e6cb; --mute:#b9a988; --zhu:#e9a45c; --zhu-d:#f0c184; --gold:#d8b878; --line:rgba(240,225,190,.28);
+  --card:rgba(22,24,34,.8); --key:#8fd9c6; --yi:#c5e3c8; --yi-bg:rgba(127,174,134,.16); --yi-bd:#7fae86}
+*{box-sizing:border-box}
+@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-b.woff2") format("woff2");font-weight:700;font-display:swap}
+html,body{margin:0;height:100%;background:#1a1612;color:var(--ink);font-family:var(--ming);font-size:var(--fs);-webkit-text-size-adjust:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+/* ── 場景：兩層交疊換畫，畫面緩慢推移 ── */
+.bg{position:fixed;inset:0;background:center/cover no-repeat;opacity:0;transition:opacity 1.4s;animation:drift 40s ease-in-out infinite alternate}
+.bg.on{opacity:1}
+@keyframes drift{from{transform:scale(1.03) translate(-.6%,.3%)}to{transform:scale(1.1) translate(.8%,-.5%)}}
+.paused .bg{animation-play-state:paused}
+/* 中央留一片紙色，字才清楚；四周露出畫 */
+.veil{position:fixed;inset:0;pointer-events:none;transition:background .8s;
+  background:radial-gradient(ellipse 62% 70% at 50% 52%,rgba(var(--paper),.93) 0 62%,rgba(var(--paper),.55) 82%,rgba(var(--paper),0) 100%)}
+body.wide .veil{background:radial-gradient(ellipse 80% 82% at 50% 52%,rgba(var(--paper),.95) 0 70%,rgba(var(--paper),.6) 88%,rgba(var(--paper),.15) 100%)}
+body.cover .veil{background:radial-gradient(ellipse 46% 50% at 50% 46%,rgba(var(--paper),.82) 0 50%,rgba(var(--paper),0) 100%)}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+/* ── 上列：章節 ── */
+header{display:flex;align-items:center;gap:.35em;padding:.3em .6em;font-size:.6em;background:linear-gradient(rgba(var(--paper),.92),rgba(var(--paper),0))}
+.logo{color:#fbefdc;background:var(--seal);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.55);padding:.1em .45em;font-weight:700;letter-spacing:.12em;transform:rotate(-2deg);margin-right:.3em}
+nav{display:flex;gap:.1em;flex-wrap:wrap}
+nav button{border:0;background:none;padding:.2em .55em;border-radius:6px;color:var(--mute);font-weight:700;letter-spacing:.06em;position:relative}
+nav button.on{color:var(--zhu-d)}
+nav button.on::after{content:'';position:absolute;left:.5em;right:.5em;bottom:0;height:3px;border-radius:50%;background:var(--zhu)}
+header .sp{flex:1}
+.tool{border:1.5px solid var(--line);background:rgba(var(--paper),.75);border-radius:6px;padding:.2em .7em;white-space:nowrap}
+.tool.on{background:var(--zhu);border-color:var(--zhu);color:#fbefdc}
+main{flex:1;position:relative;overflow:hidden}
+#stage{position:absolute;inset:0;overflow:auto;padding:.3em 1.2em 1em;display:flex;flex-direction:column;align-items:center}
+#stage>.in{margin:auto;width:min(100%,31em);animation:enter .7s cubic-bezier(.2,.7,.2,1) both}
+body.wide #stage>.in{width:min(100%,40em)}
+@keyframes enter{from{opacity:0;transform:translateY(18px);filter:blur(6px)}}
+/* ── 下列 ── */
+footer{display:flex;align-items:center;gap:.4em;padding:.25em .6em calc(.3em + env(safe-area-inset-bottom));font-size:.6em;background:linear-gradient(rgba(var(--paper),0),rgba(var(--paper),.92))}
+footer .pg{min-width:4em;text-align:center;color:var(--mute)}
+footer .sp{flex:1} footer .hint{color:var(--mute)}
+.nx{background:var(--seal);border:0;color:#fbefdc;border-radius:6px 9px 5px 10px;padding:.3em 1.1em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),0 2px 5px rgba(0,0,0,.25)}
+#bar{position:absolute;left:0;bottom:0;height:3px;background:var(--zhu);transition:width .5s}
+/* ── 內容共用 ── */
+.kick{display:flex;align-items:center;gap:.6em;color:var(--mute);font-size:.62em;letter-spacing:.2em;margin:0 0 .5em}
+.kick::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.kick .hp{letter-spacing:.05em;border:1px solid var(--gold);border-radius:3px;padding:0 .5em;order:3;color:var(--mute)}
+h2{margin:0 0 .45em;font-size:1.35em;letter-spacing:.08em;line-height:1.3;display:flex;align-items:center;flex-wrap:wrap;gap:.1em}
+h2::before{content:'';width:.38em;height:.38em;background:var(--zhu);transform:rotate(45deg);margin-right:.5em;flex:none}
+.body{line-height:1.85}
+.st{opacity:0;transform:translateY(10px);filter:blur(5px);transition:opacity .55s,transform .55s,filter .55s}
+.st.show{opacity:1;transform:none;filter:none}
+.body>.st+.st{margin-top:.35em}
+tr.st{transform:none;filter:none}
+/* 重點字：先藏（朱框），按了才落下 */
+.bk{display:inline-block;color:transparent;border-bottom:2.5px solid var(--zhu);background:rgba(168,53,42,.1);border-radius:4px 4px 0 0;padding:0 .18em;margin:0 .06em;cursor:pointer;font-weight:700;line-height:1.35;transition:color .35s,background .35s;user-select:none}
+.bk.on{color:var(--zhu);background:none;animation:drop .45s cubic-bezier(.3,1.5,.5,1)}
+@keyframes drop{from{transform:translateY(-.35em) scale(1.25);filter:blur(3px)}}
+.l7-erab{display:inline-block;color:#fbefdc;background:var(--seal);border-radius:5px 8px 4px 9px;padding:0 .4em;margin:0 .2em;font-weight:900;letter-spacing:.1em;box-shadow:inset 0 0 0 2px rgba(251,239,220,.5)}
+.l7-key{color:var(--key);font-weight:800;background:color-mix(in srgb,var(--key) 12%,transparent);border-radius:4px;padding:0 .12em}
+a.l7-wkl{display:inline-block;color:var(--zhu-d);font-weight:800;cursor:pointer;border:1.5px solid var(--zhu);background:rgba(var(--paper),.85);border-radius:4px;padding:0 .25em;margin:.08em .1em;line-height:1.5;box-shadow:2px 3px 0 rgba(107,74,43,.18);transition:transform .15s,background .15s,color .15s}
+a.l7-wkl:hover{background:var(--zhu);color:#fbefdc;transform:translateY(-2px)}
+table.l7t{border-collapse:collapse;width:100%;border:3px double var(--mute)}
+table.l7t th,table.l7t td{border:1px solid var(--line);padding:.32em .6em;vertical-align:top;text-align:left;background:var(--card);line-height:1.6}
+table.l7t th{white-space:nowrap;color:var(--zhu-d);background:color-mix(in srgb,var(--zhu) 12%,rgba(var(--paper),.9))}
+/* ── 封面 ── */
+.cv{text-align:center}
+.cv h1{margin:0;font-size:3.4em;letter-spacing:.3em;text-indent:.3em;line-height:1.15;font-weight:900;text-shadow:0 0 .4em rgba(var(--paper),1)}
+.cv h1 span{display:inline-block;animation:ink .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.22s + .3s)}
+@keyframes ink{from{opacity:0;transform:scale(1.7);filter:blur(10px)}}
+.cv .sub{letter-spacing:.5em;text-indent:.5em;color:var(--mute);margin:.3em 0 1.1em;animation:enter .7s 1.2s both}
+.cv .toc{display:flex;flex-wrap:wrap;justify-content:center;gap:.45em;font-size:.72em;animation:enter .7s 1.5s both}
+.cv .toc button{border:1px solid var(--line);border-top:5px solid var(--zhu);background:var(--card);border-radius:4px;padding:.35em .8em;box-shadow:2px 3px 0 rgba(107,74,43,.15);font-weight:700;transition:transform .15s}
+.cv .toc button:hover{transform:translateY(-3px)}
+.cv .toc small{display:block;font-weight:400;color:var(--mute);font-size:.8em}
+/* ── 發展：時代場景 ── */
+.era{display:grid;grid-template-columns:auto 1fr;gap:0 1.1em;align-items:start}
+.era .big{writing-mode:vertical-rl;text-orientation:upright;font-size:2.7em;font-weight:900;letter-spacing:.12em;line-height:1;color:#fbefdc;background:var(--seal);border-radius:8px 12px 7px 14px;padding:.3em .18em .22em;box-shadow:inset 0 0 0 3px rgba(251,239,220,.5),0 6px 18px rgba(0,0,0,.3);transform:rotate(-2deg);animation:stamp .55s .25s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(-14deg)}}
+.era .verb{font-size:1.5em;font-weight:900;letter-spacing:.1em;margin:0 0 .3em}
+.era .l7-erab{display:none}
+.rail{display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin:1.2em .4em 0;font-size:.62em}
+.rail::before{content:'';position:absolute;left:0;right:0;top:.42em;height:3px;border-radius:50%;background:linear-gradient(90deg,transparent,var(--mute) 4%,var(--mute) 96%,transparent);opacity:.6}
+.rail button{position:relative;border:0;background:none;padding:1.1em .2em 0;color:var(--mute);font-weight:700}
+.rail button::before{content:'';position:absolute;left:50%;top:0;width:.8em;height:.8em;margin-left:-.4em;border-radius:50%;background:rgb(var(--paper));border:2.5px solid var(--mute);transition:all .4s}
+.rail button.done::before{background:var(--mute)}
+.rail button.on{color:var(--zhu-d)}
+.rail button.on::before{background:var(--zhu);border-color:var(--zhu);transform:scale(1.5);box-shadow:0 0 0 5px rgba(168,53,42,.2)}
+/* ── 挑戰 ── */
+.gm{text-align:center}
+.gm .q{min-height:4.2em;display:flex;align-items:center;justify-content:center;font-size:1.3em;font-weight:800;line-height:1.5;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.5em .8em;box-shadow:3px 4px 0 rgba(107,74,43,.15);margin:.2em 0 .6em}
+.gm .q.in2{animation:enter .45s both}
+.gm .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:.5em}
+.gm .opts button{border:2px solid var(--mute);background:rgba(var(--paper),.9);border-radius:8px;padding:.45em .3em;font-weight:800;font-size:1.05em;box-shadow:2px 3px 0 rgba(107,74,43,.18);transition:transform .1s,background .2s}
+.gm .opts button:active{transform:translateY(2px)}
+.gm .opts button.ok{background:#3f6b52;border-color:#3f6b52;color:#fff}
+.gm .opts button.no{background:#b0796a;border-color:#b0796a;color:#fff;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.gm .fb{min-height:1.8em;margin:.5em 0 .2em;color:var(--mute);font-size:.85em}
+.gm .sc{font-size:.7em;color:var(--mute);letter-spacing:.1em}
+.gm .dots{display:flex;gap:.25em;justify-content:center;margin:.4em 0;flex-wrap:wrap}
+.gm .dots i{width:.5em;height:.5em;border-radius:50%;background:var(--line)}
+.gm .dots i.ok{background:#3f6b52}.gm .dots i.no{background:#b0796a}.gm .dots i.cur{outline:2px solid var(--zhu);outline-offset:2px}
+/* ── 讀詩模式 ── */
+#rd{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;background:radial-gradient(ellipse 66% 92% at 50% 50%,rgba(var(--paper),.94) 0 62%,rgba(var(--paper),.6) 84%,rgba(var(--paper),.12) 100%)}
+body.rd #app,body.rd .veil{visibility:hidden}
+#rd.on{display:flex;animation:rdin .6s both}
+@keyframes rdin{from{opacity:0;clip-path:inset(46% 0 46% 0)}to{clip-path:inset(0)}}
+#rd .top{display:flex;align-items:center;gap:.45em;padding:.35em .7em;font-size:.6em;background:linear-gradient(rgba(var(--paper),.95),rgba(var(--paper),0))}
+#rd .ttl{font-size:1.9em;font-weight:900;letter-spacing:.15em}
+#rd .who{color:var(--mute);letter-spacing:.08em}
+#rd .sl{color:#fbefdc;background:var(--seal);border-radius:4px 7px 4px 8px;padding:.05em .5em;font-weight:700;letter-spacing:.1em;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5)}
+#rd .sp{flex:1}
+#rdb{flex:1;overflow-y:auto;padding:28vh 1em 40vh;scroll-behavior:smooth}
+.sz{max-width:30em;margin:0 auto 1.6em;opacity:.28;transition:opacity .45s,transform .45s;cursor:pointer;transform:scale(.94)}
+.sz.cur{opacity:1;transform:none}
+#rd.all .sz{opacity:1;transform:none}
+#rd.all #rdb{padding-top:1.2em;padding-bottom:3em}
+.sz .o{font-size:1.4em;line-height:1.9;letter-spacing:.14em;text-align:center;font-weight:700}
+#rd.shu .sz .o{font-family:var(--shu);font-weight:400;font-size:1.55em}
+.sz.pre .o{font-size:.92em;font-weight:400;letter-spacing:.04em;text-align:left;color:var(--mute);border-left:3px solid var(--gold);padding-left:.8em;line-height:1.8}
+.sz .o .l7-era{display:table;margin:0 auto .2em;font-size:.55em;letter-spacing:.2em;color:var(--zhu);border:1px solid var(--zhu);border-radius:3px;padding:0 .7em;font-family:var(--ming);font-weight:700}
+.sz .y{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s,margin .45s}
+.sz .y>div{overflow:hidden;font-size:.82em;line-height:1.8;color:var(--yi);background:var(--yi-bg);border-left:4px solid var(--yi-bd);border-radius:0 6px 6px 0;padding:0 1em}
+.sz.tr .y{grid-template-rows:1fr;margin-top:.5em}
+.sz.tr .y>div{padding:.45em 1em}
+.note{max-width:30em;margin:0 auto 1em;font-size:.68em;color:var(--mute);background:rgba(107,74,43,.09);border-radius:4px;padding:.3em .8em}
+#rd .ft{display:flex;align-items:center;gap:.4em;padding:.3em .7em calc(.3em + env(safe-area-inset-bottom));font-size:.6em;background:linear-gradient(rgba(var(--paper),0),rgba(var(--paper),.95))}
+#rd .ft .pg{color:var(--mute);min-width:5em;text-align:center}
+@media (max-width:760px){
+  :root{--fs:17px}
+  header{font-size:.72em}footer,#rd .top,#rd .ft{font-size:.75em}
+  footer .hint,.logo{display:none}
+  #stage{padding:.3em .8em 1em}
+  .veil,body.wide .veil{background:rgba(var(--paper),.9)}
+  .cv h1{font-size:2.3em}
+  .era{grid-template-columns:1fr}.era .big{writing-mode:horizontal-tb;font-size:1.6em;justify-self:start;margin-bottom:.3em}
+  .gm .opts{grid-template-columns:1fr}
+  .sz .o{font-size:1.15em;letter-spacing:.05em}#rd.shu .sz .o{font-size:1.25em}
+  #rd .who{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="bg" id="bgA"></div><div class="bg" id="bgB"></div><div class="veil"></div>
+<div id="app">
+  <header><span class="logo">樂府長卷</span><nav id="nav"></nav><span class="sp"></span>
+    <button class="tool" id="bAns" title="重點字全部顯示／藏起來">答案</button>
+    <button class="tool" id="bNight" title="日／夜">☾</button>
+    <button class="tool" id="bFull" title="全螢幕">⛶</button>
+    <button class="tool" id="bClose" hidden>✕ 回課文</button></header>
+  <main><div id="stage"></div><div id="bar"></div></main>
+  <footer><button class="tool" id="bPrev">← 上一頁</button><span class="pg" id="pg"></span><button class="nx" id="bNext">下一步 ▸</button>
+    <span class="sp"></span><span class="hint">點畫面或 → 下一步・點朱框揭曉・點作品名讀詩</span></footer>
+</div>
+<div id="rd"><div class="top"><span class="sl" id="rdE"></span><span class="ttl" id="rdT"></span><span class="who" id="rdW"></span><span class="sp"></span>
+    <button class="tool" id="rdShu" hidden title="華康歐陽詢體／源流明體">書法</button><button class="tool" id="rdAll" title="一段一段聚焦／全篇">全篇</button><button class="tool" id="rdTr">翻譯</button><button class="tool" id="rdX">✕</button></div>
+  <div id="rdb"></div>
+  <div class="ft"><button class="tool" id="rdP">← 上一段</button><span class="pg" id="rdN"></span><button class="nx" id="rdNx">下一段 ▸</button><span class="sp"></span><span class="hint" style="color:var(--mute)">點段落看翻譯・Esc 回長卷</span></div></div>
+<script src="../data/lessons/30.js"></script>
+<script>
+'use strict';
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+/* ───────── 讀課檔（不另抄內容） ───────── */
+const LES = (window.TB_LESSONS || []).find(x => x[0] === '樂府詩選—長干行');
+if (!LES) document.body.innerHTML = '<p style="color:#fff;padding:2em">課檔沒載到（data/lessons/30.js）</p>';
+const INTRO = LES[1].extras.intro;
+const frag = h => { const t = document.createElement('template'); t.innerHTML = h; return t.content; };
+const page = l => { const p = INTRO.find(x => x.label === l); if (!p) throw new Error('課檔沒有這頁：' + l); return { head: p.head, d: frag(p.body) }; };
+const blocks = l => $$('.l7b', page(l).d).map(b => ({ k: b.dataset.k, h: $('.l7b-h', b).innerHTML, b: $('.l7b-b', b), hp: ($('.l7-hp-tag', b) || {}).textContent || '' }));
+/* 內文切成一步一步：表格一列一步；其餘以 <br> 分段 */
+function chunk(el) {
+  if (el.children.length === 1 && el.firstElementChild.matches('table.l7t') && !el.textContent.replace(el.firstElementChild.textContent, '').trim()) {
+    $$('tr', el).forEach(r => r.classList.add('st')); return el.innerHTML;
+  }
+  const out = []; let cur = document.createElement('div');
+  [...el.childNodes].forEach(n => { if (n.nodeName === 'BR') { if (cur.textContent.trim()) out.push(cur); cur = document.createElement('div'); } else cur.appendChild(n.cloneNode(true)); });
+  if (cur.textContent.trim()) out.push(cur);
+  return out.map(d => `<div class="st">${d.innerHTML}</div>`).join('');
+}
+/* ───────── 場景 ───────── */
+const BG = { 封面: '2-garden', 名稱: '8-booklover', 特色: '1-fuguang', 新樂府: '5-lookback', 影響: '7-dongpo', 比較: '8-booklover', 挑戰: '2-garden',
+  兩漢: '3-westlake', 魏晉: '7-dongpo', 南北朝: '1-fuguang', 南朝: '1-fuguang', 北朝: '4-snowpeak', 隋: '4-snowpeak', 唐: '6-gugong', 中唐: '5-lookback' };
+const S = [];   /* {ch 章, bg, wide, cls, html, init} */
+const CH = [['封面', ''], ['名稱', '一、名稱與定義'], ['特色', '二、特色與形式'], ['發展', '三、樂府詩的發展'], ['新樂府', '中唐新樂府運動'], ['影響', '四、樂府詩的影響'], ['比較', '五、樂府詩與古詩'], ['挑戰', '樂府還是古詩？']];
+const kick = (t, hp) => `<div class="kick"><span>${t}</span>${hp ? `<span class="hp">${hp}</span>` : ''}</div>`;
+const blockSlides = (ch, label, bg) => { const p = page(label); blocks(label).forEach(b => S.push({ ch, bg: bg || BG[ch], wide: !!$('table', b.b), html: kick(p.head, b.hp) + `<h2>${b.h}</h2><div class="body">${chunk(b.b)}</div>` })); };
+
+S.push({ ch: '封面', bg: BG.封面, cls: 'cover', html: `<div class="cv"><h1>${[...'樂府詩'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1><div class="sub">感於哀樂・緣事而發</div>
+  <div class="toc">${CH.slice(1).map(([c, t]) => `<button data-ch="${c}">${c}<small>${t}</small></button>`).join('')}</div></div>`,
+  init: el => $$('[data-ch]', el).forEach(b => b.onclick = e => { e.stopPropagation(); goCh(b.dataset.ch); }) });
+blockSlides('名稱', '樂府詩·名稱');
+blockSlides('特色', '樂府詩·特色');
+/* 發展：一個時代一幅畫 */
+const DEV = blocks('樂府詩·發展');
+DEV.forEach((b, i) => {
+  const h = frag(b.h), era = ($('.l7-erab', h) || {}).textContent || b.k;
+  const hh = document.createElement('div'); hh.appendChild(h);
+  S.push({ ch: '發展', bg: BG[b.k] || BG.兩漢, era: b.k, html: kick('三、樂府詩的發展', b.hp) + `<div class="era"><div class="big">${era}</div><div><div class="verb">${hh.innerHTML}</div><div class="body">${chunk(b.b)}</div></div></div>
+    <div class="rail">${DEV.map((x, j) => `<button data-era="${x.k}" class="${j === i ? 'on' : j < i ? 'done' : ''}">${x.k}</button>`).join('')}</div>`,
+    init: el => $$('[data-era]', el).forEach(x => x.onclick = e => { e.stopPropagation(); go(S.findIndex(s => s.era === x.dataset.era)); }) });
+});
+blockSlides('新樂府', '樂府詩·新樂府');
+blockSlides('新樂府', '樂府詩·新樂府作品');
+blockSlides('影響', '樂府詩·影響');
+blockSlides('比較', '樂府詩·與古詩');
+/* 挑戰：從比較表自動出題（兩欄不同 → 各一題；「同左」→ 兩者皆是）。名稱、發展、影響三列單看一句分不出是在說誰，不出 */
+const QS = [];
+$$('tr', page('樂府詩·與古詩').d).forEach(r => {
+  const th = r.querySelector('th'), td = $$('td', r); if (td.length !== 2 || !th) return;
+  const row = th.textContent.trim(); if (['名稱', '發展', '影響'].includes(row)) return;
+  const items = c => c.innerHTML.split(/<br\s*\/?>/).map(x => x.replace(/<[^>]+>/g, '').replace(/^\s*\d+[.．]\s*/, '').trim()).filter(Boolean);
+  if (/同左/.test(td[1].textContent)) items(td[0]).forEach(t => QS.push({ t, a: '兩者皆是', row }));
+  else { items(td[0]).forEach(t => QS.push({ t, a: '樂府詩', row })); items(td[1]).forEach(t => QS.push({ t, a: '古詩', row })); }
+});
+S.push({ ch: '挑戰', bg: BG.挑戰, html: kick('挑戰：樂府還是古詩？') + `<div class="gm"><div class="q" id="gq"></div><div class="opts">${['樂府詩', '古詩', '兩者皆是'].map(o => `<button>${o}</button>`).join('')}</div><div class="fb" id="gf"></div><div class="dots" id="gd"></div><div class="sc" id="gs"></div>
+  <button class="tool" id="gr" style="font-size:.65em;margin-top:.4em">⟲ 重新洗牌</button></div>`,
+  init: el => {
+    let order, i, score, res;
+    const start = () => { order = QS.map((_, k) => k).sort(() => Math.random() - .5).slice(0, 10); i = 0; score = 0; res = []; draw(); };
+    const draw = () => {
+      if (!el.isConnected || !$('#gq', el)) return;
+      const done = i >= order.length, q = QS[order[i]];
+      $('#gq', el).textContent = done ? `完成！答對 ${score}／${order.length} 題` : q.t; $('#gq', el).classList.remove('in2'); void $('#gq', el).offsetWidth; $('#gq', el).classList.add('in2');
+      $$('.opts button', el).forEach(b => { b.className = ''; b.disabled = done; });
+      $('#gf', el).textContent = done ? '' : '這句說的是哪一種？';
+      $('#gd', el).innerHTML = order.map((_, k) => `<i class="${res[k] || ''}${k === i ? ' cur' : ''}"></i>`).join('');
+      $('#gs', el).textContent = done ? '' : `第 ${i + 1}／${order.length} 題`;
+    };
+    $$('.opts button', el).forEach(b => b.onclick = e => {
+      e.stopPropagation(); const q = QS[order[i]]; if (!q || el.dataset.lock) return;
+      if (b.textContent === q.a) { b.classList.add('ok'); if (!res[i]) { res[i] = 'ok'; score++; } $('#gf', el).textContent = `✔ 「${q.row}」這一項：${q.a}`; el.dataset.lock = 1; setTimeout(() => { delete el.dataset.lock; i++; draw(); }, 1100); }
+      else { b.classList.add('no'); res[i] = 'no'; $('#gf', el).textContent = `再想想——這是比較表「${q.row}」那一列`; }
+    });
+    $('#gr', el).onclick = e => { e.stopPropagation(); start(); };
+    start();
+  } });
+
+/* ───────── 播放 ───────── */
+const st = { i: 0, ans: false, bg: 0 };
+const stage = $('#stage');
+$('#nav').innerHTML = CH.map(([c]) => `<button data-ch="${c}">${c}</button>`).join('');
+$$('#nav button').forEach(b => b.onclick = () => goCh(b.dataset.ch));
+function setBg(name) {
+  const url = `url("../img/ui/bg/${name}-${document.body.classList.contains('night') ? 'dark' : 'light'}.webp")`;
+  const a = $('#bgA'), b = $('#bgB'), cur = st.bg ? b : a, nxt = st.bg ? a : b;
+  if (cur.style.backgroundImage === url) { cur.classList.add('on'); return; }
+  nxt.style.backgroundImage = url; nxt.classList.add('on'); cur.classList.remove('on'); st.bg ^= 1;
+}
+function go(i) {
+  if (i < 0 || i >= S.length) return;
+  st.i = i; const s = S[i];
+  document.body.classList.toggle('wide', !!s.wide); document.body.classList.toggle('cover', s.cls === 'cover');
+  setBg(s.bg);
+  stage.innerHTML = `<div class="in">${s.html}</div>`; stage.scrollTop = 0;
+  $$('.wk-a', stage).forEach(x => { x.classList.add('bk'); if (st.ans) x.classList.add('on'); x.onclick = e => { e.stopPropagation(); x.classList.toggle('on'); upd(); }; });
+  $$('a.l7-wkl', stage).forEach(a => { const m = /l7Pop\('([^']+)'/.exec(a.getAttribute('onclick') || ''); a.removeAttribute('onclick'); if (m) a.onclick = e => { e.stopPropagation(); openRd(m[1]); }; });
+  const f = $('.st', stage); if (f) f.classList.add('show');
+  s.init && s.init(stage);
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.ch === s.ch));
+  $('#pg').textContent = (i + 1) + ' / ' + S.length; $('#bar').style.width = ((i + 1) / S.length * 100) + '%';
+  $('#bPrev').disabled = i === 0;
+  try { history.replaceState(null, '', '#' + i); } catch (e) {}
+  upd();
+}
+const goCh = c => go(S.findIndex(s => s.ch === c));
+/* 下一步＝文件順序裡第一個還沒出現的段落，或已出現段落裡第一個還藏著的重點字 */
+const pending = () => $$('.st:not(.show), .bk:not(.on)', stage).find(x => x.classList.contains('st') || !x.closest('.st:not(.show)'));
+function upd() { $('#bNext').textContent = pending() ? '下一步 ▸' : (st.i < S.length - 1 ? '下一頁 →' : '完'); }
+function next() {
+  const p = pending();
+  if (p) { p.classList.add(p.classList.contains('st') ? 'show' : 'on'); setTimeout(() => p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 80); upd(); return; }
+  if (st.i < S.length - 1) go(st.i + 1);
+}
+const prev = () => go(st.i - 1);
+$('#bNext').onclick = next; $('#bPrev').onclick = prev;
+$('#bAns').onclick = e => { st.ans = !st.ans; e.currentTarget.classList.toggle('on', st.ans); $$('.bk', stage).forEach(x => x.classList.toggle('on', st.ans)); if (st.ans) $$('.st', stage).forEach(x => x.classList.add('show')); upd(); };
+$('#bNight').onclick = e => { const n = document.body.classList.toggle('night'); e.currentTarget.classList.toggle('on', n); setBg(rd.on ? rd.bg : S[st.i].bg); };
+$('#bFull').onclick = () => { const d = document.documentElement; if (!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); else document.exitFullscreen && document.exitFullscreen(); };
+$('main').addEventListener('click', e => { if (e.target.closest('button,a,.bk')) return; next(); });
+
+/* ───────── 讀詩模式 ───────── */
+const rd = { on: false, i: 0, n: 0, bg: '', direct: false };
+function hasFont(f) { try { const c = document.createElement('canvas').getContext('2d'), t = 'abcdefgIl1'; c.font = '40px monospace'; const a = c.measureText(t).width; c.font = `40px "${f}", monospace`; return c.measureText(t).width !== a; } catch (e) { return false; } }
+const SHU = ['DFPOYangXunW5-B5', '華康歐陽詢體W5(P)'].some(hasFont);
+$('#rdShu').hidden = !SHU;
+function openRd(k) {
+  const p = page('代表作·' + k), who = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜'), note = $('.l7-note', p.d);
+  $('#rdT').textContent = k; $('#rdE').textContent = who[0]; $('#rdW').textContent = who.slice(1).join('｜');
+  $('#rdb').innerHTML = (note ? `<div class="note">${note.innerHTML}</div>` : '') + $$('.l7-st', p.d).map(s => { const o = $('.l7-o', s), y = $('.l7-y', s);
+    return `<div class="sz${o.classList.contains('l7-pre') ? ' pre' : ''}"><div class="o">${o.innerHTML}</div><div class="y"><div>${y ? y.innerHTML : ''}</div></div></div>`; }).join('');
+  const zs = $$('.sz', $('#rdb')); rd.n = zs.length; rd.on = true; rd.bg = BG[who[0]] || S[st.i].bg;
+  zs.forEach((z, j) => z.onclick = () => { if (rd.i !== j && !$('#rd').classList.contains('all')) return focus(j); z.classList.toggle('tr'); });
+  $('#rdTr').classList.remove('on'); $('#rd').classList.add('on'); document.body.classList.add('rd'); setBg(rd.bg); focus(0, true);
+}
+function focus(j, instant) {
+  rd.i = Math.max(0, Math.min(j, rd.n - 1)); const zs = $$('.sz', $('#rdb'));
+  zs.forEach((z, k) => z.classList.toggle('cur', k === rd.i));
+  $('#rdN').textContent = `第 ${rd.i + 1}／${rd.n} 段`; $('#rdP').disabled = rd.i === 0; $('#rdNx').textContent = rd.i < rd.n - 1 ? '下一段 ▸' : '讀完，回長卷';
+  const z = zs[rd.i]; if (z) z.scrollIntoView({ block: 'center', behavior: instant ? 'auto' : 'smooth' });
+}
+function closeRd() {
+  if (rd.direct && window.parent !== window) { window.parent.postMessage({ lbClose: 1 }, '*'); return; }
+  rd.on = false; $('#rd').classList.remove('on'); document.body.classList.remove('rd'); setBg(S[st.i].bg);
+}
+$('#rdX').onclick = closeRd; $('#rdP').onclick = () => focus(rd.i - 1); $('#rdNx').onclick = () => rd.i < rd.n - 1 ? focus(rd.i + 1) : closeRd();
+$('#rdTr').onclick = e => { const on = !e.currentTarget.classList.contains('on'); e.currentTarget.classList.toggle('on', on); $$('.sz', $('#rdb')).forEach(z => z.classList.toggle('tr', on)); setTimeout(() => focus(rd.i), 460); };
+$('#rdAll').onclick = e => { const on = $('#rd').classList.toggle('all'); e.currentTarget.classList.toggle('on', on); if (!on) focus(rd.i); else $('#rdb').scrollTop = 0; };
+$('#rdShu').onclick = e => e.currentTarget.classList.toggle('on', $('#rd').classList.toggle('shu'));
+
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (rd.on) {
+    if (k === 'Escape') closeRd(); else if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { e.preventDefault(); $('#rdNx').click(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k)) { e.preventDefault(); focus(rd.i - 1); } else if (k === 't' || k === 'T') $$('.sz', $('#rdb'))[rd.i].classList.toggle('tr');
+    return;
+  }
+  if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
+  else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
+  else if (k === 'Escape') go(0);
+});
+if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
+/* 可用 #頁碼 或 #作品名 直接開（網站發展頁點作品名 → 直接進讀詩） */
+const h = decodeURIComponent(location.hash.slice(1));
+if (/^\d+$/.test(h)) go(+h); else if (h && INTRO.some(x => x.label === '代表作·' + h)) { const p = page('代表作·' + h), e = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜')[0]; go(Math.max(0, S.findIndex(s => s.era === e))); rd.direct = true; openRd(h); } else go(0);
+</script>
+</body>
+</html>

@@ -8162,3 +8162,99 @@ body.dark-mode { --l7-key: #7fd6c4; }
 /* 11/13 晚 老師：補充講義有相似概念的 → 右上浮框標補充講義頁碼（class 含 -tag，字級不被整課統一規則蓋掉） */
 .l7-hp-tag { float: right; margin: 0 0 .3em .6em; padding: .12em .65em; font-size: .72em; font-weight: 700; color: #7a5a1e; background: #fff6df; border: 1.5px solid #d9b56a; border-radius: 999px; box-shadow: 0 1px 3px rgba(60, 40, 20, .12); white-space: nowrap; }
 body.dark-mode .l7-hp-tag { color: #f0d9a6; background: #3a3020; border-color: #8a7040; }
+/* ════ src/css/192_v251-l7-guofeng-css.css ════ */
+/* V251（老師 11/13）：〈長干行〉補充頁外觀
+   - 題解／詩的流變／樂府詩／代表作各頁：宣紙底＋頁底遠山、朱印時代、筆觸分隔線、線裝書風表格
+   - 發展頁點代表作、封面的「樂府長卷」→ 開 yf/index.html（互動版，193_v251-l7-guofeng-js）
+   只加不刪：182／185／187 的舊樣式保留，這裡覆蓋。內文、標題仍是源流明體（老師 11/13 定）。
+   老師 11/13：不要標楷體 → 全部維持源流明體（--gf-kai 現在就是明體；想試書法字，在樂府長卷的讀詩模式按「書法」）。 */
+:root {
+  --gf-kai: "RayGenRyuRead", "Noto Serif TC", serif;
+  --gf-paper: #f5ecd8; --gf-paper-hi: #fbf5e6; --gf-ink: #2b2622; --gf-zhu: #a8352a; --gf-zhu-d: #7f241c; --gf-gold: #b08d57; --gf-brown: #6b4a2b;
+  --gf-line: rgba(107, 74, 43, .3); --gf-card: rgba(255, 252, 243, .72);
+  --gf-yi-bd: #5d7a5f; --gf-yi-bg: rgba(93, 122, 95, .1); --gf-yi-ink: #2f4a35;
+  /* 宣紙纖維（細點＋橫向纖維）、水墨遠山（上濃下淡，山腳化成霧） */
+  --gf-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .18 0 0 0 .55 -.2'/%3E%3C/filter%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .38 0 0 0 0 .22 0 0 0 .34 -.14'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  --gf-mount: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23403a34' stop-opacity='.5'/%3E%3Cstop offset='1' stop-color='%23403a34' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath filter='url(%23b)' fill='url(%23g)' opacity='.5' d='M0 210C80 150 140 190 220 120C270 80 310 150 380 130C450 110 500 40 560 90C620 140 680 110 760 150C840 190 900 100 980 130C1060 160 1120 120 1200 170L1200 320L0 320Z'/%3E%3Cpath filter='url(%23b)' fill='url(%23g)' d='M0 270C90 230 150 250 240 200C300 170 350 230 430 215C520 200 560 150 640 190C720 230 800 215 880 240C960 265 1040 205 1120 225C1160 235 1180 245 1200 250L1200 320L0 320Z'/%3E%3C/svg%3E");
+}
+body.dark-mode {
+  --gf-paper: #25211c; --gf-paper-hi: #2e2923; --gf-ink: #ece2d0; --gf-zhu: #c9523f; --gf-zhu-d: #e0806c; --gf-gold: #c9a970; --gf-brown: #cdb592;
+  --gf-line: rgba(236, 226, 208, .22); --gf-card: rgba(255, 245, 225, .05);
+  --gf-yi-bd: #7fae86; --gf-yi-bg: rgba(127, 174, 134, .12); --gf-yi-ink: #bfe0c4;
+  /* 深色：纖維改淺色細點、不要橫向纖維（深底上會看到接縫） */
+  --gf-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .85 0 0 0 0 .75 0 0 0 .4 -.17'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --gf-mount: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e8dcc6' stop-opacity='.3'/%3E%3Cstop offset='1' stop-color='%23e8dcc6' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath filter='url(%23b)' fill='url(%23g)' opacity='.5' d='M0 210C80 150 140 190 220 120C270 80 310 150 380 130C450 110 500 40 560 90C620 140 680 110 760 150C840 190 900 100 980 130C1060 160 1120 120 1200 170L1200 320L0 320Z'/%3E%3Cpath filter='url(%23b)' fill='url(%23g)' d='M0 270C90 230 150 250 240 200C300 170 350 230 430 215C520 200 560 150 640 190C720 230 800 215 880 240C960 265 1040 205 1120 225C1160 235 1180 245 1200 250L1200 320L0 320Z'/%3E%3C/svg%3E");
+}
+
+/* ══════════ 補充頁（題解／詩的流變／樂府詩／代表作） ══════════ */
+/* 宣紙底＋頁底遠山（背景貼在頁框上，內容捲動時山不動） */
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info-intro {
+  /* 全站 .wks-info 的底色是 !important → 這裡也要 */
+  background-color: var(--gf-paper) !important; background-image: var(--gf-mount), var(--gf-noise) !important;
+  background-repeat: no-repeat, repeat !important; background-position: bottom center, 0 0 !important; background-size: 100% 26%, 240px 240px !important; background-attachment: scroll !important; }
+
+/* 小標（樂府詩簡介／題解）：朱色楷體＋朱條＋淡出的線 */
+body.l7-wide .wk-slide.wks-info-intro .l7-sub { display: flex; align-items: center; gap: .5em; margin: .2em 0 .55em; padding: 0; background: none; border-radius: 0; color: var(--gf-zhu); font-weight: 700; letter-spacing: .2em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-sub::before { content: ''; flex: none; width: .4em; height: 1.2em; border-radius: 2px; background: var(--gf-zhu); }
+body.l7-wide .wk-slide.wks-info-intro .l7-sub::after { content: ''; flex: 1; min-width: 2em; height: 2px; background: linear-gradient(90deg, var(--gf-zhu), transparent); opacity: .45; }
+
+/* 展開的內容區塊：筆觸分隔線、楷體標題＋朱點 */
+body.l7-wide .wk-slide.wks-info-intro .l7b { position: relative; border-bottom: 0; margin: 0 0 1em; padding: 0 0 1em; }
+body.l7-wide .wk-slide.wks-info-intro .l7b:not(:last-child)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 50%;
+  background: linear-gradient(90deg, transparent, var(--gf-line) 10%, var(--gf-line) 55%, transparent 92%); }
+body.l7-wide .wk-slide.wks-info-intro .l7b-h { color: var(--gf-ink); letter-spacing: .06em; margin: 0 0 .3em; }
+body.l7-wide .wk-slide.wks-info-intro .l7b-h::before { content: ''; display: inline-block; width: .42em; height: .42em; margin: 0 .45em .16em .05em; vertical-align: middle; background: var(--gf-zhu); transform: rotate(45deg); border-radius: 1px; }
+body.l7-wide .wk-slide.wks-info-intro .l7b-b { line-height: 1.9; }
+
+/* 時代：朱文印 */
+body.l7-wide .wk-slide.wks-info-intro .l7-erab { color: #fbefdc; background: linear-gradient(135deg, #b83f31, #98291f); border-radius: 5px 8px 4px 9px; padding: .04em .42em .02em; margin: 0 .22em; letter-spacing: .12em;
+  box-shadow: inset 0 0 0 2px rgba(251, 239, 220, .5), 0 1px 2px rgba(0, 0, 0, .22); }
+body.dark-mode.l7-wide .wk-slide.wks-info-intro .l7-erab { color: #fbefdc; background: linear-gradient(135deg, #b83f31, #98291f); }
+
+/* 表格：線裝書風（外框雙線、欄名淡朱底） */
+body.l7-wide .wk-slide.wks-info-intro table.l7t { border: 3px double var(--gf-brown); background: var(--gf-card); }
+body.l7-wide .wk-slide.wks-info-intro table.l7t th, body.l7-wide .wk-slide.wks-info-intro table.l7t td { border: 1px solid var(--gf-line); padding: .42em .7em; }
+body.l7-wide .wk-slide.wks-info-intro table.l7t th { background: rgba(168, 53, 42, .09); color: var(--gf-zhu-d); letter-spacing: .05em; }
+
+/* 補充講義頁碼：小籤條 */
+body.l7-wide .wk-slide.wks-info-intro .l7-hp-tag { border-radius: 3px; border: 1px solid var(--gf-gold); background: var(--gf-paper-hi); color: var(--gf-brown); box-shadow: 1px 2px 0 rgba(107, 74, 43, .12); letter-spacing: .05em; }
+
+/* 封面：楷體大題＋兩側淡線；結構卡＝宣紙卡＋朱邊 */
+body.l7-wide .wk-slide.wks-info-intro .l7-cv-t { display: flex; align-items: center; justify-content: center; gap: .6em; color: var(--gf-ink); letter-spacing: .35em; text-indent: .35em; margin: .1em 0 0; font-weight: 900; }
+body.l7-wide .wk-slide.wks-info-intro .l7-cv-t::before, body.l7-wide .wk-slide.wks-info-intro .l7-cv-t::after { content: ''; width: 3.2em; height: 2px; background: linear-gradient(90deg, transparent, var(--gf-zhu)); opacity: .6; }
+body.l7-wide .wk-slide.wks-info-intro .l7-cv-t::after { transform: scaleX(-1); }
+body.l7-wide .wk-slide.wks-info-intro .l7-cv-s { color: var(--gf-brown); letter-spacing: .5em; text-indent: .5em; margin-bottom: .8em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-tree-s { background: var(--gf-card); border-radius: 4px; border-left: 5px solid var(--gf-zhu); box-shadow: 0 0 0 1px var(--gf-line), 2px 3px 0 rgba(107, 74, 43, .08); padding: .45em 1em .5em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-tree-t { color: var(--gf-zhu-d); letter-spacing: .08em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-tree-s:not(:last-child)::after { color: var(--gf-brown); opacity: .6; }
+
+/* 跳轉清單、收合卡：宣紙卡 */
+body.l7-wide .wk-slide.wks-info-intro .l7-jump:not(.l7-anim-row) { background: var(--gf-card); border-radius: 6px; box-shadow: 0 0 0 1px var(--gf-line), 2px 3px 0 rgba(107, 74, 43, .08); }
+body.l7-wide .wk-slide.wks-info-intro .l7-jump:not(.l7-anim-row) .l7-go { color: var(--gf-ink); }
+body.l7-wide .wk-slide.wks-info-intro .l7-jump:not(.l7-anim-row) .l7-go + .l7-go { box-shadow: inset 0 1px 0 var(--gf-line); }
+body.l7-wide .wk-slide.wks-info-intro .l7-jump:not(.l7-anim-row) .l7-go::after { color: var(--gf-zhu); }
+body.l7-wide .wk-slide.wks-info-intro .l7-anim-row .l7-go { background: linear-gradient(135deg, #b83f31, #98291f); color: #fbefdc; border-radius: 6px 9px 5px 10px; padding: .5em 1.5em; letter-spacing: .12em; box-shadow: inset 0 0 0 2px rgba(251, 239, 220, .5), 0 2px 5px rgba(0, 0, 0, .25); }
+body.l7-wide .wk-slide.wks-info-intro details.l7d { background: var(--gf-card); border-radius: 5px; box-shadow: 0 0 0 1px var(--gf-line), 2px 3px 0 rgba(107, 74, 43, .07); }
+body.l7-wide .wk-slide.wks-info-intro details.l7d[open] > summary { border-bottom: 1px solid var(--gf-line); background: rgba(168, 53, 42, .05); }
+body.l7-wide .wk-slide.wks-info-intro details.l7d > summary::after { color: var(--gf-zhu); }
+body.l7-wide .wk-slide.wks-info-intro .l7-era { background: none; color: var(--gf-zhu-d); border: 1px solid var(--gf-zhu); border-radius: 3px; letter-spacing: .08em; }
+
+/* 代表作頁：作者行、說明、原文（楷體）、翻譯 */
+body.l7-wide .wk-slide.wks-info-intro .l7-who { color: var(--gf-brown); letter-spacing: .12em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-note { background: rgba(107, 74, 43, .08); color: var(--gf-brown); border-radius: 4px; }
+body.l7-wide .wk-slide.wks-info-intro .l7-o:not(.l7-pre) { letter-spacing: .12em; color: var(--gf-ink); font-weight: 700; }
+body.l7-wide .wk-slide.wks-info-intro .l7-o.l7-pre { color: var(--gf-brown); border-left: 3px solid var(--gf-gold); padding-left: .8em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-y { border-left: 4px solid var(--gf-yi-bd); border-radius: 0 6px 6px 0; background: var(--gf-yi-bg); color: var(--gf-yi-ink); }
+
+/* 楷體：封面大題、代表作原文（蓋過 185 的整課明體；其餘仍是明體） */
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info-intro :is(.l7-cv-t, .l7-cv-s, .l7-o:not(.l7-pre), .l7-o:not(.l7-pre) *) { font-family: var(--gf-kai) !important; }
+/* 字級：整課統一規則（168_v194）會把沒有 -tag／title／head 的字級壓回一樣大 → 這幾個用更高權重放大 */
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .l7-sub { font-size: 1.15em !important; }
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .l7b-h { font-size: 1.12em !important; }
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .l7-cv-t { font-size: 2.3em !important; }
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .l7-tree-t { font-size: 1.08em !important; }
+body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .l7-o:not(.l7-pre) { font-size: 1.25em !important; }
+
+/* 樂府詩封面的「樂府長卷」入口（193 的程式插入） */
+body.l7-wide .wk-slide.wks-info-intro .l7-yf-row { display: flex; justify-content: center; margin: .2em 0 1em; }
+body.l7-wide .wk-slide.wks-info-intro .l7-yf-row a { cursor: pointer; background: linear-gradient(135deg, #b83f31, #98291f); color: #fbefdc; font-weight: 700; border-radius: 6px 9px 5px 10px; padding: .5em 1.6em; letter-spacing: .14em; box-shadow: inset 0 0 0 2px rgba(251, 239, 220, .5), 0 2px 6px rgba(0, 0, 0, .25); }
