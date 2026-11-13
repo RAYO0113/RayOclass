@@ -8081,3 +8081,50 @@ body:not(.dark-mode) .wk-slide :is(.tp-title, .wks-info-head, .wks-st-title, .hd
   --ink:         #1a1209;
   --l7-ink:      #2b2420;
 }
+/* ════ src/css/187_v250-l7-flat-css.css ════ */
+/* V250（老師 11/13 晚）：〈長干行〉樂府詩各頁
+   - 不要點來點去：內容全部直接展開（div.l7b 取代收合的 details），按下一頁往下講
+   - 時代大字、各時代各自顏色（.l7-erab，顏色寫在資料的 --ec）
+   - 架構＝旁邊縮小的結構圖（div.l7-map），標出現在講到哪一節
+   - 樂府詩封面：一二三四五六由上往下一欄排（原本兩欄 → 變成左右左右跳）
+   只加不刪：182／185 的舊樣式保留，這裡覆蓋 */
+
+/* 版面：左內容、右結構圖 */
+.l7-lf { display: grid; grid-template-columns: minmax(0, 1fr) 10.5em; gap: 0 1.1em; align-items: start; }
+.l7-lf-main { min-width: 0; }
+@media (max-width: 700px) { .l7-lf { grid-template-columns: 1fr; } .l7-map { display: none; } }
+
+/* 展開的內容區塊 */
+.l7b { margin: 0 0 1.1em; padding: 0 0 .9em; border-bottom: .5px solid var(--l7-sep); }
+.l7b:last-child { border-bottom: 0; }
+.l7b-h { font-weight: 800; color: var(--l7-ink); font-size: 1.08em; margin: 0 0 .35em; }
+.l7b-b { color: var(--l7-ans); line-height: 1.85; }
+.l7b-b th { color: var(--l7-ink); }
+.l7-wk { color: var(--l7-ans); font-weight: 700; }
+
+/* 時代：大字＋各自顏色 */
+.l7-erab { display: inline-block; margin: 0 .12em; padding: 0 .3em; font-size: 1.45em; font-weight: 900; line-height: 1.2; letter-spacing: .06em; color: var(--ec); border-bottom: 4px solid color-mix(in srgb, var(--ec) 35%, transparent); }
+body.dark-mode .l7-erab { color: color-mix(in srgb, var(--ec) 55%, #fff); }
+table.l7t .l7-erab { font-size: 1.15em; border-bottom-width: 3px; }
+
+/* 旁邊的小結構圖 */
+.l7-map { position: sticky; top: .5em; font-size: .76em !important; line-height: 1.45; padding: .7em .8em; border-radius: 12px; background: var(--l7-card); box-shadow: 0 0 0 .5px var(--l7-sep); color: var(--l7-mute); }
+.l7-map-s { padding: .25em .4em; border-radius: 6px; position: relative; }
+.l7-map-s + .l7-map-s, .l7-map-i + .l7-map-s { margin-top: .5em; }
+.l7-map-s:not(:last-of-type)::after { content: '↓'; position: absolute; left: 50%; bottom: -1.05em; font-size: .8em; opacity: .5; }
+.l7-map-s.on { background: var(--l7-tint); color: #fff; font-weight: 800; }
+.l7-map-s.on::after { color: var(--l7-mute); }
+.l7-map-i { margin: .3em 0 .2em .5em; padding-left: .5em; border-left: 2px solid var(--l7-tint); color: var(--l7-ink); }
+.l7-map-i span { display: block; }
+
+/* 樂府詩封面：一欄、由上往下 */
+.l7-cover.l7-cover-1 { display: block; }
+.l7-tree { max-width: 34em; margin: 0 auto; }
+.l7-tree-s { position: relative; background: var(--l7-card); border-radius: 12px; box-shadow: 0 0 0 .5px var(--l7-sep), 0 1px 4px rgba(60, 40, 20, .05); padding: .5em 1em; margin: 0 0 1.1em; }
+.l7-tree-s:not(:last-child)::after { content: '↓'; position: absolute; left: 50%; bottom: -1.05em; transform: translateX(-50%); color: var(--l7-mute); font-size: .9em; }
+.l7-tree-t { font-weight: 800; color: var(--l7-tint); }
+.l7-tree-i { color: var(--l7-ink); font-size: .85em; }
+.l7-tree-i span + span::before { content: '・'; color: var(--l7-mute); }
+
+/* 比較表頁有旁邊結構圖 → 欄名不要被擠成直排 */
+:is(#wk-fullscreen, #wkfs-body, #wk-slide-area, .wk-slide-area) .l7-lf table.l7t th { white-space: nowrap !important; }

@@ -131,6 +131,29 @@ table.cmp tr.st{display:table-row}
 .xs-free{position:absolute;left:0;top:0;line-height:1.65;font-size:1.05em;font-weight:600;opacity:0;transition:opacity .9s}
 .xs-on .xs-grid{opacity:0}
 .xs-on .xs-free{opacity:1}
+.xs-free .lab{font-weight:500}
+.xs-free>div{white-space:nowrap}
+.cz-row+.cz-row{margin-top:.45em}
+.bh{color:var(--xs);background:color-mix(in srgb,var(--xs) 16%,transparent);border-radius:4px;padding:0 .05em}
+.xs-rules{flex:1;min-width:9em;display:flex;flex-direction:column;gap:.35em;font-size:.72em}
+.xr{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.4em;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:.3em .55em;line-height:1.35}
+.xr::before{content:'→';grid-column:2;grid-row:1;color:var(--xs);font-weight:900}
+.xr .a{grid-column:1;grid-row:1;color:var(--muted);text-decoration:line-through;text-decoration-color:#b0796a;text-decoration-thickness:2px}
+.xr .b{grid-column:3;grid-row:1;color:var(--xs);font-weight:800}
+/* 烏青：一行一行冒出來 */
+.wq{font-size:1.05em;line-height:1.7;font-weight:600}
+.wq-l{opacity:0;transform:translateX(-10px);transition:opacity .4s,transform .4s}
+.play .wq-l{opacity:1;transform:none}
+.wq-l b{color:var(--xs);font-weight:900}
+/* 曲：襯字示範 */
+.cz-demo{display:flex;flex-direction:column;gap:.5em;margin:.2em 0 .3em}
+.cz-row{display:flex;align-items:center;gap:.12em}
+.cz-tag{font-size:.6em;font-weight:800;color:#fff;background:var(--qu);border-radius:6px;padding:.1em .45em;margin-right:.4em;min-width:3.6em;text-align:center}
+.ch.cz-new{width:0;border-width:0;overflow:hidden;margin:0 -.06em;color:#fff;background:var(--qu);font-weight:900;transition:width .5s,border-width .5s,margin .5s,opacity .5s,transform .5s}
+.play .ch.cz-new{opacity:0}
+.play .cz-on .ch.cz-new{opacity:1;width:1.45em;border-width:3px;margin:0;overflow:visible;transform:scale(1.12)}
+.ch.cz-new::after{content:'襯字';position:absolute;top:-1.35em;left:50%;transform:translateX(-50%);font-size:.5em;color:var(--qu);font-weight:900;white-space:nowrap;opacity:0;transition:opacity .3s .4s}
+.cz-on .ch.cz-new::after{opacity:1}
 /* 總整理 */
 .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:.35em}
 .sum .card{border-top:8px solid var(--c);padding:.25em .45em}
@@ -445,27 +468,64 @@ P('ci2', '詞｜長短句', head('ci', '看形式：詞牌決定長短') + `
 
 /* ───────── 曲 ───────── */
 featPage('qu');
-P('qu2', '曲｜曲牌與襯字', head('qu', '看形式：曲牌＋襯字') + `
-<div class="verse" id="qud">${['枯藤老樹昏鴉，', '小橋流水人家，', '古道西風瘦馬。', '夕陽西下，', '斷腸人在天涯。'].map(l => `<div class="row">${chars(l, '', C.qu)}</div>`).join('')}</div>
-<div class="src">馬致遠〈天淨沙・秋思〉：曲牌〈天淨沙〉規定的句式</div>
-<div class="st"><div class="row" style="margin:.1em 0"><span class="lab" style="margin:0 .4em 0 0">曲牌規定</span>${Array(7).fill(`<span class="ch zz" style="--c:${C.qu}">正</span>`).join('')}</div>
-<div class="row"><span class="lab" style="margin:0 .4em 0 0">加入襯字</span>${[1, 1, 0, 0, 0, 1, 0, 0, 0, 0].map(x => x ? `<span class="ch cz" style="--c:${C.qu}">襯</span>` : `<span class="ch zz" style="--c:${C.qu}">正</span>`).join('')}</div>
-<div class="note">示意：大格＝曲牌規定的字，小虛線格＝襯字。襯字讓語氣更像說話。</div></div>`, el => stagger($('#qud', el), .03));
+/* 11/13 晚 老師：「天淨沙有點看不出襯字」→〈天淨沙・秋思〉本身照曲牌填、沒有襯字；
+   這頁只看「曲牌規定的句式」，襯字另開一頁用真的句子示範（例句＝龍騰技高國文(5)L4 曲選備課用書「我也會襯字」課堂活動） */
+const TJS = ['枯藤老樹昏鴉，', '小橋流水人家，', '古道西風瘦馬。', '夕陽西下，', '斷腸人在天涯。'];
+P('qu2', '曲｜曲牌', head('qu', '看形式：照曲牌填字') + `
+<div style="display:flex;gap:1em;flex-wrap:wrap;align-items:flex-start">
+  <div class="verse" id="qud">${TJS.map(l => `<div class="row">${chars(l, '', C.qu)}<span class="lab">${nChars(l)}字</span></div>`).join('')}</div>
+  <div style="flex:1;min-width:7em"><div class="src">馬致遠〈天淨沙・秋思〉</div>
+  <div class="note st" style="font-size:.78em">曲牌〈天淨沙〉規定：<b>六・六・六・四・六</b>字。<br>這首照規定填，<b>沒有加襯字</b>。</div>
+  <div class="note st" style="font-size:.78em">曲比詞自由的地方：可以在規定的字數之外，<b>再加「襯字」</b>→ 下一頁</div></div>
+</div>`, el => stagger($('#qud', el), .03));
+const CZ_A = '也許該要真的相信', CZ_B = ['也許', '應', '該要真的相信'];
+P('qu3', '曲｜襯字', head('qu', '看形式：襯字') + `
+<div class="cz-demo" id="czd">
+  <div class="cz-row"><span class="cz-tag">原句</span>${chars(CZ_A, '', C.qu)}<span class="lab">${CZ_A.length}字</span></div>
+  <div class="cz-row"><span class="cz-tag">加襯字</span>${chars(CZ_B[0], '', C.qu)}<span class="ch cz-new" style="--c:${C.qu}">${CZ_B[1]}</span>${chars(CZ_B[2], '', C.qu)}<span class="lab" id="czn">${CZ_A.length}字</span></div>
+</div>
+<div class="src">流行歌加襯字：郭采潔〈誠實的想你〉「也許該要真的相信」唱成「也許<b>應</b>該要真的相信」</div>
+<button class="btn" id="czb" style="font-size:.7em">▶ 加入襯字</button>
+<div class="note st" style="font-size:.8em"><b>襯字</b>：曲牌規定的字數以外，多加的字。<br>・可加在<b>句首、句中</b>，<b>不可加在句末</b><br>・可以是虛詞，也可以是實詞<br>・不改原意，讓語氣更像說話、更活潑（口語化）</div>`, el => {
+  const d = $('#czd', el), n = $('#czn', el);
+  const set = on => { d.classList.toggle('cz-on', on); n.textContent = (CZ_A.length + (on ? 1 : 0)) + '字'; $('#czb', el).textContent = on ? '⟲ 拿掉襯字' : '▶ 加入襯字'; };
+  $('#czb', el).onclick = e => { e.stopPropagation(); set(!d.classList.contains('cz-on')); };
+  setTimeout(() => set(true), 1400);
+});
 
 /* ───────── 新詩 ───────── */
 featPage('xs');
-P('xs2', '新詩｜走出格線', head('xs', '看形式：文字走出格線') + `
-<div class="xs-stage" id="xss">
+/* 11/13 晚 老師：〈再別康橋〉要更能凸顯新詩「打破格律」→ 格線旁標字數、白話字變色，右邊逐條對照「近體詩規定 ✗ 新詩」；
+   再加一頁烏青〈對白雲的讚美〉（原文依 ETtoday 2012-03-30 報導轉錄，待與原出處核對，見核校清單） */
+const KB = [['輕輕的我走了，', 0], ['正如我輕輕的來；', 2], ['我輕輕的招手，', 0], ['作別西天的雲彩。', 2]];
+const baihua = l => [...l].map(c => '的了我'.includes(c) ? `<b class="bh">${c}</b>` : c).join('');
+P('xs2', '新詩｜打破格律', head('xs', '看形式：文字走出格線') + `
+<div style="display:flex;gap:1.2em;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:0 0 auto;width:13em"><div class="xs-stage" id="xss">
   <div class="xs-grid">${'白日依山盡黃河入海流欲窮千里目更上一層樓'.split('').map(c => `<i>${c}</i>`).join('')}</div>
-  <div class="xs-free"><div>輕輕的我走了，</div><div style="padding-left:2em">正如我輕輕的來；</div><div>我輕輕的招手，</div><div style="padding-left:2em">作別西天的雲彩。</div></div>
+  <div class="xs-free">${KB.map(([l, p]) => `<div style="padding-left:${p}em">${baihua(l)}<span class="lab">${nChars(l)}字</span></div>`).join('')}</div>
 </div>
 <div class="src" id="xsc">格線裡是近體詩〈登鸛雀樓〉</div>
-<button class="btn" id="xsb" style="font-size:.7em">▶ 讓文字走出格線</button>`, el => {
+<button class="btn" id="xsb" style="font-size:.7em">▶ 讓文字走出格線</button></div>
+<div class="xs-rules">
+  <div class="xr st"><span class="a">字數固定 5・5・5・5</span><span class="b">每行長短不一</span></div>
+  <div class="xr st"><span class="a">文言</span><span class="b">白話：<b class="bh">的、了、我</b></span></div>
+  <div class="xr st"><span class="a">講平仄、押韻、對仗</span><span class="b">不拘平仄、不必對仗</span></div>
+  <div class="xr st"><span class="a">四句排整齊</span><span class="b">分行、分段、縮排自由</span></div>
+</div></div>`, el => {
   const s = $('#xss', el), cap = $('#xsc', el);
-  const set = on => { s.classList.toggle('xs-on', on); cap.textContent = on ? '徐志摩〈再別康橋〉第一節：白話、分行，長短自由' : '格線裡是近體詩〈登鸛雀樓〉'; };
+  const set = on => { s.classList.toggle('xs-on', on); cap.textContent = on ? '徐志摩〈再別康橋〉第一節' : '格線裡是近體詩〈登鸛雀樓〉'; };
   $('#xsb', el).onclick = e => { e.stopPropagation(); set(!s.classList.contains('xs-on')); };
   setTimeout(() => set(true), 1600);
 });
+const WQ = ['天上的白雲真白啊', '真的，很白很白', '非常白', '非常非常十分白', '極其白', '賊白', '簡直白死了', '啊—'];
+P('xs3', '新詩｜自由到極點', head('xs', '再自由一點：這樣也算詩嗎？') + `
+<div style="display:flex;gap:1.2em;flex-wrap:wrap;align-items:flex-start">
+  <div class="wq" id="wqv">${WQ.map((l, i) => `<div class="wq-l" style="transition-delay:${.2 + i * .35}s">${l.replace(/白/g, '<b>白</b>')}<span class="lab">${nChars(l.replace(/—/g, ''))}字</span></div>`).join('')}</div>
+  <div style="flex:1;min-width:8em"><div class="src">烏青〈對白雲的讚美〉<br>（2012 年在網路爆紅，被稱為「廢話體」）</div>
+  <div class="note st" style="font-size:.8em">每行長短任意：8、6、3……1 字<br>不押韻、不對仗，幾乎沒有修辭<br>只是把「<b>白</b>」說了又說</div>
+  <div class="note st" style="font-size:.8em"><b>想一想：</b>新詩形式完全自由，但仍講究<b>節奏</b>與<b>意象</b>——你覺得這首有嗎？算不算詩？</div></div>
+</div>`);
 
 /* ───────── 總整理 ───────── */
 const SUMS = [['sj', '先秦', '四言・入樂'], ['cc', '戰國～西漢初', '加「兮」・騷體'], ['yf', '兩漢起', '長短句・入樂'], ['gs', '兩漢～六朝', '五七言・不入樂'], ['jt', '唐', '絕句律詩・格律'], ['ci', '唐～宋', '詞牌・長短句・入樂'], ['qu', '元', '曲牌・襯字・入樂'], ['xs', '五四以來', '白話・分行']];
@@ -510,7 +570,7 @@ function go(t, back) {
   const i = typeof t === 'number' ? t : PAGES.findIndex(p => p.id === t);
   if (i < 0 || i >= PAGES.length) return;
   const p = PAGES[i], s = main.children[i];
-  if (i > 1) state.last = p.id.replace(/2$/, '');
+  if (i > 1) state.last = p.id.replace(/[23]$/, '');
   state.i = i; state.back = !!back;
   [...main.children].forEach((x, k) => x.classList.toggle('on', k === i));
   s.innerHTML = p.html; s.scrollTop = 0; s.classList.remove('play');
