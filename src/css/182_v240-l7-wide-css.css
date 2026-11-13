@@ -53,3 +53,4 @@ table.l7t th { white-space: nowrap; background: #f6eedd; }
 .l7-o.l7-pre { font-size: 1em; color: #6b5a44; }
 .l7-y { display: none; margin-top: .4em; padding: .5em .9em; border-left: 4px solid #2d6b4f; background: #f1f7f3; color: #24563f; line-height: 1.85; font-size: .95em; }
 .l7-y.show { display: block; }
+.l7-nav-end { margin: 1.4em 0 .4em; padding-top: .8em; border-top: 1px dashed #d9c7a3; justify-content: center; }

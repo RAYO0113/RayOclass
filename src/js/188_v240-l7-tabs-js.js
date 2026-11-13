@@ -55,6 +55,13 @@
     ds.forEach(function (d) { d.open = !allOpen; });
     btn.textContent = allOpen ? '全部展開' : '全部收起';
   };
+  /* V241（11/13）：代表作頁底「回最上方」 */
+  window.l7Top = function (btn) {
+    var t = btn.closest('.wk-slide') || curBox(); if (!t) return;
+    /* 投影模式：頁面本身在捲（.wk-slide overflow:auto）；一般畫面：整個視窗在捲 */
+    if (t.scrollTop > 0) t.scrollTo({ top: 0, behavior: 'smooth' });
+    else t.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
   window.l7Tr = function (btn) {
     var slide = btn.closest('.wk-slide') || document;
     var on = !btn.classList.contains('on');
