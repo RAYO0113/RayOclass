@@ -1,0 +1,16 @@
+/* V245 甲乙丙丁題：一項一行；有詳解的項目點了在下方打開（老師 11/13） */
+.jy4{display:block}
+.jy4-pre{margin-bottom:6px}
+.jy4-l{display:block;padding:4px 10px 4px 2.4em;text-indent:-2.4em;margin:3px 0;border-radius:8px;line-height:1.6}
+.jy4-l.has{cursor:pointer}
+.jy4-l.has:hover{background:rgba(154,74,38,.07)}
+.jy4-m{display:inline-block;width:2.4em;text-indent:0;font-weight:700;color:#9a4a26}
+.jy4-l.has>.jy4-t::after{content:"▸";font-size:.7em;color:#b08a60;margin-left:.4em}
+.jy4-l.has.jy4-on>.jy4-t::after{content:"▾"}
+.jy4-x{display:none;text-indent:0;margin:5px 0 3px;padding:6px 12px;background:#f5ede2;border-left:4px solid #c08a4a;border-radius:6px;font-size:.86em;line-height:1.65;color:#4a3c31;font-weight:400}
+.jy4-on>.jy4-x{display:block}
+.jy4-lab{display:inline-block;font-size:.8em;font-weight:700;color:#fff;background:#8a6d4a;border-radius:4px;padding:0 6px;margin-right:6px}
+.jy4-tail{margin-top:6px}
+body.dark-mode .jy4-m{color:#e59a6d}
+body.dark-mode .jy4-x{background:#342b24;color:#e3d7c9;border-left-color:#8a6a48}
+body.dark-mode .jy4-l.has:hover{background:rgba(229,154,109,.1)}
