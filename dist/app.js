@@ -13143,7 +13143,7 @@ try {
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="lb/index.html#map" title="詩的變形記" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="lb/index.html" title="詩的變形記" allow="fullscreen"></iframe>';
     document.body.appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
@@ -13161,7 +13161,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V241';
+  window.APP_VERSION = 'V242';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
