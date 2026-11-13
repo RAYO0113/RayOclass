@@ -6,6 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2b2420">
 <title>無腦上課</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- 手機講稿（V217 起；V219 改成逐句講稿）
      ・平板投影翻頁 → 這頁跟著跳；平板點了某一句 → 這頁捲到那一句並標亮（位置代號 seg:第三段#2，#後面是句子序號）。
      ・課文頁＝逐句講稿：本段考點（加密講稿）＋每一句的 句意／修辭（短版，長版可展開）、翻譯、提問（含答案與「師」）、統測；
@@ -228,6 +230,23 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 .ops li.ok{background:var(--cmb);border-left:5px solid var(--cm);font-weight:700}
 .ops li.ok>.ol:after{content:" ✓";color:var(--cm)}
 .ops .oe{font-weight:400;font-size:14px;color:var(--mut);margin-top:2px}
+/* V244（老師 11/13「看題詳解不夠清楚：詳解字太淡、字體不漂亮，改清楚美觀」；正解反綠保留）
+   題目、選項、詳解改宋體（Noto Serif TC，同網站原文頁「宋體比較好看」）；詳解改深色字＋淡底小框，和選項分開 */
+:root{--oe:#4a3c31;--oebg:#f5ede2;--oebd:#d9c4a8}
+:root[data-theme="dark"]{--oe:#e3d7c9;--oebg:#342b24;--oebd:#5a4a3c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--oe:#e3d7c9;--oebg:#342b24;--oebd:#5a4a3c}}
+.qz{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif}
+.qz .qn{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;letter-spacing:.05em}
+.qz .stem{font-size:18px;font-weight:700;line-height:1.7;margin:2px 0 8px}
+.ops li{padding:9px 12px;margin:8px 0;font-size:16.5px;line-height:1.7;border:1px solid var(--line);background:var(--card);border-radius:10px}
+.ops li.ok{border-color:var(--cm);border-left-width:5px}
+.ops .ol{font-weight:700;color:var(--pri);margin-right:2px}
+.ops li.ok .ol{color:var(--cm)}
+.ops .oe{font-size:15.5px;line-height:1.75;color:var(--oe);background:var(--oebg);border-left:3px solid var(--oebd);border-radius:6px;padding:6px 10px;margin-top:7px;font-weight:400}
+.ops li.ok .oe{background:rgba(255,255,255,.6);border-left-color:var(--cm)}
+:root[data-theme="dark"] .ops li.ok .oe{background:rgba(0,0,0,.22)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ops li.ok .oe{background:rgba(0,0,0,.22)}}
+.qz>.it.c-m{font-size:16px;line-height:1.75;color:var(--ink)}
 .ansb{display:inline-block;background:var(--cm);color:#fff;border-radius:8px;padding:1px 10px;font-weight:800;margin-right:6px}
 .psg{font-size:14.5px;color:var(--mut);line-height:1.75;margin-top:6px}
 .psg>summary{color:var(--pri);font-weight:700}
@@ -884,7 +903,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V243', TN_DATE = '2026-11-13';
+  var TN_VER = 'V244', TN_DATE = '2026-11-13';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
