@@ -7285,8 +7285,8 @@ body.dark-mode #rd-fs { background:#16130f; color:#eadfcb; }
 body.dark-mode #rd-fs .rd-bar button { background:transparent; color:#9cc0f0; border-color:#9cc0f0; }
 #rd-fs .rd-txt * { font-family:inherit; }   /* 注釋、出處也用同一字型 */
 /* 原文頁字型：源流明體 GenRyuMin2 TW（SIL OFL 1.1），字集＝全部課文資料用到的字（tools/make_font_subset_read.py）；只有原文頁用到，打開時才下載 */
-@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-r.woff2?v=cf110702") format("woff2"); font-weight:400; font-display:swap; }
-@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-b.woff2?v=53c3d319") format("woff2"); font-weight:700; font-display:swap; }
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-r.woff2?v=d2837dfc") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-b.woff2?v=1bf493a0") format("woff2"); font-weight:700; font-display:swap; }
 /* V136 二改：一句原文＋一句語譯（語譯點開才顯示、不同顏色） */
 #rd-fs .rd-pair { margin:0 0 .35em; }
 #rd-fs .rd-pair.has-t .rd-o { cursor:pointer; }
@@ -8056,3 +8056,7 @@ body.dark-mode { --l7-ans: #8cc0f0; }
 details.l7d > summary { color: var(--l7-ink); }
 details.l7d > .l7d-b { color: var(--l7-ans); }
 details.l7d > .l7d-b th { color: var(--l7-ink); }
+
+/* V248（老師 11/13）：〈長干行〉整課改源流明體（RayGenRyuRead，字集見 tools/make_font_subset_read.py；只有這課打開才下載） */
+body.l7-wide #wk-slide-area .wk-slide, body.l7-wide #wk-slide-area .wk-slide *,
+body.l7-wide #wkfs-body .wk-slide, body.l7-wide #wkfs-body .wk-slide * { font-family: "RayGenRyuRead", "Noto Serif TC", serif !important; }

@@ -6,7 +6,7 @@
 <title>詩的變形記</title>
 <!-- V240（2026-11-12）〈長干行〉詩的流變動畫頁。依老師〈詩的變形記_互動簡報製作規格.md〉＋老師 11/12 意見改版：
      字放大、多分頁（每個詩體＝特徵頁＋看形式頁）、小標統一為「時代／作者／句式／入樂／其他重要」、總覽點一下往右滑、拿掉漢賦、
-     關雎全文、楚辭名句與作者、樂府詩與古詩比較。iPad 11（1194×834）為主、手機直式可用。全部內嵌、可離線。
+     關雎全文、楚辭名句與作者（樂府詩與古詩比較 11/13 移回網站）。iPad 11（1194×834）為主、手機直式可用。全部內嵌、可離線。
      核校清單：教學系統專案根目錄「詩的變形記_內容核校清單.md」 -->
 <style>
 :root{
@@ -15,7 +15,10 @@
   --fs: clamp(18px, 2.75vw, 40px);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",sans-serif;font-size:var(--fs);-webkit-text-size-adjust:100%}
+@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-b.woff2") format("woff2");font-weight:700;font-display:swap}
+/* 11/13 老師：改源流明體 */
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;font-size:var(--fs);-webkit-text-size-adjust:100%}
 button{font:inherit;color:inherit}
 #app{position:fixed;inset:0;display:flex;flex-direction:column}
 header{display:flex;align-items:center;gap:.4em;padding:.2em .7em;border-bottom:1px solid var(--line);font-size:.62em}
@@ -215,7 +218,7 @@ const FORMS = {
     ['作者', '多為<b>士大夫</b>；〈古詩十九首〉作者不詳'],
     ['句式', '多<b>五言、七言</b>；句數不限，可換韻'],
     ['入樂', '<b>不入樂</b>，只可誦'],
-    ['其他', '與樂府詩並稱「<b>漢代詩歌雙葩</b>」；早期五言：班固〈詠史〉、早期七言：曹丕〈燕歌行〉（傳統說法）'],
+    ['其他', '與樂府詩並稱「<b>漢代詩歌雙葩</b>」；最早的五言詩：班固〈詠史〉；最早的七言詩：曹丕〈燕歌行〉'],
   ]},
   jt: { name: '近體詩', c: C.jt, f: [
     ['時代', '<b>唐代</b>成熟、盛行'],
@@ -366,7 +369,7 @@ P('gs2', '古詩｜看形式', head('gs', '看形式：五言、七言整齊') +
 <div class="verse" id="gsv">${['行行重行行，與君生別離。', '相去萬餘里，各在天一涯。'].map(l => `<div class="row">${chars(l, '', C.gs)}</div>`).join('')}</div>
 <div class="src">〈古詩十九首・行行重行行〉：五言</div>
 <div class="st"><div class="verse">${['秋風蕭瑟天氣涼，', '草木搖落露為霜。'].map(l => `<div class="row">${chars(l, '', C.gs)}</div>`).join('')}</div>
-<div class="src">曹丕〈燕歌行〉：早期完整的七言詩</div></div>`, el => stagger($('#gsv', el), .03));
+<div class="src">曹丕〈燕歌行〉：最早的七言詩</div></div>`, el => stagger($('#gsv', el), .03));
 
 /* ───────── 樂府詩 vs 古詩 比較（補充講義） ───────── */
 const CMP = [
@@ -384,8 +387,7 @@ const CMP = [
 const cmpPage = (id, rows, sub) => P(id, '樂府詩 vs 古詩' + sub, `<div class="ph"><h1>樂府詩 vs 古詩</h1><span class="k" style="background:var(--yf)">${sub}</span></div>
 <table class="cmp"><thead><tr><th></th><th class="a">樂府詩</th><th class="b">古詩（古體詩）</th></tr></thead><tbody>
 ${rows.map(r => `<tr class="st"><th>${r[0]}</th><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>`);
-cmpPage('cmp1', CMP.slice(0, 5), '比較 1／2');
-cmpPage('cmp2', CMP.slice(5), '比較 2／2');
+/* 11/13 老師：講解路線只留一條 → 樂府詩與古詩比較只放在網站「樂府詩·與古詩」頁，動畫不再放（CMP 留著備用） */
 
 /* ───────── 近體詩 ───────── */
 featPage('jt');

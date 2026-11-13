@@ -14,6 +14,8 @@ for f in sorted(glob.glob(os.path.join(ROOT, 'data', 'lessons', '*.js'))):
     t = io.open(f, encoding='utf-8').read()
     t = re.sub(r'\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), t)
     chars.update(c for c in t if ord(c) > 0x2E7F)          # 中日韓字、全形標點、注音、圈號
+for f in sorted(glob.glob(os.path.join(ROOT, 'lb', '*.html'))):   # V248：〈詩的變形記〉也用源流明體（老師 11/13）
+    chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
 chars.update('，。、；：「」『』！？（）《》〈〉—…─．‧·○□①②③④⑤⑥⑦⑧⑨⑩')
 chars.update(chr(c) for c in range(0x20, 0x7F))            # 英數
 text = ''.join(sorted(chars))

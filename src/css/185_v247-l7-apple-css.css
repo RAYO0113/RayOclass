@@ -59,3 +59,7 @@ body.dark-mode { --l7-ans: #8cc0f0; }
 details.l7d > summary { color: var(--l7-ink); }
 details.l7d > .l7d-b { color: var(--l7-ans); }
 details.l7d > .l7d-b th { color: var(--l7-ink); }
+
+/* V248（老師 11/13）：〈長干行〉整課改源流明體（RayGenRyuRead，字集見 tools/make_font_subset_read.py；只有這課打開才下載） */
+body.l7-wide #wk-slide-area .wk-slide, body.l7-wide #wk-slide-area .wk-slide *,
+body.l7-wide #wkfs-body .wk-slide, body.l7-wide #wkfs-body .wk-slide * { font-family: "RayGenRyuRead", "Noto Serif TC", serif !important; }
