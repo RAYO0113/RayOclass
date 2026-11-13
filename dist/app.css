@@ -8131,3 +8131,25 @@ table.l7t .l7-erab { font-size: 1.15em; border-bottom-width: 3px; }
 
 /* 11/13 晚 老師：旁邊結構圖沒必要 → 資料已拿掉，內容改全寬 */
 .l7-lf { display: block; }
+
+/* 11/13 晚 老師：①朝代顏色統一、用背景底色區分時代 ②內文要鐵灰（V249），不要藍色 */
+.l7-erab { color: #fff; background: var(--l7-tint); border-bottom: 0; border-radius: 8px; padding: .02em .4em; margin: 0 .2em; }
+body.dark-mode .l7-erab { color: #2a2622; background: var(--l7-tint); }
+table.l7t .l7-erab { padding: 0 .3em; }
+.l7b-b, .l7-wk { color: var(--l7-ink); }
+
+/* 11/13 晚 老師：代表作點開＝統一大小浮框；可點的作品名用紫色字 */
+:root { --l7-click: #6b3fa0; }
+body.dark-mode { --l7-click: #c3a3ec; }
+a.l7-go.l7-wkl, :is(#wkfs-body, #wk-slide-area) a.l7-go.l7-wkl { color: var(--l7-click) !important; font-weight: 800; padding: 0 .1em; margin: 0; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: .2em; }
+#l7-pop { position: fixed; inset: 0; z-index: 2147483000; background: rgba(30, 24, 18, .45); display: flex; align-items: center; justify-content: center; }
+#l7-pop .l7p-box { width: min(92vw, 980px); height: 84vh; display: flex; flex-direction: column; background: #fffdf8; color: #3a3f45; border-radius: 16px; box-shadow: 0 12px 40px rgba(0, 0, 0, .3); overflow: hidden;
+  font-family: "RayGenRyuRead", "Noto Serif TC", serif; font-size: clamp(20px, 2.5vw, 30px); }
+body.dark-mode #l7-pop .l7p-box { background: #2a2622; color: #eee6dc; }
+#l7-pop .l7p-top { display: flex; align-items: center; gap: .5em; padding: .5em .9em; border-bottom: 1px solid rgba(60, 40, 20, .15); }
+#l7-pop .l7p-title { font-size: 1.15em; color: #a0432c; }
+#l7-pop .l7p-sp { flex: 1; }
+#l7-pop button { font: inherit; font-size: .8em; cursor: pointer; border: 0; border-radius: 10px; padding: .25em .9em; background: rgba(160, 67, 44, .1); color: #a0432c; }
+#l7-pop .l7p-tr.on { background: #a0432c; color: #fff; }
+#l7-pop .l7p-body { flex: 1; overflow-y: auto; padding: .7em 1.1em 1.2em; }
+#l7-pop .l7p-body .l7-o { font-size: 1.1em; }
