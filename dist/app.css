@@ -7994,3 +7994,65 @@ body.dark-mode .jy4-l.has:hover{background:rgba(229,154,109,.1)}
 .jy4-xl{display:block;padding-left:2.4em;text-indent:-2.4em;margin:3px 0}
 .jy4-xl .jy4-m{width:2.4em}
 .jy4-xr{margin-top:4px}
+/* ════ src/css/185_v247-l7-apple-css.css ════ */
+/* V247：〈長干行〉題解區按鈕改版（老師 11/13：長條圓框突兀、不好看，參考蘋果美學）
+   - 拿掉膠囊框：連結改成「純文字＋主題色」，像 iOS 的文字按鈕
+   - 題解頁的「去樂府詩／詩的流變／樂府與古詩」：改成 iOS 設定頁那種白底圓角清單，一列一項、右邊 ›
+   - 收合區：白底圓角卡片＋極淡陰影，箭頭改到右邊的 ›，打開時轉向下
+   - 「翻譯」：淡色底的圓角小按鈕，打開時填滿
+   只覆蓋 182_v240-l7-wide-css 的外觀，不刪舊檔 */
+:root { --l7-tint: #a0432c; --l7-ink: #2b2420; --l7-mute: #8e8378; --l7-card: #fff; --l7-sep: rgba(60, 40, 20, .12); }
+body.dark-mode { --l7-tint: #e8957a; --l7-ink: #eee6dc; --l7-mute: #a99d90; --l7-card: #2a2622; --l7-sep: rgba(255, 255, 255, .12); }
+
+/* 文字按鈕（取代膠囊） */
+.l7-go, .l7-cover .l7-go, .l7-jump .l7-go {
+  border: 0; background: none; border-radius: 8px; color: var(--l7-tint); font-weight: 600;
+  padding: .12em .35em; margin: 0 .15em; font-size: 1em; transition: background .15s, opacity .15s;
+}
+.l7-go:hover { background: color-mix(in srgb, var(--l7-tint) 9%, transparent); }
+.l7-go:active { opacity: .55; }
+
+/* 頁頂／頁底導覽：一行輕量文字，中間以細點分隔 */
+.l7-nav { gap: 0; align-items: center; font-size: .9em; margin: 0 0 1em; }
+.l7-nav .l7-go + .l7-go::before { content: none; }
+.l7-nav .l7-all { margin-left: auto; color: var(--l7-mute); font-weight: 500; }
+.l7-nav-end { border-top: .5px solid var(--l7-sep); padding-top: 1em; margin-top: 2em; justify-content: center; }
+
+/* 翻譯：淡底圓角，打開時填滿 */
+.l7-nav .l7-trb { margin-left: auto; padding: .25em .9em; border-radius: 9px; background: color-mix(in srgb, var(--l7-tint) 10%, transparent); color: var(--l7-tint); }
+.l7-nav .l7-trb.on { background: var(--l7-tint); color: #fff; }
+
+/* 題解頁的跳轉：iOS 白底圓角清單 */
+.l7-jump:not(.l7-anim-row) { display: block; gap: 0; margin: 1em 0 1.6em; background: var(--l7-card); border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 .5px var(--l7-sep), 0 2px 8px rgba(60, 40, 20, .06); }
+.l7-jump:not(.l7-anim-row) .l7-go { display: flex; justify-content: space-between; align-items: center; margin: 0; padding: .7em 1.1em; border-radius: 0; color: var(--l7-ink); background: none; font-weight: 600; white-space: normal; }
+.l7-jump:not(.l7-anim-row) .l7-go + .l7-go { box-shadow: inset 0 .5px 0 var(--l7-sep); }
+.l7-jump:not(.l7-anim-row) .l7-go::after { content: '›'; color: var(--l7-mute); font-size: 1.3em; line-height: 1; font-weight: 400; }
+.l7-jump:not(.l7-anim-row) .l7-go:hover { background: color-mix(in srgb, var(--l7-tint) 6%, transparent); }
+
+/* 流變小封面的動畫按鈕：唯一的主要動作，用實心圓角矩形 */
+.l7-anim-row .l7-go { background: var(--l7-tint); color: #fff; border-radius: 12px; padding: .5em 1.4em; }
+.l7-anim-row .l7-go:hover { background: var(--l7-tint); opacity: .88; }
+
+/* 收合區：白底圓角卡片，箭頭在右 */
+details.l7d { border: 0; border-radius: 12px; background: var(--l7-card); box-shadow: 0 0 0 .5px var(--l7-sep), 0 1px 4px rgba(60, 40, 20, .05); margin: .6em 0; overflow: hidden; }
+details.l7d > summary { display: flex; align-items: center; gap: .3em; padding: .65em 1.1em; }
+details.l7d > summary::before { content: none; }
+details.l7d > summary::after { content: '›'; margin-left: auto; color: var(--l7-mute); font-size: 1.3em; line-height: 1; font-weight: 400; transition: transform .2s; }
+details.l7d[open] > summary::after { transform: rotate(90deg); }
+details.l7d[open] > summary { border-bottom: .5px solid var(--l7-sep); }
+.l7-cover details.l7d > summary { padding: .45em .9em; }
+
+/* 年代標籤：淡底、不加框 */
+.l7-era { border-radius: 6px; }
+
+/* 老師 11/13：「詩的流變：從《詩經》到新詩」頁左右還能滑 → 內容其實沒有超寬，是 iPad 觸控的左右回彈；
+   這一課（body.l7-wide）的頁面只准上下捲 */
+body.l7-wide .wk-slide { overflow-x: hidden; overscroll-behavior-x: none; touch-action: pan-y pinch-zoom; }
+body.l7-wide #wk-slide-area, body.l7-wide #wkfs-body { overflow-x: hidden; overscroll-behavior-x: none; }
+
+/* 老師 11/13：點開來的答案字色要和題目不一樣 → 標題維持深色，展開內容改深藍；重點字（wk-a）維持原本標色 */
+:root { --l7-ans: #1d4f86; }
+body.dark-mode { --l7-ans: #8cc0f0; }
+details.l7d > summary { color: var(--l7-ink); }
+details.l7d > .l7d-b { color: var(--l7-ans); }
+details.l7d > .l7d-b th { color: var(--l7-ink); }
