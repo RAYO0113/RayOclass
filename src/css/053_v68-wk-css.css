@@ -1,7 +1,7 @@
 
 /* ② 習作答案總覽：預設隱藏，點單格顯示 */
 .v68-ao-bar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
-.v68-ao-bar button { appearance:none; padding:5px 14px; border:1px solid rgba(202,187,150,.9); border-radius:5px; background:var(--mk-paper-warm,#f7f2e6); color:var(--mk-ink-deep,#211710); font:inherit; font-size:.86em; font-weight:700; cursor:pointer; }
+.v68-ao-bar button { appearance:none; padding:5px 14px; border:1px solid rgba(202,187,150,.9); border-radius:5px; background:var(--mk-paper-warm,#f7f2e6); color:var(--mk-ink-deep,#3a3f45); font:inherit; font-size:.86em; font-weight:700; cursor:pointer; }
 .v68-ao-bar button:hover { border-color:var(--L-gloss,#1f6fb2); }
 .v68-ao-hidden .wk-ao-chip { cursor:pointer; }
 .v68-ao-hidden .wk-ao-chip:not(.v68-show) > span,

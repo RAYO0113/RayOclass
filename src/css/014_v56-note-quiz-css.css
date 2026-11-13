@@ -3,7 +3,7 @@
 #note-quiz-tab {
   position:fixed; right:0; top:calc(34% + 168px); z-index:9801;
   padding:12px 9px;
-  background:var(--ink,#33271a); color:var(--gold,#c8931a);
+  background:var(--ink,#555b62); color:var(--gold,#c8931a);
   border:1px solid rgba(200,147,26,.35); border-right:none;
   border-radius:12px 0 0 12px;
   writing-mode:vertical-rl; letter-spacing:2px;
@@ -11,7 +11,7 @@
   cursor:pointer; box-shadow:0 5px 18px rgba(0,0,0,.18);
   user-select:none;
 }
-#note-quiz-tab:hover { background:#2c2218; }
+#note-quiz-tab:hover { background:#4a5057; }
 /* RayOclass 4b：舊版出題面板（#note-quiz-panel、#note-quiz-overlay、.nq-*）樣式已刪；側邊籤仍用 */
 @media (max-width:760px) {
   #note-quiz-tab { top:calc(30% + 144px); padding:11px 7px; }

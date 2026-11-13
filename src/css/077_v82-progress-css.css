@@ -1,7 +1,7 @@
 
 #v82-chip { position:fixed; left:8px; bottom:8px; z-index:9590; display:flex; align-items:center; gap:6px;
   max-width:min(460px, calc(100vw - 16px)); padding:4px 10px; border-radius:14px;
-  background:var(--surface,#fff); color:var(--ink,#1a1209); border:1px solid var(--border,#d4c4a8);
+  background:var(--surface,#fff); color:var(--ink,#3a3f45); border:1px solid var(--border,#d4c4a8);
   font-size:12px; line-height:1.4; box-shadow:0 1px 5px rgba(0,0,0,0.12); opacity:0.88; cursor:pointer;
   font-family:"Noto Serif TC",serif; -webkit-tap-highlight-color:transparent; }
 #v82-chip .v82-dot { width:8px; height:8px; border-radius:50%; background:#b0a390; flex:none; }
@@ -19,7 +19,7 @@ body.v82-proj #v82-chip, body.v56-proj-open #v82-chip { display:none !important;
 #v82-box .v82-now { font-weight:700; margin-bottom:6px; }
 #v82-box .v82-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
 #v82-box select, #v82-box button, #v82-sched select { font-size:13px; padding:6px 8px; border-radius:4px;
-  border:1px solid var(--border,#d4c4a8); background:var(--surface,#fff); color:var(--ink,#1a1209); font-family:inherit; }
+  border:1px solid var(--border,#d4c4a8); background:var(--surface,#fff); color:var(--ink,#3a3f45); font-family:inherit; }
 #v82-box button.on { background:#1e4d8c; color:#fff; border-color:#1e4d8c; }
 #v82-box .v82-sub { color:var(--muted,#7a6a55); font-size:12px; margin-top:6px; }
 #v82-sched { margin-top:8px; overflow-x:auto; }

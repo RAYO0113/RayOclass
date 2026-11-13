@@ -7,7 +7,7 @@
 .v80-type:hover { background:rgba(192,57,43,.06); }
 body.dark-mode .v80-type { background:#241d16; border-color:#3d2e1e; }
 .v80-tdef { margin:0 0 12px; padding:10px 16px; background:var(--mk-paper-warm,#f7f2e6); border-left:4px solid var(--L-rhet,#c0392b); border-radius:6px;
-  font-family:"Noto Sans TC",sans-serif; color:var(--mk-ink,#33271a); }
+  font-family:"Noto Sans TC",sans-serif; color:var(--mk-ink,#555b62); }
 body.dark-mode .v80-tdef { background:#221d18; }
 .v73-kr .v80-tdef { font-size:var(--v74-rs, calc(var(--base-size) * 1.3)) !important; }
 /* 各動畫舞台字級 */

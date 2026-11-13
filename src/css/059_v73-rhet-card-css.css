@@ -12,7 +12,7 @@
 .v73-def { position: relative; cursor: pointer; margin: 0 0 16px; padding: 10px 92px 10px 74px;
   background: var(--mk-paper-warm, #f7f2e6); border-left: 4px solid var(--L-rhet, #c0392b); border-radius: 6px;
   font-family: "Noto Sans TC", sans-serif; font-size: calc(var(--base-size) * 1.02); line-height: 1.85;
-  color: var(--mk-ink, #33271a); }
+  color: var(--mk-ink, #555b62); }
 .v73-def-tag { position: absolute; left: 14px; top: 11px; background: var(--L-rhet, #c0392b); color: #fff;
   border-radius: 3px; padding: 0 9px; font-size: .85em; line-height: 1.75; letter-spacing: .1em; }
 .v73-def-body { max-height: 1.85em; overflow: hidden;
@@ -39,7 +39,7 @@ body.dark-mode .v73-def { background: var(--mk-paper-warm, #221d18); }
 .v73-kr table.jy-table td:not(:last-child), .v73-rt table.jy-table td:not(:last-child) { padding-bottom: 0 !important;
   font-family: "Noto Sans TC", sans-serif; font-size: calc(var(--base-size) * .98); color: var(--mk-ink-soft, #6b5a42); line-height: 1.8; }
 .v73-kr table.jy-table td:last-child, .v73-rt table.jy-table td:last-child { font-family: "Noto Serif TC", serif;
-  font-size: calc(var(--base-size) * 1.28); line-height: 1.95; color: var(--mk-ink, #33271a); padding-bottom: 14px !important; }
+  font-size: calc(var(--base-size) * 1.28); line-height: 1.95; color: var(--mk-ink, #555b62); padding-bottom: 14px !important; }
 #wk-fullscreen .v73-kr table.jy-table td:last-child, #wk-fullscreen .v73-rt table.jy-table td:last-child { font-size: calc(var(--base-size) * 1.4); }
 .v73-kr .bk-note, .v73-rt .bk-note { font-family: "Noto Sans TC", sans-serif; font-size: .78em; color: var(--mk-ink-soft, #6b5a42); }
 .v73-own { display: inline-block; vertical-align: .15em; margin-right: 8px; padding: 0 8px; border-radius: 3px;
@@ -48,7 +48,7 @@ body.dark-mode .v73-kr table.jy-table tr, body.dark-mode .v73-rt table.jy-table 
 
 /* ════════ 結構動畫頁 ════════ */
 .v73-anim-slide .wks-kr-sub { background: #b8862b !important; }
-.v73a { font-family: "Noto Serif TC", serif; color: var(--mk-ink, #33271a); display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.v73a { font-family: "Noto Serif TC", serif; color: var(--mk-ink, #555b62); display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .v73-tabs { display: flex; gap: 8px; margin: 0 0 10px; }
 .v73-tab { font-family: "Noto Sans TC", sans-serif; font-size: calc(var(--base-size) * .9); padding: 3px 14px; border-radius: 14px;
   border: 1px solid var(--mk-line, #cabb96); background: transparent; color: var(--mk-ink-soft, #6b5a42); cursor: pointer; }

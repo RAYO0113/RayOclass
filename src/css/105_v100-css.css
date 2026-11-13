@@ -3,9 +3,9 @@
 #v98-cal .v98-pill.qz { background:#efe6f8; color:#4f2a86; font-weight:700; }
 #v98-cal .v98-row.v100-q { font-size:14px; gap:6px; }
 #v98-cal .v98-row.v100-q input[type=number] { width:62px; padding:5px 6px; border:1px solid var(--border,#d4c4a8); border-radius:4px;
-  font-size:15px; background:var(--surface,#fff); color:var(--ink,#1a1209); text-align:center; }
+  font-size:15px; background:var(--surface,#fff); color:var(--ink,#3a3f45); text-align:center; }
 #v98-cal .v98-it button.v100-qgo { color:#fff; background:#5b3596; border-radius:4px; font-size:13px; padding:2px 8px; white-space:nowrap; }
-#v100-rmenu { position:fixed; z-index:9800; background:var(--surface,#fff); color:var(--ink,#1a1209); border:1px solid #7a2e2e; border-radius:6px;
+#v100-rmenu { position:fixed; z-index:9800; background:var(--surface,#fff); color:var(--ink,#3a3f45); border:1px solid #7a2e2e; border-radius:6px;
   box-shadow:0 6px 24px rgba(0,0,0,.3); padding:6px; min-width:240px; font-size:14px; }
 #v100-rmenu .v100-rh { font-weight:700; color:#7a2e2e; padding:4px 6px 6px; font-family:"Noto Serif TC",serif; }
 #v100-rmenu button { display:block; width:100%; text-align:left; border:none; border-top:1px solid var(--border,#e4d8c4); background:transparent;

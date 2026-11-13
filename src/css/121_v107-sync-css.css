@@ -9,7 +9,7 @@
 #v107-sync { position:fixed; inset:0; z-index:9720; background:rgba(30,20,10,.45); display:none; align-items:center; justify-content:center; }
 #v107-sync.open { display:flex; }
 #v107-sync * { box-sizing:border-box; }
-#v107-sync .sy-box { background:var(--surface,#fff); color:var(--ink,#1a1209); width:min(760px,96vw); max-height:92vh; border-radius:8px;
+#v107-sync .sy-box { background:var(--surface,#fff); color:var(--ink,#3a3f45); width:min(760px,96vw); max-height:92vh; border-radius:8px;
   box-shadow:0 10px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; overflow:hidden; font-size:15px; }
 #v107-sync .sy-top { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#3d7a4f; color:#fff; }
 #v107-sync .sy-top h3 { margin:0; flex:1; font-family:"Noto Serif TC",serif; font-size:18px; letter-spacing:2px; }
@@ -21,7 +21,7 @@
 #v107-sync .sy-btn.warn { border-color:#b3412e; color:#9a3423; }
 #v107-sync .sy-btn:disabled { opacity:.5; cursor:default; }
 #v107-sync input[type=password] { font-size:15px; padding:6px 8px; border:1px solid var(--border,#d4c4a8); border-radius:4px; width:200px;
-  background:var(--surface,#fff); color:var(--ink,#1a1209); }
+  background:var(--surface,#fff); color:var(--ink,#3a3f45); }
 #v107-sync table { width:100%; border-collapse:collapse; margin:8px 0; font-size:14px; }
 #v107-sync th, #v107-sync td { border-bottom:1px solid var(--border,#e2d6c2); padding:6px 6px; text-align:left; vertical-align:top; }
 #v107-sync th { font-weight:700; color:var(--muted,#7a6a55); font-size:13px; }

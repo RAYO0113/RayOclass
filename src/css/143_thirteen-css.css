@@ -13,17 +13,17 @@
 .t13-name { font-size:calc(var(--base-size) * 2.4); font-weight:900; color:var(--t13-c); letter-spacing:.1em; }
 .t13-count { font-size:calc(var(--base-size) * 1.1); color:var(--mk-ink-soft,#6b5a42); }
 .t13-stage { display:flex; flex-wrap:wrap; gap:.45em; min-height:3.2em; font-size:calc(var(--base-size) * 1.9); margin-bottom:.6em; }
-.t13-b { display:none; padding:.2em .5em; border:2px solid var(--t13-c); border-radius:.35em; background:var(--surface,#fffdf8); color:var(--mk-ink,#33271a);
+.t13-b { display:none; padding:.2em .5em; border:2px solid var(--t13-c); border-radius:.35em; background:var(--surface,#fffdf8); color:var(--mk-ink,#555b62);
   font-weight:700; line-height:1.3; position:relative; }
 .t13-b.on { display:inline-block; }
 .t13-b::before { content:"《"; opacity:.45; } .t13-b::after { content:"》"; opacity:.45; }
 .t13-b.add { background:var(--t13-add); border-color:var(--t13-add); color:#fff; }
 .t13-b.split { border-color:var(--t13-split); color:var(--t13-split); }
 .t13-b.gone { border-style:dashed; color:#999; text-decoration:line-through; text-decoration-color:var(--t13-add); text-decoration-thickness:.12em; }
-.t13-cap { font-size:calc(var(--base-size) * 1.35); line-height:1.8; color:var(--mk-ink,#33271a); }
+.t13-cap { font-size:calc(var(--base-size) * 1.35); line-height:1.8; color:var(--mk-ink,#555b62); }
 .t13-note { margin-top:.3em; font-size:calc(var(--base-size) * 1.05); line-height:1.7; color:var(--mk-ink-soft,#6b5a42); }
 .t13-sum { display:none; margin-top:.8em; padding:.6em .9em; border-left:5px solid var(--t13-c); border-radius:.4em; background:var(--mk-paper-warm,#f7f2e6);
-  font-size:calc(var(--base-size) * 1.2); line-height:1.8; color:var(--mk-ink,#33271a); }
+  font-size:calc(var(--base-size) * 1.2); line-height:1.8; color:var(--mk-ink,#555b62); }
 .t13-sum.show { display:block; }
 #wk-fullscreen .t13-stage { font-size:calc(var(--base-size) * 2.05); }
 #wk-fullscreen .t13-tl { margin:.2em 0 .6em; }
@@ -38,7 +38,7 @@ body.dark-mode .t13-sum { background:var(--mk-paper-warm,#221d18); }
 .t13-b.ren .t13-bn::before { content: "《"; opacity: .45; }
 .t13-stage { padding-top: .5em; }
 .t13-ren { margin: 0 0 .5em; }
-.t13-ren-i { font-size: calc(var(--base-size) * 1.1); line-height: 1.7; color: var(--mk-ink, #33271a); margin: .15em 0; }
+.t13-ren-i { font-size: calc(var(--base-size) * 1.1); line-height: 1.7; color: var(--mk-ink, #555b62); margin: .15em 0; }
 .t13-ren-i b { color: #7c4da0; margin-right: .4em; }
 .t13-ren-i .t13-ren-tag { display: inline-block; padding: 0 .45em; border-radius: .35em; background: #7c4da0; color: #fff; font-size: .85em; }
 #wk-fullscreen .t13-ren-i { font-size: calc(var(--base-size) * 1.3); }
@@ -47,7 +47,7 @@ body.dark-mode .t13-ren-i b { color: #c8a2e8; }
 body.dark-mode .t13-ren-i .t13-ren-tag { background: #7c4da0; color: #fff; }
 /* V193：《爾雅》簡介（十二經那一步） */
 .t13-info { margin: 0 0 .5em; padding: .45em .8em; border-radius: .5em; background: rgba(192,57,43,.07); border-left: 5px solid var(--t13-add);
-  font-size: calc(var(--base-size) * 1.1); line-height: 1.75; color: var(--mk-ink, #33271a); }
+  font-size: calc(var(--base-size) * 1.1); line-height: 1.75; color: var(--mk-ink, #555b62); }
 .t13-info-tag { color: var(--t13-add); margin-right: .4em; }
 #wk-fullscreen .t13-info { font-size: calc(var(--base-size) * 1.25); }
 body.dark-mode .t13-info { background: rgba(232,115,95,.12); }
