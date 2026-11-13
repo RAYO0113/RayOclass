@@ -8158,3 +8158,7 @@ body.dark-mode #l7-pop .l7p-box { background: #2a2622; color: #eee6dc; }
 :root { --l7-key: #17675a; }
 body.dark-mode { --l7-key: #7fd6c4; }
 .l7-key { color: var(--l7-key); font-weight: 800; background: color-mix(in srgb, var(--l7-key) 10%, transparent); border-radius: 4px; padding: 0 .12em; }
+
+/* 11/13 晚 老師：補充講義有相似概念的 → 右上浮框標補充講義頁碼（class 含 -tag，字級不被整課統一規則蓋掉） */
+.l7-hp-tag { float: right; margin: 0 0 .3em .6em; padding: .12em .65em; font-size: .72em; font-weight: 700; color: #7a5a1e; background: #fff6df; border: 1.5px solid #d9b56a; border-radius: 999px; box-shadow: 0 1px 3px rgba(60, 40, 20, .12); white-space: nowrap; }
+body.dark-mode .l7-hp-tag { color: #f0d9a6; background: #3a3020; border-color: #8a7040; }
