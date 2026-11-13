@@ -1,11 +1,20 @@
-/* V249（2026-11-13）課文內文改鐵灰：只動內文區與注釋浮框，
-   課文標題（.tp-title）、頁首、左側課文清單、右側籤頁維持原色；深色模式不動。 */
-body:not(.dark-mode) .tp-main,
-body:not(.dark-mode) .tp-side,
+/* V249（2026-11-13）投影頁內文改鐵灰（老師指示）
+   範圍：所有投影頁（課文、作者、題解、段旨、結構表、修辭、習作、測驗…）與注釋浮框。
+   不改：各頁標題（下方還原清單）、頁首「瑞媛的國文教學」、左側課文清單、右側籤頁；深色模式不動。 */
+body:not(.dark-mode) .wk-slide,
 body:not(.dark-mode) .tp-panel {
   --mk-ink-deep: #3a3f45;
   --mk-ink:      #555b62;
   --ink:         #3a3f45;
+  --l7-ink:      #3a3f45;   /* 〈長干行〉等新版頁面（可展開小項、表頭、連結） */
+  color:         #3a3f45;   /* 沒有自己顏色、從外層繼承的文字（如注釋欄） */
 }
-body:not(.dark-mode) .tp-main .tp-ruby-book { color: #3a3f45; }
-body:not(.dark-mode) .tp-side { color: #3a3f45; }  /* 注釋欄文字是繼承外層顏色，需直接指定 */
+body:not(.dark-mode) .wk-slide .tp-ruby-book { color: #3a3f45; }
+
+/* 標題維持原色 */
+body:not(.dark-mode) .wk-slide :is(.tp-title, .wks-info-head, .wks-st-title, .hd-title, .wk-head, .as-title, .jy-sub, .wk-ao-subhead) {
+  --mk-ink-deep: #211710;
+  --mk-ink:      #33271a;
+  --ink:         #1a1209;
+  --l7-ink:      #2b2420;
+}
