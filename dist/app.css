@@ -7990,3 +7990,7 @@ body.dark-mode .wks-wq1 .wk-qpos{background:rgba(255,255,255,.12)}
 body.dark-mode .jy4-m{color:#e59a6d}
 body.dark-mode .jy4-x{background:#342b24;color:#e3d7c9;border-left-color:#8a6a48}
 body.dark-mode .jy4-l.has:hover{background:rgba(229,154,109,.1)}
+/* V246 文章裡的甲乙丙：選項詳解一項一行 */
+.jy4-xl{display:block;padding-left:2.4em;text-indent:-2.4em;margin:3px 0}
+.jy4-xl .jy4-m{width:2.4em}
+.jy4-xr{margin-top:4px}

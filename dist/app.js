@@ -13248,16 +13248,16 @@ try {
   /* ── V245 甲乙丙丁題（老師 11/13：L6 習作第 2 題甲乙丙丁擠在一起、詳解全塞在 D 選項）──
      題幹裡 (甲)(乙)(丙)… 一項一行；詳解裡「(甲)…(乙)…」拆到各項底下，點那一項才打開；選項裡只留沒拆到的部分。
      資料不動，只在畫面上重排。平板（src/js/190）與手機（tn/index.html）各放一份同樣的程式。 */
-  var JY_LET = '甲乙丙丁戊己庚辛';
+  var JY_LET = '甲乙丙丁戊己庚辛', JY_CIR = '①②③④⑤⑥⑦⑧';   /* V246：①②判斷題也算（老師 11/13「一起改」） */
   /* 標記：(甲)／（甲）；資料裡少數寫成「( ) 戊」也算。前面要是開頭、空白、標點或另一個標記（避免抓到詳解句中「應接<b>(乙)</b>」） */
-  var JY_RE = /[（(][\s　]*([甲乙丙丁戊己庚辛])[\s　]*[）)]|[（(][\s　]*[）)][\s　]*([甲乙丙丁戊己庚辛])(?=[\s　])/g;
+  var JY_RE = /[（(][\s　]*([甲乙丙丁戊己庚辛])[\s　]*[）)]|[（(][\s　]*[）)][\s　]*([甲乙丙丁戊己庚辛])(?=[\s　])|([①②③④⑤⑥⑦⑧])/g;
   function jyMarks(s, strict) {
     var o = [], m; JY_RE.lastIndex = 0;
     while ((m = JY_RE.exec(s))) {
       var pv = s.slice(0, m.index).replace(/<br\s*\/?>\s*$/i, '\n');
-      var c = pv.slice(-1);
-      if (strict && pv && !/[\s　。；;，,：:？?！!）)\n]/.test(c)) continue;
-      o.push({ L: m[1] || m[2], at: m.index, end: m.index + m[0].length });
+      var c = pv.slice(-1), L = m[1] || m[2] || m[3];
+      if ((strict || m[3]) && pv && !/[\s　。；;，,：:？?！!）)\n]/.test(c)) continue;
+      o.push({ L: L, at: m.index, end: m.index + m[0].length, lab: m[3] ? L : '(' + L + ')' });
     }
     return o;
   }
@@ -13269,8 +13269,10 @@ try {
     var cm = /<(div|img|table|figure)\b/i.exec(stem), cut = cm ? cm.index : stem.length;
     var head = stem.slice(0, cut), after = stem.slice(cut);
     var ms = jyMarks(head); if (ms.length < 2) return null;
-    for (var i = 0; i < ms.length; i++) if (ms[i].L !== JY_LET[i]) return null;
-    var items = ms.map(function (m, i) { return { L: m.L, t: head.slice(m.end, i + 1 < ms.length ? ms[i + 1].at : head.length) }; });
+    var fam = JY_CIR.indexOf(ms[0].L) >= 0 ? JY_CIR : JY_LET;
+    ms = ms.filter(function (m) { return fam.indexOf(m.L) >= 0; }); if (ms.length < 2) return null;
+    for (var i = 0; i < ms.length; i++) if (ms[i].L !== fam[i]) return null;
+    var items = ms.map(function (m, i) { return { L: m.L, lab: m.lab, t: head.slice(m.end, i + 1 < ms.length ? ms[i + 1].at : head.length) }; });
     if (items.some(function (it) { return jyEmpty(it.t); })) return null;
     /* 最後一項後面接的問句（「以上各組…」「依此規劃…應是：」）拆出來另起一行 */
     var last = items[items.length - 1], tail = '', re = /[。？！?!]/g, mm, at = -1;
@@ -13308,6 +13310,29 @@ try {
     if (!hit) return null;
     return { rest: rest.join('<br>').replace(/^(\s*<br>)+|(<br>\s*)+$/g, '').trim(), per: per };
   }
+  /* V246：甲乙丙標在文章裡（不是一項一行的題目），詳解「(甲)…(乙)…(丙)…」整段塞在一個選項 → 在選項裡拆成一項一行 */
+  function jyExpLines(q, stemKey, fmt) {
+    fmt = fmt || function (x) { return x; };
+    var st = String(q[stemKey] || ''), letters = '', m; JY_RE.lastIndex = 0;
+    while ((m = JY_RE.exec(st))) { var L = m[1] || m[2]; if (L && letters.indexOf(L) < 0) letters += L; }
+    if (letters.length < 2) return null;
+    var hit = false;
+    function lines(t) {
+      var r = jySplit(t, letters); if (!r) return t;
+      var Ls = Object.keys(r.per); if (Ls.length < 2) return t;
+      Ls.sort(function (a, b) { return JY_LET.indexOf(a) - JY_LET.indexOf(b); });
+      hit = true;
+      return Ls.map(function (L) { return '<div class="jy4-xl"><span class="jy4-m">(' + L + ')</span>' + fmt(r.per[L].join('<br>')) + '</div>'; }).join('') +
+        (r.rest ? '<div class="jy4-xr">' + fmt(r.rest) + '</div>' : '');
+    }
+    var q2 = {}; for (var kk in q) q2[kk] = q[kk];
+    q2.opts = (q.opts || []).map(function (o) { var o2 = o.slice(); if (o2[2]) o2[2] = lines(o2[2]); return o2; });
+    if (q.per) { q2.per = {}; for (var k in q.per) q2.per[k] = lines(q.per[k]); }
+    if (q.exp) q2.exp = lines(q.exp);
+    if (!hit) return null;
+    q2._jy = 2;
+    return q2;
+  }
   /* 題目 → 複本（題幹換成逐項 HTML、詳解拆走）；不是甲乙丙丁列項題回傳 null。fmt＝各片段輸出前的處理（手機用 clean） */
   function jyTransform(q, stemKey, fmt) {
     fmt = fmt || function (x) { return x; };
@@ -13327,7 +13352,7 @@ try {
       J.items.map(function (it) {
         var x = X[it.L];
         return '<div class="jy4-l' + (x ? ' has' : '') + '"' + (x ? ' onclick="this.classList.toggle(\'jy4-on\');event.stopPropagation()"' : '') + '>' +
-          '<span class="jy4-m">(' + it.L + ')</span><span class="jy4-t">' + fmt(it.t) + '</span>' +
+          '<span class="jy4-m">' + it.lab + '</span><span class="jy4-t">' + fmt(it.t) + '</span>' +
           (x ? '<div class="jy4-x">' + fmt(x.join('<br>')) + '</div>' : '') + '</div>';
       }).join('') + (J.tail ? '<div class="jy4-tail">' + fmt(J.tail) + '</div>' : '') + '</div>';
     q2._jy = 1;
@@ -13335,7 +13360,7 @@ try {
   }
 
   /* 平板：基礎練習（iquiz，題幹 q）、A卷（aq，題幹 stem）、習作（work，題幹 q；含 189 一題一頁）渲染前換成重排後的複本 */
-  function tx(q, key) { return (q && !q._jy && jyTransform(q, key)) || q; }
+  function tx(q, key) { return (q && !q._jy && (jyTransform(q, key) || jyExpLines(q, key))) || q; }
   var _render = wkRenderSlideHTML;
   wkRenderSlideHTML = function (slide) {
     if (slide && (slide.type === 'iquiz' || slide.type === 'aq') && slide.q) {
@@ -13363,7 +13388,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V245';
+  window.APP_VERSION = 'V246';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
