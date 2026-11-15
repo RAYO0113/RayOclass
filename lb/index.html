@@ -4,241 +4,268 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>詩的變形記</title>
-<!-- V240（2026-11-12）〈長干行〉詩的流變動畫頁。依老師〈詩的變形記_互動簡報製作規格.md〉＋老師 11/12 意見改版：
-     字放大、多分頁（每個詩體＝特徵頁＋看形式頁）、小標統一為「時代／作者／句式／入樂／其他重要」、總覽點一下往右滑、拿掉漢賦、
-     關雎全文、楚辭名句與作者（樂府詩與古詩比較 11/13 移回網站）。iPad 11（1194×834）為主、手機直式可用。全部內嵌、可離線。
-     核校清單：教學系統專案根目錄「詩的變形記_內容核校清單.md」
-     V251（2026-11-13 老師：動畫重新設計、要中國風）：只換外觀與動態，各頁文字內容不動——
-     宣紙底＋水墨遠山＋流動的霧、詩句寫在米字格裡（落墨出現）、小標改印章、總覽改長卷（流行期間一筆刷出）、
-     封面改紅日＋逐字落墨＋五種句式的小字格、換頁像展卷。 -->
+<!-- V252（2026-11-15 老師：照「樂府長卷」的做法整個重做）〈長干行〉詩的流變互動頁。
+     文字內容＝老師核校過的 V240／V251 版原樣搬來（FORMS、CHIPEX、各詩例、SUMS、QUIZ 一字未改；核校清單：教學系統專案 docs 或根目錄「詩的變形記_內容核校清單.md」），
+     這一版只重做呈現與互動：
+     ・一種詩體一幅徽宗工筆畫（img/ui/bg，八主題配八詩體），中央留紙色放字；☾ 切夜景
+     ・總覽＝可左右拖動的長卷（點畫面往右走一站，最後縮小看全部）
+     ・五項特徵的重點字先藏（朱框），按了才揭曉；「答案」鍵一次全開
+     ・「看形式」改成動手做：關雎找重複句、楚辭點「兮」、樂府／古詩／曲數字數、近體把詩句排進格線、詞照詞牌填字、曲自己找襯字位置、新詩拆格線
+     ・挑戰＝原 5 題＋總整理 8 張關鍵詞卡，洗牌出題
+     字體＝源流明體（老師 11/13：不要標楷體）。頁碼代號（#map、#sj、#jt2…）與舊版相同；從網站開（188 的 l7Anim 蓋版）時右上有「✕ 回課文」。
+     iPad 11（1194×834）為主、手機直式可用。 -->
 <style>
 :root{
-  --bg:#F3EAD6; --paper:#fbf5e6; --ink:#2b2622; --muted:#4a433a; --line:#cdbf9f; --card:rgba(255,250,240,.86); --zhu:#a8352a;
+  --fs:clamp(18px,2.75vw,40px);
+  --paper:247,238,214; --ink:#2a2521; --mute:#5a4c3a; --zhu:#a8352a; --zhu-d:#7f241c; --gold:#b08d57; --line:rgba(107,74,43,.32);
+  --card:rgba(255,251,240,.88); --cell:#fffaf0; --stx:#fbefdc; --xi:#cfe3e6; --dzb:#f0dfd3;
   --sj:#8D7655; --cc:#537C83; --yf:#A7794F; --gs:#628475; --jt:#805C4D; --ci:#A88A4D; --qu:#806C8E; --xs:#607F96;
-  --fs: clamp(18px, 2.75vw, 40px);
-  --kai:"RayGenRyuRead","Noto Serif TC",serif;
   --seal:linear-gradient(135deg,#b83f31,#98291f);
-  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .18 0 0 0 .55 -.2'/%3E%3C/filter%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .38 0 0 0 0 .22 0 0 0 .34 -.14'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
-  /* 水墨遠山：左右兩端同高，可以橫向接續（總覽長卷用 repeat-x） */
-  --mount:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23403a34' stop-opacity='.5'/%3E%3Cstop offset='1' stop-color='%23403a34' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath filter='url(%23b)' fill='url(%23g)' opacity='.5' d='M0 210C80 150 140 190 220 120C270 80 310 150 380 130C450 110 500 40 560 90C620 140 680 110 760 150C840 190 900 100 980 130C1060 160 1130 170 1200 210L1200 320L0 320Z'/%3E%3Cpath filter='url(%23b)' fill='url(%23g)' d='M0 270C90 230 150 250 240 200C300 170 350 230 430 215C520 200 560 150 640 190C720 230 800 215 880 240C960 265 1040 205 1120 225C1160 235 1180 262 1200 270L1200 320L0 320Z'/%3E%3C/svg%3E");
+  --ming:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;
 }
+body.night{--paper:16,18,26; --ink:#f1e6cb; --mute:#b9a988; --zhu:#e9a45c; --zhu-d:#f0c184; --gold:#d8b878; --line:rgba(240,225,190,.28);
+  --card:rgba(22,24,34,.84); --cell:#22252f; --stx:#15161c; --xi:#2f5560; --dzb:#4a3a34;
+  --sj:#c9b188; --cc:#8fbcc4; --yf:#d9a877; --gs:#9cc0ae; --jt:#c9a08e; --ci:#d8bb78; --qu:#b9a3c9; --xs:#9bbdd6}
 *{box-sizing:border-box}
 @font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-b.woff2") format("woff2");font-weight:700;font-display:swap}
-/* --kai 現在就是源流明體（老師 11/13：不要標楷體）；明體有粗細 → 標題用 bold，不用描邊 */
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;font-size:var(--fs);-webkit-text-size-adjust:100%}
-button{font:inherit;color:inherit}
-#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--noise) 0 0/240px 240px}
-header{position:relative;display:flex;align-items:center;gap:.4em;padding:.25em .7em;font-size:.62em;background:linear-gradient(rgba(107,74,43,.1),transparent)}
-header::after,footer::before{content:'';position:absolute;left:0;right:0;height:3px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(43,38,34,.55) 8%,rgba(43,38,34,.55) 70%,transparent)}
-header::after{bottom:0} footer::before{top:0}
-header .hs{font-family:var(--kai);color:#fbefdc;background:var(--seal);border-radius:4px 6px 3px 7px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.55);padding:.05em .3em;transform:rotate(-3deg)}
-header .t{font-family:var(--kai);font-size:1.3em;letter-spacing:.14em;font-weight:700;}
+html,body{margin:0;height:100%;background:#1a1612;color:var(--ink);font-family:var(--ming);font-size:var(--fs);-webkit-text-size-adjust:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+/* ── 場景：兩層交疊換畫，畫面緩慢推移 ── */
+.bg{position:fixed;inset:0;background:center/cover no-repeat;opacity:0;transition:opacity 1.4s;animation:drift 40s ease-in-out infinite alternate}
+.bg.on{opacity:1}
+@keyframes drift{from{transform:scale(1.03) translate(-.6%,.3%)}to{transform:scale(1.1) translate(.8%,-.5%)}}
+.veil{position:fixed;inset:0;pointer-events:none;transition:background .8s;
+  background:radial-gradient(ellipse 80% 84% at 50% 52%,rgba(var(--paper),.95) 0 70%,rgba(var(--paper),.62) 88%,rgba(var(--paper),.15) 100%)}
+body.full .veil{background:rgba(var(--paper),.8)}
+body.cover .veil{background:radial-gradient(ellipse 60% 62% at 50% 50%,rgba(var(--paper),.88) 0 58%,rgba(var(--paper),0) 100%)}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+/* ── 上列 ── */
+header{display:flex;align-items:center;gap:.3em;padding:.3em .6em;font-size:.58em;background:linear-gradient(rgba(var(--paper),.94),rgba(var(--paper),0))}
+.logo{border:0;color:#fbefdc;background:var(--seal);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.55);padding:.1em .45em;font-weight:700;letter-spacing:.1em;transform:rotate(-2deg);margin-right:.2em;white-space:nowrap}
+nav{display:flex;gap:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{border:0;background:none;padding:.2em .42em;border-radius:6px;color:var(--mute);font-weight:700;letter-spacing:.04em;position:relative;white-space:nowrap}
+nav button.on{color:var(--zhu-d)}
+nav button.on::after{content:'';position:absolute;left:.4em;right:.4em;bottom:0;height:3px;border-radius:50%;background:var(--zhu)}
 header .sp{flex:1}
+.tool{border:1.5px solid var(--line);background:rgba(var(--paper),.78);border-radius:6px;padding:.2em .7em;white-space:nowrap}
+.tool.on{background:var(--zhu);border-color:var(--zhu);color:var(--stx)}
+.tool[disabled]{opacity:.35;cursor:default}
 main{flex:1;position:relative;overflow:hidden}
-/* 背景：頁底遠山＋緩緩橫移的霧 */
-main::before{content:'';position:absolute;left:0;right:0;bottom:0;height:36%;background:var(--mount) bottom/100% 100% no-repeat;pointer-events:none}
-main::after{content:'';position:absolute;left:0;bottom:0;width:200%;height:20%;pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(243,234,214,.9) 25%,transparent 50%,rgba(243,234,214,.9) 75%,transparent);animation:mist 36s linear infinite;-webkit-mask-image:linear-gradient(transparent,#000 65%);mask-image:linear-gradient(transparent,#000 65%)}
-@keyframes mist{to{transform:translateX(-50%)}}
-.paused main::after{animation-play-state:paused}
-/* 換頁：像展卷，從右邊帶一點墨暈進來 */
-.slide{position:absolute;inset:0;z-index:1;padding:.45em .9em .5em;overflow:auto;opacity:0;visibility:hidden;transform:translateX(30px);filter:blur(6px);transition:opacity .45s,transform .55s cubic-bezier(.2,.7,.2,1),filter .45s,visibility 0s .45s}
-.slide.on{opacity:1;visibility:visible;transform:none;filter:none;transition-delay:0s}
-footer{position:relative;display:flex;align-items:center;gap:.4em;padding:.3em .6em calc(.25em + env(safe-area-inset-bottom));background:rgba(229,216,190,.92);font-size:.62em}
-.btn{border:1.5px solid #8a7a5c;background:var(--paper);border-radius:6px;padding:.25em .9em;cursor:pointer;white-space:nowrap;box-shadow:1px 2px 0 rgba(107,74,43,.16);transition:background .15s,transform .1s}
-.btn:hover{background:#f3e7cc}
-.btn:active{transform:translateY(1px)}
-.btn.pri{background:var(--seal);border-color:#98291f;color:#fbefdc;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),1px 2px 0 rgba(107,74,43,.2)}
-.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.btn[disabled]{opacity:.35;cursor:default}
-footer .pg{min-width:3.5em;text-align:center;color:var(--muted)}
-footer .sp{flex:1}
-footer .hint{color:var(--muted);font-size:.85em}
-/* 頁首：詩體名（楷體）＋印章小標 */
-.ph{display:flex;align-items:center;gap:.5em;margin:0 0 .3em;flex-wrap:wrap}
-.ph h1{font-family:var(--kai);font-size:1.12em;font-weight:700;margin:0;letter-spacing:.08em;line-height:1.25;color:var(--c,var(--ink))}
-.ph .k{font-size:.62em;color:#fbefdc;background:var(--c,var(--ink));border-radius:4px 7px 4px 8px;padding:.12em .6em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5)}
-.note{font-size:.7em;color:var(--muted);margin-top:.3em;line-height:1.5}
-/* 逐步揭露：墨暈化開 */
-.st{opacity:0;transform:translateY(10px);filter:blur(5px);transition:opacity .5s,transform .5s,filter .5s}
+#stage{position:absolute;inset:0;overflow:auto;padding:.3em 1.1em .8em;display:flex;flex-direction:column;align-items:center}
+#stage>.in{margin:auto;width:min(100%,35em);animation:enter .7s cubic-bezier(.2,.7,.2,1) both}
+body.full #stage>.in{width:100%}
+@keyframes enter{from{opacity:0;transform:translateY(18px);filter:blur(6px)}}
+/* ── 下列 ── */
+footer{display:flex;align-items:center;gap:.4em;padding:.25em .6em calc(.3em + env(safe-area-inset-bottom));font-size:.58em;background:linear-gradient(rgba(var(--paper),0),rgba(var(--paper),.94))}
+footer .pg{min-width:4em;text-align:center;color:var(--mute)}
+footer .sp{flex:1} footer .hint{color:var(--mute)}
+.nx{background:var(--seal);border:0;color:#fbefdc;border-radius:6px 9px 5px 10px;padding:.3em 1.1em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),0 2px 5px rgba(0,0,0,.25);white-space:nowrap}
+#bar{position:absolute;left:0;bottom:0;height:3px;background:var(--zhu);transition:width .5s}
+/* ── 內容共用 ── */
+.ph{display:flex;align-items:center;gap:.5em;margin:0 0 .35em;flex-wrap:wrap}
+.ph h2{margin:0;font-size:1.15em;font-weight:700;letter-spacing:.08em;line-height:1.25;color:var(--c,var(--ink))}
+.ph .k{font-size:.62em;color:var(--stx);background:var(--c,var(--zhu));border-radius:4px 7px 4px 8px;padding:.12em .6em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.4)}
+.tip{display:inline-block;font-size:.6em;color:var(--zhu-d);border:1px dashed var(--zhu);border-radius:4px;padding:.05em .6em;background:rgba(var(--paper),.7);line-height:1.5}
+.cnt{font-size:.68em;color:var(--zhu-d);font-weight:700;min-height:1.6em;margin:.2em 0}
+.note{font-size:.78em;color:var(--mute);margin-top:.3em;line-height:1.55}
+.src{font-size:.68em;color:var(--mute);margin:.15em 0 .4em}
+.split{display:flex;gap:1em;align-items:flex-start;flex-wrap:wrap}
+.split .side{flex:1;min-width:8em}
+.st{opacity:0;transform:translateY(10px);filter:blur(5px);transition:opacity .55s,transform .55s,filter .55s}
 .st.show{opacity:1;transform:none;filter:none}
-/* 五項特徵（小標統一）：小標＝印章 */
+/* 重點字：先藏（朱框），按了才落下 */
+.bk{display:inline-block;color:transparent;border-bottom:2.5px solid var(--zhu);background:rgba(168,53,42,.1);border-radius:4px 4px 0 0;padding:0 .18em;margin:0 .06em;cursor:pointer;font-weight:700;line-height:1.3;transition:color .35s,background .35s;user-select:none;-webkit-user-select:none}
+.bk.on{color:var(--c,var(--zhu));background:none;animation:drop .45s cubic-bezier(.3,1.5,.5,1)}
+body.night .bk:not(.on){background:rgba(233,164,92,.14)}
+@keyframes drop{from{transform:translateY(-.35em) scale(1.25);filter:blur(3px)}}
+/* ── 封面 ── */
+.cv{text-align:center}
+.cv h1{display:flex;align-items:center;justify-content:center;margin:0;font-size:2.7em;letter-spacing:.16em;line-height:1.15;font-weight:700;text-shadow:0 0 .4em rgba(var(--paper),1)}
+.cv h1 span{display:inline-block;animation:ink .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.18s + .3s)}
+@keyframes ink{from{opacity:0;transform:scale(1.7);filter:blur(10px)}}
+.cv h1 .seal{font-size:.3em;font-weight:400;writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.1em;line-height:1;margin-left:.9em;padding:.4em .3em .3em;color:#fbefdc;background:var(--seal);border-radius:5px 7px 4px 8px;box-shadow:inset 0 0 0 2px rgba(251,239,220,.55);animation:stamp .45s 1.4s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(-14deg)}}
+.cv .sub{letter-spacing:.3em;text-indent:.3em;color:var(--mute);margin:.25em 0 .6em;animation:enter .7s 1.5s both}
+.evo{display:flex;align-items:stretch;gap:.35em;margin:0 0 .7em;flex-wrap:wrap;justify-content:center}
+.evo .blk{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:4px;padding:.3em .4em .2em;box-shadow:2px 3px 0 rgba(107,74,43,.12);animation:enter .6s both;animation-delay:calc(var(--i)*.28s + 1.8s)}
+.evo .erow{display:flex;gap:.07em;margin-bottom:.07em}
+.evo .erow i{display:block;width:.3em;height:.3em;border:1.5px solid var(--c);border-radius:1.5px;background:color-mix(in srgb,var(--c) 20%,var(--cell))}
+.evo .cap{font-size:.52em;color:var(--mute);margin-top:.3em;font-weight:700;align-self:center}
+.evo .arr{align-self:center;color:var(--mute);font-size:.7em;animation:enter .6s both;animation-delay:calc(var(--i)*.28s + 1.7s)}
+.toc{display:flex;flex-wrap:wrap;justify-content:center;gap:.35em;font-size:.68em;animation:enter .7s 3s both;margin-bottom:.8em}
+.toc button{border:1px solid var(--line);border-top:5px solid var(--c);background:var(--card);border-radius:4px;padding:.3em .7em;box-shadow:2px 3px 0 rgba(107,74,43,.15);font-weight:700;transition:transform .15s}
+.toc button:hover{transform:translateY(-3px)}
+.toc small{display:block;font-weight:400;color:var(--mute);font-size:.72em}
+.cv .nx{font-size:.8em;letter-spacing:.15em;animation:enter .6s 3.3s both}
+/* ── 總覽：可拖動的長卷 ── */
+.tl-view{position:relative;overflow-x:auto;overflow-y:hidden;height:min(17.8em,calc(100vh - 8.2em));border-radius:4px;border:1px solid var(--line);background:rgba(var(--paper),.55);box-shadow:inset 0 0 2em rgba(107,74,43,.13);cursor:grab;user-select:none;-webkit-user-select:none;scrollbar-width:none}
+.tl-view::-webkit-scrollbar{display:none}
+.tl-view.all{overflow:hidden;cursor:default}
+.tl-track{position:relative;height:100%;width:calc(var(--ux) * 8.8 + 18.9em)}
+.tl-view.all .tl-track{width:100%}
+.tl-pin{position:absolute;top:0;transition:left 1s cubic-bezier(.4,.1,.2,1)}
+.tl-view.all .node i{width:0;margin-right:-.45em;opacity:0}
+.tl-axis{position:absolute;left:0;right:0;top:1.3em;height:4px;border-radius:50%;background:linear-gradient(90deg,transparent,var(--ink) 2%,var(--ink) 98%,transparent);opacity:.8}
+.tl-era{position:absolute;top:.1em;font-size:.62em;line-height:1.3;color:var(--zhu);background:rgb(var(--paper));border:1px solid var(--zhu);border-radius:3px;padding:0 .45em;transform:translateX(-50%);white-space:nowrap}
+.tl-era::after{content:'';position:absolute;left:50%;top:1.6em;width:2px;height:.55em;background:var(--ink)}
+.node{position:absolute;display:flex;align-items:center;gap:.45em;font-weight:700;line-height:1.3;border:1.5px solid var(--c);border-left:7px solid var(--c);background:var(--card);border-radius:4px;padding:.2em .7em .2em .25em;cursor:pointer;white-space:nowrap;box-shadow:2px 3px 0 rgba(107,74,43,.16);
+  opacity:.4;filter:grayscale(.85);transition:opacity .5s,filter .5s,box-shadow .3s,transform .5s cubic-bezier(.2,.8,.2,1),left 1s cubic-bezier(.4,.1,.2,1);transform:scale(.94)}
+.node i{display:block;flex:none;width:2.5em;height:2.5em;border-radius:3px;background:center/cover no-repeat;box-shadow:inset 0 0 0 1px var(--line);transition:width .8s,margin .8s,opacity .5s}
+.node small{display:block;font-weight:400;font-size:.55em;color:var(--mute)}
+.node.lit{opacity:1;filter:none;transform:none}
+.node.cur{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 32%,transparent),2px 3px 0 rgba(107,74,43,.16)}
+.lane{position:absolute;height:.4em;border-radius:.3em .5em .5em .3em;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 75%,transparent),color-mix(in srgb,var(--c) 18%,transparent));transform-origin:left;transform:scaleX(0);opacity:0;transition:opacity .4s,transform 1s cubic-bezier(.3,.7,.2,1) .15s,left 1s cubic-bezier(.4,.1,.2,1),width 1s cubic-bezier(.4,.1,.2,1)}
+.lane.lit{opacity:1;transform:none}
+.tl-note{font-size:.62em;color:var(--mute);line-height:1.5}
+/* ── 特徵頁：直式朱印＋五項（小標＝印章） ── */
+.era{display:grid;grid-template-columns:auto 1fr;gap:0 .9em;align-items:start}
+.era .big{writing-mode:vertical-rl;text-orientation:upright;font-size:2.3em;font-weight:700;letter-spacing:.1em;line-height:1;color:var(--stx);background:var(--c);border-radius:8px 12px 7px 14px;padding:.3em .18em .22em;box-shadow:inset 0 0 0 3px rgba(251,239,220,.45),0 6px 18px rgba(0,0,0,.3);transform:rotate(-2deg);animation:stamp .55s .25s cubic-bezier(.3,1.4,.5,1) both}
 .feat{display:grid;grid-template-columns:auto 1fr;gap:.32em .55em;align-items:start}
-.feat .lb{font-family:var(--kai);font-size:.78em;color:#fbefdc;background:var(--c);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5);padding:.16em .6em;text-align:center;white-space:nowrap;margin-top:.1em}
+.feat .lb{font-size:.78em;color:var(--stx);background:var(--c);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.4);padding:.16em .6em;text-align:center;white-space:nowrap;margin-top:.1em;font-weight:700}
 .feat .tx{line-height:1.45;font-size:.92em}
-.feat .tx b{color:var(--c)}
 .chips{display:inline-flex;flex-wrap:wrap;gap:.3em;vertical-align:middle}
-.chip{font-family:var(--kai);border:1.5px solid var(--c);color:var(--c);background:var(--paper);border-radius:4px;padding:0 .5em;cursor:pointer;font-size:.92em;box-shadow:1px 2px 0 rgba(107,74,43,.14)}
-.chip.on{background:var(--c);color:#fff}
+.chip{border:1.5px solid var(--c);color:var(--c);background:var(--cell);border-radius:4px;padding:0 .5em;cursor:pointer;font-size:.92em;box-shadow:1px 2px 0 rgba(107,74,43,.14);font-weight:700}
+.chip.on{background:var(--c);color:var(--stx)}
 .expl{margin-top:.25em;padding:.25em .6em;border-left:4px solid var(--c);background:var(--card);border-radius:0 6px 6px 0;line-height:1.45;font-size:.88em}
 .expl:empty{display:none}
-/* 字格：米字格＋楷體；出現時像落墨（由大而濃縮定） */
+.expl b{color:var(--c)}
+.rail{display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin:.9em .4em 0;font-size:.58em}
+.rail::before{content:'';position:absolute;left:0;right:0;top:.42em;height:3px;border-radius:50%;background:linear-gradient(90deg,transparent,var(--mute) 4%,var(--mute) 96%,transparent);opacity:.6}
+.rail button{position:relative;border:0;background:none;padding:1.1em .2em 0;color:var(--mute);font-weight:700}
+.rail button::before{content:'';position:absolute;left:50%;top:0;width:.8em;height:.8em;margin-left:-.4em;border-radius:50%;background:rgb(var(--paper));border:2.5px solid var(--mute);transition:all .4s}
+.rail button.done::before{background:var(--mute)}
+.rail button.on{color:var(--c)}
+.rail button.on::before{background:var(--c);border-color:var(--c);transform:scale(1.5);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 25%,transparent)}
+/* ── 字格：米字格，落墨出現 ── */
 .verse{display:flex;flex-direction:column;gap:.22em;align-items:flex-start}
 .row{display:flex;gap:.12em;flex-wrap:nowrap;align-items:center}
-.ch{position:relative;display:inline-flex;align-items:center;justify-content:center;width:1.45em;height:1.45em;font-family:var(--kai);border:1.5px solid var(--c,#8D7655);border-radius:3px;
+.ch{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.45em;height:1.45em;border:1.5px solid var(--c,var(--gold));border-radius:3px;
   background:linear-gradient(90deg,transparent calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% + .5px),transparent calc(50% + .5px)),
-    linear-gradient(0deg,transparent calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% + .5px),transparent calc(50% + .5px)),#fffaf0;
-  opacity:0;transform:scale(1.5);filter:blur(4px);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1),filter .35s,color .4s}
-.play .ch{opacity:1;transform:none;filter:none}
-.ch.p{border:none;background:none;width:.6em;color:var(--muted)}
-.ch.xi{background:#cfe3e6;font-weight:700;}
-.ch.rhy{outline:3px solid var(--zhu);outline-offset:1px}
-.ch.dz{background:#f0dfd3}
-.ch.zz{border-width:2.5px}
-.ch.cz{width:1em;height:1em;font-size:.65em;border-style:dashed;background:#efe8f3}
-.lab{font-family:"RayGenRyuRead","Noto Serif TC",serif;font-size:.62em;color:var(--muted);margin-left:.4em;white-space:nowrap;font-weight:400}
-.src{font-size:.68em;color:var(--muted);margin:.15em 0 .5em}
-.gap{width:.7em}
-/* 封面：紅日、逐字落墨的題目、五種句式的小字格 */
-.cover{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;text-align:center;gap:.3em}
-.cover .sun{position:absolute;right:13%;top:9%;width:3em;height:3em;border-radius:50%;background:radial-gradient(circle at 38% 38%,#dc6a57,#a8352a);box-shadow:0 0 1.6em rgba(168,53,42,.28);opacity:.88;animation:sunrise 2.6s cubic-bezier(.2,.7,.2,1) both}
-@keyframes sunrise{from{transform:translateY(6em);opacity:0}}
-.cover h1{display:flex;align-items:center;justify-content:center;font-family:var(--kai);font-size:2.5em;font-weight:700;letter-spacing:.14em;margin:0;line-height:1.2}
-.cover h1 span{display:inline-block;animation:inkdrop .75s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * .17s + .25s)}
-@keyframes inkdrop{from{opacity:0;transform:scale(1.7);filter:blur(9px)}}
-.cover h1 .seal{font-size:.3em;font-weight:400;writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.1em;line-height:1;margin-left:.9em;padding:.4em .3em .3em;color:#fbefdc;background:var(--seal);border-radius:5px 7px 4px 8px;box-shadow:inset 0 0 0 2px rgba(251,239,220,.55);transform:rotate(-3deg);animation:stamp .45s 1.35s cubic-bezier(.3,1.4,.5,1) both}
-@keyframes stamp{from{opacity:0;transform:scale(2.4) rotate(-14deg)}}
-.cover .sub{font-family:var(--kai);color:var(--muted);letter-spacing:.3em;text-indent:.3em;animation:rise .7s 1.5s both}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}}
-.evo{display:flex;align-items:stretch;gap:.35em;margin:.7em 0 .55em;flex-wrap:wrap;justify-content:center}
-.evo .blk{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:4px;padding:.3em .4em .2em;box-shadow:2px 3px 0 rgba(107,74,43,.12);opacity:0;transform:translateY(12px);filter:blur(4px);transition:opacity .5s,transform .5s,filter .5s}
-.evo .blk.show{opacity:1;transform:none;filter:none}
-.evo .erow{display:flex;gap:.07em;margin-bottom:.07em}
-.evo .erow i{display:block;width:.3em;height:.3em;border:1.5px solid var(--c);border-radius:1.5px;background:color-mix(in srgb,var(--c) 20%,#fffaf0)}
-.evo .cap{font-size:.52em;color:var(--muted);margin-top:.3em;font-weight:700;align-self:center}
-.evo .arr{align-self:center;color:var(--muted);font-size:.7em;opacity:0;transition:opacity .5s}
-.evo .arr.show{opacity:.8}
-.cover .btn.pri{font-family:var(--kai);font-weight:400;letter-spacing:.15em;padding:.35em 1.3em;animation:rise .6s 2.6s both}
-/* 總覽：長卷。點一下往右展開一站 */
-.tl-view{position:relative;overflow:hidden;height:calc(100% - 2.9em);border-radius:4px;border:1px solid var(--line);background:rgba(255,250,240,.4);box-shadow:inset 0 0 2em rgba(107,74,43,.13)}
-.tl-track{position:absolute;left:0;top:0;height:100%;background:var(--mount) left bottom/100% 46% no-repeat;transition:transform 1s cubic-bezier(.4,.1,.2,1);transform-origin:0 50%}
-.tl-axis{position:absolute;left:0;right:0;top:1.3em;height:4px;border-radius:50%;background:linear-gradient(90deg,transparent,var(--ink) 2%,var(--ink) 98%,transparent);opacity:.8}
-.era{position:absolute;top:.1em;font-family:var(--kai);font-size:.62em;line-height:1.3;color:var(--zhu);background:var(--paper);border:1px solid var(--zhu);border-radius:3px;padding:0 .45em;transform:translateX(-50%);white-space:nowrap}
-.era::after{content:'';position:absolute;left:50%;top:1.6em;width:2px;height:.55em;background:var(--ink)}
-.node{position:absolute;font-family:var(--kai);font-weight:700;line-height:1.35;border:1.5px solid var(--c);border-top:6px solid var(--c);background:var(--paper);border-radius:4px;padding:.15em .6em .2em;cursor:pointer;white-space:nowrap;box-shadow:2px 3px 0 rgba(107,74,43,.16);
-  opacity:0;transform:translateY(14px) scale(.92);filter:blur(4px);transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1),filter .5s,box-shadow .3s}
-.node small{display:block;font-family:"RayGenRyuRead","Noto Serif TC",serif;font-weight:400;font-size:.55em;color:var(--muted)}
-.node.show{opacity:1;transform:none;filter:none}
-.node.cur{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 32%,transparent),2px 3px 0 rgba(107,74,43,.16)}
-/* 流行期間：像一筆刷出去 */
-.lane{position:absolute;height:.45em;border-radius:.3em .5em .5em .3em;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 75%,transparent),color-mix(in srgb,var(--c) 18%,transparent));transform-origin:left;transform:scaleX(0);opacity:0;transition:opacity .4s,transform 1s cubic-bezier(.3,.7,.2,1) .15s}
-.lane.show{opacity:1;transform:none}
-.tl-note{font-size:.62em;color:var(--muted);line-height:1.5}
+    linear-gradient(0deg,transparent calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% - .5px),color-mix(in srgb,var(--c,#8D7655) 24%,transparent) calc(50% + .5px),transparent calc(50% + .5px)),var(--cell);
+  transition:color .45s,background .35s,box-shadow .3s;animation:inkc .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0) * 1s)}
+@keyframes inkc{from{opacity:0;transform:scale(1.5);filter:blur(4px)}}
+.ch.p{border:none;background:none;width:.6em;color:var(--mute)}
+.lab{font-size:.62em;color:var(--mute);margin-left:.5em;white-space:nowrap;font-weight:400}
+.lab.bk{font-weight:700}
+/* 還沒放字的格子：虛線空格 */
+.hid:not(.on) .ch{color:transparent;border-style:dashed}
+/* 關雎：點一句，同樣的句子一起亮 */
+.hf{display:inline-flex;gap:.12em;cursor:pointer;border-radius:4px}
+.hf.same .ch:not(.p){background:color-mix(in srgb,var(--zhu) 22%,var(--cell));box-shadow:0 0 0 2px var(--zhu);font-weight:700}
+/* 楚辭：兮 */
+#ccv .ch:not(.p){cursor:pointer}
+.ch.xi.on{background:var(--xi);font-weight:700;box-shadow:0 0 0 2px var(--cc)}
 /* 兩漢分支 */
 .fork{display:grid;grid-template-columns:1fr 1fr;gap:.6em}
 .branch{border:1px solid var(--line);border-top:6px solid var(--c);border-radius:4px;padding:.35em .65em .4em;background:var(--card);box-shadow:2px 3px 0 rgba(107,74,43,.13)}
-.branch h2{font-family:var(--kai);font-weight:700;color:var(--c);margin:0 0 .2em;font-size:1.08em}
-.branch ul{margin:.1em 0;padding-left:1.1em;line-height:1.5;font-size:.88em}
+.branch h3{font-weight:700;color:var(--c);margin:0 0 .2em;font-size:1.08em}
+.branch ul{margin:.1em 0;padding-left:1.1em;line-height:1.55;font-size:.9em}
 .root{display:flex;align-items:center;justify-content:center;gap:.4em;margin:.1em 0 .35em}
-.root .dot{font-family:var(--kai);background:var(--seal);color:#fbefdc;border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5);padding:.08em .7em;letter-spacing:.15em}
-.root .ln{height:3px;flex:1;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(43,38,34,.6))}
+.root .dot{background:var(--seal);color:#fbefdc;border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5);padding:.08em .7em;letter-spacing:.15em}
+.root .ln{height:3px;flex:1;border-radius:50%;background:linear-gradient(90deg,transparent,var(--mute))}
 .root .ln:last-child{transform:scaleX(-1)}
 .wave{display:inline-flex;align-items:flex-end;gap:3px;height:.9em;vertical-align:middle;margin-left:.3em}
 .wave i{display:block;width:5px;border-radius:2px;background:var(--yf);animation:wv 1.1s ease-in-out infinite}
 @keyframes wv{0%,100%{height:20%}50%{height:100%}}
-.paused .wave i{animation-play-state:paused}
-/* 比較表 */
-table.cmp{border-collapse:collapse;width:100%;font-size:.8em}
-table.cmp th,table.cmp td{border:1px solid var(--line);padding:.18em .4em;vertical-align:top;text-align:left;background:var(--card);line-height:1.4}
-table.cmp thead th{background:#ece4d3;text-align:center}
-table.cmp thead th.a{color:#fff;background:var(--yf)}
-table.cmp thead th.b{color:#fff;background:var(--gs)}
-table.cmp tbody th{white-space:nowrap;background:#f3ecdc;width:4.2em}
-table.cmp tr.st{display:table-row}
-/* 近體格線：先有空格，再一行一行落字 */
-.jt-ctrl{display:flex;flex-wrap:wrap;gap:.25em;margin-bottom:.3em;align-items:center;font-size:.7em}
-.jt-ctrl .sep{width:2px;height:1.4em;background:var(--line);margin:0 .2em}
-.jt-grid .row.empty .ch{color:transparent;border-style:dashed;opacity:1;transform:none;filter:none}
-.lian{font-size:.55em;color:var(--muted);width:2.2em}
-.dz-tag{font-size:.55em;color:#fbefdc;background:var(--jt);border-radius:3px 5px 3px 6px;padding:0 .4em;margin-left:.3em}
-/* 詞：一句一筆，長短不一 */
-.ci-line{display:flex;align-items:center;gap:.4em;margin:.12em 0}
-.ci-line .n{font-size:.55em;color:var(--muted);width:2.2em;text-align:right}
-.ci-line .bar{font-family:var(--kai);height:1.45em;border-radius:3px 12px 5px 14px;border-left:5px solid var(--ci);background:linear-gradient(90deg,color-mix(in srgb,var(--ci) 36%,#fffaf0),color-mix(in srgb,var(--ci) 10%,#fffaf0));display:flex;align-items:center;padding:0 .5em;white-space:nowrap;transform-origin:left;transform:scaleX(0);opacity:0;transition:transform .55s cubic-bezier(.3,.7,.2,1),opacity .3s}
-.play .ci-line .bar{transform:scaleX(1);opacity:1}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
-.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:.35em .6em;box-shadow:2px 3px 0 rgba(107,74,43,.12)}
-.card h3{font-family:var(--kai);font-weight:700;margin:0 0 .15em;font-size:1em;color:var(--c,var(--ink))}
-/* 新詩 */
-.xs-stage{position:relative;height:6.8em}
-.xs-grid{display:grid;grid-template-columns:repeat(5,1.45em);gap:.15em;transition:opacity .8s,transform .9s,filter .8s;position:absolute;left:0;top:0}
-.xs-grid i{width:1.45em;height:1.45em;font-family:var(--kai);border:1.5px dashed #a8997a;border-radius:3px;background:#fffaf0;display:flex;align-items:center;justify-content:center;font-style:normal}
-.xs-free{position:absolute;left:0;top:0;font-family:var(--kai);line-height:1.65;font-size:1.05em;font-weight:700;opacity:0;transform:translateY(8px);filter:blur(5px);transition:opacity .9s .25s,transform .9s .25s,filter .9s .25s}
-.xs-on .xs-grid{opacity:0;transform:scale(1.08);filter:blur(6px)}
+/* 近體：把詩句排進格線 */
+.ctrl{display:flex;flex-wrap:wrap;gap:.25em;margin-bottom:.35em;align-items:center;font-size:.66em}
+.ctrl .sep{width:2px;height:1.4em;background:var(--line);margin:0 .2em}
+.lian{font-size:.55em;color:var(--mute);width:2.2em;flex:none}
+.dz-tag{display:none;font-size:.55em;color:var(--stx);background:var(--jt);border-radius:3px 5px 3px 6px;padding:0 .4em;margin-left:.3em;white-space:nowrap}
+.jt-grid.dz .row.on .dz-tag{display:inline}
+.jt-grid.dz .row.on .ch.d{background:var(--dzb)}
+.jt-grid.rhy .row.on .ch.r{box-shadow:0 0 0 3px var(--zhu)}
+.tray{flex:1;min-width:8em;display:flex;flex-wrap:wrap;gap:.35em;align-content:flex-start}
+.tile{border:1.5px solid var(--jt);border-bottom-width:4px;background:var(--card);border-radius:4px;padding:.12em .55em;font-weight:700;letter-spacing:.12em;box-shadow:2px 3px 0 rgba(107,74,43,.16);transition:transform .15s,opacity .3s}
+.tile:hover{transform:translateY(-2px)}
+.tile.used{opacity:0;pointer-events:none}
+.tray .msg{flex-basis:100%;font-size:.7em;color:var(--mute)}
+/* 詞：詞牌先定格子，再填字 */
+.ci-line{display:flex;align-items:center;gap:.4em;margin:.1em 0;cursor:pointer}
+.ci-line .n{font-size:.55em;color:var(--mute);width:2.2em;text-align:right;flex:none}
+/* 曲：襯字 */
+.cz-demo{display:flex;flex-direction:column;gap:.55em;margin:.2em 0 .3em}
+.cz-row{display:flex;align-items:center;gap:.1em}
+.cz-tag{font-size:.6em;font-weight:700;color:var(--stx);background:var(--qu);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.4);padding:.12em .45em;margin-right:.4em;min-width:3.6em;text-align:center;flex:none}
+.slot{flex:none;width:.95em;height:1.9em;border:0;background:none;padding:0;color:var(--qu);font-size:.72em;font-weight:700;opacity:.6;border-radius:4px}
+.slot:hover{opacity:1;background:color-mix(in srgb,var(--qu) 18%,transparent)}
+.cz-on .slot{display:none}
+.ch.cz-new{color:var(--stx);background:var(--qu);border-width:3px;margin:0 .1em;transition:width .5s,border-width .5s,margin .5s,opacity .5s}
+.ch.cz-new.hid:not(.on){width:0;border-width:0;margin:0;opacity:0;overflow:hidden}
+.ch.cz-new::after{content:'襯字';position:absolute;top:-1.5em;left:50%;transform:translateX(-50%);font-size:.5em;color:var(--qu);font-weight:700;white-space:nowrap}
+/* 新詩：拆格線 */
+.xs-stage{position:relative;height:6.8em;cursor:pointer}
+.xs-grid{display:grid;grid-template-columns:repeat(5,1.45em);gap:.15em;position:absolute;left:0;top:0}
+.xs-grid i{width:1.45em;height:1.45em;border:1.5px dashed var(--gold);border-radius:3px;background:var(--cell);display:flex;align-items:center;justify-content:center;font-style:normal;transition:opacity .9s,transform 1s cubic-bezier(.3,.6,.3,1),border-color .5s}
+.xs-free{position:absolute;left:0;top:0;line-height:1.65;font-size:1.05em;font-weight:700;opacity:0;transform:translateY(8px);filter:blur(5px);transition:opacity .9s .35s,transform .9s .35s,filter .9s .35s;pointer-events:none}
+.xs-on .xs-grid i{opacity:0;transform:translate(var(--rx),var(--ry)) rotate(var(--rr))}
 .xs-on .xs-free{opacity:1;transform:none;filter:none}
 .xs-free>div{white-space:nowrap}
-.cz-row+.cz-row{margin-top:.45em}
 .bh{color:var(--xs);background:color-mix(in srgb,var(--xs) 16%,transparent);border-radius:4px;padding:0 .05em}
 .xs-rules{flex:1;min-width:9em;display:flex;flex-direction:column;gap:.35em;font-size:.72em}
 .xr{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.4em;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:.3em .55em;line-height:1.35;box-shadow:2px 3px 0 rgba(107,74,43,.1)}
-.xr::before{content:'→';grid-column:2;grid-row:1;color:var(--xs);font-weight:900}
-.xr .a{grid-column:1;grid-row:1;color:var(--muted);text-decoration:line-through;text-decoration-color:#b0796a;text-decoration-thickness:2px}
-.xr .b{grid-column:3;grid-row:1;color:var(--xs);font-weight:800}
-/* 烏青：一行一行冒出來 */
-.wq{font-family:var(--kai);font-size:1.08em;line-height:1.7;font-weight:700;}
-.wq-l{opacity:0;transform:translateX(-10px);filter:blur(4px);transition:opacity .4s,transform .4s,filter .4s}
-.play .wq-l{opacity:1;transform:none;filter:none}
+.xr::before{content:'→';grid-column:2;grid-row:1;color:var(--xs);font-weight:700}
+.xr .a{grid-column:1;grid-row:1;color:var(--mute);text-decoration:line-through;text-decoration-color:#b0796a;text-decoration-thickness:2px}
+.xr .b{grid-column:3;grid-row:1;color:var(--xs);font-weight:700}
+.wq{font-size:1.08em;line-height:1.7;font-weight:700}
+.wq-l.st{transform:translateX(-10px)}
+.wq-l.st.show{transform:none}
 .wq-l b{color:var(--xs)}
-/* 曲：襯字示範 */
-.cz-demo{display:flex;flex-direction:column;gap:.5em;margin:.2em 0 .3em}
-.cz-row{display:flex;align-items:center;gap:.12em}
-.cz-tag{font-size:.6em;font-weight:800;color:#fbefdc;background:var(--qu);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5);padding:.12em .45em;margin-right:.4em;min-width:3.6em;text-align:center}
-.ch.cz-new{width:0;border-width:0;overflow:hidden;margin:0 -.06em;color:#fff;background:var(--qu);transition:width .5s,border-width .5s,margin .5s,opacity .5s,transform .5s}
-.play .ch.cz-new{opacity:0}
-.play .cz-on .ch.cz-new{opacity:1;width:1.45em;border-width:3px;margin:0;overflow:visible;transform:scale(1.12)}
-.ch.cz-new::after{content:'襯字';position:absolute;top:-1.35em;left:50%;transform:translateX(-50%);font-family:"RayGenRyuRead","Noto Serif TC",serif;font-size:.5em;color:var(--qu);font-weight:900;white-space:nowrap;opacity:0;transition:opacity .3s .4s}
-.cz-on .ch.cz-new::after{opacity:1}
 /* 總整理 */
-.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:.35em}
-.sum .card{border-top:7px solid var(--c);padding:.25em .45em}
-.sum .card h3{font-size:.98em}
-.sum .card div{font-size:.62em;line-height:1.45}
-/* 測驗 */
-.qbox{max-width:28em}
-.qbox .qq{font-weight:800;font-size:1.05em;line-height:1.4;margin:.2em 0 .45em}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:.35em}
-.opt{font-family:var(--kai);font-weight:700;border:1.5px solid #8a7a5c;background:var(--paper);border-radius:6px;padding:.3em .5em;cursor:pointer;box-shadow:2px 3px 0 rgba(107,74,43,.14);transition:background .2s,transform .1s}
-.opt:active{transform:translateY(1px)}
-.opt.ok{background:#3f6b52;color:#fff;border-color:#3f6b52}
-.opt.no{background:#efe2da;border-color:#b0796a;color:#8a6a5c}
-.fb{min-height:1.5em;margin-top:.4em;line-height:1.45;font-size:.9em}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:.4em}
+.sum .card{background:var(--card);border:1px solid var(--line);border-top:7px solid var(--c);border-radius:4px;padding:0 0 .25em;box-shadow:2px 3px 0 rgba(107,74,43,.12);cursor:pointer;overflow:hidden}
+.sum .card i{display:block;height:2.3em;background:center/cover no-repeat}
+.sum .card h3{font-weight:700;margin:.15em .45em 0;font-size:.98em;color:var(--c)}
+.sum .card div{font-size:.62em;line-height:1.45;margin:0 .7em}
+/* 挑戰 */
+.gm{text-align:center}
+.gm .q{min-height:3.6em;display:flex;align-items:center;justify-content:center;font-size:1.12em;font-weight:700;line-height:1.45;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.4em .8em;box-shadow:3px 4px 0 rgba(107,74,43,.15);margin:.1em 0 .5em}
+.gm .q.in2{animation:enter .45s both}
+.gm .opts{display:grid;grid-template-columns:repeat(4,1fr);gap:.45em}
+.gm .opts button{border:2px solid var(--mute);background:rgba(var(--paper),.9);border-radius:8px;padding:.4em .2em;font-weight:700;box-shadow:2px 3px 0 rgba(107,74,43,.18);transition:transform .1s,background .2s}
+.gm .opts button:active{transform:translateY(2px)}
+.gm .opts button.ok{background:#3f6b52;border-color:#3f6b52;color:#fff}
+.gm .opts button.no{background:#b0796a;border-color:#b0796a;color:#fff}
+.gm .fb{min-height:3em;margin:.45em 0 .1em;font-size:.82em;line-height:1.5}
+.gm .sc{font-size:.66em;color:var(--mute);letter-spacing:.1em}
+.gm .dots{display:flex;gap:.25em;justify-content:center;margin:.3em 0;flex-wrap:wrap}
+.gm .dots i{width:.5em;height:.5em;border-radius:50%;background:var(--line)}
+.gm .dots i.ok{background:#3f6b52}.gm .dots i.no{background:#b0796a}.gm .dots i.cur{outline:2px solid var(--zhu);outline-offset:2px}
 /* 手機直式 */
-@media (max-width: 760px){
+@media (max-width:760px){
   :root{--fs:17px}
-  header,footer{font-size:.85em}
-  footer .hint{display:none}
-  .fork,.two{grid-template-columns:1fr}
-  .sum{grid-template-columns:1fr 1fr}
-  .opts{grid-template-columns:1fr}
-  .cover h1{font-size:1.6em;letter-spacing:.06em}
-  .cover .sun{width:2.2em;height:2.2em;right:6%;top:5%}
+  header{font-size:.72em}footer{font-size:.75em}
+  footer .hint,.logo{display:none}
+  #stage{padding:.3em .7em 1em}
+  .veil,body.cover .veil{background:rgba(var(--paper),.9)}
+  .cv h1{font-size:1.7em;letter-spacing:.06em}
   .evo .arr{display:none}
-  .ch{width:1.55em;height:1.55em}
-  table.cmp{font-size:.8em}
-  .tl-view{height:24em}
-  #ccv .row{flex-wrap:wrap;row-gap:.12em}
+  .era{grid-template-columns:1fr}.era .big{writing-mode:horizontal-tb;font-size:1.3em;justify-self:start;margin-bottom:.3em;padding:.1em .4em}
+  .fork{grid-template-columns:1fr}
+  .sum{grid-template-columns:1fr 1fr}
+  .gm .opts{grid-template-columns:1fr 1fr}
+  .ch{width:1.5em;height:1.5em}
+  #ccv .row,.cz-row{flex-wrap:wrap;row-gap:.12em}
+  .rail{font-size:.62em;margin:.9em 0 0}
+  .tl-view{height:19em}
 }
-@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
+<div class="bg" id="bgA"></div><div class="bg" id="bgB"></div><div class="veil"></div>
 <div id="app">
-<header><span class="hs">詩</span><span class="t">詩的變形記</span><span id="crumb"></span><span class="sp"></span>
-  <button class="btn" id="bHome" title="回到總覽（Esc）">☰ 總覽</button>
-  <button class="btn" id="bFull" title="全螢幕">⛶</button>
-  <button class="btn" id="bClose" hidden>✕ 回課文</button>
-</header>
-<main id="main"></main>
-<footer>
-  <button class="btn" id="bPrev">← 上一頁</button>
-  <span class="pg" id="pg"></span>
-  <button class="btn pri" id="bNext">下一步 →</button>
-  <button class="btn" id="bReplay" title="重新播放本頁">⟲ 重播</button>
-  <button class="btn" id="bPause" title="暫停／繼續動畫">❚❚</button>
-  <span class="sp"></span>
-  <span class="hint">點畫面或 → 下一步；← 上一頁；Esc 總覽</span>
-</footer>
+  <header><button class="logo" id="bLogo" title="回封面">詩的變形記</button><nav id="nav"></nav><span class="sp"></span>
+    <button class="tool" id="bAns" title="本頁重點全部顯示／藏起來">答案</button>
+    <button class="tool" id="bNight" title="日／夜">☾</button>
+    <button class="tool" id="bFull" title="全螢幕">⛶</button>
+    <button class="tool" id="bClose" hidden>✕ 回課文</button></header>
+  <main><div id="stage"></div><div id="bar"></div></main>
+  <footer><button class="tool" id="bPrev">← 上一頁</button><span class="pg" id="pg"></span><button class="nx" id="bNext">下一步 ▸</button>
+    <button class="tool" id="bReplay" title="本頁重來">⟲ 重來</button>
+    <span class="sp"></span><span class="hint">點畫面或 → 下一步・點朱框揭曉・Esc 回長卷</span></footer>
 </div>
 <script>
 'use strict';
@@ -247,10 +274,11 @@ const PUNC = '，。？！；：、「」';
 function chars(text, cls, color) {
   return [...text].map(c => PUNC.includes(c) ? `<span class="ch p">${c}</span>` : `<span class="ch ${cls || ''}" ${color ? `style="--c:${color}"` : ''}>${c}</span>`).join('');
 }
-function stagger(el, per = .04) { $$('.ch', el).forEach((c, i) => c.style.transitionDelay = (i * per) + 's'); }
+function stagger(el, per = .04) { $$('.ch', el).forEach((c, i) => c.style.setProperty('--d', i * per)); }
 const nChars = s => [...s].filter(c => !PUNC.includes(c)).length;
+const shake = el => el.animate([{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { duration: 320 });
 
-/* ───────── 詩體資料：五項小標統一（時代／作者／句式／入樂／其他重要） ───────── */
+/* ───────── 詩體資料：五項小標統一（時代／作者／句式／入樂／其他重要）。以下文字為老師核校版，不要改 ───────── */
 const C = { sj: 'var(--sj)', cc: 'var(--cc)', yf: 'var(--yf)', gs: 'var(--gs)', jt: 'var(--jt)', ci: 'var(--ci)', qu: 'var(--qu)', xs: 'var(--xs)' };
 const FORMS = {
   sj: { name: '《詩經》', c: C.sj, f: [
@@ -315,29 +343,35 @@ const CHIPEX = {
   賦: '<b>賦</b>：直接鋪陳敘述', 比: '<b>比</b>：以彼物比此物（譬喻）', 興: '<b>興</b>：先言他物，引起所要詠的事（如先寫雎鳩鳴叫，再引出淑女）',
   散曲: '<b>散曲</b>：沒有故事情節、供清唱；分<b>小令</b>（單支）與<b>套數</b>（多支聯成一套）', 劇曲: '<b>劇曲</b>：用於戲劇演出，代表為<b>元雜劇</b>（明清傳奇是之後的戲曲發展）',
 };
+const NAME = id => FORMS[id].name.replace(/（.*）/, ''), SEAL = id => NAME(id).replace(/[《》]/g, '');
+const IDS = Object.keys(FORMS);
+/* 一種詩體一幅畫（img/ui/bg 八主題） */
+const BG = { cover: '2-garden', map: '8-booklover', sj: '2-garden', cc: '3-westlake', yf: '1-fuguang', gs: '7-dongpo', jt: '6-gugong', ci: '5-lookback', qu: '4-snowpeak', xs: '8-booklover', sum: '8-booklover', quiz: '2-garden' };
+const th = id => `<i data-th="${BG[id]}"></i>`;
 
-const PAGES = [];
-const P = (id, title, html, init, steps) => PAGES.push({ id, title, html, init, steps });
-const head = (id, sub) => `<div class="ph" style="--c:${FORMS[id].c}"><h1>${FORMS[id].name}</h1><span class="k">${sub}</span></div>`;
+const S = [];   /* {id, ch 章, title, html, init, steps, more, full, cls} */
+const P = (id, ch, title, html, o) => S.push(Object.assign({ id, ch, title, html, bg: BG[ch] }, o || {}));
+const head = (id, sub) => `<div class="ph" style="--c:${FORMS[id].c}"><h2>${FORMS[id].name}</h2><span class="k">${sub}</span></div>`;
+const rail = id => `<div class="rail" style="--c:${FORMS[id].c}">${IDS.map((x, j) => `<button data-go="${x}" class="${x === id ? 'on' : j < IDS.indexOf(id) ? 'done' : ''}">${SEAL(x)}</button>`).join('')}</div>`;
 function featPage(id) {
   const F = FORMS[id];
-  P(id, F.name + '｜特徵', head(id, '特徵') + `<div class="feat" style="--c:${F.c}">${F.f.map(([l, t]) => `<div class="lb st">${l}</div><div class="tx st">${t}</div>`).join('')}</div>`,
-    el => { $$('.chips[data-g]', el).forEach(g => $$('.chip', g).forEach(c => c.onclick = e => { e.stopPropagation(); $$('.chips[data-g="' + g.dataset.g + '"] .chip', el).forEach(x => x.classList.toggle('on', x === c)); $('#' + g.dataset.g, el).innerHTML = CHIPEX[c.textContent]; })); });
+  P(id, id, F.name + '｜特徵', `<div class="era" style="--c:${F.c}"><div class="big">${SEAL(id)}</div><div>${head(id, '特徵')}
+    <div class="feat" data-hide>${F.f.map(([l, t]) => `<div class="lb st">${l}</div><div class="tx st">${t}</div>`).join('')}</div></div></div>${rail(id)}`,
+    { init: el => $$('.chips[data-g]', el).forEach(g => $$('.chip', g).forEach(c => c.onclick = e => { e.stopPropagation(); $$('.chips[data-g="' + g.dataset.g + '"] .chip', el).forEach(x => x.classList.toggle('on', x === c)); $('#' + g.dataset.g, el).innerHTML = CHIPEX[c.textContent]; })) });
 }
-/* 一題兩頁內的 .st 成對出現（標籤＋內容一起） */
 
 /* ───────── 1 封面 ───────── */
-P('cover', '封面', `
-<div class="cover">
-  <div class="sun"></div>
+P('cover', 'cover', '封面', `
+<div class="cv">
   <h1>${[...'詩的變形記'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}<span class="seal">流變</span></h1>
   <div class="sub">從《詩經》到新詩的千年旅程</div>
   <div class="evo">${[['四言', C.sj, [4, 4, 4, 4]], ['長短句', C.cc, [7, 5, 8, 6]], ['方整格律', C.jt, [5, 5, 5, 5]], ['詞的長短句', C.ci, [4, 7, 3, 6]], ['自由分行', C.xs, [6, 2, 9, 4]]]
-    .map(([cap, c, ls], i) => `${i ? `<span class="arr" style="transition-delay:${1.75 + i * .28}s">→</span>` : ''}<div class="blk" style="--c:${c};transition-delay:${1.9 + i * .28}s">${ls.map(n => `<div class="erow">${'<i></i>'.repeat(n)}</div>`).join('')}<div class="cap">${cap}</div></div>`).join('')}</div>
-  <button class="btn pri" onclick="go(1)" style="font-size:.8em">開始探索 →</button>
-</div>`, el => setTimeout(() => $$('.blk,.arr', el).forEach(b => b.classList.add('show')), 60));
+    .map(([cap, c, ls], i) => `${i ? `<span class="arr" style="--i:${i}">→</span>` : ''}<div class="blk" style="--c:${c};--i:${i}">${ls.map(n => `<div class="erow">${'<i></i>'.repeat(n)}</div>`).join('')}<div class="cap">${cap}</div></div>`).join('')}</div>
+  <div class="toc" id="toc"></div>
+  <button class="nx" data-go="map">開始探索 →</button>
+</div>`, { cls: 'cover' });
 
-/* ───────── 2 總覽：點一下，時間軸往右滑一站 ───────── */
+/* ───────── 2 總覽：可拖動的長卷；點一下往右走一站 ───────── */
 const ERAS = [['先秦', 0], ['戰國', 1], ['兩漢', 2.2], ['魏晉南北朝', 3.6], ['唐', 5], ['宋', 6.2], ['元', 7.4], ['五四以來', 8.8]];
 const STOPS = [   /* [id, 名稱, 時代說明, x(格), y(列), 線段長] */
   ['sj', '《詩經》', '西周初～春秋中葉', 0, 0, 0.9],
@@ -349,49 +383,70 @@ const STOPS = [   /* [id, 名稱, 時代說明, x(格), y(列), 線段長] */
   ['qu', '曲', '元', 7.4, 1, 0.9],
   ['xs', '新詩', '五四以來', 8.8, 0, 0.8],
 ];
-const UX = 6.2, UY = 3.1;   /* 每一格寬 em、每一列高 em */
-P('map', '總覽', `
-<div class="ph"><h1>詩歌發展總覽</h1><span class="tl-note">點畫面往右走一站；點詩體進專頁；時間是大致示意</span></div>
-<div class="tl-view" id="tlv"><div class="tl-track" id="tlt" style="width:${(8.8 + 2.4) * UX}em">
+const UX = 7, UY = 4.6, Y0 = 3.2;   /* 每一格寬 em、每一列高 em、第一列起點 */
+S.find(s => s.id === 'cover').init = el => { $('#toc', el).innerHTML = STOPS.map(([id, n, t]) => `<button data-go="${id}" style="--c:${FORMS[id].c}">${n}<small>${t}</small></button>`).join(''); };
+P('map', 'map', '總覽', `
+<div class="ph"><h2>詩歌發展總覽</h2><span class="tl-note">左右拖動看長卷；點畫面往右走一站；點詩體進專頁；時間是大致示意</span></div>
+<div class="tl-view" id="tlv"><div class="tl-track" id="tlt" style="--ux:${UX}em">
   <div class="tl-axis"></div>
-  ${ERAS.map(([t, x]) => `<div style="position:absolute;top:0;left:${x * UX + 2.3}em"><div class="era">${t}</div></div>`).join('')}
-  ${STOPS.map(([id, n, t, x, y, w], i) => `<div class="lane" data-i="${i}" style="--c:${FORMS[id].c};left:${x * UX + 1.6}em;top:${3.1 + y * UY + 2.3}em;width:${w * UX}em"></div>
-    <div class="node" data-i="${i}" data-go="${id}" style="--c:${FORMS[id].c};left:${x * UX + .3}em;top:${3.1 + y * UY}em">${n}<small>${t}</small></div>`).join('')}
+  ${ERAS.map(([t, x]) => `<div class="tl-pin" style="left:calc(var(--ux) * ${x} + 2.6em)"><div class="tl-era">${t}</div></div>`).join('')}
+  ${STOPS.map(([id, n, t, x, y, w], i) => `<div class="lane" data-i="${i}" style="--c:${FORMS[id].c};left:calc(var(--ux) * ${x} + 1.6em);top:${Y0 + y * UY + 3.35}em;width:calc(var(--ux) * ${w})"></div>
+    <div class="node" data-i="${i}" data-go="${id}" style="--c:${FORMS[id].c};left:calc(var(--ux) * ${x} + .5em);top:${Y0 + y * UY}em">${th(id)}<span>${n}<small>${t}</small></span></div>`).join('')}
 </div></div>
-<div class="tl-note st" id="tln" style="margin-top:.2em">樂府詩與古詩<b>同在兩漢出現、時間交疊</b>：兩條並行的路線，不是「樂府結束後才有古詩」。</div>`,
-  el => {
-    $$('.node', el).forEach(n => n.onclick = e => { e.stopPropagation(); go(n.dataset.go); });
-    el._k = -1;
-    el._step = k => {   /* k＝第幾站；k＝STOPS.length 時縮放看全部 */
-      const view = $('#tlv', el), track = $('#tlt', el), em = parseFloat(getComputedStyle(track).fontSize);
-      if (k >= STOPS.length) {
-        const s = Math.min(1, view.clientWidth / track.scrollWidth);
-        track.style.transform = `scale(${s})`; $$('.node,.lane', el).forEach(x => x.classList.add('show')); $('#tln', el).classList.add('show');
-        $$('.node', el).forEach(x => x.classList.remove('cur')); return;
-      }
-      $$('.node,.lane', el).forEach(x => { const i = +x.dataset.i; x.classList.toggle('show', i <= k || (k === 2 && i === 3) || (k === 3 && i === 2)); });
-      $$('.node', el).forEach(x => x.classList.toggle('cur', +x.dataset.i === k || (k === 2 && +x.dataset.i === 3)));
-      if (k === 2) $('#tln', el).classList.add('show');
-      const x = (STOPS[k][3] * UX + .3) * em, dx = Math.max(0, Math.min(x - view.clientWidth * .35, track.scrollWidth - view.clientWidth));
-      track.style.transform = `translateX(${-dx}px)`;
-    };
-    if (state.back && state.last) { const i = STOPS.findIndex(s => s[0] === state.last); for (let k = 0; k <= i; k++) el._step(k); el._k = i; }
-    else { el._step(0); el._k = 0; }
-  },
-  el => {   /* 自訂步驟：兩漢一次出樂府＋古詩 */
-    const order = [0, 1, 2, 4, 5, 6, 7, STOPS.length];
-    const cur = order.indexOf(el._k); if (cur < 0 || cur >= order.length - 1) return false;
-    el._k = order[cur + 1]; el._step(el._k); return true;
-  });
+<div class="tl-note st" id="tln" style="margin-top:.25em">樂府詩與古詩<b>同在兩漢出現、時間交疊</b>：兩條並行的路線，不是「樂府結束後才有古詩」。</div>`,
+  { full: true,
+    init: el => {
+      const view = $('#tlv', el), track = $('#tlt', el);
+      el._k = -1;
+      el._step = (k, instant) => {   /* k＝第幾站；k＝STOPS.length 時縮小看全部 */
+        if (k >= STOPS.length) {
+          const em = parseFloat(getComputedStyle(track).fontSize);   /* 收攏：格距縮到整卷剛好一個畫面，字不縮 */
+          view.scrollTo({ left: 0, behavior: 'smooth' }); view.classList.add('all');
+          track.style.setProperty('--ux', Math.min(UX, (view.clientWidth / em - 8.6) / 8.8) + 'em');
+          $$('.node,.lane', el).forEach(x => x.classList.add('lit')); $('#tln', el).classList.add('show');
+          $$('.node', el).forEach(x => x.classList.remove('cur')); return;
+        }
+        view.classList.remove('all'); track.style.setProperty('--ux', UX + 'em');
+        $$('.node,.lane', el).forEach(x => { const i = +x.dataset.i; x.classList.toggle('lit', i <= k || (k === 2 && i === 3)); });
+        $$('.node', el).forEach(x => x.classList.toggle('cur', +x.dataset.i === k || (k === 2 && +x.dataset.i === 3)));
+        if (k >= 2) $('#tln', el).classList.add('show');
+        const n = $(`.node[data-i="${k}"]`, el);
+        view.scrollTo({ left: Math.max(0, n.offsetLeft - view.clientWidth * .3), behavior: instant ? 'auto' : 'smooth' });
+      };
+      /* 滑鼠拖動（觸控用原生橫向捲動） */
+      let d = null;
+      view.onpointerdown = e => { if (e.pointerType === 'mouse' && !view.classList.contains('all')) d = { x: e.clientX, l: view.scrollLeft, m: false }; };
+      view.onpointermove = e => { if (!d) return; const dx = e.clientX - d.x; if (Math.abs(dx) > 6) d.m = true; if (d.m) view.scrollLeft = d.l - dx; };
+      view.onpointerup = view.onpointerleave = () => { if (d && d.m) { st.drag = true; setTimeout(() => st.drag = false, 60); } d = null; };
+      const i = st.back && st.last ? STOPS.findIndex(s => s[0] === st.last) : 0;
+      el._k = Math.max(0, i); el._step(el._k, true);
+    },
+    steps: el => {   /* 兩漢一次出樂府＋古詩 */
+      const order = [0, 1, 2, 4, 5, 6, 7, STOPS.length];
+      let cur = order.indexOf(el._k); if (cur < 0) cur = order.indexOf(2);
+      if (cur >= order.length - 1) return false;
+      el._k = order[cur + 1]; el._step(el._k); return true;
+    },
+    more: el => el._k !== STOPS.length });
 
 /* ───────── 詩經 ───────── */
 featPage('sj');
 const GUANJU = ['關關雎鳩，在河之洲。', '窈窕淑女，君子好逑。', '參差荇菜，左右流之。', '窈窕淑女，寤寐求之。', '求之不得，寤寐思服。', '悠哉悠哉，輾轉反側。', '參差荇菜，左右采之。', '窈窕淑女，琴瑟友之。', '參差荇菜，左右芼之。', '窈窕淑女，鐘鼓樂之。'];
-P('sj2', '《詩經》｜看形式', head('sj', '看形式：四字一拍') + `
-<div style="display:flex;gap:1em;align-items:flex-start;flex-wrap:wrap">
-  <div class="verse" id="sjv" style="--c:${C.sj}">${GUANJU.map(l => `<div class="row">${chars(l, '', C.sj)}</div>`).join('')}</div>
-  <div style="flex:1;min-width:8em"><div class="src">〈周南・關雎〉全文</div><div class="note st" style="font-size:.78em">每句四字、兩句一行，整齊穩定。<br>「窈窕淑女」反覆出現：重章疊句。<br>首兩句先寫雎鳩鳴叫，再引出淑女：這就是「<b>興</b>」。</div></div>
-</div>`, el => stagger($('#sjv', el), .03));
+P('sj2', 'sj', '《詩經》｜看形式', head('sj', '看形式：四字一拍') + `
+<div class="split">
+  <div class="verse" id="sjv" style="--c:${C.sj}">${GUANJU.map(l => `<div class="row">${l.match(/[^，。]+[，。]/g).map(h => `<span class="hf" data-t="${h.slice(0, -1)}">${chars(h, '', C.sj)}</span>`).join('')}</div>`).join('')}</div>
+  <div class="side"><div class="src">〈周南・關雎〉全文</div>
+    <div class="tip">點任何一句，找出和它一模一樣的句子</div><div class="cnt" id="sjc"></div>
+    <div data-hide><div class="note st">每句四字、兩句一行，整齊穩定。</div><div class="note st">「窈窕淑女」反覆出現：重章疊句。</div><div class="note st">首兩句先寫雎鳩鳴叫，再引出淑女：這就是「<b>興</b>」。</div></div></div>
+</div>`, { init: el => {
+  stagger($('#sjv', el), .03);
+  $$('.hf', el).forEach(h => h.onclick = e => {
+    e.stopPropagation(); const t = h.dataset.t, was = h.classList.contains('same');
+    $$('.hf', el).forEach(x => x.classList.toggle('same', !was && x.dataset.t === t));
+    const n = $$('.hf.same', el).length;
+    $('#sjc', el).textContent = was ? '' : n > 1 ? `「${t}」出現 ${n} 次` : `「${t}」只出現 1 次`;
+  });
+} });
 
 /* ───────── 楚辭 ───────── */
 featPage('cc');
@@ -401,17 +456,24 @@ const CC = [
   ['滄浪之水清兮，可以濯吾纓；', '滄浪之水濁兮，可以濯吾足。', '〈漁父〉（傳為屈原作）'],
   ['悲哉，秋之為氣也！', '蕭瑟兮，草木搖落而變衰。', '宋玉〈九辯〉'],
 ];
-P('cc2', '《楚辭》｜看形式', head('cc', '看形式：句子變長、加「兮」') + `
-<div class="verse" id="ccv" style="gap:.15em">${CC.map(([a, b, s], i) => `<div class="${i ? 'st' : ''}"><div class="row">${[...a].map(c => PUNC.includes(c) ? `<span class="ch p">${c}</span>` : `<span class="ch ${c === '兮' ? 'xi' : ''}" style="--c:${C.cc}">${c}</span>`).join('')}</div><div class="row">${[...b].map(c => PUNC.includes(c) ? `<span class="ch p">${c}</span>` : `<span class="ch ${c === '兮' ? 'xi' : ''}" style="--c:${C.cc}">${c}</span>`).join('')}<span class="lab">${s}</span></div></div>`).join('')}</div>
-<div class="note">藍底＝「兮」：楚地歌謠的語氣詞，可在句中，也可在句尾</div>`, el => stagger($('#ccv', el), .02));
+const ccRow = t => [...t].map(c => PUNC.includes(c) ? `<span class="ch p">${c}</span>` : `<span class="ch ${c === '兮' ? 'xi hid' : ''}" style="--c:${C.cc}">${c}</span>`).join('');
+P('cc2', 'cc', '《楚辭》｜看形式', head('cc', '看形式：句子變長、加「兮」') + `
+<div><span class="tip">把每一句裡的「兮」點出來</span> <span class="cnt" id="ccn"></span></div>
+<div class="verse" id="ccv" style="gap:.15em;margin-top:.25em">${CC.map(([a, b, s], i) => `<div class="${i ? 'st' : ''}"><div class="row">${ccRow(a)}</div><div class="row">${ccRow(b)}<span class="lab">${s}</span></div></div>`).join('')}</div>
+<div class="note st">藍底＝「兮」：楚地歌謠的語氣詞，可在句中，也可在句尾</div>`, {
+  init: el => {
+    stagger($('#ccv', el), .02);
+    $$('#ccv .ch:not(.p)', el).forEach(c => c.onclick = e => { e.stopPropagation(); if (c.classList.contains('xi')) { c.classList.add('on'); upd(); } else shake(c); });
+  },
+  upd: el => { $('#ccn', el).textContent = `找到 ${$$('.xi.on', el).length}／${$$('.xi', el).length} 個`; } });
 
 /* ───────── 兩漢：兩條路線 ───────── */
-P('han', '兩漢：兩條路線', `<div class="ph"><h1>兩漢：樂府詩與古詩</h1><span class="k" style="background:var(--ink)">兩條並行的路線</span></div>
+P('han', 'yf', '兩漢：兩條路線', `<div class="ph"><h2>兩漢：樂府詩與古詩</h2><span class="k" style="background:var(--ink);color:rgb(var(--paper))">兩條並行的路線</span></div>
 <div class="root"><span class="ln"></span><span class="dot">兩漢</span><span class="ln"></span></div>
-<div class="fork">
-  <div class="branch st" style="--c:${C.yf}"><h2>♪ 樂府詩<span class="wave">${Array.from({ length: 10 }, (_, i) => `<i style="animation-delay:${(i % 5) * .12}s"></i>`).join('')}</span></h2>
+<div class="fork" data-hide>
+  <div class="branch st" style="--c:${C.yf}"><h3>♪ 樂府詩<span class="wave">${Array.from({ length: 10 }, (_, i) => `<i style="animation-delay:${(i % 5) * .12}s"></i>`).join('')}</span></h3>
     <ul><li><b>入樂</b>，可歌</li><li>民間作品為主</li><li><b>長短句</b>，多敘事</li></ul></div>
-  <div class="branch st" style="--c:${C.gs}"><h2>✎ 古詩</h2>
+  <div class="branch st" style="--c:${C.gs}"><h3>✎ 古詩</h3>
     <ul><li><b>不入樂</b>，只可誦</li><li>多士大夫所作</li><li><b>五言、七言</b>，多抒情</li></ul></div>
 </div>
 <div class="note st">兩者同在兩漢出現、時間交疊，並稱「漢代詩歌雙葩」。下兩頁各看特徵，再比一比。</div>`);
@@ -419,39 +481,25 @@ P('han', '兩漢：兩條路線', `<div class="ph"><h1>兩漢：樂府詩與古�
 /* ───────── 樂府詩 ───────── */
 featPage('yf');
 const SHANGYE = ['上邪！', '我欲與君相知，', '長命無絕衰。', '山無陵，', '江水為竭，', '冬雷震震，', '夏雨雪，', '天地合，', '乃敢與君絕。'];
-P('yf2', '樂府詩｜看形式', head('yf', '看形式：句子忽長忽短') + `
-<div style="display:flex;gap:1em;flex-wrap:wrap;align-items:flex-start">
-  <div class="verse" id="yfv">${SHANGYE.map(l => `<div class="row">${chars(l, '', C.yf)}<span class="lab">${nChars(l)}字</span></div>`).join('')}</div>
-  <div style="flex:1;min-width:7em"><div class="src">漢樂府〈上邪〉</div><div class="note st" style="font-size:.78em">二字、六字、五字、三字……長短交錯，跟著曲調走：這就是<b>雜言</b>、<b>長短句</b>。</div></div>
-</div>`, el => stagger($('#yfv', el), .03));
+P('yf2', 'yf', '樂府詩｜看形式', head('yf', '看形式：句子忽長忽短') + `
+<div class="split">
+  <div class="verse" id="yfv" style="--c:${C.yf}">${SHANGYE.map(l => `<div class="row">${chars(l, '', C.yf)}<span class="lab bk">${nChars(l)}字</span></div>`).join('')}</div>
+  <div class="side"><div class="src">漢樂府〈上邪〉</div><div class="tip">數一數每句幾個字，再點朱框對答案</div>
+    <div class="note st" data-hide>二字、六字、五字、三字……長短交錯，跟著曲調走：這就是<b>雜言</b>、<b>長短句</b>。</div></div>
+</div>`, { init: el => stagger($('#yfv', el), .03) });
 
 /* ───────── 古詩 ───────── */
 featPage('gs');
-P('gs2', '古詩｜看形式', head('gs', '看形式：五言、七言整齊') + `
-<div class="verse" id="gsv">${['行行重行行，與君生別離。', '相去萬餘里，各在天一涯。'].map(l => `<div class="row">${chars(l, '', C.gs)}</div>`).join('')}</div>
+P('gs2', 'gs', '古詩｜看形式', head('gs', '看形式：五言、七言整齊') + `
+<div class="tip">數一數每句幾個字，再點朱框對答案</div>
+<div class="verse" id="gsv" style="--c:${C.gs};margin-top:.3em">${['行行重行行，與君生別離。', '相去萬餘里，各在天一涯。'].map(l => `<div class="row">${chars(l, '', C.gs)}<span class="lab bk">每句 5 字</span></div>`).join('')}</div>
 <div class="src">〈古詩十九首・行行重行行〉：五言</div>
-<div class="st"><div class="verse">${['秋風蕭瑟天氣涼，', '草木搖落露為霜。'].map(l => `<div class="row">${chars(l, '', C.gs)}</div>`).join('')}</div>
-<div class="src">曹丕〈燕歌行〉：最早的七言詩</div></div>`, el => stagger($('#gsv', el), .03));
+<div class="st"><div class="verse" style="--c:${C.gs}">${['秋風蕭瑟天氣涼，', '草木搖落露為霜。'].map(l => `<div class="row">${chars(l, '', C.gs)}<span class="lab bk">每句 7 字</span></div>`).join('')}</div>
+<div class="src">曹丕〈燕歌行〉：最早的七言詩</div></div>`, { init: el => stagger($('#gsv', el), .03) });
 
-/* ───────── 樂府詩 vs 古詩 比較（補充講義） ───────── */
-const CMP = [
-  ['名稱', '「樂府」最早見於秦代官制，漢武帝時正式成立樂府官署，所收的詩稱為樂府詩', '古詩之名始於唐，以別於近體詩而言'],
-  ['作者', '多為民間人士', '多為士大夫'],
-  ['音樂', '<b>入樂</b>，可歌，可誦', '<b>不入樂</b>，不可歌，只可誦'],
-  ['句法', '句式自由，多<b>長短句</b>', '句式較嚴整，多<b>五、七言</b>，亦見雜言'],
-  ['格律', '句數不限，不須對仗，平仄不分；只求韻諧（寬），可換韻', '（同左）'],
-  ['風格', '多<b>敘事</b>，反映時代（主敘事，貴遒勁）；多熱情之詞', '多<b>言情</b>，尚溫雅；多含蓄之言'],
-  ['發展', '創始於兩漢、成熟於魏晉、衰頹於隋、變調於中唐（新樂府運動）', '產生於兩漢、發展於魏晉、復古於唐宋'],
-  ['影響', '五言古詩自樂府發展而來', '五言絕句自五言古詩發展而來'],
-  ['流變', '後為詞取代', '後演變為近體詩'],
-  ['價值', '與古詩被視為「漢代詩歌雙葩」', '（同左）'],
-];
-const cmpPage = (id, rows, sub) => P(id, '樂府詩 vs 古詩' + sub, `<div class="ph"><h1>樂府詩 vs 古詩</h1><span class="k" style="background:var(--yf)">${sub}</span></div>
-<table class="cmp"><thead><tr><th></th><th class="a">樂府詩</th><th class="b">古詩（古體詩）</th></tr></thead><tbody>
-${rows.map(r => `<tr class="st"><th>${r[0]}</th><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>`);
-/* 11/13 老師：講解路線只留一條 → 樂府詩與古詩比較只放在網站「樂府詩·與古詩」頁，動畫不再放（CMP 留著備用） */
+/* 樂府詩 vs 古詩比較：11/13 老師定案只放在網站「樂府詩·與古詩」頁與「樂府長卷」，這裡不放 */
 
-/* ───────── 近體詩 ───────── */
+/* ───────── 近體詩：把詩句照順序排進格線 ───────── */
 featPage('jt');
 const JT = {
   '5絕': { t: '王之渙〈登鸛雀樓〉', l: ['白日依山盡', '黃河入海流', '欲窮千里目', '更上一層樓'], rhy: [1, 3], dz: [] },
@@ -460,77 +508,93 @@ const JT = {
   '7律': { t: '杜甫〈登高〉', l: ['風急天高猿嘯哀', '渚清沙白鳥飛迴', '無邊落木蕭蕭下', '不盡長江滾滾來', '萬里悲秋常作客', '百年多病獨登臺', '艱難苦恨繁霜鬢', '潦倒新停濁酒杯'], rhy: [0, 1, 3, 5, 7], dz: [2, 3, 4, 5] },
 };
 const LIAN = ['首聯', '首聯', '頷聯', '頷聯', '頸聯', '頸聯', '尾聯', '尾聯'];
-P('jt2', '近體詩｜格線', head('jt', '看形式：先有格線再填字') + `
-<div class="jt-ctrl"><button class="btn on" data-w="5">五言</button><button class="btn" data-w="7">七言</button><span class="sep"></span>
-<button class="btn on" data-k="絕">絕句</button><button class="btn" data-k="律">律詩</button><span class="sep"></span>
-<button class="btn" id="bRhy">□ 押韻</button><button class="btn" id="bDz">⇄ 對仗</button><span id="jtt" style="margin-left:.4em"></span></div>
-<div class="verse jt-grid" id="jtg"></div>`, el => {
-  let w = '5', k = '絕', rhy = false, dz = false;
+P('jt2', 'jt', '近體詩｜格線', head('jt', '看形式：先有格線再填字') + `
+<div class="ctrl"><button class="tool on" data-w="5">五言</button><button class="tool" data-w="7">七言</button><span class="sep"></span>
+<button class="tool on" data-k="絕">絕句</button><button class="tool" data-k="律">律詩</button><span class="sep"></span>
+<button class="tool" id="bRhy">□ 押韻</button><button class="tool" id="bDz">⇄ 對仗</button><span id="jtt" style="margin-left:.4em"></span></div>
+<div class="split"><div class="verse jt-grid" id="jtg"></div>
+<div class="tray" id="jty" style="--c:${C.jt}"></div></div>`, { init: el => {
+  let w = '5', k = '絕';
+  const g = $('#jtg', el), tray = $('#jty', el);
   const draw = () => {
-    const d = JT[w + k], g = $('#jtg', el); $('#jtt', el).textContent = d.t;
-    const small = k === '律';
-    g.style.fontSize = small ? '.78em' : '1em';
-    g.innerHTML = d.l.map((line, i) => `<div class="row empty">${small ? `<span class="lian">${LIAN[i]}</span>` : ''}${chars(line, '', C.jt)}${dz && d.dz.includes(i) && i % 2 === 0 ? '<span class="dz-tag">⇄ 對仗</span>' : ''}</div>`).join('');
-    $$('.row', g).forEach((r, i) => setTimeout(() => {
-      r.classList.remove('empty');
-      if (rhy && d.rhy.includes(i)) { const cs = $$('.ch:not(.p)', r); cs[cs.length - 1].classList.add('rhy'); }
-      if (dz && d.dz.includes(i)) $$('.ch:not(.p)', r).forEach(c => c.classList.add('dz'));
-    }, 200 + i * 220));
-    g.classList.add('play');
+    const d = JT[w + k], small = k === '律'; $('#jtt', el).textContent = d.t;
+    g.style.fontSize = tray.style.fontSize = small ? '.78em' : '1em';
+    g.innerHTML = d.l.map((line, i) => `<div class="row hid" data-i="${i}">${small ? `<span class="lian">${LIAN[i]}</span>` : ''}${[...line].map((c, j) => `<span class="ch${j === line.length - 1 && d.rhy.includes(i) ? ' r' : ''}${d.dz.includes(i) ? ' d' : ''}" style="--c:${C.jt}">${c}</span>`).join('')}${d.dz.includes(i) && i % 2 === 0 ? '<span class="dz-tag">⇄ 對仗</span>' : ''}</div>`).join('');
+    let order = d.l.map((_, i) => i); do { order.sort(() => Math.random() - .5); } while (order.every((x, i) => x === i));
+    tray.innerHTML = `<div class="msg">照順序點詩句，把它放進左邊的格線</div>` + order.map(i => `<button class="tile" data-i="${i}">${d.l[i]}</button>`).join('');
+    $$('.row', g).forEach(r => r._rev = () => {
+      r.classList.add('on'); $(`.tile[data-i="${r.dataset.i}"]`, tray).classList.add('used');
+      if (!$('.row.hid:not(.on)', g)) $('.msg', tray).textContent = `排好了：${d.l.length} 句、每句 ${[...d.l[0]].length} 字`;
+    });
+    $$('.tile', tray).forEach(t => t.onclick = e => { e.stopPropagation(); const nx = $('.row.hid:not(.on)', g); if (nx && nx.dataset.i === t.dataset.i) { nx._rev(); upd(); } else shake(t); });
+    if (st.ans) $$('.row', g).forEach(r => r._rev());
+    upd();
   };
-  const pick = (sel, v) => $$(sel, el).forEach(x => x.classList.toggle('on', x.dataset[sel.includes('w') ? 'w' : 'k'] === v));
-  $$('[data-w]', el).forEach(b => b.onclick = e => { e.stopPropagation(); w = b.dataset.w; pick('[data-w]', w); draw(); });
-  $$('[data-k]', el).forEach(b => b.onclick = e => { e.stopPropagation(); k = b.dataset.k; pick('[data-k]', k); if (k === '絕') { dz = false; $('#bDz', el).classList.remove('on'); } draw(); });
-  $('#bRhy', el).onclick = e => { e.stopPropagation(); rhy = !rhy; e.currentTarget.classList.toggle('on', rhy); draw(); };
-  $('#bDz', el).onclick = e => { e.stopPropagation(); if (k !== '律') { k = '律'; pick('[data-k]', k); } dz = !dz; e.currentTarget.classList.toggle('on', dz); draw(); };
+  const pick = (a, v) => $$(`[data-${a}]`, el).forEach(x => x.classList.toggle('on', x.dataset[a] === v));
+  $$('[data-w]', el).forEach(b => b.onclick = e => { e.stopPropagation(); w = b.dataset.w; pick('w', w); draw(); });
+  $$('[data-k]', el).forEach(b => b.onclick = e => { e.stopPropagation(); k = b.dataset.k; pick('k', k); if (k === '絕') { g.classList.remove('dz'); $('#bDz', el).classList.remove('on'); } draw(); });
+  $('#bRhy', el).onclick = e => { e.stopPropagation(); e.currentTarget.classList.toggle('on', g.classList.toggle('rhy')); };
+  $('#bDz', el).onclick = e => { e.stopPropagation(); e.currentTarget.classList.toggle('on', g.classList.toggle('dz')); if (k !== '律') { k = '律'; pick('k', k); draw(); } };
   draw();
-});
+} });
 
-/* ───────── 詞 ───────── */
+/* ───────── 詞：詞牌先定好每句幾個字，再把詞填進去 ───────── */
 featPage('ci');
 const CI = {
   '如夢令': { who: '李清照〈如夢令〉（婉約）', lines: ['昨夜雨疏風驟，', '濃睡不消殘酒。', '試問捲簾人，', '卻道海棠依舊。', '知否？', '知否？', '應是綠肥紅瘦。'] },
   '念奴嬌': { who: '蘇軾〈念奴嬌・赤壁懷古〉上片（豪放）', lines: ['大江東去，', '浪淘盡、千古風流人物。', '故壘西邊，', '人道是、三國周郎赤壁。', '亂石穿空，', '驚濤拍岸，', '捲起千堆雪。', '江山如畫，', '一時多少豪傑。'] },
 };
-P('ci2', '詞｜長短句', head('ci', '看形式：詞牌決定長短') + `
-<div class="jt-ctrl" id="cip">${Object.keys(CI).map((k, i) => `<button class="btn${i ? '' : ' on'}" data-p="${k}">詞牌〈${k}〉</button>`).join('')}<span id="ciw" style="margin-left:.4em"></span></div>
-<div id="cil"></div>`, el => {
+P('ci2', 'ci', '詞｜長短句', head('ci', '看形式：詞牌決定長短') + `
+<div class="ctrl" id="cip">${Object.keys(CI).map((k, i) => `<button class="tool${i ? '' : ' on'}" data-p="${k}">詞牌〈${k}〉</button>`).join('')}<span id="ciw" style="margin-left:.4em"></span></div>
+<div class="tip">詞牌先定好每句幾個字——點格子，把詞填進去；換個詞牌，格子跟著變</div>
+<div id="cil" style="margin-top:.25em"></div>`, { init: el => {
   const draw = p => {
     const d = CI[p], box = $('#cil', el); $('#ciw', el).textContent = d.who;
-    box.classList.remove('play'); box.style.fontSize = d.lines.length > 7 ? '.82em' : '1em';
-    box.innerHTML = d.lines.map((l, i) => { const n = nChars(l.replace('、', '')); return `<div class="ci-line"><span class="n">${n}字</span><span class="bar" style="transition-delay:${i * .18}s;min-width:${n * 1.02}em">${l}</span></div>`; }).join('');
-    setTimeout(() => box.classList.add('play'), 30);
+    box.style.fontSize = d.lines.length > 7 ? '.8em' : '1em';
+    box.innerHTML = d.lines.map(l => `<div class="ci-line hid"><span class="n">${nChars(l)}字</span><span class="row">${chars(l, '', C.ci)}</span></div>`).join('');
+    stagger(box, .012);
+    $$('.ci-line', box).forEach(r => r.onclick = e => { e.stopPropagation(); r.classList.toggle('on'); upd(); });
+    if (st.ans) $$('.ci-line', box).forEach(r => r.classList.add('on'));
+    upd();
   };
-  $$('#cip .btn', el).forEach(b => b.onclick = e => { e.stopPropagation(); $$('#cip .btn', el).forEach(x => x.classList.toggle('on', x === b)); draw(b.dataset.p); });
+  $$('#cip .tool', el).forEach(b => b.onclick = e => { e.stopPropagation(); $$('#cip .tool', el).forEach(x => x.classList.toggle('on', x === b)); draw(b.dataset.p); });
   draw('如夢令');
-});
+} });
 
 /* ───────── 曲 ───────── */
 featPage('qu');
 /* 11/13 晚 老師：「天淨沙有點看不出襯字」→〈天淨沙・秋思〉本身照曲牌填、沒有襯字；
    這頁只看「曲牌規定的句式」，襯字另開一頁用真的句子示範（例句＝龍騰技高國文(5)L4 曲選備課用書「我也會襯字」課堂活動） */
 const TJS = ['枯藤老樹昏鴉，', '小橋流水人家，', '古道西風瘦馬。', '夕陽西下，', '斷腸人在天涯。'];
-P('qu2', '曲｜曲牌', head('qu', '看形式：照曲牌填字') + `
-<div style="display:flex;gap:1em;flex-wrap:wrap;align-items:flex-start">
-  <div class="verse" id="qud">${TJS.map(l => `<div class="row">${chars(l, '', C.qu)}<span class="lab">${nChars(l)}字</span></div>`).join('')}</div>
-  <div style="flex:1;min-width:7em"><div class="src">馬致遠〈天淨沙・秋思〉</div>
-  <div class="note st" style="font-size:.78em">曲牌〈天淨沙〉規定：<b>六・六・六・四・六</b>字。<br>這首照規定填，<b>沒有加襯字</b>。</div>
-  <div class="note st" style="font-size:.78em">曲比詞自由的地方：可以在規定的字數之外，<b>再加「襯字」</b>→ 下一頁</div></div>
-</div>`, el => stagger($('#qud', el), .03));
+P('qu2', 'qu', '曲｜曲牌', head('qu', '看形式：照曲牌填字') + `
+<div class="split">
+  <div class="verse" id="qud" style="--c:${C.qu}">${TJS.map(l => `<div class="row">${chars(l, '', C.qu)}<span class="lab bk">${nChars(l)}字</span></div>`).join('')}</div>
+  <div class="side"><div class="src">馬致遠〈天淨沙・秋思〉</div><div class="tip">數一數每句幾個字，再點朱框對答案</div>
+  <div class="note st" data-hide>曲牌〈天淨沙〉規定：<b>六・六・六・四・六</b>字。<br>這首照規定填，<b>沒有加襯字</b>。</div>
+  <div class="note st">曲比詞自由的地方：可以在規定的字數之外，<b>再加「襯字」</b>→ 下一頁</div></div>
+</div>`, { init: el => stagger($('#qud', el), .03) });
 const CZ_A = '也許該要真的相信', CZ_B = ['也許', '應', '該要真的相信'];
-P('qu3', '曲｜襯字', head('qu', '看形式：襯字') + `
-<div class="cz-demo" id="czd">
+P('qu3', 'qu', '曲｜襯字', head('qu', '看形式：襯字') + `
+<div class="tip">這句歌詞唱的時候多加了一個襯字「${CZ_B[1]}」——點「＋」猜猜加在哪裡</div>
+<div class="cz-demo" id="czd" style="--c:${C.qu}">
   <div class="cz-row"><span class="cz-tag">原句</span>${chars(CZ_A, '', C.qu)}<span class="lab">${CZ_A.length}字</span></div>
-  <div class="cz-row"><span class="cz-tag">加襯字</span>${chars(CZ_B[0], '', C.qu)}<span class="ch cz-new" style="--c:${C.qu}">${CZ_B[1]}</span>${chars(CZ_B[2], '', C.qu)}<span class="lab" id="czn">${CZ_A.length}字</span></div>
+  <div class="cz-row"><span class="cz-tag">加襯字</span>${[...CZ_A].map((c, j) => `<button class="slot" data-j="${j}">＋</button>${j === CZ_B[0].length ? `<span class="ch cz-new hid" style="--c:${C.qu}">${CZ_B[1]}</span>` : ''}<span class="ch" style="--c:${C.qu}">${c}</span>`).join('')}<button class="slot" data-j="${CZ_A.length}">＋</button><span class="lab" id="czn">${CZ_A.length}字</span></div>
 </div>
-<div class="src">流行歌加襯字：郭采潔〈誠實的想你〉「也許該要真的相信」唱成「也許<b>應</b>該要真的相信」</div>
-<button class="btn" id="czb" style="font-size:.7em">▶ 加入襯字</button>
-<div class="note st" style="font-size:.8em"><b>襯字</b>：曲牌規定的字數以外，多加的字。<br>・可加在<b>句首、句中</b>，<b>不可加在句末</b><br>・可以是虛詞，也可以是實詞<br>・不改原意，讓語氣更像說話、更活潑（口語化）</div>`, el => {
-  const d = $('#czd', el), n = $('#czn', el);
-  const set = on => { d.classList.toggle('cz-on', on); n.textContent = (CZ_A.length + (on ? 1 : 0)) + '字'; $('#czb', el).textContent = on ? '⟲ 拿掉襯字' : '▶ 加入襯字'; };
-  $('#czb', el).onclick = e => { e.stopPropagation(); set(!d.classList.contains('cz-on')); };
-  setTimeout(() => set(true), 1400);
-});
+<div class="cnt" id="czf"></div>
+<button class="tool" id="czb" style="font-size:.66em">▶ 加入襯字</button>
+<div class="src st" style="margin-top:.4em">流行歌加襯字：郭采潔〈誠實的想你〉「也許該要真的相信」唱成「也許<b>應</b>該要真的相信」</div>
+<div class="note st"><b>襯字</b>：曲牌規定的字數以外，多加的字。</div>
+<div class="note st" data-hide>・可加在<b>句首、句中</b>，<b>不可加在句末</b><br>・可以是虛詞，也可以是實詞<br>・不改原意，讓語氣更像說話、更活潑（口語化）</div>`, { init: el => {
+  const d = $('#czd', el), n = $('#czn', el), cz = $('.cz-new', el), fb = $('#czf', el);
+  const set = on => { cz.classList.toggle('on', on); d.classList.toggle('cz-on', on); n.textContent = (CZ_A.length + (on ? 1 : 0)) + '字'; $('#czb', el).textContent = on ? '⟲ 拿掉襯字' : '▶ 加入襯字'; if (on) fb.textContent = ''; };
+  cz._rev = () => set(true);
+  $$('.slot', el).forEach(s => s.onclick = e => {
+    e.stopPropagation(); const j = +s.dataset.j;
+    if (j === CZ_B[0].length) { set(true); upd(); return; }
+    shake(s); fb.textContent = j === CZ_A.length ? '襯字不可加在句末，再找找' : '不是這裡，再找找';
+  });
+  $('#czb', el).onclick = e => { e.stopPropagation(); set(!cz.classList.contains('on')); upd(); };
+} });
 
 /* ───────── 新詩 ───────── */
 featPage('xs');
@@ -538,42 +602,41 @@ featPage('xs');
    再加一頁烏青〈對白雲的讚美〉（原文依 ETtoday 2012-03-30 報導轉錄，待與原出處核對，見核校清單） */
 const KB = [['輕輕的我走了，', 0], ['正如我輕輕的來；', 2], ['我輕輕的招手，', 0], ['作別西天的雲彩。', 2]];
 const baihua = l => [...l].map(c => '的了我'.includes(c) ? `<b class="bh">${c}</b>` : c).join('');
-P('xs2', '新詩｜打破格律', head('xs', '看形式：文字走出格線') + `
-<div style="display:flex;gap:1.2em;flex-wrap:wrap;align-items:flex-start">
-<div style="flex:0 0 auto;width:13em"><div class="xs-stage" id="xss">
-  <div class="xs-grid">${'白日依山盡黃河入海流欲窮千里目更上一層樓'.split('').map(c => `<i>${c}</i>`).join('')}</div>
+P('xs2', 'xs', '新詩｜打破格律', head('xs', '看形式：文字走出格線') + `
+<div class="split" style="gap:1.2em">
+<div style="flex:0 0 auto;width:13em"><div class="tip">點一下格線，把它拆掉</div><div class="xs-stage hid" id="xss" style="margin-top:.3em">
+  <div class="xs-grid">${'白日依山盡黃河入海流欲窮千里目更上一層樓'.split('').map((c, i) => `<i style="--rx:${((i * 37) % 11 - 5) * .5}em;--ry:${((i * 53) % 9 - 6) * .5}em;--rr:${((i * 29) % 13 - 6) * 9}deg;transition-delay:${(i % 5) * .05}s">${c}</i>`).join('')}</div>
   <div class="xs-free">${KB.map(([l, p]) => `<div style="padding-left:${p}em">${baihua(l)}<span class="lab">${nChars(l)}字</span></div>`).join('')}</div>
 </div>
 <div class="src" id="xsc">格線裡是近體詩〈登鸛雀樓〉</div>
-<button class="btn" id="xsb" style="font-size:.7em">▶ 讓文字走出格線</button></div>
+<button class="tool" id="xsb" style="font-size:.66em">▶ 讓文字走出格線</button></div>
 <div class="xs-rules">
   <div class="xr st"><span class="a">字數固定 5・5・5・5</span><span class="b">每行長短不一</span></div>
   <div class="xr st"><span class="a">文言</span><span class="b">白話：<b class="bh">的、了、我</b></span></div>
   <div class="xr st"><span class="a">講平仄、押韻、對仗</span><span class="b">不拘平仄、不必對仗</span></div>
   <div class="xr st"><span class="a">四句排整齊</span><span class="b">分行、分段、縮排自由</span></div>
-</div></div>`, el => {
+</div></div>`, { init: el => {
   const s = $('#xss', el), cap = $('#xsc', el);
-  const set = on => { s.classList.toggle('xs-on', on); cap.textContent = on ? '徐志摩〈再別康橋〉第一節' : '格線裡是近體詩〈登鸛雀樓〉'; };
-  $('#xsb', el).onclick = e => { e.stopPropagation(); set(!s.classList.contains('xs-on')); };
-  setTimeout(() => set(true), 1600);
-});
+  const set = on => { s.classList.toggle('on', on); s.classList.toggle('xs-on', on); cap.textContent = on ? '徐志摩〈再別康橋〉第一節' : '格線裡是近體詩〈登鸛雀樓〉'; $('#xsb', el).textContent = on ? '⟲ 放回格線' : '▶ 讓文字走出格線'; };
+  s._rev = () => set(true);
+  s.onclick = $('#xsb', el).onclick = e => { e.stopPropagation(); set(!s.classList.contains('xs-on')); upd(); };
+} });
 const WQ = ['天上的白雲真白啊', '真的，很白很白', '非常白', '非常非常十分白', '極其白', '賊白', '簡直白死了', '啊—'];
-P('xs3', '新詩｜自由到極點', head('xs', '再自由一點：這樣也算詩嗎？') + `
-<div style="display:flex;gap:1.2em;flex-wrap:wrap;align-items:flex-start">
-  <div class="wq" id="wqv">${WQ.map((l, i) => `<div class="wq-l" style="transition-delay:${.2 + i * .35}s">${l.replace(/白/g, '<b>白</b>')}<span class="lab">${nChars(l.replace(/—/g, ''))}字</span></div>`).join('')}</div>
-  <div style="flex:1;min-width:8em"><div class="src">烏青〈對白雲的讚美〉<br>（2012 年在網路爆紅，被稱為「廢話體」）</div>
-  <div class="note st" style="font-size:.8em">每行長短任意：8、6、3……1 字<br>不押韻、不對仗，幾乎沒有修辭<br>只是把「<b>白</b>」說了又說</div>
-  <div class="note st" style="font-size:.8em"><b>想一想：</b>新詩形式完全自由，但仍講究<b>節奏</b>與<b>意象</b>——你覺得這首有嗎？算不算詩？</div></div>
+P('xs3', 'xs', '新詩｜自由到極點', head('xs', '再自由一點：這樣也算詩嗎？') + `
+<div class="split" style="gap:1.2em">
+  <div class="wq" id="wqv">${WQ.map(l => `<div class="wq-l st">${l.replace(/白/g, '<b>白</b>')}<span class="lab">${nChars(l.replace(/—/g, ''))}字</span></div>`).join('')}</div>
+  <div class="side"><div class="src">烏青〈對白雲的讚美〉<br>（2012 年在網路爆紅，被稱為「廢話體」）</div>
+  <div class="note st">每行長短任意：8、6、3……1 字<br>不押韻、不對仗，幾乎沒有修辭<br>只是把「<b>白</b>」說了又說</div>
+  <div class="note st"><b>想一想：</b>新詩形式完全自由，但仍講究<b>節奏</b>與<b>意象</b>——你覺得這首有嗎？算不算詩？</div></div>
 </div>`);
 
 /* ───────── 總整理 ───────── */
 const SUMS = [['sj', '先秦', '四言・入樂'], ['cc', '戰國～西漢初', '加「兮」・騷體'], ['yf', '兩漢起', '長短句・入樂'], ['gs', '兩漢～六朝', '五七言・不入樂'], ['jt', '唐', '絕句律詩・格律'], ['ci', '唐～宋', '詞牌・長短句・入樂'], ['qu', '元', '曲牌・襯字・入樂'], ['xs', '五四以來', '白話・分行']];
-P('sum', '總整理', `<div class="ph"><h1>總整理</h1><span class="k" style="background:var(--ink)">點卡片回專頁</span></div>
-<div class="sum">${SUMS.map(([id, t, k]) => `<div class="card st" data-go="${id}" style="--c:${FORMS[id].c};cursor:pointer"><h3>${FORMS[id].name.replace('（現代詩）', '').replace('（古體詩）', '')}</h3><div>${t}<br><b>${k}</b></div></div>`).join('')}</div>
-<div class="note st" style="font-size:.75em;margin-top:.4em">風格記憶語：<b>詩莊・詞媚・曲俗</b>（概括的風格提示，不是每首都如此）</div>`,
-  el => $$('.card[data-go]', el).forEach(c => c.onclick = e => { e.stopPropagation(); go(c.dataset.go); }));
+P('sum', 'sum', '總整理', `<div class="ph"><h2>總整理</h2><span class="k" style="background:var(--ink);color:rgb(var(--paper))">點卡片回專頁</span></div>
+<div class="sum">${SUMS.map(([id, t, k]) => `<div class="card st" data-go="${id}" style="--c:${FORMS[id].c}">${th(id)}<h3>${NAME(id)}</h3><div>${t}<br><b>${k}</b></div></div>`).join('')}</div>
+<div class="note st" style="font-size:.75em;margin-top:.5em">風格記憶語：<b>詩莊・詞媚・曲俗</b>（概括的風格提示，不是每首都如此）</div>`);
 
-/* ───────── 挑戰：一次一題 ───────── */
+/* ───────── 挑戰：原 5 題＋總整理 8 張關鍵詞卡，洗牌出題 ───────── */
 const QUIZ = [
   ['哪一種詩體以四言為主，並分風、雅、頌？', '《詩經》', ['《詩經》', '《楚辭》', '樂府詩', '詞'], '關鍵是「四言」和「風雅頌」。', '提示：〈關雎〉四字一拍。'],
   ['哪一種詩體可以入樂，句子長短不齊，多為民間作品？', '樂府詩', ['古詩', '樂府詩', '近體詩', '新詩'], '入樂、長短句、民間：樂府詩。', '提示：〈上邪〉、〈長干行〉都屬於它。'],
@@ -581,75 +644,106 @@ const QUIZ = [
   ['哪一種詩體依詞牌填寫，常見長短句？', '詞', ['古詩', '曲', '詞', '新詩'], '「詞牌」是詞的關鍵。', '提示：〈如夢令〉〈念奴嬌〉是什麼？'],
   ['哪一種詩體可以加入襯字，語言較口語化？', '曲', ['詞', '曲', '新詩', '《楚辭》'], '「襯字」是曲的特色。', '提示：依「曲牌」填寫的是哪一種？'],
 ];
-P('quiz', '挑戰', `<div class="ph"><h1>挑戰</h1><span class="k" style="background:var(--ink)" id="qn"></span></div>
-<div class="qbox" id="qb"></div>
-<div style="display:flex;gap:.4em;margin-top:.5em;font-size:.7em"><button class="btn" id="qp">← 上一題</button><button class="btn pri" id="qx">下一題 →</button><button class="btn" id="qr">⟲ 重新作答</button><button class="btn" onclick="go(1)">☰ 回總覽</button></div>`, el => {
-  let i = 0;
-  const draw = () => {
-    const q = QUIZ[i]; $('#qn', el).textContent = `第 ${i + 1}／${QUIZ.length} 題`;
-    $('#qb', el).innerHTML = `<div class="qq">${q[0]}</div><div class="opts">${q[2].map(o => `<button class="opt">${o}</button>`).join('')}</div><div class="fb"></div>`;
-    $$('.opt', el).forEach(b => b.onclick = e => {
-      e.stopPropagation(); const box = $('#qb', el); if (box.dataset.done) return;
-      if (b.textContent === q[1]) { b.classList.add('ok'); $('.fb', el).innerHTML = '✔ 答對！' + q[3]; box.dataset.done = 1; }
-      else { b.classList.add('no'); $('.fb', el).innerHTML = '再想想。' + q[4]; }
-    });
-    delete $('#qb', el).dataset.done;
-  };
-  $('#qp', el).onclick = e => { e.stopPropagation(); if (i > 0) { i--; draw(); } };
-  $('#qx', el).onclick = e => { e.stopPropagation(); if (i < QUIZ.length - 1) { i++; draw(); } };
-  $('#qr', el).onclick = e => { e.stopPropagation(); i = 0; draw(); };
-  draw();
-});
+const POOL = QUIZ.map(q => ({ t: q[0], a: q[1], o: q[2], ok: q[3], hint: q[4] }))
+  .concat(SUMS.map(([id, t, k]) => ({ t: `「${k}」是哪一種詩體？`, a: NAME(id), o: IDS.map(NAME), ok: `${NAME(id)}：${t}，${k}。`, hint: `提示：時代是「${t}」。` })));
+P('quiz', 'quiz', '挑戰', `<div class="ph"><h2>挑戰</h2><span class="k" id="gs"></span></div>
+<div class="gm"><div class="q" id="gq"></div><div class="opts" id="go"></div><div class="fb" id="gf"></div><div class="dots" id="gd"></div>
+  <div style="display:flex;gap:.4em;justify-content:center;font-size:.66em;margin-top:.3em"><button class="tool" id="gr">⟲ 重新洗牌</button><button class="tool" data-go="map">☰ 回長卷</button></div></div>`, {
+  init: el => {
+    let order, i, score, res, done;
+    const start = () => { order = POOL.map((_, k) => k).sort(() => Math.random() - .5); i = 0; score = 0; res = []; draw(); };
+    const draw = () => {
+      const fin = i >= order.length, q = POOL[order[i]]; done = false;
+      const box = $('#gq', el); box.textContent = fin ? `完成！第一次就答對 ${score}／${order.length} 題` : q.t; box.classList.remove('in2'); void box.offsetWidth; box.classList.add('in2');
+      $('#go', el).innerHTML = fin ? '' : q.o.map(o => `<button>${o}</button>`).join('');
+      $('#go', el).style.gridTemplateColumns = !fin && q.o.length === 4 ? 'repeat(2,1fr)' : '';
+      $('#gf', el).textContent = ''; $('#gs', el).textContent = fin ? '完成' : `第 ${i + 1}／${order.length} 題`;
+      $('#gd', el).innerHTML = order.map((_, k) => `<i class="${res[k] || ''}${k === i ? ' cur' : ''}"></i>`).join('');
+      $$('#go button', el).forEach(b => b.onclick = e => {
+        e.stopPropagation(); if (done) return;
+        if (b.textContent === q.a) { b.classList.add('ok'); if (!res[i]) { res[i] = 'ok'; score++; } $('#gf', el).textContent = '✔ 答對！' + q.ok; done = true; }
+        else { b.classList.add('no'); shake(b); res[i] = 'no'; $('#gf', el).textContent = '再想想。' + q.hint; }
+        upd();
+      });
+      upd();
+    };
+    el._adv = () => { if (!done || i >= order.length) return false; i++; draw(); return true; };
+    el._more = () => done && i < order.length;
+    $('#gr', el).onclick = e => { e.stopPropagation(); start(); };
+    start();
+  },
+  steps: el => el._adv(), more: el => el._more() });
 
-/* ───────── 播放控制 ───────── */
-const state = { i: 0, last: null, back: false };
-const main = $('#main');
-PAGES.forEach((p, i) => { const s = document.createElement('section'); s.className = 'slide'; main.appendChild(s); });
+/* ───────── 播放 ───────── */
+const st = { i: 0, ans: false, bg: 0, last: null, back: false, drag: false };
+const stage = $('#stage');
+const CH = [['map', '長卷']].concat(IDS.map(id => [id, SEAL(id)]), [['sum', '整理'], ['quiz', '挑戰']]);
+$('#nav').innerHTML = CH.map(([c, t]) => `<button data-ch="${c}">${t}</button>`).join('');
+$$('#nav button').forEach(b => b.onclick = () => go(b.dataset.ch, b.dataset.ch === 'map'));
+const night = () => document.body.classList.contains('night');
+const bgUrl = name => `url("../img/ui/bg/${name}-${night() ? 'dark' : 'light'}.webp")`;
+function setBg(name) {
+  const url = bgUrl(name), a = $('#bgA'), b = $('#bgB'), cur = st.bg ? b : a, nxt = st.bg ? a : b;
+  if (cur.style.backgroundImage === url) { cur.classList.add('on'); return; }
+  nxt.style.backgroundImage = url; nxt.classList.add('on'); cur.classList.remove('on'); st.bg ^= 1;
+}
+const paintTh = () => $$('[data-th]', stage).forEach(x => x.style.backgroundImage = bgUrl(x.dataset.th));
+/* 下一步＝文件順序裡第一個還沒出現的段落，或已出現段落裡第一個還藏著的重點（朱框字、要點的格子） */
+const pending = () => $$('.st:not(.show), .bk:not(.on), .hid:not(.on)', stage).find(x => x.classList.contains('st') || !x.closest('.st:not(.show)'));
+function reveal(x) {
+  if (x._rev) { x._rev(); x.classList.add('on'); }
+  else if (x.classList.contains('st')) { x.classList.add('show'); if (x.classList.contains('lb') && x.nextElementSibling) x.nextElementSibling.classList.add('show'); }
+  else x.classList.add('on');
+}
+function revealAll() { const s = S[st.i]; let n = 0; while (s.steps && s.id !== 'quiz' && s.steps(stage) && n++ < 50); let p; n = 0; while ((p = pending()) && n++ < 300) reveal(p); }
 function go(t, back) {
-  const i = typeof t === 'number' ? t : PAGES.findIndex(p => p.id === t);
-  if (i < 0 || i >= PAGES.length) return;
-  const p = PAGES[i], s = main.children[i];
-  if (i > 1) state.last = p.id.replace(/[23]$/, '');
-  state.i = i; state.back = !!back;
-  [...main.children].forEach((x, k) => x.classList.toggle('on', k === i));
-  s.innerHTML = p.html; s.scrollTop = 0; s.classList.remove('play');
-  p.init && p.init(s);
-  requestAnimationFrame(() => requestAnimationFrame(() => s.classList.add('play')));
-  $('#crumb').textContent = '｜' + p.title;
-  $('#pg').textContent = (i + 1) + ' / ' + PAGES.length;
+  const i = typeof t === 'number' ? t : S.findIndex(p => p.id === t);
+  if (i < 0 || i >= S.length) return;
+  const s = S[i]; if (FORMS[s.ch]) st.last = s.ch;
+  st.i = i; st.back = !!back;
+  document.body.classList.toggle('full', !!s.full); document.body.classList.toggle('cover', s.cls === 'cover');
+  setBg(s.bg);
+  stage.innerHTML = `<div class="in">${s.html}</div>`; stage.scrollTop = 0;
+  s.init && s.init(stage);
+  $$('[data-hide] b:not([class])', stage).forEach(b => b.classList.add('bk'));
+  $$('.bk', stage).forEach(x => x.onclick = e => { e.stopPropagation(); x.classList.toggle('on'); upd(); });
+  $$('[data-go]', stage).forEach(x => x.onclick = e => { e.stopPropagation(); if (!st.drag) go(x.dataset.go); });
+  paintTh();
+  if (!s.steps) { const f = pending(); if (f && f.classList.contains('st')) reveal(f); }   /* 開頁先出第一段；第一步若是要動手的（點兮、找襯字…）就不先出 */
+  if (st.ans) revealAll();
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.ch === s.ch));
+  const on = $('#nav button.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  $('#pg').textContent = (i + 1) + ' / ' + S.length; $('#bar').style.width = ((i + 1) / S.length * 100) + '%';
   $('#bPrev').disabled = i === 0;
-  try { history.replaceState(null, '', '#' + p.id); } catch (e) {}
-  updNext();
+  try { history.replaceState(null, '', '#' + s.id); } catch (e) {}
+  upd();
 }
-const cur = () => main.children[state.i];
-function pending() {
-  /* 特徵頁：標籤＋內容一對一起出現 */
-  const st = $$('.st:not(.show)', cur());
-  if (st[0] && st[0].classList.contains('lb')) return st.slice(0, 2);
-  return st.slice(0, 1);
+function upd() {
+  const s = S[st.i]; s.upd && s.upd(stage);
+  $('#bNext').textContent = pending() || (s.more && s.more(stage)) ? '下一步 ▸' : (st.i < S.length - 1 ? '下一頁 →' : '完');
 }
-function hasMore() { const p = PAGES[state.i]; return pending().length || (p.steps && cur()._k !== undefined && cur()._k !== STOPS.length); }
-function updNext() { $('#bNext').textContent = hasMore() ? '下一步 ▸' : (state.i < PAGES.length - 1 ? '下一頁 →' : '完'); }
 function next() {
-  const p = PAGES[state.i], el = cur();
-  if (p.steps && p.steps(el)) { updNext(); return; }
-  const ps = pending();
-  if (ps.length) { ps.forEach(x => x.classList.add('show')); setTimeout(() => ps[ps.length - 1].scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60); updNext(); return; }
-  if (state.i < PAGES.length - 1) go(state.i + 1);
+  const s = S[st.i];
+  if (s.steps && s.steps(stage)) { upd(); return; }
+  const p = pending();
+  if (p) { reveal(p); setTimeout(() => p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 80); upd(); return; }
+  if (st.i < S.length - 1) go(st.i + 1);
 }
-function prev() { if (state.i > 0) go(state.i - 1, true); }
-$('#bNext').onclick = next; $('#bPrev').onclick = prev; $('#bHome').onclick = () => go(1, true);
-$('#bReplay').onclick = () => go(state.i);
-$('#bPause').onclick = e => { const p = document.body.classList.toggle('paused'); e.currentTarget.textContent = p ? '▶' : '❚❚'; };
+const prev = () => { if (st.i > 0) go(st.i - 1, true); };
+$('#bNext').onclick = next; $('#bPrev').onclick = prev; $('#bLogo').onclick = () => go(0); $('#bReplay').onclick = () => go(st.i);
+$('#bAns').onclick = e => { st.ans = !st.ans; e.currentTarget.classList.toggle('on', st.ans); if (st.ans) { revealAll(); upd(); } else go(st.i); };
+$('#bNight').onclick = e => { const n = document.body.classList.toggle('night'); e.currentTarget.classList.toggle('on', n); setBg(S[st.i].bg); paintTh(); };
 $('#bFull').onclick = () => { const d = document.documentElement; if (!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); else document.exitFullscreen && document.exitFullscreen(); };
-main.addEventListener('click', e => { if (e.target.closest('button,.chip,.node,a,.opt,.card[data-go]')) return; next(); });
+$('main').addEventListener('click', e => { if (st.drag || e.target.closest('button,a,.bk,.chip,.node,.hf,.card[data-go],.ci-line,.xs-stage,#ccv .ch')) return; next(); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
-  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
-  else if (e.key === 'Escape') go(1, true);
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
+  else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
+  else if (k === 'Escape') go('map', true);
 });
 if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
-const h = location.hash.slice(1); go(PAGES.findIndex(p => p.id === h) >= 0 ? h : 0);
+const h = location.hash.slice(1); go(S.some(p => p.id === h) ? h : 0);
+addEventListener('hashchange', () => { const h = location.hash.slice(1); if (S.some(p => p.id === h) && S[st.i].id !== h) go(h); });
 </script>
 </body>
 </html>
