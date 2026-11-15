@@ -9,17 +9,22 @@
      點作品名進讀詩模式（一段一段聚焦、點段落看翻譯），最後「樂府還是古詩？」分類挑戰。
      內容不另抄：全部執行時讀 data/lessons/30.js 的 extras.intro（樂府詩·名稱／特色／發展／新樂府／新樂府作品／影響／與古詩、代表作·○○），
      課檔改了這裡自動跟著變。字體＝源流明體；讀詩可切「書法」（這台電腦有華康歐陽詢體才出現，商業字型不能放上網站）。
-     從網站開（188 的 l7-anim 蓋版）時右上有「✕ 回課文」。iPad 11（1194×834）為主、手機直式可用。 -->
+     從網站開（188 的 l7-anim 蓋版）時右上有「✕ 回課文」。iPad 11（1194×834）為主、手機直式可用。
+     V253（2026-11-16 老師：整個樂府詩講解也照變形記美化，把補充講義的空格融合進來讓學生方便填空；範圍＝常識＋作者題解）
+     - 前面加「作者」「題解」「簡介」三段（讀 30.js 的 extras.authorPages、intro〈題解·課本〉，一樣不另抄）
+     - 翰林技高國文(1)補充講義 L7 P.77～78 的 9 個空格（HB）：講到那個詞時是藍色、有編號的空格，點了揭曉並提示填進講義；
+       每一節講完有一頁「講義填空」（FILL，句子照講義原文、順序照講義），給沒跟上的學生補抄
+     - ⟲ 這一頁重來；網址 #頁碼 改了會跟著跳 -->
 <style>
 :root{
   --fs:clamp(19px,2.5vw,36px);
   --paper:247,238,214; --ink:#2a2521; --mute:#6a5a45; --zhu:#a8352a; --zhu-d:#7f241c; --gold:#b08d57; --line:rgba(107,74,43,.32);
-  --card:rgba(255,251,240,.86); --key:#17675a; --yi:#2f4a35; --yi-bg:rgba(93,122,95,.13); --yi-bd:#5d7a5f;
+  --hb:#1d4f91; --card:rgba(255,251,240,.86); --key:#17675a; --yi:#2f4a35; --yi-bg:rgba(93,122,95,.13); --yi-bd:#5d7a5f;
   --seal:linear-gradient(135deg,#b83f31,#98291f);
   --ming:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;
   --shu:"DFOYangXunW5-B5","華康歐陽詢體W5","DFPOYangXunW5-B5","RayGenRyuRead","Noto Serif TC",serif;
 }
-body.night{--paper:16,18,26; --ink:#f1e6cb; --mute:#b9a988; --zhu:#e9a45c; --zhu-d:#f0c184; --gold:#d8b878; --line:rgba(240,225,190,.28);
+body.night{--hb:#9cc4ff; --paper:16,18,26; --ink:#f1e6cb; --mute:#b9a988; --zhu:#e9a45c; --zhu-d:#f0c184; --gold:#d8b878; --line:rgba(240,225,190,.28);
   --card:rgba(22,24,34,.8); --key:#8fd9c6; --yi:#c5e3c8; --yi-bg:rgba(127,174,134,.16); --yi-bd:#7fae86}
 *{box-sizing:border-box}
 @font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
@@ -73,6 +78,17 @@ tr.st{transform:none;filter:none}
 .bk{display:inline-block;color:transparent;border-bottom:2.5px solid var(--zhu);background:rgba(168,53,42,.1);border-radius:4px 4px 0 0;padding:0 .18em;margin:0 .06em;cursor:pointer;font-weight:700;line-height:1.35;transition:color .35s,background .35s;user-select:none}
 .bk.on{color:var(--zhu);background:none;animation:drop .45s cubic-bezier(.3,1.5,.5,1)}
 @keyframes drop{from{transform:translateY(-.35em) scale(1.25);filter:blur(3px)}}
+/* 講義空格：藍色、有編號（朱框＝老師的重點字，藍框＝學生講義上要填的） */
+.bk.hb{position:relative;border-bottom-color:var(--hb);background:color-mix(in srgb,var(--hb) 13%,transparent);padding-left:1.3em;min-width:3.4em;text-align:center}
+.bk.hb::before{content:attr(data-n);position:absolute;left:.14em;top:0;color:var(--hb);font-weight:700}
+.bk.hb.on{color:var(--hb);background:color-mix(in srgb,var(--hb) 7%,transparent)}
+.bk.hb.tip::after{content:'✎ 填進講義 ' attr(data-p) ' ' attr(data-n);position:absolute;left:50%;bottom:104%;white-space:nowrap;font-size:.5em;line-height:1.7;letter-spacing:.05em;color:#fff;background:#1d4f91;border-radius:5px;padding:0 .7em;pointer-events:none;animation:hbtip 2.8s forwards}
+@keyframes hbtip{0%{opacity:0;transform:translate(-50%,8px)}12%,82%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+.kick .hp.fill{border-color:var(--hb);color:var(--hb);font-weight:700}
+.fillnote{font-size:.66em;color:var(--mute);margin:-.3em 0 .6em;letter-spacing:.05em}
+table.l7t.fill td{font-size:1.05em;line-height:1.9}
+table.l7t.fill th{font-size:.8em;text-align:center;vertical-align:middle}
+.sec{font-size:.62em;color:var(--mute);letter-spacing:.1em;margin:.9em 0 .25em}
 .l7-erab{display:inline-block;color:#fbefdc;background:var(--seal);border-radius:5px 8px 4px 9px;padding:0 .4em;margin:0 .2em;font-weight:900;letter-spacing:.1em;box-shadow:inset 0 0 0 2px rgba(251,239,220,.5)}
 .l7-key{color:var(--key);font-weight:800;background:color-mix(in srgb,var(--key) 12%,transparent);border-radius:4px;padding:0 .12em}
 a.l7-wkl{display:inline-block;color:var(--zhu-d);font-weight:800;cursor:pointer;border:1.5px solid var(--zhu);background:rgba(var(--paper),.85);border-radius:4px;padding:0 .25em;margin:.08em .1em;line-height:1.5;box-shadow:2px 3px 0 rgba(107,74,43,.18);transition:transform .15s,background .15s,color .15s}
@@ -96,6 +112,7 @@ table.l7t th{white-space:nowrap;color:var(--zhu-d);background:color-mix(in srgb,
 @keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(-14deg)}}
 .era .verb{font-size:1.5em;font-weight:900;letter-spacing:.1em;margin:0 0 .3em}
 .era .l7-erab{display:none}
+.era .who{font-size:.7em;color:var(--mute);letter-spacing:.2em;margin:0 0 .4em}
 .rail{display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin:1.2em .4em 0;font-size:.62em}
 .rail::before{content:'';position:absolute;left:0;right:0;top:.42em;height:3px;border-radius:50%;background:linear-gradient(90deg,transparent,var(--mute) 4%,var(--mute) 96%,transparent);opacity:.6}
 .rail button{position:relative;border:0;background:none;padding:1.1em .2em 0;color:var(--mute);font-weight:700}
@@ -164,12 +181,13 @@ body.rd #app,body.rd .veil{visibility:hidden}
 <div id="app">
   <header><span class="logo">樂府長卷</span><nav id="nav"></nav><span class="sp"></span>
     <button class="tool" id="bAns" title="重點字全部顯示／藏起來">答案</button>
+    <button class="tool" id="bReset" title="這一頁重來">⟲</button>
     <button class="tool" id="bNight" title="日／夜">☾</button>
     <button class="tool" id="bFull" title="全螢幕">⛶</button>
     <button class="tool" id="bClose" hidden>✕ 回課文</button></header>
   <main><div id="stage"></div><div id="bar"></div></main>
   <footer><button class="tool" id="bPrev">← 上一頁</button><span class="pg" id="pg"></span><button class="nx" id="bNext">下一步 ▸</button>
-    <span class="sp"></span><span class="hint">點畫面或 → 下一步・點朱框揭曉・點作品名讀詩</span></footer>
+    <span class="sp"></span><span class="hint">點畫面或 → 下一步・朱框＝重點・藍框＝講義空格・點作品名讀詩</span></footer>
 </div>
 <div id="rd"><div class="top"><span class="sl" id="rdE"></span><span class="ttl" id="rdT"></span><span class="who" id="rdW"></span><span class="sp"></span>
     <button class="tool" id="rdShu" hidden title="華康歐陽詢體／源流明體">書法</button><button class="tool" id="rdAll" title="一段一段聚焦／全篇">全篇</button><button class="tool" id="rdTr">翻譯</button><button class="tool" id="rdX">✕</button></div>
@@ -197,24 +215,70 @@ function chunk(el) {
   return out.map(d => `<div class="st">${d.innerHTML}</div>`).join('');
 }
 /* ───────── 場景 ───────── */
-const BG = { 封面: '2-garden', 名稱: '8-booklover', 特色: '1-fuguang', 新樂府: '5-lookback', 影響: '7-dongpo', 比較: '8-booklover', 挑戰: '2-garden',
+const BG = { 封面: '2-garden', 作者: '6-gugong', 題解: '1-fuguang', 簡介: '8-booklover', 名稱: '8-booklover', 特色: '1-fuguang', 新樂府: '5-lookback', 影響: '7-dongpo', 比較: '8-booklover', 挑戰: '2-garden',
   兩漢: '3-westlake', 魏晉: '7-dongpo', 南北朝: '1-fuguang', 南朝: '1-fuguang', 北朝: '4-snowpeak', 隋: '4-snowpeak', 唐: '6-gugong', 中唐: '5-lookback' };
 const S = [];   /* {ch 章, bg, wide, cls, html, init} */
-const CH = [['封面', ''], ['名稱', '一、名稱與定義'], ['特色', '二、特色與形式'], ['發展', '三、樂府詩的發展'], ['新樂府', '中唐新樂府運動'], ['影響', '四、樂府詩的影響'], ['比較', '五、樂府詩與古詩'], ['挑戰', '樂府還是古詩？']];
+const CH = [['封面', ''], ['作者', '李白'], ['題解', '〈長干行〉'], ['簡介', '樂府詩簡介'], ['名稱', '一、名稱與定義'], ['特色', '二、特色與形式'], ['發展', '三、樂府詩的發展'], ['新樂府', '中唐新樂府運動'], ['影響', '四、樂府詩的影響'], ['比較', '五、樂府詩與古詩'], ['挑戰', '樂府還是古詩？']];
 const kick = (t, hp) => `<div class="kick"><span>${t}</span>${hp ? `<span class="hp">${hp}</span>` : ''}</div>`;
-const blockSlides = (ch, label, bg) => { const p = page(label); blocks(label).forEach(b => S.push({ ch, bg: bg || BG[ch], wide: !!$('table', b.b), html: kick(p.head, b.hp) + `<h2>${b.h}</h2><div class="body">${chunk(b.b)}</div>` })); };
+const blockSlides = (ch, label, bg) => { const p = page(label); blocks(label).forEach(b => S.push({ ch, key: label.replace('樂府詩·', '') + '·' + b.k, bg: bg || BG[ch], wide: !!$('table', b.b), html: kick(p.head, b.hp) + `<h2>${b.h}</h2><div class="body">${chunk(b.b)}</div>` })); };
 
 S.push({ ch: '封面', bg: BG.封面, cls: 'cover', html: `<div class="cv"><h1>${[...'樂府詩'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1><div class="sub">感於哀樂・緣事而發</div>
   <div class="toc">${CH.slice(1).map(([c, t]) => `<button data-ch="${c}">${c}<small>${t}</small></button>`).join('')}</div></div>`,
   init: el => $$('[data-ch]', el).forEach(b => b.onclick = e => { e.stopPropagation(); goCh(b.dataset.ch); }) });
+/* ───────── 補充講義的空格（翰林技高國文(1)補充講義 L7 解答版 P.77～78；編號照講義，每一節各自從 ① 起算） ─────────
+   key＝出現在哪一頁；w＝答案（講義原字）；in＝限定在頁內哪個區塊找 */
+const HB = {
+  A1: { p: 'P.77', n: '①', w: '青蓮居士', key: '作者' }, A2: { p: 'P.77', n: '②', w: '謫仙人', key: '作者' }, A3: { p: 'P.77', n: '③', w: '杜甫', key: '作者' },
+  A4: { p: 'P.77', n: '④', w: '順敘法', key: '題解' },
+  B1: { p: 'P.77', n: '①', w: '漢武帝', key: '簡介' }, B2: { p: 'P.77', n: '②', w: '古詩', key: '簡介' },
+  C1: { p: 'P.78', n: '①', w: '新樂府', key: '發展·中唐', in: '.verb' },
+  D1: { p: 'P.78', n: '①', w: '敘事', key: '與古詩·比較' }, D2: { p: 'P.78', n: '②', w: '言情', key: '與古詩·比較' }
+};
+/* 講義填空頁：句子照講義原文，{代號} 是空格 */
+const FILL = {
+  A: { p: 'P.77', t: '一、作者與題解', rows: [['字號', '字太白，號{A1}'], ['生平', '賀知章見其詩，嘆為{A2}'], ['評價', '有「詩仙」之稱，與詩聖{A3}並稱「李 杜」'],
+    ['題解<br>要旨', '全詩以少婦口吻，自述對丈夫的深刻思念。採{A4}寫兩人從童年相識，到婚後甜蜜堅貞；後丈夫遠行，女子擔心惦記，觸景傷情，殷切企盼丈夫歸來']] },
+  B: { p: 'P.77', t: '二、國學常識（一）「樂府」概述', rows: [['起源', '名稱最早見於秦代官制，{B1}時正式成立樂府官署，負責採集民間歌謠及制訂樂譜'], ['價值', '與{B2}被視為漢代詩歌的雙葩']] },
+  C: { p: 'P.78', t: '（二）樂府詩的發展', rows: [['變調<br>中唐', '中唐 白居易、元稹倡導{C1}，主張「文章合為時而著，歌詩合為事而作」，要能「補察時政，洩導人情」']] },
+  D: { p: 'P.78', t: '（三）樂府詩、古詩比較表', rows: [['風格<br>樂府詩', '多{D1}，反映時代'], ['風格<br>古詩', '多{D2}，尚溫雅']] }
+};
+const fillTable = f => `<div class="sec">${f.t}</div><table class="l7t fill">${f.rows.map(([h, t]) => `<tr class="st"><th>${h}</th><td>${t.replace(/\{(\w+)\}/g, (_, id) => `<span class="wk-a" data-hbid="${id}">${HB[id].w}</span>`)}</td></tr>`).join('')}</table>`;
+const fillSlide = (ch, bg, ids) => S.push({ ch, bg, wide: true, html: `<div class="kick"><span>講義填空</span><span class="hp fill">補充講義 ${FILL[ids[0]].p}</span></div><h2>把講義的空格補齊</h2><div class="fillnote">順序和講義一樣；點藍框對答案</div><div class="body">${ids.map(i => fillTable(FILL[i])).join('')}</div>` });
+/* 在頁面裡找到講義空格那個詞：原本就是重點字（.wk-a）就直接用，否則把那幾個字包起來 */
+function markHB(root, id) {
+  const h = HB[id], box = h.in ? $(h.in, root) : root; if (!box) return false;
+  let x = $$('.wk-a', box).find(e => e.textContent === h.w && !e.dataset.hbid);
+  if (!x) {
+    const tw = document.createTreeWalker(box, NodeFilter.SHOW_TEXT); let n;
+    while ((n = tw.nextNode())) { if (n.parentElement.closest('.wk-a,.kick,.rail,.big,a,h2')) continue; const k = n.nodeValue.indexOf(h.w); if (k < 0) continue;
+      const m = n.splitText(k); m.splitText(h.w.length); x = document.createElement('span'); x.className = 'wk-a'; x.textContent = h.w; m.replaceWith(x); break; }
+  }
+  if (!x) { console.error('講義空格在這一頁找不到：' + id + ' ' + h.w); return false; }
+  x.dataset.hbid = id; return true;
+}
+/* 兩個以上 <br> 分段 */
+const paras = html => html.split(/(?:<br\s*\/?>\s*){2,}/).map(x => x.trim()).filter(Boolean).map(x => `<div class="st">${x}</div>`).join('');
+/* 作者（課本） */
+{ const a = (LES[1].extras.authorPages || []).find(x => x.label === '作者·課本'); if (!a) throw new Error('課檔沒有這頁：作者·課本');
+  S.push({ ch: '作者', key: '作者', bg: BG.作者, html: kick(a.head, '補充講義 P.77') + `<div class="era"><div class="big">${LES[1].author.name}</div><div><div class="who">${LES[1].author.dynasty}</div><div class="body">${paras(a.body)}</div></div></div>` }); }
+/* 題解頁（課本）拆成兩節：「題解」先講（講義 P.77 一、作者與題解），「樂府詩簡介」接到樂府詩常識前面（講義 P.77（一）概述） */
+const TJ = {}; { const p = page('題解·課本'); let cur = null, hp = '';
+  [...p.d.childNodes].forEach(n => { const c = n.nodeType === 1 ? n.className : '';
+    if (c === 'l7-hp-tag') hp = n.textContent; else if (c === 'l7-sub') { cur = TJ[n.textContent.trim()] = { hp, d: document.createElement('div') }; hp = ''; }
+    else if (c === 'l7-jump') return; else if (cur) cur.d.appendChild(n.cloneNode(true)); });
+  ['題解', '樂府詩簡介'].forEach(k => { if (!TJ[k]) throw new Error('題解頁沒有這一節：' + k); }); }
+S.push({ ch: '題解', key: '題解', bg: BG.題解, html: kick('題解', TJ.題解.hp) + `<h2>〈${LES[0].split('—')[1]}〉</h2><div class="body">${paras(TJ.題解.d.innerHTML)}</div>` });
+fillSlide('題解', BG.題解, ['A']);
+S.push({ ch: '簡介', key: '簡介', bg: BG.簡介, html: kick('樂府詩', TJ.樂府詩簡介.hp) + `<h2>樂府詩簡介</h2><div class="body">${paras(TJ.樂府詩簡介.d.innerHTML)}</div>` });
 blockSlides('名稱', '樂府詩·名稱');
 blockSlides('特色', '樂府詩·特色');
+fillSlide('特色', BG.特色, ['B']);
 /* 發展：一個時代一幅畫 */
 const DEV = blocks('樂府詩·發展');
 DEV.forEach((b, i) => {
   const h = frag(b.h), era = ($('.l7-erab', h) || {}).textContent || b.k;
   const hh = document.createElement('div'); hh.appendChild(h);
-  S.push({ ch: '發展', bg: BG[b.k] || BG.兩漢, era: b.k, html: kick('三、樂府詩的發展', b.hp) + `<div class="era"><div class="big">${era}</div><div><div class="verb">${hh.innerHTML}</div><div class="body">${chunk(b.b)}</div></div></div>
+  S.push({ ch: '發展', key: '發展·' + b.k, bg: BG[b.k] || BG.兩漢, era: b.k, html: kick('三、樂府詩的發展', b.hp) + `<div class="era"><div class="big">${era}</div><div><div class="verb">${hh.innerHTML}</div><div class="body">${chunk(b.b)}</div></div></div>
     <div class="rail">${DEV.map((x, j) => `<button data-era="${x.k}" class="${j === i ? 'on' : j < i ? 'done' : ''}">${x.k}</button>`).join('')}</div>`,
     init: el => $$('[data-era]', el).forEach(x => x.onclick = e => { e.stopPropagation(); go(S.findIndex(s => s.era === x.dataset.era)); }) });
 });
@@ -222,6 +286,7 @@ blockSlides('新樂府', '樂府詩·新樂府');
 blockSlides('新樂府', '樂府詩·新樂府作品');
 blockSlides('影響', '樂府詩·影響');
 blockSlides('比較', '樂府詩·與古詩');
+fillSlide('比較', BG.比較, ['C', 'D']);
 /* 挑戰：從比較表自動出題（兩欄不同 → 各一題；「同左」→ 兩者皆是）。名稱、發展、影響三列單看一句分不出是在說誰，不出 */
 const QS = [];
 $$('tr', page('樂府詩·與古詩').d).forEach(r => {
@@ -271,7 +336,12 @@ function go(i) {
   document.body.classList.toggle('wide', !!s.wide); document.body.classList.toggle('cover', s.cls === 'cover');
   setBg(s.bg);
   stage.innerHTML = `<div class="in">${s.html}</div>`; stage.scrollTop = 0;
-  $$('.wk-a', stage).forEach(x => { x.classList.add('bk'); if (st.ans) x.classList.add('on'); x.onclick = e => { e.stopPropagation(); x.classList.toggle('on'); upd(); }; });
+  /* 講義空格：這一頁有的先標出來，頁首註明第幾格 */
+  const ids = Object.keys(HB).filter(id => s.key && HB[id].key === s.key && markHB(stage, id));
+  if (ids.length) { let hp = $('.kick .hp', stage); if (!hp) { hp = document.createElement('span'); hp.className = 'hp'; $('.kick', stage).appendChild(hp); hp.textContent = '補充講義 ' + HB[ids[0]].p; }
+    hp.classList.add('fill'); hp.textContent += '　空格 ' + ids.map(id => HB[id].n).join(''); }
+  $$('.wk-a', stage).forEach(x => { x.classList.add('bk'); const h = HB[x.dataset.hbid]; if (h) { x.classList.add('hb'); x.dataset.n = h.n; x.dataset.p = h.p; }
+    if (st.ans) x.classList.add('on'); x.onclick = e => { e.stopPropagation(); if (x.classList.contains('on')) x.classList.remove('on', 'tip'); else reveal(x); upd(); }; });
   $$('a.l7-wkl', stage).forEach(a => { const m = /l7Pop\('([^']+)'/.exec(a.getAttribute('onclick') || ''); a.removeAttribute('onclick'); if (m) a.onclick = e => { e.stopPropagation(); openRd(m[1]); }; });
   const f = $('.st', stage); if (f) f.classList.add('show');
   s.init && s.init(stage);
@@ -283,16 +353,21 @@ function go(i) {
 }
 const goCh = c => go(S.findIndex(s => s.ch === c));
 /* 下一步＝文件順序裡第一個還沒出現的段落，或已出現段落裡第一個還藏著的重點字 */
+function reveal(p) {
+  if (p.classList.contains('st')) { p.classList.add('show'); return; }
+  p.classList.add('on'); if (p.classList.contains('hb')) { p.classList.remove('tip'); void p.offsetWidth; p.classList.add('tip'); }
+}
 const pending = () => $$('.st:not(.show), .bk:not(.on)', stage).find(x => x.classList.contains('st') || !x.closest('.st:not(.show)'));
 function upd() { $('#bNext').textContent = pending() ? '下一步 ▸' : (st.i < S.length - 1 ? '下一頁 →' : '完'); }
 function next() {
   const p = pending();
-  if (p) { p.classList.add(p.classList.contains('st') ? 'show' : 'on'); setTimeout(() => p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 80); upd(); return; }
+  if (p) { reveal(p); setTimeout(() => p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 80); upd(); return; }
   if (st.i < S.length - 1) go(st.i + 1);
 }
 const prev = () => go(st.i - 1);
 $('#bNext').onclick = next; $('#bPrev').onclick = prev;
 $('#bAns').onclick = e => { st.ans = !st.ans; e.currentTarget.classList.toggle('on', st.ans); $$('.bk', stage).forEach(x => x.classList.toggle('on', st.ans)); if (st.ans) $$('.st', stage).forEach(x => x.classList.add('show')); upd(); };
+$('#bReset').onclick = () => go(st.i);
 $('#bNight').onclick = e => { const n = document.body.classList.toggle('night'); e.currentTarget.classList.toggle('on', n); setBg(rd.on ? rd.bg : S[st.i].bg); };
 $('#bFull').onclick = () => { const d = document.documentElement; if (!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); else document.exitFullscreen && document.exitFullscreen(); };
 $('main').addEventListener('click', e => { if (e.target.closest('button,a,.bk')) return; next(); });
@@ -338,6 +413,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'Escape') go(0);
 });
 if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
+addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i && !rd.on) go(+x); });
 /* 可用 #頁碼 或 #作品名 直接開（網站發展頁點作品名 → 直接進讀詩） */
 const h = decodeURIComponent(location.hash.slice(1));
 if (/^\d+$/.test(h)) go(+h); else if (h && INTRO.some(x => x.label === '代表作·' + h)) { const p = page('代表作·' + h), e = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜')[0]; go(Math.max(0, S.findIndex(s => s.era === e))); rd.direct = true; openRd(h); } else go(0);
