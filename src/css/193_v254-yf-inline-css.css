@@ -1,0 +1,7 @@
+/* V254：〈長干行〉樂府長卷直接放在課文頁（JS 在 194_v254-yf-inline-js）
+   頁面上只留一個空位 .wk-yf-slot，長卷 iframe 對齊蓋在空位上（一般畫面掛 body、投影掛 #wk-fullscreen，在畫記層下面） */
+#wk-slide-area .wk-yf-slide { padding: 0 !important; background: none !important; box-shadow: none !important; border: 0 !important; }
+#wk-slide-area .wk-yf-slot { height: calc(100vh - 150px); min-height: 460px; }
+#wkfs-body .wk-yf-slide { padding: 0 !important; background: none !important; }
+iframe.wk-yf-frame { position: absolute; display: none; border: 0; margin: 0; padding: 0; z-index: 4; background: #F4F0E7; border-radius: 6px; }
+#wk-fullscreen > iframe.wk-yf-frame { z-index: 5; border-radius: 0; }

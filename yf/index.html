@@ -388,6 +388,9 @@ S.push({ ch: '挑戰', key: '挑戰', bg: BG.挑戰, html: kick('挑戰：樂府
 
 /* ───────── 播放 ───────── */
 const st = { i: 0, ans: false, bg: 0, back: null, note: false };
+/* V254：嵌在網站課文頁裡（?embed=1）——換頁回報給網站（籤頁、畫筆跟著頁走），網站的換頁鍵送指令進來 */
+const EMB = window.parent !== window && /[?&]embed=1/.test(location.search);
+const toTop = m => { if (EMB) window.parent.postMessage(m, '*'); };
 const SC = window.YF_SCRIPT || {};
 function drawNote() { const n = $('#note'), t = SC[S[st.i].key]; n.classList.toggle('on', st.note);
   if (st.note) n.innerHTML = '<h4>講稿</h4>' + (t ? t.split('\n').map(x => `<p>${x}</p>`).join('') : '<p>（這一頁沒有講稿）</p>'); }
@@ -431,6 +434,7 @@ function go(i) {
   $('#bPrev').disabled = i === 0;
   try { history.replaceState(null, '', '#' + i); } catch (e) {}
   upd();
+  toTop({ yfAt: { i: i, ch: s.ch, n: S.length } });
 }
 const goCh = c => go(S.findIndex(s => s.ch === c));
 /* 下一步＝文件順序裡第一個還沒出現的段落，或已出現段落裡第一個還藏著的重點字 */
@@ -444,9 +448,9 @@ function upd() { $('#bNext').textContent = pending() ? '下一步 ▸' : (st.i <
 function next() {
   const p = pending();
   if (p) { reveal(p); setTimeout(() => p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 80); upd(); return; }
-  if (st.i < S.length - 1) go(st.i + 1);
+  if (st.i < S.length - 1) go(st.i + 1); else toTop({ yfEdge: 1 });
 }
-const prev = () => go(st.i - 1);
+const prev = () => { if (st.i > 0) go(st.i - 1); else toTop({ yfEdge: -1 }); };
 $('#bNext').onclick = next; $('#bPrev').onclick = prev;
 $('#bAns').onclick = e => { st.ans = !st.ans; e.currentTarget.classList.toggle('on', st.ans); $$('.bk', stage).forEach(x => x.classList.toggle('on', st.ans)); if (st.ans) { $$('.st', stage).forEach(x => x.classList.add('show')); $$('.exe', stage).forEach(markEx); } upd(); };
 $('#bReset').onclick = () => go(st.i);
@@ -495,13 +499,19 @@ document.addEventListener('keydown', e => {
   }
   if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
   else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
-  else if (k === 'Escape') go(0);
+  else if (k === 'Escape') { if (!EMB) go(0); }
 });
-if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
+document.addEventListener('keydown', e => { if (EMB && (e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey) toTop({ yfKey: 'L' }); }, true);
+if (EMB) { $('#bFull').hidden = true; document.body.classList.add('emb'); }
+else if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
+addEventListener('message', e => { if (!EMB || e.source !== window.parent || !e.data || !e.data.yfCmd) return; const c = e.data.yfCmd, v = e.data.v;
+  if (rd.on && (c === 'next' || c === 'prev')) { if (c === 'next') $('#rdNx').click(); else focus(rd.i - 1); return; }
+  if (rd.on) closeRd();
+  if (c === 'next') next(); else if (c === 'prev') prev(); else if (c === 'ch') goCh(v); else if (c === 'go') go(v === 'last' ? S.length - 1 : +v); });
 addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i && !rd.on) go(+x); });
 /* 可用 #頁碼 或 #作品名 直接開（網站發展頁點作品名 → 直接進讀詩） */
 const h = decodeURIComponent(location.hash.slice(1));
-if (/^\d+$/.test(h)) go(+h); else if (h && INTRO.some(x => x.label === '代表作·' + h)) { const p = page('代表作·' + h), e = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜')[0]; go(Math.max(0, S.findIndex(s => s.era === e))); rd.direct = true; openRd(h); } else go(0);
+if (/^\d+$/.test(h)) go(+h); else if (h === 'last') go(S.length - 1); else if (/^ch=/.test(h) && S.some(s => s.ch === h.slice(3))) goCh(h.slice(3)); else if (h && INTRO.some(x => x.label === '代表作·' + h)) { const p = page('代表作·' + h), e = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜')[0]; go(Math.max(0, S.findIndex(s => s.era === e))); rd.direct = true; openRd(h); } else go(0);
 </script>
 </body>
 </html>

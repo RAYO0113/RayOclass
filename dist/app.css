@@ -8258,3 +8258,11 @@ body.l7-wide :is(#wkfs-body, #wk-slide-area) .wk-slide.wks-info.wks-info-intro .
 /* 樂府詩封面的「樂府長卷」入口（193 的程式插入） */
 body.l7-wide .wk-slide.wks-info-intro .l7-yf-row { display: flex; justify-content: center; margin: .2em 0 1em; }
 body.l7-wide .wk-slide.wks-info-intro .l7-yf-row a { cursor: pointer; background: linear-gradient(135deg, #b83f31, #98291f); color: #fbefdc; font-weight: 700; border-radius: 6px 9px 5px 10px; padding: .5em 1.6em; letter-spacing: .14em; box-shadow: inset 0 0 0 2px rgba(251, 239, 220, .5), 0 2px 6px rgba(0, 0, 0, .25); }
+/* ════ src/css/193_v254-yf-inline-css.css ════ */
+/* V254：〈長干行〉樂府長卷直接放在課文頁（JS 在 194_v254-yf-inline-js）
+   頁面上只留一個空位 .wk-yf-slot，長卷 iframe 對齊蓋在空位上（一般畫面掛 body、投影掛 #wk-fullscreen，在畫記層下面） */
+#wk-slide-area .wk-yf-slide { padding: 0 !important; background: none !important; box-shadow: none !important; border: 0 !important; }
+#wk-slide-area .wk-yf-slot { height: calc(100vh - 150px); min-height: 460px; }
+#wkfs-body .wk-yf-slide { padding: 0 !important; background: none !important; }
+iframe.wk-yf-frame { position: absolute; display: none; border: 0; margin: 0; padding: 0; z-index: 4; background: #F4F0E7; border-radius: 6px; }
+#wk-fullscreen > iframe.wk-yf-frame { z-index: 5; border-radius: 0; }
