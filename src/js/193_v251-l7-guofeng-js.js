@@ -21,7 +21,8 @@
   wkRenderCurrent = function () {
     var r = _render.apply(this, arguments);
     try {
-      if (wkKey === KEY && wkSlides[wkIdx] && wkSlides[wkIdx].label === '樂府詩·封面') {
+      /* V253：長卷已整合作者、題解、詩的流變、樂府詩、代表作、考點，所以「詩的流變」封面也放入口 */
+      if (wkKey === KEY && wkSlides[wkIdx] && (wkSlides[wkIdx].label === '樂府詩·封面' || wkSlides[wkIdx].label === '詩的流變·封面')) {
         document.querySelectorAll('#wkfs-body .l7-cover, #wk-slide-area .l7-cover').forEach(function (cv) {
           if (cv.querySelector('.l7-yf-row')) return;
           var row = document.createElement('div');
