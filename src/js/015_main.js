@@ -1874,7 +1874,8 @@ function wkRenderSlideHTML(slide) {
     const mkAsk = function(ask, askT) { return '<ol class="tp-askl">' + ask.map(function(q){return '<li>'+q+'</li>';}).join('') + '</ol>' +
       (askT ? '<div class="tp-askt"><button class="tp-askb" onclick="this.parentNode.classList.toggle(\'show\')">師</button>' +
         '<div class="tp-asktin">' + askT + '</div></div>' : ''); };
-    const askIn = P.ask ? mkAsk(P.ask, P.askT) : '';
+    const hasAsk = !!(P.ask && P.ask.length);   /* V258：ask 是空陣列（如〈珍珠奶茶〉）就不放「本段提問」 */
+    const askIn = hasAsk ? mkAsk(P.ask, P.askT) : '';
     /* V126：段落最後可再接其他統整框（如第六段之後的「全課統整」）：P.boxes = [{label, ask, askT}] */
     const boxes = (P.boxes || []).map(function(b) {
       return '<div class="tp-sumbox tp-sumall"><span class="tp-pk">' + b.label + '</span>' + mkAsk(b.ask || [], b.askT) + '</div>'; }).join('');
@@ -1886,7 +1887,7 @@ function wkRenderSlideHTML(slide) {
           '<button class="tp-b tp-b-duan" onclick="tpPanel(this,\'pian\')">段旨</button>' +
           '<button class="tp-b tp-b-xi" onclick="tpPanel(this,\'xi\')">段析</button>' +
           (P.fan ? '<button class="tp-b tp-b-fan" onclick="tpPanel(this,\'fan\')">翻譯</button>' : '') +   /* V255：白話文（沒有翻譯）不放翻譯鈕 */
-          (P.ask && !P.askLabel ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
+          (hasAsk && !P.askLabel ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
           ((P.qa || []).length && !P.qaHide ? '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' : '') +   /* V126：沒有題目就不放按鈕；V136：qaHide＝題目已併入提問引導的「師」，資料保留、不顯示 */
         '</div><div class="tp-page">' + P.book + '</div></div>' +
       '<div class="tp-wrap">' +
@@ -1894,11 +1895,11 @@ function wkRenderSlideHTML(slide) {
           '<div class="tp-panel" data-k="pian"><span class="tp-pk">段旨</span>' + (P.pian||'') + '</div>' +
           '<div class="tp-panel" data-k="xi"><span class="tp-pk">段析</span>' + (P.xi||'') + '</div>' +
           (P.fan ? '<div class="tp-panel" data-k="fan"><span class="tp-pk">翻譯</span>' + P.fan + '</div>' : '') +
-          (P.ask && !P.askLabel ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' + askIn + '</div>' : '') +
+          (hasAsk && !P.askLabel ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' + askIn + '</div>' : '') +
           (P.qaHide ? '' : '<div class="tp-panel tp-qapanel" data-k="qa"><span class="tp-pk">課堂提問</span>' + qa + '</div>') +
           '<div class="tp-body">' + lines + yun +
             /* V126：有 askLabel（如「本段統整」）時放在該段課文最下面、直接顯示，不放上方按鈕 */
-            (P.ask && P.askLabel ? '<div class="tp-sumbox"><span class="tp-pk">' + P.askLabel + '</span>' + askIn + '</div>' : '') + boxes + '</div>' +
+            (hasAsk && P.askLabel ? '<div class="tp-sumbox"><span class="tp-pk">' + P.askLabel + '</span>' + askIn + '</div>' : '') + boxes + '</div>' +
         '</div>' +
         '<aside class="tp-side"><div class="tp-side-h">注　釋</div><div class="tp-side-b">' + notes + '</div></aside>' +
       '</div></div>';
