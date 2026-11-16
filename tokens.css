@@ -26,6 +26,7 @@
   --rk-seal:linear-gradient(135deg,#b83f31,#98291f);   /* 印章紅：主要按鈕、時代章 */
   --rk-seal-ink:#fbefdc;                  /* 印章上的字 */
   --rk-ok:#3f6b52; --rk-no:#b0796a;       /* 答對、答錯 */
+  --rk-bu:#7c4da0; --rk-bu-bg:rgba(124,77,160,.09);   /* 紫：補充（不用抄）。值照抄教學網站原本的 --L-supp */
   --rk-shadow:rgba(107,74,43,.18);        /* 紙片的硬陰影 */
 
   /* 黑金頁首（老師 11/16：保留，金色要更明顯、有黃金顆粒感） */
@@ -41,11 +42,10 @@
 
   /* 字級階梯：一律 em，跟著根字級走，不寫死 px */
   --rk-fs:clamp(19px,2.5vw,36px);         /* 投影、平板的根字級 */
-  --rk-t-xs:.6em;                         /* 工具列、頁尾、小標 */
-  --rk-t-s:.82em;                         /* 註解、翻譯 */
-  --rk-t-m:1em;                           /* 內文 */
-  --rk-t-l:1.35em;                        /* 標題 */
-  --rk-lh:1.85;                           /* 內文行高 */
+  --rk-t-xs:.6em;                         /* 小字：工具列、頁尾、標籤 */
+  --rk-t-m:1em;                           /* 內文、註解、翻譯都一樣大（老師 11/16：不要四級） */
+  --rk-t-l:1.35em;                        /* 標題（加粗） */
+  --rk-lh:2;                              /* 行高（老師 11/16） */
 
   /* 間距階梯 */
   --rk-sp-1:.25em; --rk-sp-2:.5em; --rk-sp-3:.9em; --rk-sp-4:1.6em;
@@ -58,6 +58,7 @@ body.night, body.dark-mode, html.dark{
   --rk-yi:#c5e3c8; --rk-yi-bg:rgba(127,174,134,.16); --rk-yi-bd:#7fae86;
   --rk-gold:#d8b878; --rk-line:rgba(240,225,190,.28); --rk-card:rgba(22,24,34,.8);
   --rk-shadow:rgba(0,0,0,.35);
+  --rk-bu:#c3a0e0; --rk-bu-bg:rgba(195,160,224,.12);
 }
 
 /* ════ 元件：每樣只有一種寫法（class 一律 rk- 開頭，不會撞到舊樣式） ════ */
@@ -87,10 +88,12 @@ body.night, body.dark-mode, html.dark{
 .rk-zhu{color:var(--rk-zhu-d);font-weight:700;border-bottom:2.5px solid var(--rk-zhu);background:rgba(168,53,42,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
 .rk-hb{color:var(--rk-hb);font-weight:700;border-bottom:2.5px solid var(--rk-hb);background:rgba(29,79,145,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
 .rk-key{color:var(--rk-key);font-weight:700}
-.rk-yi{font-size:var(--rk-t-s);color:var(--rk-yi);background:var(--rk-yi-bg);border-left:4px solid var(--rk-yi-bd);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
+.rk-bu{color:var(--rk-bu);background:var(--rk-bu-bg);border-left:4px solid var(--rk-bu);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
+.rk-tag.bu{border-color:var(--rk-bu);color:var(--rk-bu)}
+.rk-yi{color:var(--rk-yi);background:var(--rk-yi-bg);border-left:4px solid var(--rk-yi-bd);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
 
 /* 表格 */
-.rk-table{border-collapse:collapse;width:100%;font-size:var(--rk-t-s)}
+.rk-table{border-collapse:collapse;width:100%}
 .rk-table th{background:#98291f;color:var(--rk-seal-ink);font-weight:700;padding:.3em .7em;text-align:left}
 .rk-table td{border-bottom:1px solid var(--rk-line);padding:.3em .7em;vertical-align:top}
 .rk-table tr:nth-child(even) td{background:rgba(var(--rk-paper),.5)}
@@ -105,3 +108,34 @@ body.night, body.dark-mode, html.dark{
   background:var(--rk-grain),var(--rk-leaf);background-size:180px 180px,100% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 1px 0 rgba(60,40,5,.9)) drop-shadow(0 0 12px rgba(240,205,98,.5))}
 .rk-head-sub{position:relative;font-size:var(--rk-t-xs);letter-spacing:.1em;color:var(--rk-leaf-flat);opacity:.85}
+
+/* ════ 教學網站外框元件（老師 11/16 問：頁籤、畫筆列、聚光燈、快速加減分、班級進度欄） ════ */
+/* 頁籤：紙底、淡墨字；選到的＝墨字加粗＋下面一道朱線（同長卷上列） */
+.rk-tabs{display:flex;flex-wrap:wrap;gap:.2em;border-bottom:1px solid var(--rk-line);font-size:var(--rk-t-xs)}
+.rk-tabs button{border:0;background:none;padding:.35em .8em;color:var(--rk-mute);font-weight:700;letter-spacing:.06em;position:relative;border-radius:var(--rk-r) var(--rk-r) 0 0}
+.rk-tabs button.on{color:var(--rk-ink);background:rgba(var(--rk-paper),.9)}
+.rk-tabs button.on::after{content:'';position:absolute;left:.6em;right:.6em;bottom:-1px;height:3px;background:var(--rk-zhu)}
+
+/* 投影下方工具列（畫筆、換頁）：黑底，鈕是金細框；正在用的那顆是金底墨字。筆的顏色是功能，不在這裡改 */
+.rk-bar{display:flex;align-items:center;gap:.5em;flex-wrap:wrap;padding:.4em .7em;background:var(--rk-night-bg);font-size:var(--rk-t-xs)}
+.rk-bar button{border:1px solid rgba(240,205,98,.45);background:none;color:var(--rk-leaf-flat);border-radius:var(--rk-r);padding:.25em .8em;font-weight:700;white-space:nowrap}
+.rk-bar button.on{background:var(--rk-leaf-flat);color:#1a1209;border-color:var(--rk-leaf-flat)}
+.rk-bar .sp{flex:1}
+.rk-bar .pg{color:var(--rk-leaf-flat);letter-spacing:.1em}
+
+/* 圓鈕（聚光燈、快速加減分的星星）：紙底、金框；開著的時候印章紅 */
+.rk-fab{width:2.6em;height:2.6em;border-radius:50%;border:1.5px solid var(--rk-gold);background:rgba(var(--rk-paper),.92);color:var(--rk-ink);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.rk-fab.on{background:var(--rk-seal);color:var(--rk-seal-ink);border-color:var(--rk-seal-ink)}
+
+/* 快速加減分：浮框裡兩顆大鈕，加＝答對綠、扣＝朱框 */
+.rk-pm{display:grid;grid-template-columns:1fr 1fr;gap:.4em}
+.rk-pm button{border-radius:var(--rk-r);padding:.3em 0;font-weight:700;font-size:var(--rk-t-l)}
+.rk-pm .plus{border:0;background:var(--rk-ok);color:var(--rk-seal-ink)}
+.rk-pm .minus{border:2px solid var(--rk-zhu);background:rgba(var(--rk-paper),.9);color:var(--rk-zhu-d)}
+
+/* 班級進度欄：右側直排的拉籤（黑金）＋拉出來的紙色面板；班級用頁籤、工具用卡片 */
+.rk-sidetab{writing-mode:vertical-rl;background:var(--rk-night-bg);color:var(--rk-leaf-flat);border:1px solid rgba(240,205,98,.45);border-right:0;border-radius:var(--rk-r) 0 0 var(--rk-r);padding:.8em .35em;font-size:var(--rk-t-xs);font-weight:700;letter-spacing:.2em}
+.rk-panel{background:rgb(var(--rk-paper));border-left:2px solid var(--rk-gold);padding:var(--rk-sp-3);box-shadow:-6px 0 18px rgba(0,0,0,.2)}
+.rk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.5em;font-size:var(--rk-t-xs)}
+.rk-tiles button{background:var(--rk-card);border:1px solid var(--rk-line);border-top:4px solid var(--rk-zhu);border-radius:var(--rk-r-s);padding:.5em .3em;font-weight:700;box-shadow:2px 3px 0 var(--rk-shadow)}
+.rk-tiles small{display:block;font-weight:400;color:var(--rk-mute)}
