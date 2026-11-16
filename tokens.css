@@ -26,7 +26,7 @@
   --rk-seal:linear-gradient(135deg,#b83f31,#98291f);   /* 印章紅：主要按鈕、時代章 */
   --rk-seal-ink:#fbefdc;                  /* 印章上的字 */
   --rk-ok:#3f6b52; --rk-no:#b0796a;       /* 答對、答錯 */
-  --rk-bu:#7c4da0; --rk-bu-bg:rgba(124,77,160,.09);   /* 紫：補充（不用抄）。值照抄教學網站原本的 --L-supp */
+  --rk-bu:#6f4a78; --rk-bu-bg:rgba(111,74,120,.1);   /* 茄紫：補充（不用抄），一律粗體（老師 11/16 選定；教學網站原本是 #7c4da0） */
   --rk-shadow:rgba(107,74,43,.18);        /* 紙片的硬陰影 */
 
   /* 黑金頁首（老師 11/16：保留，金色要更明顯、有黃金顆粒感） */
@@ -58,7 +58,7 @@ body.night, body.dark-mode, html.dark{
   --rk-yi:#c5e3c8; --rk-yi-bg:rgba(127,174,134,.16); --rk-yi-bd:#7fae86;
   --rk-gold:#d8b878; --rk-line:rgba(240,225,190,.28); --rk-card:rgba(22,24,34,.8);
   --rk-shadow:rgba(0,0,0,.35);
-  --rk-bu:#c3a0e0; --rk-bu-bg:rgba(195,160,224,.12);
+  --rk-bu:#c9a9d1; --rk-bu-bg:rgba(201,169,209,.13);
 }
 
 /* ════ 元件：每樣只有一種寫法（class 一律 rk- 開頭，不會撞到舊樣式） ════ */
@@ -88,8 +88,8 @@ body.night, body.dark-mode, html.dark{
 .rk-zhu{color:var(--rk-zhu-d);font-weight:700;border-bottom:2.5px solid var(--rk-zhu);background:rgba(168,53,42,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
 .rk-hb{color:var(--rk-hb);font-weight:700;border-bottom:2.5px solid var(--rk-hb);background:rgba(29,79,145,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
 .rk-key{color:var(--rk-key);font-weight:700}
-.rk-bu{color:var(--rk-bu);background:var(--rk-bu-bg);border-left:4px solid var(--rk-bu);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
-.rk-tag.bu{border-color:var(--rk-bu);color:var(--rk-bu)}
+.rk-bu{color:var(--rk-bu);font-weight:700;background:var(--rk-bu-bg);border-left:4px solid var(--rk-bu);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
+.rk-tag.bu{border-color:var(--rk-bu);color:var(--rk-bu);font-weight:700}
 .rk-yi{color:var(--rk-yi);background:var(--rk-yi-bg);border-left:4px solid var(--rk-yi-bd);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
 
 /* 表格 */
@@ -117,8 +117,10 @@ body.night, body.dark-mode, html.dark{
 .rk-tabs button.on::after{content:'';position:absolute;left:.6em;right:.6em;bottom:-1px;height:3px;background:var(--rk-zhu)}
 
 /* 投影下方工具列（畫筆、換頁）：黑底，鈕是金細框；正在用的那顆是金底墨字。筆的顏色是功能，不在這裡改 */
-.rk-bar{display:flex;align-items:center;gap:.5em;flex-wrap:wrap;padding:.4em .7em;background:var(--rk-night-bg);font-size:var(--rk-t-xs)}
-.rk-bar button{border:1px solid rgba(240,205,98,.45);background:none;color:var(--rk-leaf-flat);border-radius:var(--rk-r);padding:.25em .8em;font-weight:700;white-space:nowrap}
+.rk-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px));background:var(--rk-night-bg);font-size:var(--rk-t-xs)}
+.rk-bar button{border:1px solid rgba(240,205,98,.45);background:none;color:var(--rk-leaf-flat);border-radius:var(--rk-r);padding:0 .8em;min-width:44px;min-height:44px;font-weight:700;white-space:nowrap}
+/* 實測現況（11/16，V259）：鈕高 30px、筆色圓點 26px、彼此只隔 6px；直式時「清除」離「上一頁」只有 28px；工具列貼底、沒留 iPad 底部橫條的位置。所以：鈕最少 44px、間隔 12px、「清除」另外隔開、底部留安全距離 */
+.rk-bar .danger{margin-left:16px;margin-right:24px}
 .rk-bar button.on{background:var(--rk-leaf-flat);color:#1a1209;border-color:var(--rk-leaf-flat)}
 .rk-bar .sp{flex:1}
 .rk-bar .pg{color:var(--rk-leaf-flat);letter-spacing:.1em}
