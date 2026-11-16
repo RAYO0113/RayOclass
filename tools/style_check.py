@@ -3,7 +3,7 @@
 # 用法（在倉庫根目錄）：
 #   python tools/style_check.py 檔案 [檔案…]     嚴格檢查：新做或整頁換過的頁面，必須 0 項才算過
 #   python tools/style_check.py --ratchet         全倉庫與基準比：每個檔每一類的數字只能少、不能多；新檔必須 0
-#   python tools/style_check.py --baseline        重寫基準 dev/style_baseline.json（只有老師同意一批上線後才重寫）
+#   python tools/style_check.py --baseline        重寫基準 tools/style_baseline.json（只有老師同意一批上線後才重寫）
 #   加 --root 路徑 可以檢查別的倉庫（例：學霸網 stu115），色票仍讀本倉庫的 tokens.css
 #
 # 檢查五類：
@@ -19,7 +19,7 @@ import io, json, os, re, sys
 HERE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 CATS = ['color', 'font', 'radius', 'px', 'imp']
 NAME = {'color': '色票以外的色碼', 'font': '明體以外的字體', 'radius': '規定以外的圓角', 'px': '字級寫死 px', 'imp': '!important'}
-SKIP_DIRS = {'.git', 'dist', 'node_modules', 'fonts', 'img', 'data'}
+SKIP_DIRS = {'.git', 'dist', 'dev', 'node_modules', 'fonts', 'img', 'data'}
 SKIP_FILES = {'index.html', '_base.html'}          # 根目錄這兩個是 tools/build.py 產生的，正本在 src/
 
 HEX = re.compile(r'#([0-9a-fA-F]{3,8})\b')
@@ -149,7 +149,7 @@ def main():
     if '--root' in a:
         i = a.index('--root'); root = os.path.abspath(a[i + 1]); del a[i:i + 2]
     pal = palette()
-    base_p = os.path.join(root, 'dev', 'style_baseline.json')
+    base_p = os.path.join(root, 'tools', 'style_baseline.json')
 
     if '--baseline' in a or '--ratchet' in a:
         cur = {}
@@ -161,7 +161,7 @@ def main():
             os.makedirs(os.path.dirname(base_p), exist_ok=True)
             with io.open(base_p, 'w', encoding='utf-8', newline='\n') as f:
                 json.dump({'total': tot, 'files': cur}, f, ensure_ascii=False, indent=1, sort_keys=True); f.write('\n')
-            print('基準已寫入 dev/style_baseline.json：%d 個檔' % len(cur))
+            print('基準已寫入 tools/style_baseline.json：%d 個檔' % len(cur))
             print('  '.join('%s %d' % (NAME[c], tot[c]) for c in CATS))
             return 0
         if not os.path.exists(base_p):

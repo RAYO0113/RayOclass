@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>全站樣本頁</title>
+<!-- 樣本頁：所有元件的標準長相。新做或改過的頁面拿來對照。
+     範例文字都是「範例」字樣，不是教材內容。規範：教學系統專案 docs/規格_全站視覺規範.md -->
+<link rel="stylesheet" href="../tokens.css">
+<style>
+html,body{margin:0}
+body{background:rgb(var(--rk-paper));font-size:var(--rk-fs);transition:background .4s}
+main{max-width:34em;margin:0 auto;padding:1em 16px 3em}
+section{margin:0 0 var(--rk-sp-4)}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:.5em;align-items:center;flex-wrap:wrap;padding:.4em 16px;font-size:var(--rk-t-xs);background:rgba(var(--rk-paper),.94);border-bottom:1px solid var(--rk-line)}
+.bar b{margin-right:auto}
+.row{display:flex;gap:.6em;flex-wrap:wrap;align-items:center}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5em,1fr));gap:.5em;font-size:var(--rk-t-xs)}
+.sw div{border:1px solid var(--rk-line);border-radius:var(--rk-r);overflow:hidden;background:var(--rk-card)}
+.sw i{display:block;height:2.6em}
+.sw span{display:block;padding:.2em .5em;line-height:1.5}
+.sw span em{display:block;font-style:normal;color:var(--rk-mute)}
+.note{font-size:var(--rk-t-xs);color:var(--rk-mute);margin:.3em 0 0}
+.ladder p{margin:0}
+.rad{display:flex;gap:1em;flex-wrap:wrap;font-size:var(--rk-t-xs)}
+.rad div{width:7em;height:3.4em;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--rk-zhu);background:var(--rk-card)}
+.cmp{display:grid;gap:.6em}
+.old{background:linear-gradient(135deg,#1a1209 0%,#2a1d0c 50%,#1a1209 100%);padding:.7em 1em}
+.old b{font-family:"Noto Serif TC",serif;font-weight:900;font-size:var(--rk-t-l);letter-spacing:.14em;color:#d6ad3e;text-shadow:0 2px 20px rgba(200,147,26,.3)} /* rk-allow：照抄現在的頁首，給老師比較 */
+.old span{display:block;font-size:var(--rk-t-xs);color:rgba(212,180,119,.7);letter-spacing:.1em} /* rk-allow：同上 */
+.bad{outline:2px dashed var(--rk-no);outline-offset:3px}
+</style>
+</head>
+<body class="rk">
+<div class="bar"><b>全站樣本頁</b>
+  <button class="rk-btn" id="tg">☾ 日／夜</button>
+  <button class="rk-btn" id="sz">字級：投影</button>
+</div>
+<main>
+
+<section>
+  <h2 class="rk-h">黑金頁首（請老師看這一塊）</h2>
+  <div class="cmp">
+    <div><div class="old"><b>瑞媛的國文教學</b><span>現在的樣子</span></div><p class="note">現在：金色偏暗、平的。</p></div>
+    <div><div class="rk-head"><span class="rk-head-title">瑞媛的國文教學</span><div class="rk-head-sub">提案：金箔漸層＋顆粒</div></div><p class="note">提案：金色有亮有暗、表面有細顆粒，下緣一條金線。</p></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="rk-h">色票：六色，意思固定</h2>
+  <div class="sw">
+    <div><i style="background:rgb(var(--rk-paper))"></i><span>紙 --rk-paper<em>底色</em></span></div>
+    <div><i style="background:var(--rk-ink)"></i><span>墨 --rk-ink<em>內文</em></span></div>
+    <div><i style="background:var(--rk-mute)"></i><span>淡墨 --rk-mute<em>次要文字</em></span></div>
+    <div><i style="background:var(--rk-zhu)"></i><span>朱 --rk-zhu<em>老師的重點</em></span></div>
+    <div><i style="background:var(--rk-hb)"></i><span>藍 --rk-hb<em>講義空格、字義</em></span></div>
+    <div><i style="background:var(--rk-key)"></i><span>綠 --rk-key<em>關鍵詞</em></span></div>
+    <div><i style="background:var(--rk-yi-bd)"></i><span>綠框 --rk-yi<em>翻譯、解析、句意</em></span></div>
+    <div><i style="background:var(--rk-gold)"></i><span>金 --rk-gold<em>細框、裝飾線</em></span></div>
+    <div><i style="background:var(--rk-seal)"></i><span>印章紅 --rk-seal<em>主要按鈕</em></span></div>
+    <div><i style="background:var(--rk-leaf)"></i><span>金箔 --rk-leaf<em>只用在黑金頁首</em></span></div>
+    <div><i style="background:var(--rk-ok)"></i><span>答對 --rk-ok</span></div>
+    <div><i style="background:var(--rk-no)"></i><span>答錯 --rk-no</span></div>
+  </div>
+</section>
+
+<section class="ladder">
+  <h2 class="rk-h">字體與字級：只有一種字體、四級</h2>
+  <p style="font-size:var(--rk-t-l);font-weight:700">標題 1.35em　範例標題文字</p>
+  <p style="font-size:var(--rk-t-m)">內文 1em　這是一行內文範例，行高 1.85。</p>
+  <p style="font-size:var(--rk-t-s)">註解 .82em　這是一行註解、翻譯範例。</p>
+  <p style="font-size:var(--rk-t-xs)">小字 .6em　工具列、頁尾、標籤用。</p>
+</section>
+
+<section>
+  <h2 class="rk-h">圓角：只有三種</h2>
+  <div class="rad">
+    <div style="border-radius:var(--rk-r-s)">3px 標籤</div>
+    <div style="border-radius:var(--rk-r)">6px 按鈕卡片</div>
+    <div style="border-radius:var(--rk-r-seal)">印章</div>
+  </div>
+</section>
+
+<section>
+  <h2 class="rk-h">按鈕：兩種</h2>
+  <div class="row">
+    <button class="rk-btn pri">下一步 ▸</button>
+    <button class="rk-btn">次要按鈕</button>
+    <button class="rk-btn" disabled>不能按</button>
+  </div>
+  <p class="note">主要動作用印章紅，一個畫面只放一顆；其他都用紙底細框。</p>
+</section>
+
+<section>
+  <h2 class="rk-h">標籤</h2>
+  <div class="row" style="font-size:1.6em">
+    <span class="rk-tag">課本 P.00</span>
+    <span class="rk-tag zhu">考點</span>
+    <span class="rk-tag hb">講義 P.00</span>
+    <span class="rk-tag seal">時代</span>
+  </div>
+</section>
+
+<section>
+  <h2 class="rk-h">三種框</h2>
+  <p>這句裡的<span class="rk-zhu">老師重點</span>用朱色，<span class="rk-hb">講義空格</span>用藍色，<span class="rk-key">關鍵詞</span>用綠色。</p>
+  <div class="rk-yi">翻譯、解析、句意放在綠底框裡，點開才顯示。</div>
+</section>
+
+<section>
+  <h2 class="rk-h">卡片</h2>
+  <div class="rk-card">卡片範例：紙色底、細框、右下一片硬陰影。</div>
+</section>
+
+<section>
+  <h2 class="rk-h">表格</h2>
+  <table class="rk-table">
+    <tr><th>欄一</th><th>欄二</th><th>欄三</th></tr>
+    <tr><td>範例</td><td>範例</td><td>範例</td></tr>
+    <tr><td>範例</td><td>範例</td><td>範例</td></tr>
+    <tr><td>範例</td><td>範例</td><td>範例</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2 class="rk-h">浮框</h2>
+  <div class="rk-pop" style="max-width:18em">浮框範例：紙色底、金色細框、柔和陰影。</div>
+</section>
+
+<section>
+  <h2 class="rk-h">錯的例子（不要這樣做）</h2>
+  <div class="row">
+    <button class="bad" data-rk-allow="故意放的錯誤示範" style="background:#4a90e2;color:#fff;border:0;border-radius:20px;padding:.3em 1em;font-family:sans-serif">自己配的藍、自己的圓角、黑體</button>
+  </div>
+  <p class="note">色票以外的顏色、三種以外的圓角、明體以外的字體，檢查腳本都會列出來。</p>
+</section>
+
+</main>
+<script>
+(function () {
+  var b = document.body;
+  document.getElementById('tg').onclick = function () { b.classList.toggle('night'); b.style.background = ''; };
+  var big = true;
+  document.getElementById('sz').onclick = function () { big = !big; b.style.fontSize = big ? '' : '17px'; this.textContent = '字級：' + (big ? '投影' : '手機'); };
+})();
+</script>
+</body>
+</html>

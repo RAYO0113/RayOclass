@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
    全站共用色票 tokens.css（美化第 0 批，2026-11-16）
-   規範：教學系統專案 docs/規格_全站視覺規範.md；樣本頁：dev/styleguide.html；檢查：python tools/style_check.py
+   規範：教學系統專案 docs/規格_全站視覺規範.md；樣本頁：styleguide/index.html；檢查：python tools/style_check.py
    來源：yf/index.html（樂府長卷）實際用的值，照抄，不要自己調。
    變數一律加 --rk- 前綴：教學網站 001_base.css 已經有 --ink、--paper、--gold（值與寫法都不同），不加前綴會互相蓋掉。
    夜間：長卷 body.night、教學網站 body.dark-mode、學霸網 html.dark，三種都認。
