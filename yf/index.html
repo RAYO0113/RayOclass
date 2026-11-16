@@ -21,7 +21,7 @@
      - 講稿：yf/script.js（Claude 草擬、老師可改），右上「講稿」或按 N 開關，預設不顯示 -->
 <style>
 :root{
-  --fs:clamp(19px,2.5vw,36px);
+  --z:1; --fs:calc(clamp(19px,2.5vw,36px) * var(--z));
   --paper:247,238,214; --ink:#2a2521; --mute:#6a5a45; --zhu:#a8352a; --zhu-d:#7f241c; --gold:#b08d57; --line:rgba(107,74,43,.32);
   --hb:#1d4f91; --card:rgba(255,251,240,.86); --key:#17675a; --yi:#2f4a35; --yi-bg:rgba(93,122,95,.13); --yi-bd:#5d7a5f;
   --seal:linear-gradient(135deg,#b83f31,#98291f);
@@ -213,6 +213,21 @@ body.rd #app,body.rd .veil{visibility:hidden}
   #rd .who{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+
+/* V255：嵌入時的標記筆（網站的標記筆碰不到 iframe 裡的字，長卷自己做一份，存法同網站：文字＋前後文） */
+.hm-m{border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hm-m[data-c=r]{background:linear-gradient(transparent 38%,rgba(232,116,106,.55) 38%,rgba(232,116,106,.55) 92%,transparent 92%)}
+.hm-m[data-c=y]{background:linear-gradient(transparent 38%,rgba(245,213,51,.55) 38%,rgba(245,213,51,.55) 92%,transparent 92%)}
+.hm-m[data-c=b]{background:linear-gradient(transparent 38%,rgba(111,168,232,.55) 38%,rgba(111,168,232,.55) 92%,transparent 92%)}
+.hm-m[data-c=g]{background:linear-gradient(transparent 38%,rgba(108,196,138,.55) 38%,rgba(108,196,138,.55) 92%,transparent 92%)}
+body.night .hm-m{filter:brightness(.85)}
+body.hm-on #stage,body.hm-on #stage *{touch-action:none;-webkit-user-select:none;user-select:none;cursor:text}
+#hm-pv{position:fixed;inset:0;pointer-events:none;z-index:60}
+#hm-pv div{position:fixed;border-radius:2px;mix-blend-mode:multiply}
+body.night #hm-pv div{mix-blend-mode:screen}
+#hm-pop{position:fixed;z-index:61;display:none;align-items:center;gap:6px;padding:6px 8px;border-radius:22px;background:rgba(32,24,18,.92);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#hm-pop button{font-size:14px;border:3px solid transparent;border-radius:50%;width:28px;height:28px;padding:0}
+#hm-pop .tx{width:auto;border-radius:18px;background:rgba(255,255,255,.14);color:#fff;padding:0 10px;height:30px;border:0}
 </style>
 </head>
 <body>
@@ -505,6 +520,73 @@ document.addEventListener('keydown', e => {
   else if (k === 'Escape') { if (!EMB) go(0); }
 });
 document.addEventListener('keydown', e => { if (EMB && (e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey) toTop({ yfKey: 'L' }); }, true);
+/* ───────── V255：嵌入時的字級與標記筆（老師 11/16：長卷融合後無法調字體大小、無法使用標記筆）；網站端在 src/js/195_v255-yf-tools-js.js ───────── */
+if (EMB) {
+  const HM = { on: false, c: 'y', id: 0 }, HKEY = 'yf_hlmark_v1', CTX = 8, COL = { r: '#e8746a', y: '#f5d533', b: '#6fa8e8', g: '#6cc48a' };
+  const hLoad = () => { try { return JSON.parse(localStorage.getItem(HKEY) || '[]') || []; } catch (e) { return []; } };
+  const hSave = a => { try { localStorage.setItem(HKEY, JSON.stringify(a)); } catch (e) {} };
+  const hKey = () => (S[st.i] && S[st.i].key) || String(st.i);
+  const SK = 'rt,rp,sup,script,style,button,.hm-ui';
+  const model = () => { const nodes = [], w = document.createTreeWalker(stage, NodeFilter.SHOW_TEXT); let s = '', n;
+    while ((n = w.nextNode())) { const p = n.parentElement; if (!p || p.closest(SK)) continue; nodes.push({ n, a: s.length }); s += n.data; } return { nodes, s }; };
+  function hApply() { if (HM.busy) return; HM.busy = true;
+    try { $$('.hm-m', stage).forEach(sp => { const p = sp.parentNode; while (sp.firstChild) p.insertBefore(sp.firstChild, sp); p.removeChild(sp); p.normalize(); });
+      hLoad().filter(m => m.k === hKey()).forEach(m => { const md = model(); let best = -1, bs = -1, bd = 1e9, i = md.s.indexOf(m.text);
+        while (i >= 0) { let sc = 0; const pre = md.s.slice(Math.max(0, i - CTX), i), post = md.s.slice(i + m.text.length, i + m.text.length + CTX);
+          for (let k = 1; k <= pre.length && k <= m.pre.length && pre[pre.length - k] === m.pre[m.pre.length - k]; k++) sc++;
+          for (let k = 0; k < post.length && k < m.post.length && post[k] === m.post[k]; k++) sc++;
+          const d = Math.abs(i - m.off); if (sc > bs || (sc === bs && d < bd)) { best = i; bs = sc; bd = d; } i = md.s.indexOf(m.text, i + 1); }
+        if (best < 0 || (bs === 0 && m.text.length <= 2 && (m.pre || m.post))) return;
+        md.nodes.forEach(x => { const s0 = Math.max(best, x.a), e0 = Math.min(best + m.text.length, x.a + x.n.data.length); if (s0 >= e0) return;
+          let node = x.n; if (e0 - x.a < node.data.length) node.splitText(e0 - x.a); if (s0 - x.a > 0) node = node.splitText(s0 - x.a);
+          const sp = document.createElement('span'); sp.className = 'hm-m'; sp.dataset.id = m.id; sp.dataset.c = m.c; node.parentNode.insertBefore(sp, node); sp.appendChild(node); }); });
+    } finally { setTimeout(() => { HM.busy = false; }, 0); } }
+  let tm = 0; const hLater = () => { clearTimeout(tm); tm = setTimeout(() => { if (!$('.hm-m', stage) && hLoad().some(m => m.k === hKey())) hApply(); }, 150); };
+  new MutationObserver(l => { if (!HM.busy && l.some(x => x.type === 'childList' && !(x.target.closest && x.target.closest('.hm-m')))) hLater(); }).observe(stage, { childList: true, subtree: true });
+  const _go = go; go = function () { const r = _go.apply(this, arguments); hApply(); hLater(); hidePop(); return r; };
+  /* 逐字量位置、拖曳選字（做法同網站 164：不用游標落點，避免疊在字上的東西抓錯字） */
+  const measure = md => { const out = [], r = document.createRange();
+    md.nodes.forEach(x => { for (let k = 0; k < x.n.data.length; k++) { if (/\s/.test(x.n.data[k])) continue; r.setStart(x.n, k); r.setEnd(x.n, k + 1); const q = r.getBoundingClientRect(); if (q.width > 0 && q.height > 0) out.push({ i: x.a + k, l: q.left, r: q.right, t: q.top, b: q.bottom }); } }); return out; };
+  const hit = (cs, x, y) => { let best = -1, bd = 1e9; cs.forEach(c => { if (y < c.t || y > c.b) return; let d = x < c.l ? c.l - x : x > c.r ? x - c.r : 0; if (d === 0) d = -1 / (1 + Math.abs(y - (c.t + c.b) / 2)); if (d < bd) { bd = d; best = c.i; } }); return bd <= 40 ? best : -1; };
+  const pvL = () => { let e = $('#hm-pv'); if (!e) { e = document.createElement('div'); e.id = 'hm-pv'; e.className = 'hm-ui'; document.body.appendChild(e); } return e; };
+  function showPv(d) { const L = pvL(); L.innerHTML = ''; if (!d || !d.sp) return; const r = document.createRange(); let sN = 0, eN = 0;
+    d.md.nodes.forEach(x => { const n = x.n.data.length; if (!sN && d.sp.a < x.a + n) { r.setStart(x.n, d.sp.a - x.a); sN = 1; } if (!eN && d.sp.b <= x.a + n) { r.setEnd(x.n, d.sp.b - x.a); eN = 1; } });
+    if (!sN || !eN) return; [...r.getClientRects()].forEach(q => { if (q.width < 1) return; const e = document.createElement('div');
+      e.style.cssText = `left:${q.left}px;top:${q.top + q.height * .38}px;width:${q.width}px;height:${q.height * .54}px;background:${COL[HM.c]}8c`; L.appendChild(e); }); }
+  let drag = null;
+  const inStage = e => e.target.closest && e.target.closest('#stage') && !e.target.closest('.hm-ui');
+  document.addEventListener('pointerdown', e => { if (!HM.on || e.button > 0 || !inStage(e)) return; hidePop();
+    const md = model(), cs = measure(md); drag = { md, cs, x: e.clientX, y: e.clientY, i0: hit(cs, e.clientX, e.clientY), moved: false, sp: null, tgt: e.target };
+    e.preventDefault(); e.stopPropagation(); }, true);
+  document.addEventListener('pointermove', e => { if (!drag) return; if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) drag.moved = true;
+    if (drag.moved) { if (drag.i0 < 0) drag.i0 = hit(drag.cs, e.clientX, e.clientY); const i1 = hit(drag.cs, e.clientX, e.clientY);
+      if (i1 >= 0 && drag.i0 >= 0) { let a = Math.min(drag.i0, i1), b = Math.max(drag.i0, i1) + 1; const s = drag.md.s; while (a < b && /\s/.test(s[a])) a++; while (b > a && /\s/.test(s[b - 1])) b--; drag.sp = b > a ? { a, b } : null; showPv(drag); } }
+    e.preventDefault(); e.stopPropagation(); }, true);
+  document.addEventListener('pointerup', e => { if (!drag) return; const d = drag; drag = null; showPv(null); e.preventDefault(); e.stopPropagation();
+    if (!d.moved) { const hm = d.tgt.closest && d.tgt.closest('.hm-m'); if (hm) showPop(hm.dataset.id, e.clientX, e.clientY); return; }
+    if (!d.sp) return; const s = d.md.s, m = { id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), k: hKey(), c: HM.c,
+      text: s.slice(d.sp.a, d.sp.b), pre: s.slice(Math.max(0, d.sp.a - CTX), d.sp.a), post: s.slice(d.sp.b, d.sp.b + CTX), off: d.sp.a, t: new Date().toISOString() };
+    const all = hLoad(); all.push(m); hSave(all); hApply(); }, true);
+  document.addEventListener('pointercancel', () => { drag = null; showPv(null); }, true);
+  ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'contextmenu'].forEach(t => document.addEventListener(t, e => { if (HM.on && inStage(e)) { e.preventDefault(); e.stopPropagation(); } }, { capture: true, passive: false }));
+  /* 點已標的字：換色／刪除 */
+  let pop = null; function hidePop() { if (pop) pop.style.display = 'none'; HM.id = 0; }
+  function showPop(id, x, y) { if (!pop) { pop = document.createElement('div'); pop.id = 'hm-pop'; pop.className = 'hm-ui';
+      pop.innerHTML = Object.keys(COL).map(k => `<button type="button" data-k="${k}" style="background:${COL[k]}"></button>`).join('') + '<button type="button" class="tx" data-del="1">🗑 刪除</button>';
+      pop.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !HM.id) return; let all = hLoad(); const m = all.find(z => z.id === HM.id);
+        if (b.dataset.del) all = all.filter(z => z.id !== HM.id); else if (m) m.c = b.dataset.k; hSave(all); hidePop(); hApply(); });
+      document.body.appendChild(pop); }
+    HM.id = id; pop.style.display = 'flex'; const w = pop.offsetWidth, h = pop.offsetHeight;
+    pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, x - w / 2)) + 'px'; pop.style.top = (y - h - 16 < 8 ? y + 20 : y - h - 16) + 'px'; }
+  document.addEventListener('pointerdown', e => { if (pop && HM.id && !(e.target.closest && e.target.closest('#hm-pop')) && !HM.on) hidePop(); }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && HM.on) { toTop({ yfKey: 'HMOFF' }); e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+  /* 網站端（195）送來的指令 */
+  addEventListener('message', e => { if (e.source !== window.parent || !e.data) return; const d = e.data;
+    if (d.yfZoom) document.documentElement.style.setProperty('--z', String(d.yfZoom));
+    if (d.yfHm) { HM.on = !!d.yfHm.on; if (d.yfHm.c) HM.c = d.yfHm.c; document.body.classList.toggle('hm-on', HM.on); if (!HM.on) { drag = null; showPv(null); hidePop(); } }
+    if (d.yfHmClear) { const k = hKey(); hSave(hLoad().filter(m => m.k !== k)); hApply(); } });
+  toTop({ yfReady: 1 });
+}
 if (EMB) { $('#bFull').hidden = true; document.body.classList.add('emb'); }
 else if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
 addEventListener('message', e => { if (!EMB || e.source !== window.parent || !e.data || !e.data.yfCmd) return; const c = e.data.yfCmd, v = e.data.v;
