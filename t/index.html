@@ -238,6 +238,7 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
     h += '</div>';
     if (S.dlg === 'who') h += whoDlg();
     else if (S.dlg === 'mode' || (!S.mode && S.d)) h += modeDlg();
+    else if (S.dlg === 'cptip') h += cpTipDlg();
     app.innerHTML = h;
     renderBar();
     var f = document.querySelector('.row.cur .sc'); if (f && !S.dlg && S.mode) { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }
@@ -266,6 +267,15 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
       (S.me.all ? '<p class="mut" style="text-align:center">' + esc(S.me.email || '') + '<br>四個班都看得到，上方可以切換班級</p>' : '') +
       '<button class="btn pri big" data-a="go">💪 小奴工上工了</button>' +
       '<button class="btn" style="width:100%;margin-top:4px" data-a="logout">不是我（登出）</button></div></div>';
+  }
+  /* 11/16 老師：「複製座號」的說明卡——小老師點進一張考卷時跳一次（記在這支手機 tutor_cpmiss_tip_v1，按了「知道了」就不再跳） */
+  var CPTIP = 'tutor_cpmiss_tip_v1';
+  function cpTipDlg() {
+    return '<div class="mask"><div class="dlg"><h3>📋 新功能：複製座號</h3>' +
+      '<p style="margin:8px 0 0;line-height:1.7">最上面「還沒交」的下面，多了一顆 <b>📋 複製座號</b>。</p>' +
+      '<p style="margin:8px 0 0;line-height:1.7">按一下，就把這張考卷<b>還沒交的座號</b>複製起來，可以直接貼到班級群組提醒同學。</p>' +
+      '<p class="mut" style="margin:8px 0 0">只會複製考卷名稱和座號，不會有分數和姓名。</p>' +
+      '<button class="btn pri big" style="margin-top:12px" data-a="cptipok">知道了</button></div></div>';
   }
   function modeDlg() {
     return '<div class="mask"><div class="dlg"><h3>你現在要做什麼？</h3><p class="mut">' + meText() + '</p>' +
@@ -636,7 +646,8 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
     else if (a === 'reload') { flush(); load(); }
     else if (a === 'retry') { Object.keys(rowSt).forEach(function (k) { if (rowSt[k] === '⚠') delete rowSt[k]; }); flush(); renderBar(); }
     else if (a === 'home') { flush(); S.item = ''; S.fix = {}; render(); window.scrollTo(0, 0); load(); }
-    else if (a === 'item') { S.item = p[1]; S.tab = 'raw'; S.fix = {}; S.cur = firstOpen(); render(); window.scrollTo(0, 0); load(); }
+    else if (a === 'cptipok') { lsPut(CPTIP, '1'); S.dlg = ''; render(); }
+    else if (a === 'item') { S.item = p[1]; S.tab = 'raw'; S.fix = {}; S.cur = firstOpen(); if (!lsGet(CPTIP)) S.dlg = 'cptip'; render(); window.scrollTo(0, 0); load(); }
     else if (a === 'tab') { S.tab = p[1]; var r1 = S.d.roster.filter(function (x) { var o = scOf(S.item, x.seat); return p[1] === 'raw' || (o && o.got); })[0]; S.cur = r1 ? r1.seat : 0; render(); }
     else if (a === 'fix') { S.fix[S.item + '|' + p[1]] = 1; S.cur = +p[1]; refreshItem(); }
     else if (a === 'st') {
