@@ -18,7 +18,8 @@
      V253 續（同日老師：作者、題解、詩的流變、樂府詩、樂府詩代表作＋補充講義全部整合起來；寫講稿；補統測／學測考點）
      - 一條路線：封面 → 作者 → 題解 → 流變（變形記 lb/ 蓋版開、總表、常識）→ 樂府詩（簡介／名稱／特色／發展／新樂府／影響／比較）→ 代表作（點了讀詩）→ 考點 → 挑戰
      - 考點：yf/exams.js（歷屆試題照來源教材原文，每題註明出處）＋課檔 extras.exams；相關的講解頁右上有「考點 ▸」可跳過去再跳回來
-     - 講稿：yf/script.js（Claude 草擬、老師可改），右上「講稿」或按 N 開關，預設不顯示 -->
+     - 講稿：V258 起不放在公開檔（yf/script.js 已清空），改放加密的 tn/notes.enc.json，只在手機講稿（tn/）解鎖後看得到；
+       明文正本在教學系統專案 data/115-1/高職/第一冊/老師講稿_長卷_樂府.json -->
 <style>
 :root{
   --z:1; --fs:calc(clamp(19px,2.5vw,36px) * var(--z));
@@ -222,6 +223,10 @@ body.rd #app,body.rd .veil{visibility:hidden}
 .hm-m[data-c=g]{background:linear-gradient(transparent 38%,rgba(108,196,138,.55) 38%,rgba(108,196,138,.55) 92%,transparent 92%)}
 body.night .hm-m{filter:brightness(.85)}
 body.hm-on #stage,body.hm-on #stage *{touch-action:none;-webkit-user-select:none;user-select:none;cursor:text}
+/* V258 手機講稿鏡像 */
+body.mir header,body.mir footer,body.mir #bar,body.mir #rd .top .tool,body.mir #rd .ft{display:none}
+.mcur{outline:.16em solid #e08a1e;outline-offset:.14em;border-radius:3px}
+body.mir #rd.all .sz.cur{outline:.12em solid #e08a1e;outline-offset:.2em;border-radius:4px}
 #hm-pv{position:fixed;inset:0;pointer-events:none;z-index:60}
 #hm-pv div{position:fixed;border-radius:2px;mix-blend-mode:multiply}
 body.night #hm-pv div{mix-blend-mode:screen}
@@ -410,6 +415,28 @@ const st = { i: 0, ans: false, bg: 0, back: null, note: false };
 const EMB = window.parent !== window && /[?&]embed=1/.test(location.search);
 const toTop = m => { if (EMB) window.parent.postMessage(m, '*'); };
 const SC = window.YF_SCRIPT || {};
+/* V258（老師 11/16「講稿長卷尚未同步；不只是換頁，換段落就要；要鎖」）
+   ・每換一頁、每按一步（段落、重點字）、讀詩每換一段，都回報給網站（yfStep），網站轉送給手機講稿。
+     step＝這一頁 .st／.bk 依文件順序的第幾個（0 起算，-1＝還沒有）；讀詩時 key＝「讀詩·作品名」、step＝第幾段。
+   ・鏡像模式（?embed=1&mirror=1，手機講稿 tn/ 用）：不顯示上下列，內容全部展開，收到 yfCmd:'mirror' 就跳到那頁、框出那一步。
+   ・講稿不再放在公開的 script.js（已清空），改放加密的 tn/notes.enc.json，只在手機講稿解鎖後顯示；SC 是空的時候「講稿」鈕藏起來。 */
+const MIR = EMB && /[?&]mirror=1/.test(location.search);
+const stepEls = () => $$('.st, .bk', stage);
+function tell() { if (MIR) return;
+  if (rd.on) { toTop({ yfStep: { key: '讀詩·' + rd.k, step: rd.i, h: '讀詩　' + rd.k } }); return; }
+  const s = S[st.i], h2 = $('h2', stage);
+  toTop({ yfStep: { key: s.key, step: st.step == null ? -1 : st.step, h: (h2 ? h2.textContent : s.key).trim().slice(0, 40) } }); }
+function mirror(key, step) {
+  if (/^讀詩·/.test(key)) { const k = key.slice(3);
+    if (!rd.on || rd.k !== k) { try { openRd(k); } catch (e) { return; } $('#rd').classList.add('all'); $$('.sz', $('#rdb')).forEach(z => z.classList.add('tr')); }
+    focus(Math.max(0, step), true); return; }
+  if (rd.on) closeRd();
+  const i = S.findIndex(x => x.key === key); if (i < 0) return;
+  if (i !== st.i) go(i);
+  $$('.st', stage).forEach(x => x.classList.add('show')); $$('.bk', stage).forEach(x => x.classList.add('on')); $$('.exe', stage).forEach(markEx);
+  $$('.mcur', stage).forEach(x => x.classList.remove('mcur'));
+  const el = stepEls()[step];
+  if (el) { el.classList.add('mcur'); el.scrollIntoView({ block: 'center' }); } else stage.scrollTop = 0; }
 function drawNote() { const n = $('#note'), t = SC[S[st.i].key]; n.classList.toggle('on', st.note);
   if (st.note) n.innerHTML = '<h4>講稿</h4>' + (t ? t.split('\n').map(x => `<p>${x}</p>`).join('') : '<p>（這一頁沒有講稿）</p>'); }
 /* 變形記蓋版：頁內「✕ 回課文」會送 lbClose 給上一層（就是這裡） */
@@ -453,11 +480,13 @@ function go(i) {
   try { history.replaceState(null, '', '#' + i); } catch (e) {}
   upd();
   toTop({ yfAt: { i: i, ch: s.ch, n: S.length } });
+  st.step = stepEls().indexOf($('.st.show', stage)); tell();
 }
 const goCh = c => go(S.findIndex(s => s.ch === c));
 /* 下一步＝文件順序裡第一個還沒出現的段落，或已出現段落裡第一個還藏著的重點字 */
 function markEx(x) { const q = x.closest('.exq'); if (q) $$('.exo button', q).forEach(b => { const ok = q.dataset.a.includes(b.dataset.o); b.classList.toggle('ok', ok); b.classList.toggle('no', !ok && b.classList.contains('pick')); b.classList.remove('pick'); }); }
 function reveal(p) {
+  st.step = stepEls().indexOf(p); tell();
   if (p.classList.contains('st')) { p.classList.add('show'); if (p.classList.contains('exe')) markEx(p); return; }
   p.classList.add('on'); if (p.classList.contains('hb')) { p.classList.remove('tip'); void p.offsetWidth; p.classList.add('tip'); }
 }
@@ -475,10 +504,10 @@ $('#bReset').onclick = () => go(st.i);
 $('#bNote').onclick = e => { st.note = !st.note; e.currentTarget.classList.toggle('on', st.note); drawNote(); };
 $('#bNight').onclick = e => { const n = document.body.classList.toggle('night'); e.currentTarget.classList.toggle('on', n); setBg(rd.on ? rd.bg : S[st.i].bg); };
 $('#bFull').onclick = () => { const d = document.documentElement; if (!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); else document.exitFullscreen && document.exitFullscreen(); };
-$('main').addEventListener('click', e => { if (e.target.closest('button,a,.bk,#note')) return; next(); });
+$('main').addEventListener('click', e => { if (MIR || e.target.closest('button,a,.bk,#note')) return; next(); });
 
 /* ───────── 讀詩模式 ───────── */
-const rd = { on: false, i: 0, n: 0, bg: '', direct: false };
+const rd = { on: false, i: 0, n: 0, bg: '', direct: false, k: '' };
 function hasFont(f) { try { const c = document.createElement('canvas').getContext('2d'), t = 'abcdefgIl1'; c.font = '40px monospace'; const a = c.measureText(t).width; c.font = `40px "${f}", monospace`; return c.measureText(t).width !== a; } catch (e) { return false; } }
 const SHU = ['DFPOYangXunW5-B5', '華康歐陽詢體W5(P)'].some(hasFont);
 $('#rdShu').hidden = !SHU;
@@ -487,7 +516,7 @@ function openRd(k) {
   $('#rdT').textContent = k; $('#rdE').textContent = who[0]; $('#rdW').textContent = who.slice(1).join('｜');
   $('#rdb').innerHTML = (note ? `<div class="note">${note.innerHTML}</div>` : '') + $$('.l7-st', p.d).map(s => { const o = $('.l7-o', s), y = $('.l7-y', s);
     return `<div class="sz${o.classList.contains('l7-pre') ? ' pre' : ''}"><div class="o">${o.innerHTML}</div><div class="y"><div>${y ? y.innerHTML : ''}</div></div></div>`; }).join('');
-  const zs = $$('.sz', $('#rdb')); rd.n = zs.length; rd.on = true; rd.bg = BG[who[0]] || S[st.i].bg;
+  const zs = $$('.sz', $('#rdb')); rd.n = zs.length; rd.on = true; rd.k = k; rd.bg = BG[who[0]] || S[st.i].bg;
   zs.forEach((z, j) => z.onclick = () => { if (rd.i !== j && !$('#rd').classList.contains('all')) return focus(j); z.classList.toggle('tr'); });
   $('#rdTr').classList.remove('on'); $('#rd').classList.add('on'); document.body.classList.add('rd'); setBg(rd.bg); focus(0, true);
 }
@@ -496,10 +525,12 @@ function focus(j, instant) {
   zs.forEach((z, k) => z.classList.toggle('cur', k === rd.i));
   $('#rdN').textContent = `第 ${rd.i + 1}／${rd.n} 段`; $('#rdP').disabled = rd.i === 0; $('#rdNx').textContent = rd.i < rd.n - 1 ? '下一段 ▸' : '讀完，回長卷';
   const z = zs[rd.i]; if (z) z.scrollIntoView({ block: 'center', behavior: instant ? 'auto' : 'smooth' });
+  tell();
 }
 function closeRd() {
   if (rd.direct && window.parent !== window) { window.parent.postMessage({ lbClose: 1 }, '*'); return; }
-  rd.on = false; $('#rd').classList.remove('on'); document.body.classList.remove('rd'); setBg(S[st.i].bg);
+  rd.on = false; $('#rd').classList.remove('on', 'all'); document.body.classList.remove('rd'); setBg(S[st.i].bg);
+  tell();
 }
 $('#rdX').onclick = closeRd; $('#rdP').onclick = () => focus(rd.i - 1); $('#rdNx').onclick = () => rd.i < rd.n - 1 ? focus(rd.i + 1) : closeRd();
 $('#rdTr').onclick = e => { const on = !e.currentTarget.classList.contains('on'); e.currentTarget.classList.toggle('on', on); $$('.sz', $('#rdb')).forEach(z => z.classList.toggle('tr', on)); setTimeout(() => focus(rd.i), 460); };
@@ -509,7 +540,7 @@ $('#rdShu').onclick = e => e.currentTarget.classList.toggle('on', $('#rd').class
 document.addEventListener('keydown', e => {
   const k = e.key;
   if ($('#lbx').classList.contains('on')) { if (k === 'Escape') closeLb(); return; }
-  if (k === 'n' || k === 'N') { if (!rd.on) $('#bNote').click(); return; }
+  if (k === 'n' || k === 'N') { if (!rd.on && !$('#bNote').hidden) $('#bNote').click(); return; }
   if (rd.on) {
     if (k === 'Escape') closeRd(); else if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { e.preventDefault(); $('#rdNx').click(); }
     else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k)) { e.preventDefault(); focus(rd.i - 1); } else if (k === 't' || k === 'T') $$('.sz', $('#rdb'))[rd.i].classList.toggle('tr');
@@ -588,8 +619,11 @@ if (EMB) {
   toTop({ yfReady: 1 });
 }
 if (EMB) { $('#bFull').hidden = true; document.body.classList.add('emb'); }
+if (!Object.keys(SC).length) $('#bNote').hidden = true;
+if (MIR) { st.ans = true; document.body.classList.add('mir'); }
 else if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
 addEventListener('message', e => { if (!EMB || e.source !== window.parent || !e.data || !e.data.yfCmd) return; const c = e.data.yfCmd, v = e.data.v;
+  if (c === 'mirror') { if (MIR) mirror(String(e.data.key || ''), +e.data.step); return; }
   if (rd.on && (c === 'next' || c === 'prev')) { if (c === 'next') $('#rdNx').click(); else focus(rd.i - 1); return; }
   if (rd.on) closeRd();
   if (c === 'next') next(); else if (c === 'prev') prev(); else if (c === 'ch') goCh(v); else if (c === 'go') go(v === 'last' ? S.length - 1 : +v); });

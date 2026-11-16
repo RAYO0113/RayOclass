@@ -12957,6 +12957,9 @@ try {
     var id = sidN(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
     if (curTag) id += curTag;   /* V231 */
     var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: id, h: head(s) };
+    /* V258：長卷頁（type yf）的代號與頁名由 196 提供（yf:<長卷頁代號>#<第幾步>） */
+    var ext = null; try { ext = window.V217TN_EXT ? window.V217TN_EXT(s) : null; } catch (e) {}
+    if (ext && ext.id) { pos.id = String(ext.id); if (ext.h) pos.h = String(ext.h); }
     var sig = JSON.stringify(pos);
     if (sig === lastSent) return;
     if (busy) { again = true; return; }
@@ -12992,6 +12995,7 @@ try {
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
   window.V217TN = { sid: sidN, send: function () { lastSent = ''; send(); },
+    now: function () { clearTimeout(timer); send(); },   /* V258：長卷每一步立刻送（內容沒變就不送） */
     /* V222：句首小點強制送這一句（就算剛剛點過，手機可能已被滑走）；cb(ok) 給小點閃綠／紅 */
     sendLine: function (li, cb) { curLi = li; curTag = ''; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
     on: function () { return jget(OFF_K, 0) != 1 && !!pw(); } };
@@ -13709,11 +13713,35 @@ try {
   });
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
+/* ════ src/js/196_v258-yf-tnote-js.js ════ */
+try {
+(function () {
+  /* V258（老師 11/16「講稿部分，長卷尚未同步；不只是換頁，換段落就要」）
+     長卷（yf/index.html?embed=1）每換一頁、每按一步、讀詩每換一段，會送 yfStep 給這一層；
+     這裡記下來，交給 186 的講稿同步送出去（位置代號 yf:<長卷頁代號>#<第幾步>，讀詩是 yf:讀詩·<作品名>#<第幾段>）。
+     只送位置，不送內容。186 的 send() 透過 window.V217TN_EXT 取得長卷頁的代號。 */
+  var cur = null;   /* { key, step, h } */
+  function isYf(s) { return !!s && s.type === 'yf'; }
+  window.V217TN_EXT = function (s) {
+    if (!isYf(s) || !cur) return null;
+    return { id: ('yf:' + cur.key + (cur.step >= 0 ? '#' + cur.step : '')).slice(0, 80), h: ('長卷　' + (cur.h || cur.key)).slice(0, 60) };
+  };
+  window.addEventListener('message', function (e) {
+    var d = e.data; if (!d || typeof d !== 'object' || !d.yfStep) return;
+    var fs = document.querySelectorAll('iframe.wk-yf-frame'), mine = false;
+    for (var i = 0; i < fs.length; i++) if (fs[i].contentWindow === e.source && fs[i].style.display !== 'none') mine = true;
+    if (!mine) return;   /* 只認正在顯示的那個長卷（一般畫面、投影各一個） */
+    cur = { key: String(d.yfStep.key || ''), step: +d.yfStep.step, h: String(d.yfStep.h || '') };
+    if (isNaN(cur.step)) cur.step = -1;
+    if (window.V217TN && window.V217TN.now) window.V217TN.now();
+  });
+})();
+} catch (e) { setTimeout(function () { throw e; }); }
 /* ════ src/js/136_v113-ver-js.js ════ */
 try {
 
 (function () {
-  window.APP_VERSION = 'V257';
+  window.APP_VERSION = 'V258';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();

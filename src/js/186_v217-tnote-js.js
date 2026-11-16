@@ -82,6 +82,9 @@
     var id = sidN(s); if (curLi >= 0 && s && s.type === 'textpage') id += '#' + curLi;   /* V219：點到第幾句（手機捲到那句） */
     if (curTag) id += curTag;   /* V231 */
     var pos = { k: String(k), i: wkIdx, n: wkSlides.length, id: id, h: head(s) };
+    /* V258：長卷頁（type yf）的代號與頁名由 196 提供（yf:<長卷頁代號>#<第幾步>） */
+    var ext = null; try { ext = window.V217TN_EXT ? window.V217TN_EXT(s) : null; } catch (e) {}
+    if (ext && ext.id) { pos.id = String(ext.id); if (ext.h) pos.h = String(ext.h); }
     var sig = JSON.stringify(pos);
     if (sig === lastSent) return;
     if (busy) { again = true; return; }
@@ -117,6 +120,7 @@
   /* 回到這個分頁時補送一次（手機可能剛打開） */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastSent = ''; soon(); } });
   window.V217TN = { sid: sidN, send: function () { lastSent = ''; send(); },
+    now: function () { clearTimeout(timer); send(); },   /* V258：長卷每一步立刻送（內容沒變就不送） */
     /* V222：句首小點強制送這一句（就算剛剛點過，手機可能已被滑走）；cb(ok) 給小點閃綠／紅 */
     sendLine: function (li, cb) { curLi = li; curTag = ''; lastSent = ''; clearTimeout(timer); doneCb = cb || null; send(); },
     on: function () { return jget(OFF_K, 0) != 1 && !!pw(); } };
