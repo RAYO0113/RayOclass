@@ -35,6 +35,7 @@ input{font:inherit;color:inherit}
 h2{font-size:18px;margin:4px 0 8px}
 .missbox{background:var(--latebg);border-radius:10px;padding:8px 10px;margin:0 0 10px}
 .missbox b{color:var(--late)}
+.missbox .cpm{display:block;margin-top:8px;padding:6px 12px;font-size:15px}
 .seg{display:flex;gap:6px;margin:0 0 10px}
 .seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px}
 .seg button.on{background:var(--pri);border-color:var(--pri);color:#fff}
@@ -326,7 +327,7 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
     var s = stat(it), o = opt(it), h = '<button class="btn" data-a="home">← 回列表</button>' +
       '<h2 style="margin-top:10px"><span class="tag">' + esc(TYPE_NAME[it.type] || it.type) + '</span>' + esc(itemName(it)) + '</h2>' +
       '<p class="mut">' + (exDay(it) ? (TEST[it.type] ? '考試 ' : '期限 ') + md(exDay(it)) + (it.late ? '' : '（不算遲交）') : '沒有期限') + '　已交 ' + s.got + '/' + s.n + '</p>';
-    h += s.miss.length ? '<div class="missbox"><b>還沒交（' + s.miss.length + '）：</b>' + s.miss.map(function (x) { return x.seat; }).join('、') + '</div>'
+    h += s.miss.length ? '<div class="missbox">' + missIn(s) + '</div>'
       : '<div class="missbox" style="background:var(--okbg)"><span class="okc">全部都交了 ✓</span></div>';
     if (S.mode === 'chk') return h + chkHTML(it);
     h += '<div class="opts"><button data-a="opt|b" class="' + (o.b ? 'on' : '') + '">' + (o.b ? '☑' : '☐') + ' 一起登訂正加分</button>' +
@@ -531,7 +532,24 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
     var it = itemOf(S.item), row = document.querySelector('.row[data-row="' + seat + '"] .chips'), x = S.d.roster.filter(function (r) { return r.seat === seat; })[0];
     if (row && x && S.mode === 'reg') { var t = document.createElement('div'); t.innerHTML = stChips(it, x, scOf(it.id, seat)); row.parentNode.replaceChild(t.firstChild, row); }
     var mb = $('.missbox'), s = stat(it);
-    if (mb) mb.innerHTML = s.miss.length ? '<b>還沒交（' + s.miss.length + '）：</b>' + s.miss.map(function (r) { return r.seat; }).join('、') : '<span class="okc">全部都交了 ✓</span>';
+    if (mb) mb.innerHTML = s.miss.length ? missIn(s) : '<span class="okc">全部都交了 ✓</span>';
+  }
+  /* 11/16 老師：「還沒交」旁邊加「複製座號」，小老師貼到班級群組催繳。只有卷名與座號，沒有分數、姓名。 */
+  function missIn(s) {
+    return '<b>還沒交（' + s.miss.length + '）：</b>' + s.miss.map(function (r) { return r.seat; }).join('、') + '<button class="btn cpm" data-a="cpmiss">📋 複製座號</button>';
+  }
+  function copyMiss() {
+    var it = itemOf(S.item); if (!it) return;
+    var s = stat(it); if (!s.miss.length) return;
+    var txt = itemName(it) + ' 還沒交（' + s.miss.length + ' 人）：' + s.miss.map(function (r) { return r.seat; }).join('、') + ' 號';
+    function ok() { toast('已複製，可以貼到班級群組'); }
+    function old() {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, txt.length);
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); if (done) ok(); else toast('複製不了，請自己抄：' + txt, true);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, old); else old();
   }
   function goNext(el) {
     var n = nextSeat(+el.getAttribute('data-seat'));
@@ -603,6 +621,7 @@ label.f{display:block;margin:8px 0 2px;font-size:14px;color:var(--mut)}
     var p = t.getAttribute('data-a').split('|'), a = p[0];
     if (/^(home|setmode|item)$/.test(a)) { if (!voLeaveOk()) return; voClose(); }   /* 語音登分：離開這份 */
     if (a === 'login') doLogin();
+    else if (a === 'cpmiss') copyMiss();
     else if (a === 'vo') { if (S.vo) { if (!voLeaveOk()) return; voClose(); } else S.vo = { list: [], last: null, heard: '' }; voPaint(); }
     else if (a === 'vogo') { if (VO.on) { voStop(); voPaint(); } else voStart(); }
     else if (a === 'voundo') voUndo();
