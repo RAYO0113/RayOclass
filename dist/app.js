@@ -5868,7 +5868,7 @@ try {
 
   /* ── 狀態 ── */
   var S = { tab: get(K.tab, 'proj'), cls: get(K.cls, '') || classes()[0] || '', item: '', admin: false, loaded: false, loadedAt: 0, loading: false,
-    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'item', reveal: {}, revealAll: false, dRev: {}, dRevAll: false, dAs: {},
+    st: '', stErr: false, subDate: '', edit: null, imp: null, projItem: '', projView: 'wall', reveal: {}, revealAll: false, dRev: {}, dRevAll: false, dAs: {},
     ptMode: '+', ptReason: '睡覺', ptView: get('gr_ptview_v1', 'grid'), seatEdit: false, ptRange: 'today', undo: [], setCls: '', paste: '', preview: null, loadErr: '' };
 
   function load(force) {
@@ -6469,16 +6469,71 @@ try {
     return h + '<p class="gr-muted">題數＝學生網頁練習區（快速刷題、練點速度、修復舊傷、注釋刷題、注釋訂正）每做完一輪的題數加總；中途離開的不算。點座號格可單獨顯示。</p></div>';
   }
 
+  /* V259（老師 11/16「還沒點下去就知道哪張缺交幾個人」）：投影預設＝考卷卡片牆（每張寫缺幾人，缺最多排前面，點了才看座號格）；
+     另有「全班總覽」（座號 × 考卷）。只有座號、人數、✓／缺／假，不顯示分數、姓名、身份別。
+     缺交規則同單份考卷畫面：過期限（lateOf > 0）、沒分數、沒繳交日。全班都沒分數（L1～L3 未滿 10 人有分數）＝還沒登分，不算缺交（同 zeroReady）。 */
+  function projStat(it, st, td) {
+    var o = { miss: [], leave: 0, done: 0, wait: 0, graded: 0, n: st.length };
+    st.forEach(function (s) {
+      var c = scoreOf(it.id, s.seat), L = lateOf(it, c, td), has = c && (c.raw != null || c.sub);
+      if (c && c.raw != null) o.graded++;
+      if (has) o.done++; else if (L) o.miss.push(s.seat); else if (c && c.leave) o.leave++; else o.wait++;
+    });
+    o.due = !!(it.late && it.due && it.due < td);   /* 已過期限 */
+    o.ready = zeroReady(it, o.graded);              /* 已經登過分 */
+    o.st = !o.due ? 'open' : !o.ready ? 'nog' : o.miss.length ? 'miss' : 'ok';
+    return o;
+  }
+  function projWallHTML(its, st, td) {
+    var rows = its.filter(function (it) { return it.type !== '態度'; }).map(function (it, i) { return { it: it, s: projStat(it, st, td), i: i }; });
+    if (!rows.length) return '<p class="gr-muted">這班還沒有考卷。</p>';
+    var rank = { miss: 0, nog: 1, open: 2, ok: 3 };
+    rows.sort(function (a, b) { return rank[a.s.st] - rank[b.s.st] || b.s.miss.length - a.s.miss.length || a.i - b.i; });
+    var tot = rows.filter(function (r) { return r.s.st === 'miss'; });
+    var h = '<p class="gr-wsum">' + (tot.length ? '<span class="late">有 ' + tot.length + ' 張考卷還有人沒交</span>' : '<span class="pos">過期限的考卷都交齊了</span>') + '<span class="gr-muted">　點卡片看是哪幾號</span></p><div class="gr-wall">';
+    rows.forEach(function (r) {
+      var it = r.it, s = r.s, big, sub;
+      if (s.st === 'miss') { big = '缺 ' + s.miss.length + ' 人'; sub = s.miss.slice(0, 12).join('、') + (s.miss.length > 12 ? '…' : '') + ' 號'; }
+      else if (s.st === 'ok') { big = '全到'; sub = s.leave ? '請假待補 ' + s.leave + ' 人' : ''; }
+      else if (s.st === 'nog') { big = '還沒登分'; sub = '已過期限'; }
+      else { big = '已交 ' + s.done + '／' + s.n; sub = it.due ? '還沒到期限' : '沒有期限'; }
+      if (s.st === 'miss' && s.leave) sub += '　請假待補 ' + s.leave + ' 人';
+      h += '<button type="button" class="gr-wc ' + s.st + '" data-g="pi|' + esc(it.id) + '"><span class="t">' + esc(itemLabel(it)) + '</span>' +
+        '<span class="d">' + (it.due ? '期限 ' + md(it.due) : '') + '</span><span class="v">' + big + '</span><span class="s">' + sub + '</span></button>';
+    });
+    return h + '</div>';
+  }
+  function projAllHTML(its, st, td) {
+    var cols = its.filter(function (it) { return it.type !== '態度'; }).map(function (it) { return { it: it, s: projStat(it, st, td) }; })
+      .filter(function (c) { return c.s.st === 'miss' || c.s.st === 'ok'; })
+      .sort(function (a, b) { return a.it.due < b.it.due ? -1 : a.it.due > b.it.due ? 1 : 0; });
+    if (!cols.length) return '<p class="gr-muted">還沒有「過了期限、已經登分」的考卷。</p>';
+    var h = '<p class="gr-wsum"><span class="gr-muted">只列過了期限、已經登分的考卷。紅＝缺交，藍＝請假待補。</span></p><div class="gr-allw"><table class="gr-t gr-all"><thead><tr><th>座號</th>' +
+      cols.map(function (c) { return '<th><span>' + esc(itemLabel(c.it)) + '</span><small>' + md(c.it.due) + '</small></th>'; }).join('') + '<th>缺</th></tr></thead><tbody>';
+    st.forEach(function (s) {
+      var k = 0, tds = cols.map(function (c) {
+        var sc = scoreOf(c.it.id, s.seat), has = sc && (sc.raw != null || sc.sub);
+        if (has) return '<td class="y">✓</td>';
+        if (lateOf(c.it, sc, td)) { k++; return '<td class="x">缺</td>'; }
+        return sc && sc.leave ? '<td class="l">假</td>' : '<td></td>';
+      }).join('');
+      h += '<tr class="' + (k ? 'bad' : '') + '"><td class="seat">' + s.seat + '</td>' + tds + '<td class="k">' + (k || '') + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
   function projHTML() {
     var its = itemsOf(S.cls), st = roster(S.cls), td = today();
     if (!st.length) return '<div class="gr-main"><div class="gr-pane"><p class="gr-muted">這班還沒有學生名單。</p></div></div>';
     if (!S.projItem || !itemById(S.projItem) || itemById(S.projItem).cls !== S.cls) S.projItem = its[0] ? its[0].id : '';
     var h = '<div class="gr-main"><div class="gr-pane"><div class="gr-h">' +
+      '<button class="gr-chip' + (S.projView === 'wall' ? ' on' : '') + '" data-g="pv|wall">全部考卷</button>' +   /* V259 */
+      '<button class="gr-chip' + (S.projView === 'all' ? ' on' : '') + '" data-g="pv|all">全班總覽</button>' +   /* V259 */
       '<button class="gr-chip' + (S.projView === 'item' ? ' on' : '') + '" data-g="pv|item">單份考卷</button>' +
       '<button class="gr-chip' + (S.projView === 'drill' ? ' on' : '') + '" data-g="pv|drill">📈 刷題排行</button>' +   /* V230 */
       '';   /* v110：投影不顯示成績，拿掉「各項平均」 */
     if (S.projView === 'drill') return h + '</div>' + drillHTML() + '</div></div>';
-    S.projView = 'item';
+    if (S.projView === 'all') return h + '</div>' + projAllHTML(its, st, td) + '</div></div>';   /* V259 */
+    if (S.projView !== 'item') { S.projView = 'wall'; return h + '</div>' + projWallHTML(its, st, td) + '</div></div>'; }   /* V259：預設卡片牆 */
     if (S.projView === 'item') {
       h += '<select id="gr-pitem" style="font-size:16px;max-width:420px">' + its.map(function (it) { return '<option value="' + it.id + '"' + (it.id === S.projItem ? ' selected' : '') + '>' +
         esc(itemLabel(it)) + (it.due ? '（期限 ' + md(it.due) + '）' : '') + '</option>'; }).join('') + '</select></div>';
@@ -7196,6 +7251,7 @@ try {
     else if (t === 'histx') { S.hist = null; render(); }
     else if (t === 'tadm') tutorAdmin(v);
     else if (t === 'pv') { S.projView = v; render(); }
+    else if (t === 'pi') { S.projItem = v; S.projView = 'item'; render(); }   /* V259：卡片牆點一張考卷 */
     else if (t === 'rev') { S.reveal[v] = !S.reveal[v]; b.classList.toggle('m', !(S.revealAll || S.reveal[v])); }
     else if (t === 'revall') { S.revealAll = !S.revealAll; S.reveal = {}; render(); }
     else if (t === 'drup') loadDrill(true);   /* V230 刷題排行 */
@@ -13741,7 +13797,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V258';
+  window.APP_VERSION = 'V259';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
