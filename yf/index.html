@@ -88,6 +88,7 @@ tr.st{transform:none;filter:none}
 .bk.hb.on{color:var(--hb);background:color-mix(in srgb,var(--hb) 7%,transparent)}
 .bk.hb.tip::after{content:'✎ 填進講義 ' attr(data-p) ' ' attr(data-n);position:absolute;left:50%;bottom:104%;white-space:nowrap;font-size:.5em;line-height:1.7;letter-spacing:.05em;color:#fff;background:#1d4f91;border-radius:5px;padding:0 .7em;pointer-events:none;animation:hbtip 2.8s forwards}
 @keyframes hbtip{0%{opacity:0;transform:translate(-50%,8px)}12%,82%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+.kick .bkp{letter-spacing:.05em;border:1px solid var(--mute);border-radius:3px;padding:0 .5em;order:2;color:var(--ink);font-weight:700}
 .kick .hp.fill{border-color:var(--hb);color:var(--hb);font-weight:700}
 .fillnote{font-size:.66em;color:var(--mute);margin:-.3em 0 .6em;letter-spacing:.05em}
 table.l7t.fill td{font-size:1.05em;line-height:1.9}
@@ -261,7 +262,9 @@ const BG = { 封面: '2-garden', 作者: '6-gugong', 題解: '1-fuguang', 流變
   兩漢: '3-westlake', 魏晉: '7-dongpo', 南北朝: '1-fuguang', 南朝: '1-fuguang', 北朝: '4-snowpeak', 隋: '4-snowpeak', 唐: '6-gugong', 中唐: '5-lookback' };
 const S = [];   /* {ch 章, bg, wide, cls, html, init} */
 const CH = [['封面', ''], ['作者', '李白'], ['題解', '〈長干行〉'], ['流變', '從《詩經》到新詩'], ['名稱', '樂府詩簡介・名稱與定義'], ['特色', '二、特色與形式'], ['發展', '三、樂府詩的發展'], ['新樂府', '中唐新樂府運動'], ['影響', '四、樂府詩的影響'], ['比較', '五、樂府詩與古詩'], ['代表作', '點作品名讀詩'], ['考點', '統測／學測怎麼考'], ['挑戰', '樂府還是古詩？']];
-const kick = (t, hp) => `<div class="kick"><span>${t}</span>${hp ? `<span class="hp">${hp}</span>` : ''}</div>`;
+/* 課本頁碼（V254，老師 11/16「作者題解缺了課本頁碼」）：數字同網站 src/js/173_v178-bookpage-js.js（翰林 115 技高國文(1) 課本 PDF 逐頁看過） */
+const BOOKP = { 作者: 'P.115', 題解: 'P.114', 簡介: 'P.114' };
+const kick = (t, hp, bp) => `<div class="kick"><span>${t}</span>${bp ? `<span class="bkp">課本 ${bp}</span>` : ''}${hp ? `<span class="hp">${hp}</span>` : ''}</div>`;
 const blockSlides = (ch, label, bg) => { const p = page(label); blocks(label).forEach(b => S.push({ ch, key: label.replace('樂府詩·', '') + '·' + b.k, bg: bg || BG[ch], wide: !!$('table', b.b), html: kick(p.head, b.hp) + `<h2>${b.h}</h2><div class="body">${chunk(b.b)}</div>` })); };
 
 S.push({ ch: '封面', key: '封面', bg: BG.封面, cls: 'cover', html: `<div class="cv"><h1>${[...'樂府詩'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1><div class="sub">感於哀樂・緣事而發</div>
@@ -302,14 +305,14 @@ function markHB(root, id) {
 const paras = html => html.split(/(?:<br\s*\/?>\s*){2,}/).map(x => x.trim()).filter(Boolean).map(x => `<div class="st">${x}</div>`).join('');
 /* 作者（課本） */
 { const a = (LES[1].extras.authorPages || []).find(x => x.label === '作者·課本'); if (!a) throw new Error('課檔沒有這頁：作者·課本');
-  S.push({ ch: '作者', key: '作者', bg: BG.作者, html: kick(a.head, '補充講義 P.77') + `<div class="era"><div class="big">${LES[1].author.name}</div><div><div class="who">${LES[1].author.dynasty}</div><div class="body" style="font-size:.9em;line-height:1.75">${paras(a.body)}</div></div></div>` }); }
+  S.push({ ch: '作者', key: '作者', bg: BG.作者, html: kick(a.head, '補充講義 P.77', BOOKP.作者) + `<div class="era"><div class="big">${LES[1].author.name}</div><div><div class="who">${LES[1].author.dynasty}</div><div class="body" style="font-size:.9em;line-height:1.75">${paras(a.body)}</div></div></div>` }); }
 /* 題解頁（課本）拆成兩節：「題解」先講（講義 P.77 一、作者與題解），「樂府詩簡介」接到樂府詩常識前面（講義 P.77（一）概述） */
 const TJ = {}; { const p = page('題解·課本'); let cur = null, hp = '';
   [...p.d.childNodes].forEach(n => { const c = n.nodeType === 1 ? n.className : '';
     if (c === 'l7-hp-tag') hp = n.textContent; else if (c === 'l7-sub') { cur = TJ[n.textContent.trim()] = { hp, d: document.createElement('div') }; hp = ''; }
     else if (c === 'l7-jump') return; else if (cur) cur.d.appendChild(n.cloneNode(true)); });
   ['題解', '樂府詩簡介'].forEach(k => { if (!TJ[k]) throw new Error('題解頁沒有這一節：' + k); }); }
-S.push({ ch: '題解', key: '題解', bg: BG.題解, html: kick('題解', TJ.題解.hp) + `<h2>〈${LES[0].split('—')[1]}〉</h2><div class="body">${paras(TJ.題解.d.innerHTML)}</div>` });
+S.push({ ch: '題解', key: '題解', bg: BG.題解, html: kick('題解', TJ.題解.hp, BOOKP.題解) + `<h2>〈${LES[0].split('—')[1]}〉</h2><div class="body">${paras(TJ.題解.d.innerHTML)}</div>` });
 fillSlide('題解', BG.題解, ['A']);
 /* ───────── 詩的流變：變形記（lb/）蓋版開；總表、常識讀課檔 ───────── */
 const dets = l => $$('details.l7d', page(l).d).map(d => ({ k: d.dataset.k, s: $('summary', d), b: $('.l7d-b', d) }));
@@ -322,7 +325,7 @@ const dets = l => $$('details.l7d', page(l).d).map(d => ({ k: d.dataset.k, s: $(
   parts.forEach((r, j) => S.push({ ch: '流變', key: '流變·總表' + (j + 1), bg: BG.流變, wide: true, html: kick(p.head) + `<h2>詩的流變（${'一二三四'[j]}）</h2><div class="body"><table class="l7t">${r.join('')}</table>${j === parts.length - 1 && tail ? paras(tail) : ''}</div>` }));
   const q = page('詩的流變·常識');
   S.push({ ch: '流變', key: '流變·常識', bg: BG.流變, wide: true, html: kick(q.head) + `<h2>${q.head}</h2><div class="body"><table class="l7t">${dets('詩的流變·常識').map(d => `<tr class="st"><th style="white-space:normal">${d.s.innerHTML}</th><td>${d.b.innerHTML}</td></tr>`).join('')}</table></div>` }); }
-S.push({ ch: '名稱', key: '簡介', bg: BG.簡介, html: kick('樂府詩', TJ.樂府詩簡介.hp) + `<h2>樂府詩簡介</h2><div class="body">${paras(TJ.樂府詩簡介.d.innerHTML)}</div>` });
+S.push({ ch: '名稱', key: '簡介', bg: BG.簡介, html: kick('樂府詩', TJ.樂府詩簡介.hp, BOOKP.簡介) + `<h2>樂府詩簡介</h2><div class="body">${paras(TJ.樂府詩簡介.d.innerHTML)}</div>` });
 blockSlides('名稱', '樂府詩·名稱');
 blockSlides('特色', '樂府詩·特色');
 fillSlide('特色', BG.特色, ['B']);
