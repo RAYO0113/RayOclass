@@ -1885,7 +1885,7 @@ function wkRenderSlideHTML(slide) {
           '<button class="tp-b tp-b-note" onclick="tpNotes(this)">注釋 ▸</button>' +
           '<button class="tp-b tp-b-duan" onclick="tpPanel(this,\'pian\')">段旨</button>' +
           '<button class="tp-b tp-b-xi" onclick="tpPanel(this,\'xi\')">段析</button>' +
-          '<button class="tp-b tp-b-fan" onclick="tpPanel(this,\'fan\')">翻譯</button>' +
+          (P.fan ? '<button class="tp-b tp-b-fan" onclick="tpPanel(this,\'fan\')">翻譯</button>' : '') +   /* V255：白話文（沒有翻譯）不放翻譯鈕 */
           (P.ask && !P.askLabel ? '<button class="tp-b tp-b-ask" onclick="tpPanel(this,\'ask\')">本段提問</button>' : '') +
           ((P.qa || []).length && !P.qaHide ? '<button class="tp-b tp-b-ti" onclick="tpPanel(this,\'qa\')">課堂提問</button>' : '') +   /* V126：沒有題目就不放按鈕；V136：qaHide＝題目已併入提問引導的「師」，資料保留、不顯示 */
         '</div><div class="tp-page">' + P.book + '</div></div>' +
@@ -1893,7 +1893,7 @@ function wkRenderSlideHTML(slide) {
         '<div class="tp-main">' +
           '<div class="tp-panel" data-k="pian"><span class="tp-pk">段旨</span>' + (P.pian||'') + '</div>' +
           '<div class="tp-panel" data-k="xi"><span class="tp-pk">段析</span>' + (P.xi||'') + '</div>' +
-          '<div class="tp-panel" data-k="fan"><span class="tp-pk">翻譯</span>' + (P.fan||'') + '</div>' +
+          (P.fan ? '<div class="tp-panel" data-k="fan"><span class="tp-pk">翻譯</span>' + P.fan + '</div>' : '') +
           (P.ask && !P.askLabel ? '<div class="tp-panel tp-askpanel" data-k="ask"><span class="tp-pk">本段提問</span>' + askIn + '</div>' : '') +
           (P.qaHide ? '' : '<div class="tp-panel tp-qapanel" data-k="qa"><span class="tp-pk">課堂提問</span>' + qa + '</div>') +
           '<div class="tp-body">' + lines + yun +
