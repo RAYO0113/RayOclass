@@ -5,188 +5,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>課文畫卷</title>
 <!-- 課文畫卷引擎（2026-11-17 起；前身 cg/index.html 試作）。開法：hj/index.html?l=<設定檔名>，例 ?l=changgan → hj/lessons/changgan.js
-     製作規範：教學系統專案 docs/規格_課文畫卷製作規範.md（每一課要填什麼、從哪裡來、怎麼驗證）。
+     製作規範：教學系統專案 docs/規格_課文畫卷製作規範.md；色票、字級、圓角一律用 ../tokens.css（全站視覺規範），做完跑 python tools/style_check.py hj/index.html 要 0 項。
      ・課文、注釋、字義（課文裡的 {g:}）、通同（{z:}）、補充（{p:}）、句意、修辭、段旨、補充框、課本頁碼：執行時讀課檔 data/lessons/<file>.js 的 textPages，不另抄
      ・課檔沒有的（另外的字義、講義空格、提問與回答、補充互動、分段說明、畫）放在設定檔 window.HJ，每筆附來源
-     ・一卷手卷由右往左；一段一幅畫，段與段互相暈開；每按一步，卷子走到下一處
-     ・老師 11/16～17 定的版面：注釋、字義、句意、修辭都直書緊跟在那一句左邊（學生知道抄在哪），字級與課文只差一點（放大時一起放大），顏色區分；
-       語譯不給學生看，放在講稿（N）；提問都有回答，按下一步才翻出；補充（修辭、年齡）做成互動
-     色票（意思固定，不可混用）：注釋＝赭（照課本注釋編號色 #b97053 加深）、字義＝藍、句意＝綠、修辭＝紫、講義空格＝墨字＋黃底；朱紅只給介面（印章、按鈕、進度）
+     第四版（老師 11/17：「字卡為什麼變小？應該是先秀圖，再切全螢幕字卡，再切回圖」「以 Opus 版為底，但要做出 Fable 版的美感」）：
+     ・一段的順序：整幅畫（畫面上不疊字）→ 全螢幕字卡（紙色蓋過畫，課文大字直書，旁批緊跟在左）→ 讀完切回畫、段旨落款 → 講義空格、提問（全螢幕卡）→ 補充互動（整頁紙）
+     ・字卡：字級依畫面高度自動放大（課文＝旁批的 1.35 倍，即色票的標題級／內文級）；正在讀的那一句是墨色，讀過的退成淡墨（偏灰）留在右邊
+     ・旁批五色（tokens.css 的 --rk-pi-*）：修辭＝朱砂、句意＝石綠、字義＝花青、補充＝茄紫、注釋＝赭石；講義空格＝墨字＋金底
+     ・出現的方式：課文一字一字落下、旁批彈出、修辭蓋印、段旨落款、空格與回答彈出
+     ・語譯不給學生看，放在講稿（N）；「看畫」（P）可以隨時把字卡收起來看畫
      字體＝源流明體。iPad 11（1194×834）為主、手機直式可用。 -->
+<link rel="stylesheet" href="../tokens.css">
 <style>
-:root{
-  --fs:clamp(18px,2.65vw,40px);
-  --paper:247,238,214; --ink:#2a2521; --mute:#6a5a45; --zhu:#a8352a; --zhu-d:#7f241c; --gold:#b08d57; --line:rgba(107,74,43,.32);
-  --card:rgba(255,251,240,.94);
-  --nt:#9a4f2f; --zy:#1d4f91; --yi:#2a5a3a; --rh:#5b3f8a; --hbk:#2a2521; --hbg:rgba(244,204,64,.42);
-  --seal:linear-gradient(135deg,#b83f31,#98291f);
-  --ming:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;
-  --ov:9em; --pz:1.32;   /* 相鄰兩幅畫暈開寬度；課文字＝旁批字的幾倍 */
-}
-body.night{--paper:16,18,26; --ink:#f1e6cb; --mute:#b9a988; --zhu:#e9a45c; --zhu-d:#f0c184; --gold:#d8b878; --line:rgba(240,225,190,.28);
-  --card:rgba(22,24,34,.93); --nt:#f0a982; --zy:#9cc4ff; --yi:#a9dcb2; --rh:#cdb6f2; --hbk:#f1e6cb; --hbg:rgba(190,150,30,.45)}
+:root{--ov:8em; --mt:1.05em}   /* 相鄰兩幅畫暈開寬度；上下裱邊高度 */
 *{box-sizing:border-box}
-@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"RayGenRyuRead";src:url("../fonts/genryumin-read-b.woff2") format("woff2");font-weight:700;font-display:swap}
-html,body{margin:0;height:100%;background:#1a1612;color:var(--ink);font-family:var(--ming);font-size:calc(var(--fs) * var(--zoom,1));-webkit-text-size-adjust:100%;overflow:hidden}
+html,body{margin:0;height:100%;background:rgb(var(--rk-paper));color:var(--rk-ink);font-family:var(--rk-ming);font-size:calc(var(--rk-fs) * var(--zoom,1));-webkit-text-size-adjust:100%;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
-#app{position:fixed;inset:0;display:flex;flex-direction:column;background:rgb(var(--paper))}
-header,footer{display:flex;align-items:center;gap:.4em;padding:.28em .6em;font-size:calc(var(--fs) * .6);background:rgb(var(--paper));z-index:3}
-header{border-bottom:1px solid var(--line)} footer{border-top:1px solid var(--line);padding-bottom:calc(.3em + env(safe-area-inset-bottom))}
-.logo{color:#fbefdc;background:var(--seal);border-radius:4px 7px 4px 8px;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.55);padding:.1em .45em;font-weight:700;letter-spacing:.12em;transform:rotate(-2deg);margin-right:.3em;white-space:nowrap}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:rgb(var(--rk-paper))}
+header,footer{display:flex;align-items:center;gap:.4em;padding:.28em .6em;font-size:calc(var(--rk-fs) * .6);background:rgb(var(--rk-paper));z-index:3}
+header{border-bottom:1px solid var(--rk-line)} footer{border-top:1px solid var(--rk-line);padding-bottom:calc(.3em + env(safe-area-inset-bottom))}
+.logo{color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-seal);box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.55);padding:.1em .45em;font-weight:700;letter-spacing:.12em;transform:rotate(-2deg);margin-right:.3em;white-space:nowrap}
 nav{display:flex;gap:.1em;flex-wrap:wrap}
-nav button{border:0;background:none;padding:.2em .5em;border-radius:6px;color:var(--mute);font-weight:700;letter-spacing:.06em;position:relative}
-nav button.on{color:var(--zhu-d)}
-nav button.on::after{content:'';position:absolute;left:.5em;right:.5em;bottom:0;height:3px;border-radius:50%;background:var(--zhu)}
+nav button{border:0;background:none;padding:.2em .5em;color:var(--rk-mute);font-weight:700;letter-spacing:.06em;position:relative}
+nav button.on{color:var(--rk-ink)}
+nav button.on::after{content:'';position:absolute;left:.5em;right:.5em;bottom:0;height:3px;background:var(--rk-zhu)}
 .sp{flex:1}
-.tool{border:1.5px solid var(--line);background:rgba(var(--paper),.75);border-radius:6px;padding:.2em .7em;white-space:nowrap}
-.tool.on{background:var(--zhu);border-color:var(--zhu);color:#fbefdc}
-.nx{background:var(--seal);border:0;color:#fbefdc;border-radius:6px 9px 5px 10px;padding:.3em 1.1em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),0 2px 5px rgba(0,0,0,.25)}
-footer .pg{min-width:4.5em;text-align:center;color:var(--mute)}
-.lg{display:inline-flex;align-items:center;gap:.25em;margin-left:.55em;color:var(--mute)} .lg::before{content:'';width:.85em;height:.85em;border-radius:2px;background:var(--c)}
+.tool{border:1.5px solid var(--rk-line);background:rgba(var(--rk-paper),.75);border-radius:var(--rk-r);padding:.2em .7em;white-space:nowrap}
+.tool.on{background:var(--rk-zhu);border-color:var(--rk-zhu);color:rgb(var(--rk-paper))}
+.nx{background:var(--rk-seal);border:0;color:var(--rk-seal-ink);border-radius:var(--rk-r-seal);padding:.3em 1.1em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),0 2px 5px rgba(0,0,0,.25)}
+footer .pg{min-width:4.5em;text-align:center;color:var(--rk-mute)}
+.lg{display:inline-flex;align-items:center;gap:.25em;margin-left:.55em;color:var(--c);font-weight:700} .lg::before{content:'';width:.85em;height:.85em;border-radius:var(--rk-r-s);background:var(--c)}
 /* ── 畫軸：上下裱邊（錦＋金線＋綾） ── */
-#view{flex:1;position:relative;overflow:hidden;background:#e9dcbd;min-height:0}
-body.night #view{background:#0e1016}
-#view::before,#view::after{content:'';position:absolute;left:0;right:0;height:1.05em;z-index:4;pointer-events:none;
+#view{flex:1;position:relative;overflow:hidden;background:rgb(var(--rk-paper));min-height:0}
+#view::before,#view::after{content:'';position:absolute;left:0;right:0;height:var(--mt);z-index:4;pointer-events:none;
   background:
-    linear-gradient(to bottom,transparent 0 58%,#c9a764 58% 63%,#6b4f2e 63% 67%,#efe3c6 67% 100%),
-    radial-gradient(circle at 50% 50%,rgba(214,178,110,.35) 0 .09em,transparent .1em) 0 0/.55em .55em,
-    repeating-linear-gradient(45deg,rgba(255,226,170,.08) 0 1px,transparent 1px 5px),
-    repeating-linear-gradient(-45deg,rgba(255,226,170,.08) 0 1px,transparent 1px 5px),
-    linear-gradient(#2d1f14,#4b3422 45%,#2d1f14);
-  box-shadow:0 2px 4px rgba(40,25,10,.35)}
+    linear-gradient(to bottom,transparent 0 58%,var(--rk-jin-gold) 58% 63%,var(--rk-jin-3) 63% 67%,var(--rk-ling) 67% 100%),
+    radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--rk-jin-gold) 40%,transparent) 0 .09em,transparent .1em) 0 0/.55em .55em,
+    repeating-linear-gradient(45deg,color-mix(in srgb,var(--rk-jin-gold) 12%,transparent) 0 1px,transparent 1px 5px),
+    repeating-linear-gradient(-45deg,color-mix(in srgb,var(--rk-jin-gold) 12%,transparent) 0 1px,transparent 1px 5px),
+    linear-gradient(var(--rk-jin-1),var(--rk-jin-2) 45%,var(--rk-jin-1));
+  box-shadow:0 2px 4px rgba(0,0,0,.3)}
 #view::before{top:0}
-#view::after{bottom:0;transform:scaleY(-1);box-shadow:0 2px 4px rgba(40,25,10,.35)}
+#view::after{bottom:0;transform:scaleY(-1)}
 body.night #view::before,body.night #view::after{filter:brightness(.75)}
-#roll{position:absolute;left:0;top:1.05em;bottom:1.05em;width:max-content;display:flex;flex-direction:row-reverse;transform-origin:0 50%;transition:transform 1.5s cubic-bezier(.3,.05,.2,1);will-change:transform}
-#roll.jump{transition:none}
-.lead,.tail{flex:none;display:flex;flex-direction:row-reverse;align-items:center;justify-content:center;gap:1.6em;padding:0 3em;background:rgb(var(--paper));position:relative}
-.lead{min-width:min(46em,92vw)} .tail{width:14em;color:var(--mute);font-size:.8em;letter-spacing:.3em;writing-mode:vertical-rl;padding:0}
-.lead::before{content:'';position:absolute;top:-1.05em;bottom:-1.05em;right:0;width:1.3em;z-index:5;
-  background:linear-gradient(90deg,#7a5a38,#3a2a1a 30%,#a07a4c 55%,#4a3420 80%,#6b4f30);box-shadow:-3px 0 6px rgba(30,20,10,.4)}   /* 軸桿 */
-.lead::after{content:'';position:absolute;top:0;bottom:0;right:1.3em;width:.9em;background:linear-gradient(90deg,transparent,rgba(90,60,30,.12))}
-.lead .tt{writing-mode:vertical-rl;font-size:min(3.6em,13vh);font-weight:900;letter-spacing:.25em;line-height:1.1}
+#roll{position:absolute;left:0;top:var(--mt);bottom:var(--mt);width:max-content;display:flex;flex-direction:row-reverse;transition:transform 1.5s cubic-bezier(.3,.05,.2,1);will-change:transform}
+.jump #roll,.jump .track{transition:none}
+.lead,.tail{flex:none;display:flex;flex-direction:row-reverse;align-items:center;justify-content:center;gap:1.6em;background:rgb(var(--rk-paper));position:relative}
+.lead{width:var(--vw)} .tail{width:14em;color:var(--rk-mute);letter-spacing:.3em;writing-mode:vertical-rl}
+.lead::before{content:'';position:absolute;top:calc(var(--mt) * -1);bottom:calc(var(--mt) * -1);right:0;width:1.3em;z-index:5;
+  background:linear-gradient(90deg,var(--rk-jin-3),var(--rk-jin-1) 30%,var(--rk-gold) 55%,var(--rk-jin-2) 80%,var(--rk-jin-3));box-shadow:-3px 0 6px rgba(0,0,0,.35)}   /* 軸桿 */
+.lead .tt{writing-mode:vertical-rl;font-size:min(3.6em,13vh);font-weight:700;letter-spacing:.25em;line-height:1.1}
 .lead .tt span{display:inline-block;animation:ink .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.25s + .3s)}
 @keyframes ink{from{opacity:0;transform:scale(1.7);filter:blur(10px)}}
-.lead .au{writing-mode:vertical-rl;letter-spacing:.4em;color:var(--mute);font-size:.8em;align-self:flex-end;padding-bottom:3em}
-.lead .au b{display:inline-block;color:#fbefdc;background:var(--seal);border-radius:4px 6px 4px 7px;padding:.3em .12em;margin-top:.5em;letter-spacing:.1em;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5)}
-.pan{position:relative;flex:none;min-width:92vw;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:1.2em;padding:.7em 2.2em 0}   /* 詩箋靠上：畫的人物在下半部，要露出來 */
+.lead .au{writing-mode:vertical-rl;letter-spacing:.4em;color:var(--rk-mute);align-self:flex-end;padding-bottom:3em}
+.lead .au b{display:inline-block;color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-seal);padding:.3em .12em;margin-top:.5em;letter-spacing:.1em;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5)}
+/* 一段一幅畫：整幅露出來，畫面上不疊字卡；左右各多出 --ov，跟隔壁的畫互相暈開 */
+.pan{position:relative;flex:none;width:calc(var(--vw) + var(--ov) * 2)}
 .pan .img,.pan .tint{position:absolute;top:0;bottom:0;left:calc(var(--ov)*-1);right:calc(var(--ov)*-1);pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%)}
-.pan .img{background-repeat:no-repeat;background-size:auto 100%;background-position:50% 100%;transition:background-position 1.5s cubic-bezier(.3,.05,.2,1)}   /* 圖＝畫面高；位置由 placeImgs() 跟著卷子移動（像鏡頭掃過畫） */
-#roll.jump .pan .img{transition:none}
-body.night .pan .img.own{filter:brightness(.42) saturate(.75)}
+.pan .img{background:center bottom/cover no-repeat}
+body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .pan .tint{background:var(--tint);mix-blend-mode:multiply}
 .pan .img.own~.tint{display:none}   /* 疊色只給替代的舊背景用；新圖本身已有色調 */
-.pan>*:not(.img):not(.tint){position:relative;z-index:1}
-/* 題簽：段名＋段旨（整段讀完才落款）＋課本頁碼＋自行分段提示 */
-.tq{flex:none;writing-mode:vertical-rl;display:flex;align-items:center;gap:.5em;background:var(--card);border:1px solid var(--gold);box-shadow:2px 3px 0 rgba(107,74,43,.2);padding:.7em .28em;font-size:.8em;letter-spacing:.18em}
-.tq>*{white-space:nowrap} .tq .sg{color:var(--zhu-d);font-weight:700} .tq .bkp{color:var(--mute);font-size:.8em;letter-spacing:.05em}
-.tq .pn{font-size:1.5em;font-weight:900;color:transparent;border-right:3px solid var(--zhu);background:rgba(168,53,42,.1);padding:.2em .08em;min-height:4.6em;cursor:pointer;transition:color .4s,background .4s}
-.tq .pn.on{color:var(--zhu-d);background:none;animation:stamp .55s cubic-bezier(.3,1.4,.5,1)}
+/* 題簽：段名＋段旨（整段讀完、切回畫時才落款）＋課本頁碼＋自行分段提示 */
+.tq{position:absolute;right:calc(var(--ov) + 1.5em);top:1.1em;z-index:1;writing-mode:vertical-rl;display:flex;align-items:center;gap:.5em;background:var(--rk-card);border:1px solid var(--rk-gold);box-shadow:3px 4px 0 var(--rk-shadow);padding:.7em .3em;letter-spacing:.18em}
+.tq>*{white-space:nowrap} .tq .sg{color:var(--rk-zhu-d);font-weight:700} .tq .bkp{color:var(--rk-mute);font-size:var(--rk-t-xs);letter-spacing:.05em}
+.tq .pn{font-size:var(--rk-t-l);font-weight:700;color:transparent;border-right:3px solid var(--rk-zhu);background:rgba(168,53,42,.1);padding:.2em .08em;min-height:4.6em;cursor:pointer;transition:color .4s,background .4s}
+.tq .pn.on{color:var(--rk-zhu-d);background:none;animation:stamp .55s cubic-bezier(.3,1.4,.5,1)}
 @keyframes stamp{from{opacity:0;transform:scale(2) rotate(-10deg)}}
-.tq .mk{font-size:.75em;color:#fbefdc;background:var(--seal);border-radius:3px;padding:.3em .1em;letter-spacing:.05em}
-#roll.ovw .seam,#roll.ovw .tail,#roll.ovw .lead .askc{display:none} #roll.ovw .pan{min-width:0} #roll.ovw .lead{min-width:0}
-/* 一聯（一句）＝一張詩箋：課文直書＋緊跟在左邊的旁批 */
-.lw{flex:none;opacity:0;transform:translateX(-1.2em);filter:blur(6px);transition:opacity .7s,transform .7s,filter .7s;pointer-events:none}
-.lw.show{opacity:.86;transform:none;filter:none;pointer-events:auto}
-.lw.cur,#roll.whole .lw.show{opacity:1}
-.lian{display:flex;flex-direction:row-reverse;align-items:stretch;gap:.4em;background:var(--card);border:1px solid var(--line);border-radius:3px;box-shadow:3px 5px 14px rgba(60,40,20,.28);padding:.55em .55em}
-.lw.cur .lian{box-shadow:0 0 0 2px var(--gold),4px 7px 18px rgba(60,40,20,.38)}
-.col{flex:none;writing-mode:vertical-rl;white-space:nowrap;font-size:calc(var(--pz) * 1em);font-weight:700;line-height:1.3;letter-spacing:.06em;cursor:pointer;align-self:flex-start}
+.tq .mk{font-size:var(--rk-t-xs);color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-s);padding:.3em .1em;letter-spacing:.05em}
+#roll.ovw{--ov:2em} #roll.ovw .lead,#roll.ovw .tail,#roll.ovw .tq{display:none} #roll.ovw .pan{width:calc(var(--vw) / var(--n))}
+/* ── 全螢幕字卡：紙色蓋過畫（畫在後面隱約透出來），四周一圈版框 ── */
+#stage{position:absolute;left:0;right:0;top:var(--mt);bottom:var(--mt);z-index:2;opacity:0;visibility:hidden;transition:opacity .8s,visibility 0s .8s;
+  background:rgba(var(--rk-paper),.93);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#stage.on{opacity:1;visibility:visible;transition:opacity .8s}
+#stage::before{content:'';position:absolute;inset:.3em;border:1px solid var(--rk-gold);outline:1px solid var(--rk-line);outline-offset:3px;pointer-events:none}
+.seg{position:absolute;left:.7rem;right:.7rem;top:.9rem;bottom:.9rem;overflow:hidden;display:none;font-size:var(--sf,1em)}
+.seg.act{display:block}
+.track{position:absolute;left:0;top:0;bottom:0;width:max-content;display:flex;flex-direction:row-reverse;transition:transform 1.1s cubic-bezier(.3,.05,.2,1);will-change:transform}
+/* 一句＝一欄：課文直書（大字）＋緊跟在左邊的旁批。正在讀的是墨色，讀過的退成淡墨，還沒讀的不出現 */
+.lw{flex:none;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:.3em;padding:0 .6em;border-right:1px solid var(--rk-line);
+  opacity:0;transform:translateX(-1em);filter:blur(6px);transition:opacity .7s,transform .7s,filter .7s,color .7s;pointer-events:none}
+.lw.show{opacity:.45;transform:none;filter:none;pointer-events:auto;color:var(--rk-mute)}
+.lw.cur{opacity:1;color:var(--rk-ink)}
+.col{flex:none;writing-mode:vertical-rl;white-space:nowrap;font-size:var(--rk-t-l);font-weight:700;line-height:1.3;letter-spacing:.06em;cursor:pointer}
 .col i{font-style:normal;display:inline-block}
-.col i.pu{color:var(--mute)} .col i.gap{height:.3em}
-.lw.fresh .col i{animation:write .5s both;animation-delay:calc(var(--k)*95ms + .35s)}
+.col i.pu{color:var(--rk-mute)} .col i.gap{height:.3em}
+.lw.fresh .col i{animation:write .5s both;animation-delay:calc(var(--k)*95ms + .5s)}
 @keyframes write{from{opacity:0;transform:translateY(-.3em) scale(1.3);filter:blur(4px)}}
-/* 課文裡有注釋的詞：右邊赭線＋課本注釋編號；有字義的字：右邊藍線 */
-.nw{border-right:3px solid var(--nt)} .nw sup{font-size:.4em;color:var(--nt);vertical-align:baseline;letter-spacing:0;line-height:1;font-weight:900}
-.gw{box-shadow:inset -3px 0 0 var(--zy)}
-.col i.rq{color:var(--rh);background:color-mix(in srgb,var(--rh) 14%,transparent);box-shadow:inset 3px 0 0 var(--rh)}
-/* 旁批：位置先留好（有顏色的空框），按了才出現字 */
-.an{flex:none;writing-mode:vertical-rl;font-size:1em;line-height:1.5;letter-spacing:.03em;padding:.3em .2em;border-radius:3px;border-top:.25em solid var(--c);background:color-mix(in srgb,var(--c) 8%,transparent);color:var(--c);cursor:pointer;position:relative;transition:background .4s}
-.an>span{transition:opacity .5s,filter .5s}
+/* 課文裡有注釋的詞：右邊赭線＋課本注釋編號；有字義的字：右邊藍線；補充：右邊紫線 */
+.nw{border-right:3px solid var(--rk-pi-nt)} .nw sup{font-size:.4em;color:var(--rk-pi-nt);vertical-align:baseline;letter-spacing:0;line-height:1;font-weight:700}
+.gw{box-shadow:inset -3px 0 0 var(--rk-pi-zy)} .bw{box-shadow:inset -3px 0 0 var(--rk-pi-bu)}
+.col i.rq{color:var(--rk-pi-rh);background:color-mix(in srgb,var(--rk-pi-rh) 14%,transparent);box-shadow:inset 3px 0 0 var(--rk-pi-rh)}
+/* 旁批：位置先留好（有顏色的斜紋空框），按了才彈出字 */
+.an{flex:none;height:var(--th);writing-mode:vertical-rl;line-height:var(--rk-lh);letter-spacing:.03em;padding:.3em 0;border-radius:var(--rk-r-s);border-top:.2em solid var(--c);
+  background:color-mix(in srgb,var(--c) 7%,transparent);color:var(--c);cursor:pointer;transition:background .4s}
+.an>span{display:block;height:calc(var(--th) - .8em);transition:opacity .4s,filter .4s}
 .an.off>span{opacity:0;filter:blur(5px)}
 .an.off{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 15%,transparent) 0 .5em,color-mix(in srgb,var(--c) 6%,transparent) .5em 1em)}
-.an .tg{display:inline-block;font-weight:900;color:#fff;background:var(--c);border-radius:3px;padding:.12em .04em;margin-bottom:.3em;letter-spacing:0;font-size:.8em;line-height:1.2}
-body.night .an .tg{color:#14161c}
-.an b{font-weight:900} .an .q{margin-top:.35em}
-.an.nt{--c:var(--nt)} .an.zy{--c:var(--zy)} .an.mean{--c:var(--yi)} .an.rhet{--c:var(--rh)}
-.an.rhet.act{box-shadow:0 0 0 2px var(--rh)}
-/* 段與段之間的留白：段落透視（講義空格）、提問、補充 */
-.seam{flex:none;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:1em;padding:0 1.2em}
-.card{flex:none;width:15em;max-height:calc(100% - 1em);overflow:auto;background:var(--card);border-top:5px solid var(--zhu);border-radius:3px;box-shadow:3px 5px 16px rgba(60,40,20,.3);padding:.55em .9em .7em;line-height:1.6;opacity:0;transform:translateY(14px);filter:blur(6px);transition:opacity .7s .3s,transform .7s .3s,filter .7s .3s;pointer-events:none}
-.card.show{opacity:1;transform:none;filter:none;pointer-events:auto}
-.card.cur{box-shadow:0 0 0 2px var(--gold),3px 5px 16px rgba(60,40,20,.3)}
-.card small.k{display:block;font-size:.62em;letter-spacing:.25em;color:var(--mute);margin-bottom:.2em}
-.card .q{font-weight:700;font-size:1.08em}
-.card .src{display:block;font-size:.58em;color:var(--mute);margin-top:.5em;letter-spacing:.02em;line-height:1.5}
-.card .ans{margin-top:.5em;padding:.35em .7em;border-left:4px solid var(--yi);background:color-mix(in srgb,var(--yi) 9%,transparent);color:var(--yi);border-radius:0 6px 6px 0;font-size:.92em}
+.lw.cur .an:not(.off)>span{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes pop{from{opacity:0;transform:translateY(-.5em) scale(.85);filter:blur(4px)}}
+.an .tg{display:inline-block;font-weight:700;color:rgb(var(--rk-paper));background:var(--c);border-radius:var(--rk-r-s);padding:.25em 0;margin-bottom:.5em;letter-spacing:0;font-size:var(--rk-t-xs);line-height:1.5}
+.an b{font-weight:700} .an b.w{margin-bottom:.6em} .an .q{margin-top:.35em}   /* 直書的冒號會橫躺，詞條和解釋之間改用空一格 */
+.an.nt{--c:var(--rk-pi-nt)} .an.zy{--c:var(--rk-pi-zy)} .an.mean{--c:var(--rk-pi-yi)} .an.rhet{--c:var(--rk-pi-rh)} .an.bu{--c:var(--rk-pi-bu);font-weight:700}
+.an.rhet .tg{border-radius:var(--rk-r-seal);transform:rotate(-4deg);box-shadow:inset 0 0 0 1.5px rgba(var(--rk-paper),.55)}   /* 修辭＝蓋一方小印 */
+.lw.cur .an.rhet:not(.off) .tg{animation:seal .6s cubic-bezier(.3,1.5,.5,1) .15s both}
+@keyframes seal{from{opacity:0;transform:scale(2.2) rotate(-16deg)}}
+.an.rhet.act{box-shadow:0 0 0 2px var(--rk-pi-rh)}
+/* 全螢幕卡：段落透視（講義空格）、提問與回答 */
+.cards{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.card{position:absolute;width:min(32em,90%);max-height:88%;overflow:auto;background:var(--rk-card);border:1px solid var(--rk-line);border-top:5px solid var(--c,var(--rk-zhu));border-radius:var(--rk-r);
+  box-shadow:3px 4px 0 var(--rk-shadow),0 10px 30px rgba(0,0,0,.18);padding:.7em 1.3em 1em;line-height:var(--rk-lh);
+  opacity:0;transform:translateY(22px) scale(.96);filter:blur(6px);transition:opacity .55s,transform .6s cubic-bezier(.3,1.35,.5,1),filter .55s;pointer-events:none}
+.card.act{opacity:1;transform:none;filter:none;pointer-events:auto}
+.card small.k{display:block;font-size:var(--rk-t-xs);letter-spacing:.25em;color:var(--rk-mute)}
+.card .q{font-weight:700;font-size:var(--rk-t-l);line-height:1.6}
+.card .src{display:block;font-size:var(--rk-t-xs);color:var(--rk-mute);margin-top:.8em;line-height:1.6}
+.card .ans{margin-top:.6em;padding:.35em .9em;border-left:4px solid var(--rk-yi-bd);background:var(--rk-yi-bg);color:var(--rk-yi);border-radius:0 var(--rk-r) var(--rk-r) 0}
 .card .ans.off{display:none}
-.card .ans b{margin-right:.3em}
-.card.hbc{border-top-color:#c9a227} .card.exc{border-top-color:var(--rh)}
-.opts{display:grid;gap:.3em;margin-top:.4em}
-.opts button{text-align:left;border:1.5px solid var(--line);background:rgba(var(--paper),.9);border-radius:6px;padding:.15em .6em}
-.opts button b{color:var(--zhu-d);margin-right:.4em}
-.opts button.ok{background:#3f6b52;border-color:#3f6b52;color:#fff}.opts button.ok b{color:#fff}
-.opts button.no{background:#b0796a;border-color:#b0796a;color:#fff;animation:shake .35s}.opts button.no b{color:#fff}
+.card .ans:not(.off){animation:rise .55s cubic-bezier(.3,1.4,.5,1)}
+@keyframes rise{from{opacity:0;transform:translateY(.8em) scale(.9)}}
+.card .ans b{margin-right:.5em}
+.card.hbc{--c:var(--rk-leaf-flat);font-size:var(--rk-t-l)} .card.hbc small.k,.card.hbc .src{font-size:.45em}
+.opts{display:grid;gap:.4em;margin-top:.5em}
+.opts button{text-align:left;border:1.5px solid var(--rk-line);background:rgba(var(--rk-paper),.9);border-radius:var(--rk-r);padding:.1em .7em}
+.opts button b{color:var(--rk-zhu-d);margin-right:.5em}
+.opts button.ok{background:var(--rk-ok);border-color:var(--rk-ok);color:var(--rk-seal-ink);animation:bump .45s cubic-bezier(.3,1.6,.5,1)}.opts button.ok b{color:var(--rk-seal-ink)}
+.opts button.no{background:var(--rk-no);border-color:var(--rk-no);color:var(--rk-seal-ink);animation:shake .35s}.opts button.no b{color:var(--rk-seal-ink)}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.hbl{margin:.15em 0}
-.hb{display:inline-block;min-width:3.2em;text-align:center;color:transparent;background:var(--hbg);border-bottom:2px solid var(--hbk);border-radius:3px 3px 0 0;padding:0 .2em;margin:0 .1em;font-weight:900;cursor:pointer;position:relative;transition:color .35s}
-.hb::before{content:attr(data-n);position:absolute;left:-.1em;top:-.85em;font-size:.55em;color:var(--mute);font-weight:400}
-.hb.on{color:var(--hbk)}
-.go{margin-top:.5em;border:0;background:var(--seal);color:#fbefdc;border-radius:5px;padding:.2em .9em;font-weight:700}
+@keyframes bump{from{transform:scale(.9)}60%{transform:scale(1.05)}}
+.hbl{margin:.2em 0}
+.hb{display:inline-block;min-width:3.2em;text-align:center;color:transparent;background:color-mix(in srgb,var(--rk-leaf-flat) 45%,transparent);border-bottom:2px solid var(--rk-ink);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .2em;margin:0 .1em;font-weight:700;cursor:pointer;position:relative;line-height:1.5}
+.hb::before{content:attr(data-n);position:absolute;left:-.1em;top:-1em;font-size:.45em;color:var(--rk-mute);font-weight:400}
+.hb.on{color:var(--rk-ink);animation:hbpop .45s cubic-bezier(.3,1.7,.5,1)}
+@keyframes hbpop{from{transform:scale(1.5)}}
 /* 講稿（老師看；預設不顯示） */
-#note{position:absolute;left:1.5em;right:1.5em;bottom:1.3em;z-index:6;max-height:38%;overflow:auto;display:none;background:rgba(24,21,18,.93);color:#f3e9d2;font-size:.68em;line-height:1.75;padding:.5em 1.1em .7em;border-top:3px solid var(--gold);border-radius:4px;box-shadow:0 -6px 20px rgba(0,0,0,.3)}
-#note.on{display:block} #note h4{margin:0 0 .15em;font-size:.8em;letter-spacing:.2em;color:#d8b878} #note p{margin:.1em 0}
-#cap{position:absolute;left:50%;bottom:1.5em;transform:translateX(-50%);z-index:3;background:var(--card);border:1px solid var(--gold);border-radius:4px;padding:.2em 1em;font-size:.75em;max-width:94%;text-align:center;box-shadow:2px 3px 0 rgba(107,74,43,.15);transition:opacity .5s}
+#note{position:absolute;left:1.5em;right:1.5em;bottom:1.4em;z-index:6;max-height:38%;overflow:auto;display:none;background:rgba(0,0,0,.88);color:var(--rk-seal-ink);font-size:.68em;line-height:1.75;padding:.5em 1.1em .7em;border-top:3px solid var(--rk-leaf-flat);border-radius:var(--rk-r);box-shadow:0 -6px 20px rgba(0,0,0,.3)}
+#note.on{display:block} #note h4{margin:0 0 .15em;letter-spacing:.2em;color:var(--rk-leaf-flat)} #note p{margin:.1em 0}
+#cap{position:absolute;left:50%;bottom:1.6em;transform:translateX(-50%);z-index:3;background:var(--rk-card);border:1px solid var(--rk-gold);border-radius:var(--rk-r);padding:.15em 1em;font-size:.75em;max-width:94%;text-align:center;box-shadow:3px 4px 0 var(--rk-shadow);transition:opacity .5s}
 #cap:empty{opacity:0}
 #cap i{font-style:normal;display:inline-flex;align-items:center;gap:.35em;font-weight:700;margin:0 .5em} #cap i::before{content:'';width:.8em;height:.8em;border-radius:50%;background:var(--c)}
 /* ── 整頁紙：補充互動 ── */
-#sheet{position:fixed;inset:0;z-index:20;display:none;background:rgba(20,16,12,.55);padding:2.5vh 3vw}
+#sheet{position:fixed;inset:0;z-index:20;display:none;background:rgba(0,0,0,.55);padding:2.5vh 3vw}
 #sheet.on{display:flex}
-#sheet .pp{margin:auto;width:min(46em,100%);max-height:100%;overflow:auto;background:rgb(var(--paper));border:3px double var(--mute);border-radius:4px;padding:.6em 1.1em 1em;font-size:.8em;line-height:1.6;animation:rise .4s both}
-@keyframes rise{from{opacity:0;transform:translateY(20px)}}
-#sheet h3{margin:0 0 .4em;display:flex;align-items:center;gap:.5em;color:var(--rh);letter-spacing:.1em}
+#sheet .pp{--c:var(--rk-pi-bu);margin:auto;width:min(46em,100%);max-height:100%;overflow:auto;background:rgb(var(--rk-paper));border:3px double var(--rk-mute);border-radius:var(--rk-r);padding:.6em 1.1em 1em;font-size:.8em;line-height:1.6;animation:sheet .45s cubic-bezier(.3,1.3,.5,1) both}
+#sheet .pp.rh{--c:var(--rk-pi-rh)}
+@keyframes sheet{from{opacity:0;transform:translateY(24px) scale(.96)}}
+#sheet h3{margin:0 0 .4em;display:flex;align-items:center;gap:.5em;color:var(--c);letter-spacing:.1em}
 #sheet h3 span{flex:1}
 #sheet table{border-collapse:collapse;width:100%;margin:.3em 0}
-#sheet th,#sheet td{border:1px solid var(--line);padding:.3em .55em;vertical-align:top;text-align:left}
-#sheet th{background:color-mix(in srgb,var(--rh) 10%,rgba(var(--paper),.9));color:var(--rh);white-space:nowrap}
-#sheet tr.hl td{background:color-mix(in srgb,var(--zhu) 9%,transparent)} #sheet tr.hl td:first-child{box-shadow:inset 4px 0 0 var(--zhu)}
-#sheet .tp-ruby{display:inline-block;font-size:.55em;font-weight:400;color:var(--mute);vertical-align:middle;margin:0 .15em}
+#sheet th,#sheet td{border:1px solid var(--rk-line);padding:.3em .55em;vertical-align:top;text-align:left}
+#sheet th{background:color-mix(in srgb,var(--c) 10%,rgba(var(--rk-paper),.9));color:var(--c);white-space:nowrap}
+#sheet tr.hl td{background:color-mix(in srgb,var(--rk-zhu) 9%,transparent)} #sheet tr.hl td:first-child{box-shadow:inset 4px 0 0 var(--rk-zhu)}
+#sheet .tp-ruby{display:inline-block;font-size:.55em;font-weight:400;color:var(--rk-mute);vertical-align:middle;margin:0 .15em}
 #sheet .tp-ruby-col{display:inline-block} #sheet .tp-ruby-char,#sheet .tp-ruby-tone{display:inline}
-.def{border-left:4px solid var(--rh);background:color-mix(in srgb,var(--rh) 7%,transparent);padding:.35em .8em;border-radius:0 6px 6px 0}
-.qz{margin-top:.6em} .qz .qq{font-size:1.25em;font-weight:700;line-height:1.7;padding:.4em .8em;background:var(--card);border:1px solid var(--line);border-radius:6px;min-height:3.4em}
-.qz .qq small{display:block;font-size:.55em;color:var(--mute);font-weight:400}
-.qz .ks{display:flex;gap:.5em;margin:.5em 0;flex-wrap:wrap} .qz .ks button{flex:1;min-width:5em;border:2px solid var(--rh);background:rgba(var(--paper),.9);color:var(--rh);border-radius:8px;padding:.3em;font-weight:900;font-size:1.05em}
-.qz .ks button.ok{background:#3f6b52;border-color:#3f6b52;color:#fff} .qz .ks button.no{background:#b0796a;border-color:#b0796a;color:#fff;animation:shake .35s}
-.qz .fb{min-height:1.6em;color:var(--mute)} .qz .dots{display:flex;gap:.25em;flex-wrap:wrap}
-.qz .dots i{width:.55em;height:.55em;border-radius:50%;background:var(--line)} .qz .dots i.ok{background:#3f6b52} .qz .dots i.no{background:#b0796a} .qz .dots i.cur{outline:2px solid var(--rh);outline-offset:2px}
-.tb-ctl{display:flex;gap:.4em;align-items:center;flex-wrap:wrap;font-size:.85em;color:var(--mute)}
-td.blk{cursor:pointer;color:transparent;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--rh) 12%,transparent) 0 .5em,transparent .5em 1em)}
-td.blk.on{color:inherit;background:none} td.blk:not(.on) *{visibility:hidden}
-.fnote{font-size:.8em;color:var(--mute);border-top:1px dashed var(--line);margin-top:.6em;padding-top:.4em}
+.def{border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 7%,transparent);padding:.35em .8em;border-radius:0 var(--rk-r) var(--rk-r) 0}
+.qz{margin-top:.6em} .qz .qq{font-size:var(--rk-t-l);font-weight:700;line-height:1.7;padding:.4em .8em;background:var(--rk-card);border:1px solid var(--rk-line);border-radius:var(--rk-r);min-height:3.4em}
+.qz .qq small{display:block;font-size:.55em;color:var(--rk-mute);font-weight:400}
+.qz .ks{display:flex;gap:.5em;margin:.5em 0;flex-wrap:wrap} .qz .ks button{flex:1;min-width:5em;border:2px solid var(--c);background:rgba(var(--rk-paper),.9);color:var(--c);border-radius:var(--rk-r);padding:.3em;font-weight:700}
+.qz .ks button.ok{background:var(--rk-ok);border-color:var(--rk-ok);color:var(--rk-seal-ink);animation:bump .45s cubic-bezier(.3,1.6,.5,1)} .qz .ks button.no{background:var(--rk-no);border-color:var(--rk-no);color:var(--rk-seal-ink);animation:shake .35s}
+.qz .fb{min-height:1.6em;color:var(--rk-mute)} .qz .dots{display:flex;gap:.25em;flex-wrap:wrap}
+.qz .dots i{width:.55em;height:.55em;border-radius:50%;background:var(--rk-line)} .qz .dots i.ok{background:var(--rk-ok)} .qz .dots i.no{background:var(--rk-no)} .qz .dots i.cur{outline:2px solid var(--c);outline-offset:2px}
+.tb-ctl{display:flex;gap:.4em;align-items:center;flex-wrap:wrap;color:var(--rk-mute)}
+td.blk{cursor:pointer;color:transparent;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 12%,transparent) 0 .5em,transparent .5em 1em)}
+td.blk.on{color:inherit;background:none;animation:hbpop .4s cubic-bezier(.3,1.7,.5,1)} td.blk:not(.on) *{visibility:hidden}
+.fnote{font-size:.8em;color:var(--rk-mute);border-top:1px dashed var(--rk-line);margin-top:.6em;padding-top:.4em}
 @media (max-width:760px){
-  :root{--fs:16px;--ov:5em}
-  header{font-size:12px}footer{font-size:12.5px} .logo,.lgs{display:none}
-  .pan{padding:0 1.2em;gap:.8em} .card{width:13em}
-  .lead{gap:1em;padding:0 1.6em}
+  :root{--ov:4em}
+  header,footer{font-size:calc(var(--rk-fs) * .72)} .logo,.lgs{display:none}
+  .lead{gap:1em} .tq{right:calc(var(--ov) + .6em)}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:0s;animation-duration:0s;animation-delay:0s}}
 </style>
 </head>
 <body>
 <div id="app">
   <header><span class="logo" id="logo">課文畫卷</span><nav id="nav"></nav><span class="sp"></span>
+    <button class="tool" id="bPeek" title="看畫（P）：把字卡收起來，看整幅畫；再按一次回字卡">看畫</button>
     <button class="tool" id="bMode" title="細讀：每一句依序出注釋字義、句意修辭／通讀：只出課文，其餘點了才出現">細讀</button>
     <button class="tool" id="bSm" title="字小一點">A−</button><button class="tool" id="bLg" title="字大一點">A＋</button>
     <button class="tool" id="bNote" title="講稿（N）：語譯等，只給老師看">講稿</button>
     <button class="tool" id="bNight" title="日／夜">☾</button>
     <button class="tool" id="bFull" title="全螢幕">⛶</button>
     <button class="tool" id="bClose" hidden>✕ 回課文</button></header>
-  <div id="view"><div id="roll" class="jump"></div><div id="cap"></div><div id="note"></div></div>
+  <div id="view" class="jump"><div id="roll"></div><div id="stage"></div><div id="cap"></div><div id="note"></div></div>
   <footer><button class="tool" id="bPrev">← 上一步</button><span class="pg" id="pg"></span><button class="nx" id="bNext">下一步 ▸</button>
-    <span class="sp"></span><span class="lgs"><span class="lg" style="--c:var(--nt)">注釋</span><span class="lg" style="--c:var(--zy)">字義</span><span class="lg" style="--c:var(--yi)">句意</span><span class="lg" style="--c:var(--rh)">修辭</span><span class="lg" style="--c:#c9a227">講義空格</span></span></footer>
+    <span class="sp"></span><span class="lgs"><span class="lg" style="--c:var(--rk-pi-nt)">注釋</span><span class="lg" style="--c:var(--rk-pi-zy)">字義</span><span class="lg" style="--c:var(--rk-pi-yi)">句意</span><span class="lg" style="--c:var(--rk-pi-rh)">修辭</span><span class="lg" style="--c:var(--rk-pi-bu)">補充</span><span class="lg" style="--c:var(--rk-leaf-flat)">講義空格</span></span></footer>
 </div>
 <div id="sheet"><div class="pp"><h3><span id="shT"></span><button class="tool" id="shX">✕ 回畫卷</button></h3><div id="shB"></div></div></div>
 <script>
@@ -194,7 +199,7 @@ td.blk.on{color:inherit;background:none} td.blk:not(.on) *{visibility:hidden}
 /* ───────── 載入：設定檔 → 課檔 → 開始 ───────── */
 const KEY = (new URLSearchParams(location.search).get('l') || 'changgan').replace(/[^\w-]/g, '');
 const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error('載不到 ' + src)); document.head.appendChild(s); });
-const fail = m => { document.body.innerHTML = `<p style="color:#fff;padding:2em;font-size:20px">${m}</p>`; };
+const fail = m => { document.body.innerHTML = `<p style="padding:2em">${m}</p>`; };
 load(`lessons/${KEY}.js`).then(() => load(`../data/lessons/${window.HJ.file}.js`)).then(start).catch(e => { console.error(e); fail(e.message); });
 
 function start() {
@@ -220,7 +225,7 @@ function parse(t, ctx = {}, gl = []) {
     for (let k = 0; k < rest.length; k++) { if (rest[k] === '{') d++; else if (rest[k] === '}') d--; else if (rest[k] === '|' && !d) { bar = k; break; } }
     const w = bar < 0 ? rest : rest.slice(0, bar), info = bar < 0 ? '' : rest.slice(bar + 1);
     if (tag === 'n') out.push(...parse(info, { ...ctx, n: +w }, gl));
-    else if (tag === 'g' || tag === 'z' || tag === 'p') { const id = gl.length; gl.push({ kind: { g: '字義', z: '通同', p: '補充' }[tag], w: strip(w), d: info }); out.push(...parse(w, { ...ctx, g: id }, gl)); }
+    else if (tag === 'g' || tag === 'z' || tag === 'p') { const id = gl.length; gl.push({ kind: { g: '字義', z: '通同', p: '補充' }[tag], cls: tag === 'p' ? 'bu' : 'zy', w: strip(w), d: info }); out.push(...parse(w, { ...ctx, g: id }, gl)); }
     else if (tag === 'y') out.push(...parse(w, ctx, gl));
     else throw new Error('不認得的課文標記 {' + tag + ':…}');
     i = j + 1;
@@ -236,27 +241,29 @@ function columns(chars) {
   if (col.length) cols.push(col); return cols;
 }
 const LN = {};   /* '段-句' → { plain, line, notes, gl, zy } */
+let MAXLEN = 1;  /* 全課最長的一行有幾個字：字卡字級照它算 */
 const tagH = t => `<span class="tg">${t}</span>`;
 function lianHtml(p, pi, li) {
   const line = p.lines[li], gl = [], chars = parse(line.text, {}, gl), k0 = pi + '-' + li;
   const note = n => { const t = p.notes[n - p.noteStart]; if (!t) throw new Error(`第 ${pi + 1} 段找不到注釋 ${n}`); return { n, w: t[0], d: t[1] }; };
-  const plain = chars.map(x => x.c).join(''), zy = (ZY[k0] || []).map(([w, d]) => ({ kind: '字義', w, d, cfg: 1 }));
+  const plain = chars.map(x => x.c).join(''), zy = (ZY[k0] || []).map(([w, d]) => ({ kind: '字義', cls: 'zy', w, d }));
   zy.forEach(z => { if (!plain.includes(z.w)) console.error(`字義「${z.w}」在 ${k0} 這一句找不到`); });
   LN[k0] = { plain, line, gl, zy, notes: [...new Set(chars.filter(x => x.n).map(x => x.n))].map(note), chars };
   let k = 0;
   const html = columns(chars).map(col => {
     let h = '', on = 0; const ns = [], gs = [];
+    MAXLEN = Math.max(MAXLEN, col.filter(x => x.c !== ' ').length);
     col.forEach(x => {
       if (x.n !== on) { if (on) h += '</span>'; if (x.n) { h += `<span class="nw" data-n="${x.n}">${ns.includes(x.n) ? '' : `<sup>${CIRC[x.n - 1] || x.n}</sup>`}`; if (!ns.includes(x.n)) ns.push(x.n); } on = x.n; }
       if (x.g != null && !gs.includes(x.g)) gs.push(x.g);
-      const zyHit = zy.some(z => z.w.includes(x.c));
-      h += x.c === ' ' ? `<i class="gap" data-k="${k}"></i>` : `<i class="${PU.includes(x.c) ? 'pu' : ''}${x.g != null || zyHit ? ' gw' : ''}" data-k="${k}" style="--k:${k}">${x.c}</i>`; k++;
+      const mark = x.g != null ? (gl[x.g].cls === 'bu' ? ' bw' : ' gw') : zy.some(z => z.w.includes(x.c)) ? ' gw' : '';
+      h += x.c === ' ' ? `<i class="gap" data-k="${k}"></i>` : `<i class="${PU.includes(x.c) ? 'pu' : ''}${mark}" data-k="${k}" style="--k:${k}">${x.c}</i>`; k++;
     });
     if (on) h += '</span>';
-    /* 這一行的注釋、字義緊跟在它左邊 */
+    /* 這一行的注釋、字義、補充緊跟在它左邊 */
     const txt = col.map(x => x.c).join('');
-    const nH = ns.map(note).map(n => `<div class="an nt" data-t="note"><span>${tagH('注釋')}<b>${CIRC[n.n - 1] || n.n}${n.w}</b>：${n.d}</span></div>`).join('');
-    const gH = gs.map(g => gl[g]).concat(zy.filter(z => txt.includes(z.w))).map(g => `<div class="an zy" data-t="note"><span>${tagH(g.kind)}<b>${g.w}</b>：${g.d}</span></div>`).join('');
+    const nH = ns.map(note).map(n => `<div class="an nt" data-t="note"><span>${tagH('注釋')}<b class="w">${CIRC[n.n - 1] || n.n}${n.w}</b>${n.d}</span></div>`).join('');
+    const gH = gs.map(g => gl[g]).concat(zy.filter(z => txt.includes(z.w))).map(g => `<div class="an ${g.cls}" data-t="note"><span>${tagH(g.kind)}<b class="w">${g.w}</b>${g.d}</span></div>`).join('');
     return `<span class="col">${h}</span>${nH}${gH}`;
   }).join('');
   const mean = line.mean ? `<div class="an mean" data-t="mean"><span>${tagH('句意')}${line.mean}</span></div>` : '';
@@ -264,48 +271,55 @@ function lianHtml(p, pi, li) {
     return `<div class="an rhet" data-t="mean" data-r="${j}"><span>${tagH('修辭')}<b>${r[0]}</b>${q !== plain ? `<span class="q">「${q}」</span>` : ''}${sh ? `<span class="q">${sh}</span>` : ''}</span></div>`; }).join('');
   return html + mean + rhet;
 }
-/* ── 段與段之間的卡片 ── */
-const CARDS = [];   /* {id, kind:'hb'|'ask'|'ext', p, html} */
+/* ── 全螢幕卡：講義空格、提問（補充互動另開整頁紙） ── */
+const CARDS = [], CH = [];   /* CARDS：{id, kind:'hb'|'ask'|'ext', p}；CH：卡片的 HTML */
 let nHb = 0;
 const hbHtml = s => s.replace(/\{([^{}]+)\}/g, (_, w) => `<span class="hb" data-n="${CIRC[nHb++] || ''}">${w}</span>`);
 function askCard(a, where, j) {
   const id = `ask-${where}-${j}`;
   const body = a.kind === 'choice' ? `<div class="opts">${a.opts.map((o, i) => `<button data-i="${i}"><b>${'甲乙丙丁戊'[i]}</b>${o}</button>`).join('')}</div>` : '';
   CARDS.push({ id, kind: 'ask', p: where, a });
-  return `<div class="card askc" id="${id}"><small class="k">想一想${a.kind === 'choice' ? '・選一選' : ''}</small><div class="q">${a.q}</div>${body}
-    <div class="ans off"><b>${a.kind === 'choice' ? '答案' : '參考回答'}</b>${a.a}</div><span class="src">${a.by ? '【' + a.by + '】' : ''}${a.src || ''}</span></div>`;
+  CH.push(`<div class="card askc" id="${id}"><small class="k">想一想${a.kind === 'choice' ? '・選一選' : ''}</small><div class="q">${a.q}</div>${body}
+    <div class="ans off"><b>${a.kind === 'choice' ? '答案' : '參考回答'}</b>${a.a}</div><span class="src">${a.by ? '【' + a.by + '】' : ''}${a.src || ''}</span></div>`);
 }
-function seamHtml(pi) {
-  let h = '';
+function seamCards(pi) {
   if (HB[pi]) { const id = 'hb-' + pi; CARDS.push({ id, kind: 'hb', p: pi });
-    h += `<div class="card hbc" id="${id}"><small class="k">段落透視・講義空格</small>${HB[pi].map(s => `<div class="hbl">${hbHtml(s)}</div>`).join('')}<span class="src">${H.hbSrc || ''}</span></div>`; }
-  (ASKS[pi] || []).forEach((a, j) => { h += askCard(a, pi, j); });
-  (EXT[pi] || []).forEach((x, j) => { const id = `ext-${pi}-${j}`; CARDS.push({ id, kind: 'ext', p: pi, x });
-    h += `<div class="card exc" id="${id}"><small class="k">補充・互動</small><div class="q">${x.type === 'rhetQuiz' ? x.name + '：先看定義，再現場判斷' : x.box}</div><button class="go" data-ext="${id}">打開 ▸</button></div>`; });
-  return h ? `<div class="seam">${h}</div>` : '';
+    CH.push(`<div class="card hbc" id="${id}"><small class="k">段落透視・講義空格（點空格揭曉）</small>${HB[pi].map(s => `<div class="hbl">${hbHtml(s)}</div>`).join('')}<span class="src">${H.hbSrc || ''}</span></div>`); }
+  (ASKS[pi] || []).forEach((a, j) => askCard(a, pi, j));
+  (EXT[pi] || []).forEach((x, j) => CARDS.push({ id: `ext-${pi}-${j}`, kind: 'ext', p: pi, x }));
 }
-/* ───────── 建卷 ───────── */
-const roll = $('#roll'), view = $('#view'), cap = $('#cap');
+/* ───────── 建卷（只有畫）與字卡 ───────── */
+const view = $('#view'), roll = $('#roll'), stage = $('#stage'), cap = $('#cap');
 const ttl = LES[0].split('—')[1] || LES[0];
-const leadAsk = (ASKS.lead || []).map((a, j) => askCard(a, 'lead', j)).join('');
+(ASKS.lead || []).forEach((a, j) => askCard(a, 'lead', j));
+roll.style.setProperty('--n', TP.length);
 roll.innerHTML = `<section class="lead"><div class="tt">${[...ttl].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div>
-    <div class="au">${L.author.dynasty}<b>${L.author.name}</b></div>${leadAsk}</section>` +
+    <div class="au">${L.author.dynasty}<b>${L.author.name}</b></div></section>` +
   TP.map((p, pi) => { const P = PANS[pi] || {};
     return `<section class="pan" data-p="${pi}" style="--tint:${P.tint || 'transparent'}"><div class="img" data-p="${pi}"></div><div class="tint"></div>
-    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div>
-    ${p.lines.map((l, li) => `<div class="lw" data-l="${pi}-${li}"><div class="lian">${lianHtml(p, pi, li)}</div></div>`).join('')}
-    ${seamHtml(pi)}</section>`; }).join('') +
+    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div></section>`; }).join('') +
   (TP.length < ALL.length ? `<section class="tail">${ALL[TP.length].seg}起　待續</section>` : '');
+const segH = TP.map((p, pi) => `<div class="seg" data-p="${pi}"><div class="track">${p.lines.map((l, li) => `<div class="lw" data-l="${pi}-${li}">${lianHtml(p, pi, li)}</div>`).join('')}</div></div>`).join('');
+TP.forEach((p, pi) => seamCards(pi));
+stage.innerHTML = segH + `<div class="cards">${CH.join('')}</div>`;
 /* 畫：有新圖用新圖（img/hj/…），載不到就退回現有背景（img/ui/bg/…） */
 function setImgs() {
   const n = document.body.classList.contains('night') ? 'dark' : 'light';
   $$('.pan .img').forEach(x => { const P = PANS[+x.dataset.p] || {}, own = P.img ? `../img/hj/${P.img}.webp` : '', bg = P.bg ? `../img/ui/bg/${P.bg}-${n}.webp` : '';
+    if (P.pos) x.style.backgroundPosition = P.pos;
     if (!own) { x.style.backgroundImage = bg ? `url("${bg}")` : ''; return; }
-    const im = new Image(); im.onload = () => { RATIO[x.dataset.p] = im.naturalWidth / im.naturalHeight; x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; placeImgs(); }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
+    const im = new Image(); im.onload = () => { x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
 }
-/* 詩箋高度＝最長那一行課文；旁批在這個高度裡自動換行 */
-function sizeLians() { $$('.lian').forEach(c => { c.style.height = ''; const h = Math.max(...$$('.col', c).map(x => x.offsetHeight)); c.style.height = (h + c.offsetHeight - c.clientHeight + 18) + 'px'; $$('.an', c).forEach(a => a.style.height = h + 'px'); }); }
-/* ───────── 步驟：畫軸怎麼走，課文就怎麼進行 ───────── */
+/* 字卡字級：照畫面高度放大。詩（一行 ≤8 字）課文佔高度約 2/3，旁批用整個高度；文（一行較長）課文佔約九成。旁批＝1em、課文＝1.35em（色票的兩級） */
+let zoom = 1; try { zoom = +localStorage.getItem('hj_zoom') || 1; } catch (e) {}
+function fit() {
+  const root = parseFloat(getComputedStyle(document.documentElement).fontSize) / zoom;
+  roll.style.setProperty('--vw', view.clientWidth + 'px');
+  const th = stage.clientHeight - root * zoom * 1.8, fill = MAXLEN <= 8 ? .66 : .9;
+  const sf = Math.max(root, Math.min(root * 1.7, th * fill / (1.35 * 1.06 * (MAXLEN + .5)))) * zoom;
+  stage.style.setProperty('--sf', sf + 'px'); stage.style.setProperty('--th', th + 'px');
+}
+/* ───────── 步驟：畫 → 字卡 → 畫（段旨）→ 卡 ───────── */
 const STEPS = [{ t: 'lead' }];
 const askSteps = (where, p) => (ASKS[where] || []).forEach((a, j) => { STEPS.push({ t: 'ask', p, id: `ask-${where}-${j}` }); STEPS.push({ t: 'ans', p, id: `ask-${where}-${j}` }); });
 askSteps('lead');
@@ -317,29 +331,22 @@ TP.forEach((p, pi) => { STEPS.push({ t: 'pan', p: pi });
   askSteps(pi, pi);
   (EXT[pi] || []).forEach((x, j) => STEPS.push({ t: 'ext', p: pi, id: `ext-${pi}-${j}` })); });
 STEPS.push({ t: 'all' });
-const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, tx: 0, sc: 1 };
-const LAYER = ['note', 'mean'];
+const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, peek: false, seg: -1 };
+const LAYER = ['note', 'mean'], TEXT = ['line', 'note', 'mean'], CARD = ['ask', 'ans', 'hb'];
 const idx = (pred) => STEPS.findIndex(pred);
 const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j >= 0 && j <= st.i; };
 const layerOn = (k, t) => { const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
-function moveTo(el, side) {
-  const vw = view.clientWidth, W = roll.scrollWidth, r0 = roll.getBoundingClientRect(), r = el.getBoundingClientRect(), sc = r0.width / W || 1, pad = vw * .02;
-  const a = (r.left - r0.left) / sc, b = (r.right - r0.left) / sc;
-  const x = side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2;
-  st.tx = Math.max(vw - W, Math.min(0, x)); st.sc = 1;
-  roll.style.transform = `translateX(${st.tx}px)`;
-}
-/* 每段的畫：高度＝畫面高，水平位置讓它停在畫面中央（但不超出那一段），卷子移動時畫跟著慢慢移，像鏡頭掃過 */
-const RATIO = {};
-function placeImgs() {
-  const vw = view.clientWidth;
-  $$('.pan').forEach(pan => { const x = $('.img', pan), r = RATIO[x.dataset.p] || 16 / 9, ih = x.offsetHeight, iw = ih * r, ov = (x.offsetWidth - pan.offsetWidth) / 2;
-    const left = pan.offsetLeft - ov, want = (vw / 2 - st.tx) / st.sc - left - iw / 2;
-    x.style.backgroundPosition = `${Math.max(0, Math.min(x.offsetWidth - iw, want))}px 100%`; });
-}
+function rollTo(el) { const vw = view.clientWidth, W = roll.scrollWidth; roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, vw / 2 - el.offsetLeft - el.offsetWidth / 2))}px)`; }
+function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b = a + el.offsetWidth, pad = vw * .03;
+  $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
 function draw() {
-  const s = STEPS[st.i], fresh = st.i === st.last + 1, curK = s.k || null;
-  $$('.lw', roll).forEach(w => { const k = w.dataset.l, on = reached(k, 'line');
+  const s = STEPS[st.i], fresh = st.i === st.last + 1, curK = s.k || null, inText = TEXT.includes(s.t), inCard = CARD.includes(s.t);
+  /* 字卡 */
+  if (inText && st.seg !== s.p) { view.classList.add('jump'); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); }
+  if (inText) st.seg = s.p;
+  stage.classList.toggle('on', (inText || inCard) && !st.peek);
+  $$('.seg', stage).forEach(g => g.classList.toggle('act', +g.dataset.p === st.seg && !inCard));
+  $$('.lw', stage).forEach(w => { const k = w.dataset.l, on = reached(k, 'line');
     if (on && !w.classList.contains('show')) w.classList.toggle('fresh', fresh && k === curK); if (!on) w.classList.remove('fresh');
     w.classList.toggle('show', on); w.classList.toggle('cur', k === curK);
     $$('.an', w).forEach(a => { a.classList.toggle('off', !layerOn(k, a.dataset.t)); a.classList.toggle('act', a.dataset.r != null && st.rq === k + ':' + a.dataset.r); });
@@ -348,23 +355,23 @@ function draw() {
     if (a0 < 0) console.error('修辭引句在課文裡找不到：' + q);
     else { const m = /<b class='rq-hi'>([^<]*)<\/b>/.exec(h), a = m ? a0 + strip(h.slice(0, m.index)).length : a0, n = m ? m[1].length : q.length;
       const w = $(`.lw[data-l="${k}"]`); for (let x = a; x < a + n; x++) { const e = $(`i[data-k="${x}"]`, w); e && e.classList.add('rq'); } } }
-  TP.forEach((p, pi) => { const pan = $(`.pan[data-p="${pi}"]`), o = (st.ov['p' + pi] || {}).pian;
-    $('.pn', pan).classList.toggle('on', o !== undefined ? o : idx(x => x.t === 'pian' && x.p === pi) <= st.i); });
-  CARDS.forEach(c => { const el = $('#' + c.id), j = idx(x => x.id === c.id && x.t !== 'ans');
-    el.classList.toggle('show', j <= st.i || !!st.ov[c.id]); el.classList.toggle('cur', s.id === c.id);
-    if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = (st.ov[c.id + ':a']); $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
-  roll.classList.toggle('whole', ['pian', 'all', 'ask', 'ans', 'hb', 'ext'].includes(s.t)); roll.classList.toggle('ovw', s.t === 'all');
-  /* 卷子走到哪：整張詩箋放得下就置中；比畫面寬一點就靠邊（課文、注釋靠右，句意修辭靠左）；再寬就置中這一步出現的那一塊 */
-  if (s.t === 'all') { const sc = Math.min(1, view.clientWidth / roll.scrollWidth); st.sc = sc; st.tx = (view.clientWidth - roll.scrollWidth * sc) / 2; roll.style.transform = `translateX(${st.tx}px) scale(${sc})`; }
-  else if (s.k) { const w = $(`.lw[data-l="${s.k}"]`), vw = view.clientWidth;
-    if (w.offsetWidth <= vw * .96) moveTo(w); else if (w.offsetWidth <= vw * 1.7) moveTo(w, s.t === 'mean' ? 'left' : 'right');
-    else moveTo(s.t === 'line' ? $('.col', w) : $(`.an[data-t="${s.t}"]`, w) || w); }
-  else moveTo(s.t === 'lead' ? $('.lead .tt') : s.id ? $('#' + s.id) : $(`.pan[data-p="${s.p}"] .tq`));
-  placeImgs();
-  cap.innerHTML = s.t === 'pan' ? `先看畫。按下一步，課文落下。${H.segNote && s.p != null ? '<br><small>' + H.segNote.text + '</small>' : ''}`
-    : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
+  /* 字卡走到哪：整句放得下就置中；比畫面寬一點就靠邊（課文、注釋靠右，句意修辭靠左）；再寬就置中這一步出現的那一塊 */
+  if (inText) { const seg = $(`.seg[data-p="${s.p}"]`), w = $(`.lw[data-l="${s.k}"]`), vw = seg.clientWidth;
+    if (w.offsetWidth <= vw * .94) slide(seg, w); else if (w.offsetWidth <= vw * 1.7) slide(seg, w, s.t === 'mean' ? 'left' : 'right');
+    else slide(seg, s.t === 'line' ? $('.col', w) : $(`.an[data-t="${s.t}"]`, w) || w); }
+  /* 段旨落款、卡片 */
+  TP.forEach((p, pi) => { const o = (st.ov['p' + pi] || {}).pian; $(`.pan[data-p="${pi}"] .pn`).classList.toggle('on', o !== undefined ? o : idx(x => x.t === 'pian' && x.p === pi) <= st.i); });
+  CARDS.forEach(c => { if (c.kind === 'ext') return; const el = $('#' + c.id); el.classList.toggle('act', s.id === c.id);
+    if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = st.ov[c.id + ':a']; $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
+  /* 畫卷走到哪 */
+  roll.classList.toggle('ovw', s.t === 'all');
+  if (s.t === 'all') roll.style.transform = 'translateX(0)'; else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
+  cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
+    : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
+    : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
   if (s.t === 'ext') openExt(s.id); else if ($('#sheet').classList.contains('on') && fresh) closeSheet();
   $$('#nav button').forEach(b => b.classList.toggle('on', +b.dataset.p === (s.p == null ? (s.t === 'all' ? -2 : -1) : s.p)));
+  $('#bPeek').classList.toggle('on', st.peek); $('#bPeek').disabled = !(inText || inCard);
   $('#pg').textContent = (st.i + 1) + ' / ' + STEPS.length; $('#bPrev').disabled = st.i === 0;
   $('#bNext').textContent = st.i < STEPS.length - 1 ? '下一步 ▸' : '完';
   drawNote(s);
@@ -377,7 +384,7 @@ function drawNote(s) {
   n.innerHTML = '<h4>講稿（只給老師看）</h4>' + (l ? `<p><b>語譯</b>　${l.tr || '（課檔沒有）'}</p>` : p && s.t === 'pian' ? `<p><b>全段語譯</b>　${p.fan || ''}</p>` : '<p>（這一步沒有講稿）</p>');
 }
 const skip = t => st.fast && LAYER.includes(t);
-function go(i) { if (i < 0 || i >= STEPS.length) return; st.i = i; st.rq = null; draw(); }
+function go(i) { if (i < 0 || i >= STEPS.length) return; st.i = i; st.rq = null; st.peek = false; draw(); }
 function next() { let i = st.i + 1; while (i < STEPS.length && skip(STEPS[i].t)) i++; go(i); }
 function prev() { let i = st.i - 1; while (i > 0 && skip(STEPS[i].t)) i--; go(i); }
 /* ───────── 補充互動（整頁紙） ───────── */
@@ -392,7 +399,8 @@ function rows(html) { /* 補充框表格 → 列（處理 rowspan） */
   return { out, t: t.content };
 }
 function openExt(id) {
-  const c = CARDS.find(x => x.id === id), x = c.x, B = $('#shB'); $('#shT').textContent = x.type === 'rhetQuiz' ? '修辭：' + x.name : x.box; $('#sheet').classList.add('on');
+  const c = CARDS.find(x => x.id === id), x = c.x, B = $('#shB'); $('#shT').textContent = x.type === 'rhetQuiz' ? '修辭：' + x.name : '補充：' + x.box;
+  $('#sheet .pp').classList.toggle('rh', x.type === 'rhetQuiz'); $('#sheet').classList.add('on');
   if (x.type === 'rhetQuiz') {
     const R = rows(box(x.box)), def = ($('div', R.t) || {}).textContent || '';
     /* 題目：補充框表裡的例句（類型＝那一列），加上本課標了這種修辭的句子 */
@@ -410,7 +418,7 @@ function openExt(id) {
       $$('.ks button', B).forEach(b => { b.className = ''; b.disabled = !q; }); $('#qd').innerHTML = QS.map((_, k) => `<i class="${res[k] || ''}${k === i ? ' cur' : ''}"></i>`).join(''); };
     $$('.ks button', B).forEach(b => b.onclick = () => { const q = QS[i]; if (!q || B.dataset.lock) return;
       if (b.textContent === q.a) { b.classList.add('ok'); res[i] = res[i] || 'ok'; $('#qf').textContent = '✔ ' + q.a + x.name; B.dataset.lock = 1; setTimeout(() => { delete B.dataset.lock; i++; $('#qf').textContent = ''; dr(); }, 1100); }
-      else { b.classList.add('no'); res[i] = 'no'; $('#qf').textContent = '再想想：事情是過去的、未來的，還是此刻想像中的？'; dr(); $$('.ks button', B).find(y => y.textContent === b.textContent).classList.add('no'); } });
+      else { res[i] = 'no'; $('#qf').textContent = '再想想：事情是過去的、未來的，還是此刻想像中的？'; dr(); $$('.ks button', B).find(y => y.textContent === b.textContent).classList.add('no'); } });
     dr();
   } else if (x.type === 'tableBlank') {
     const R = rows(box(x.box)); let bl = x.blank;
@@ -429,41 +437,46 @@ function openExt(id) {
 $('#nav').innerHTML = `<button data-p="-1">卷首</button>` + TP.map((p, i) => `<button data-p="${i}">${p.seg}</button>`).join('') + `<button data-p="-2">全卷</button>`;
 $$('#nav button').forEach(b => b.onclick = () => { const p = +b.dataset.p; go(p === -1 ? 0 : p === -2 ? STEPS.length - 1 : idx(s => s.t === 'pan' && s.p === p)); });
 $('#bNext').onclick = next; $('#bPrev').onclick = prev;
+$('#bPeek').onclick = () => { st.peek = !st.peek; draw(); };
 $('#bMode').onclick = e => { st.fast = !st.fast; e.currentTarget.textContent = st.fast ? '通讀' : '細讀'; e.currentTarget.classList.toggle('on', st.fast); if (skip(STEPS[st.i].t)) prev(); else draw(); };
 $('#bNight').onclick = e => { e.currentTarget.classList.toggle('on', document.body.classList.toggle('night')); setImgs(); };
 $('#bNote').onclick = e => { st.note = !st.note; e.currentTarget.classList.toggle('on', st.note); drawNote(STEPS[st.i]); };
-let zoom = 1; try { zoom = +localStorage.getItem('hj_zoom') || 1; } catch (e) {}
-const setZoom = z => { zoom = Math.max(.75, Math.min(1.5, Math.round(z * 100) / 100)); document.documentElement.style.setProperty('--zoom', zoom); try { localStorage.setItem('hj_zoom', zoom); } catch (e) {} roll.classList.add('jump'); sizeLians(); draw(); requestAnimationFrame(() => roll.classList.remove('jump')); };
+const relayout = () => { view.classList.add('jump'); fit(); draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); };
+const setZoom = z => { zoom = Math.max(.75, Math.min(1.5, Math.round(z * 100) / 100)); document.documentElement.style.setProperty('--zoom', zoom); try { localStorage.setItem('hj_zoom', zoom); } catch (e) {} relayout(); };
 $('#bSm').onclick = () => setZoom(zoom - .1); $('#bLg').onclick = () => setZoom(zoom + .1);
 $('#bFull').onclick = () => { const d = document.documentElement; if (!document.fullscreenElement) (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); else document.exitFullscreen && document.exitFullscreen(); };
 $('#shX').onclick = closeSheet; $('#sheet').onclick = e => { if (e.target.id === 'sheet') closeSheet(); };
 const flip = (k, t) => { (st.ov[k] = st.ov[k] || {})[t] = !layerOn(k, t); };
 view.addEventListener('click', e => {
   if (e.target.closest('#note')) return;
-  const go2 = e.target.closest('[data-ext]'); if (go2) { openExt(go2.dataset.ext); return; }
+  if (st.peek) { st.peek = false; draw(); return; }
   const hb = e.target.closest('.hb'); if (hb) { hb.classList.toggle('on'); return; }
   const ob = e.target.closest('.opts button'); if (ob) { const c = CARDS.find(x => x.id === ob.closest('.card').id), ok = +ob.dataset.i === c.a.ans;
     ob.classList.remove('no'); void ob.offsetWidth; ob.classList.add(ok ? 'ok' : 'no'); if (ok) { st.ov[c.id + ':a'] = true; draw(); } return; }
-  const cd = e.target.closest('.card.show'); if (cd) { if (cd.classList.contains('askc')) { const k = cd.id + ':a', a = $('.ans', cd); st.ov[k] = a.classList.contains('off'); draw(); } else if (cd.classList.contains('hbc')) $$('.hb', cd).forEach(x => x.classList.add('on')); return; }
+  const cd = e.target.closest('.card.act'); if (cd) { if (cd.classList.contains('askc')) { st.ov[cd.id + ':a'] = $('.ans', cd).classList.contains('off'); draw(); } return; }
   const pn = e.target.closest('.pn'); if (pn) { const pi = pn.closest('.pan').dataset.p; (st.ov['p' + pi] = st.ov['p' + pi] || {}).pian = !pn.classList.contains('on'); draw(); return; }
   const w = e.target.closest('.lw.show'); if (!w) return next();
   const k = w.dataset.l, an = e.target.closest('.an');
+  /* 旁批：藏著的點了就出現（整層一起）；出現後，點修辭＝在課文上標出那幾個字，點其他＝收回 */
   if (an) { if (an.classList.contains('off')) flip(k, an.dataset.t); else if (an.dataset.r != null) st.rq = st.rq === k + ':' + an.dataset.r ? null : k + ':' + an.dataset.r; else flip(k, an.dataset.t); draw(); return; }
-  if (e.target.closest('.nw,.gw')) { flip(k, 'note'); draw(); return; }
+  if (e.target.closest('.nw,.gw,.bw')) { flip(k, 'note'); draw(); return; }
   next();
 });
 document.addEventListener('keydown', e => { const k = e.key;
   if (k === 'n' || k === 'N') { $('#bNote').click(); return; }
+  if (k === 'p' || k === 'P') { if (!$('#bPeek').disabled) $('#bPeek').click(); return; }
   if ($('#sheet').classList.contains('on') && k === 'Escape') { closeSheet(); return; }
   if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
   else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
   else if (k === 'Escape') go(0); });
 if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
-addEventListener('resize', () => { roll.classList.add('jump'); sizeLians(); draw(); requestAnimationFrame(() => roll.classList.remove('jump')); });
+addEventListener('resize', relayout);
 addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i) go(+x); });
 document.documentElement.style.setProperty('--zoom', zoom);
 setImgs();
-const begin = () => { sizeLians(); const h = location.hash.slice(1); st.i = /^\d+$/.test(h) ? Math.min(+h, STEPS.length - 1) : 0; st.last = st.i; draw(); requestAnimationFrame(() => requestAnimationFrame(() => roll.classList.remove('jump'))); };
+const begin = () => { fit(); const h = location.hash.slice(1); st.i = /^\d+$/.test(h) ? Math.min(+h, STEPS.length - 1) : 0; st.last = st.i;
+  for (let j = st.i; j >= 0; j--) if (TEXT.includes(STEPS[j].t)) { st.seg = STEPS[j].p; break; }
+  draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); };
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(begin);
 window.HJ_DEBUG = { STEPS, LN, CARDS, go, st };
 }

@@ -29,6 +29,17 @@
   --rk-bu:#6f4a78; --rk-bu-bg:rgba(111,74,120,.1);   /* 茄紫：補充（不用抄），一律粗體（老師 11/16 選定；教學網站原本是 #7c4da0） */
   --rk-shadow:rgba(107,74,43,.18);        /* 紙片的硬陰影 */
 
+  /* 課文旁批五色（老師 11/17 定：修辭紅、句意綠、字義藍、補充紫；注釋的赭石是 Claude 建議，等老師看）。
+     取國畫顏料的顏色，配水墨畫卷；意思固定，不可混用。 */
+  --rk-pi-rh:#a8352a;                     /* 朱砂：修辭（＝朱） */
+  --rk-pi-yi:#2c6a4a;                     /* 石綠：句意（比 --rk-yi 亮，投影才不會跟墨字混在一起） */
+  --rk-pi-zy:#1d4f91;                     /* 花青：字義（＝藍） */
+  --rk-pi-bu:#6f4a78;                     /* 茄紫：補充（＝--rk-bu） */
+  --rk-pi-nt:#86591f;                     /* 赭石：注釋（課本注釋） */
+
+  /* 畫卷裱邊：錦（深褐）＋金線＋綾（淺米） */
+  --rk-jin-1:#2d1f14; --rk-jin-2:#4b3422; --rk-jin-3:#6b4f2e; --rk-jin-gold:#c9a764; --rk-ling:#efe3c6;
+
   /* 黑金頁首（老師 11/16：保留，金色要更明顯、有黃金顆粒感） */
   --rk-night-bg:linear-gradient(135deg,#1a1209 0%,#2a1d0c 50%,#1a1209 100%);
   --rk-leaf:linear-gradient(100deg,#c99a2e 0%,#f6d978 18%,#fff6c9 32%,#e8bf4f 50%,#c8962b 66%,#f8e08a 84%,#d9aa3c 100%);
@@ -59,6 +70,7 @@ body.night, body.dark-mode, html.dark{
   --rk-gold:#d8b878; --rk-line:rgba(240,225,190,.28); --rk-card:rgba(22,24,34,.8);
   --rk-shadow:rgba(0,0,0,.35);
   --rk-bu:#c9a9d1; --rk-bu-bg:rgba(201,169,209,.13);
+  --rk-pi-rh:#f29484; --rk-pi-yi:#9fd6ae; --rk-pi-zy:#9cc4ff; --rk-pi-bu:#c9a9d1; --rk-pi-nt:#dfb877;
 }
 
 /* ════ 元件：每樣只有一種寫法（class 一律 rk- 開頭，不會撞到舊樣式） ════ */
