@@ -408,7 +408,7 @@ function openExt(id) {
       <div class="qz"><div class="qq" id="qq"></div><div class="ks">${x.kinds.map(k => `<button>${k}</button>`).join('')}</div><div class="fb" id="qf"></div><div class="dots" id="qd"></div></div>
       ${x.note ? `<div class="fnote">${x.note}</div>` : ''}`;
     let i = 0, res = [];
-    const dr = () => { const q = QS[i]; $('#qq').innerHTML = q ? `<small>第 ${i + 1}／${QS.length} 題・${q.src}・這是哪一種${x.name}？</small>${q.t}` : `完成！答對 ${res.filter(r => r === 'ok').length}／${QS.length} 題`;
+    const dr = () => { const q = QS[i]; $('#qq').innerHTML = q ? `<small>第 ${i + 1}／${QS.length} 題・這是哪一種${x.name}？</small>${q.t}` : `完成！答對 ${res.filter(r => r === 'ok').length}／${QS.length} 題`;
       $$('.ks button', B).forEach(b => { b.className = ''; b.disabled = !q; }); $('#qd').innerHTML = QS.map((_, k) => `<i class="${res[k] || ''}${k === i ? ' cur' : ''}"></i>`).join(''); };
     $$('.ks button', B).forEach(b => b.onclick = () => { const q = QS[i]; if (!q || B.dataset.lock) return;
       if (b.textContent === q.a) { b.classList.add('ok'); res[i] = res[i] || 'ok'; $('#qf').textContent = '✔ ' + q.a + x.name; B.dataset.lock = 1; setTimeout(() => { delete B.dataset.lock; i++; $('#qf').textContent = ''; dr(); }, 1100); }
