@@ -116,9 +116,10 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .an .tg{display:inline-block;font-weight:700;color:rgb(var(--rk-paper));background:var(--c);border-radius:var(--rk-r-s);padding:.25em 0;margin-bottom:.5em;letter-spacing:0;font-size:var(--rk-t-xs);line-height:1.5}
 .an b{font-weight:700} .an b.w{margin-bottom:.6em} .an .q{margin-top:.35em}   /* 直書的冒號會橫躺，詞條和解釋之間改用空一格 */
 .an.nt{--c:var(--rk-pi-nt)} .an.zy{--c:var(--rk-pi-zy)} .an.mean{--c:var(--rk-pi-yi)} .an.rhet{--c:var(--rk-pi-rh)} .an.bu{--c:var(--rk-pi-bu);font-weight:700}
-.an.rhet .tg{border-radius:var(--rk-r-seal);transform:rotate(-4deg);box-shadow:inset 0 0 0 1.5px rgba(var(--rk-paper),.55)}   /* 修辭＝蓋一方小印 */
-.lw.cur .an.rhet:not(.off) .tg{animation:seal .6s cubic-bezier(.3,1.5,.5,1) .15s both}
-@keyframes seal{from{opacity:0;transform:scale(2.2) rotate(-16deg)}}
+.an .tg{border-radius:var(--rk-r-seal);transform:rotate(var(--tilt,-4deg));box-shadow:inset 0 0 0 1.5px rgba(var(--rk-paper),.55)}   /* 注釋、字義、句意、修辭、補充的標籤都是一方小印（老師 11/17），各歪一點點才像手蓋的 */
+.an.nt{--tilt:3deg} .an.zy{--tilt:-2deg} .an.mean{--tilt:2deg} .an.bu{--tilt:-3deg}
+.lw.cur .an:not(.off) .tg{animation:seal .6s cubic-bezier(.3,1.5,.5,1) .15s both}
+@keyframes seal{from{opacity:0;transform:scale(2.2) rotate(calc(var(--tilt,-4deg) * 4))}}
 .an.rhet.act{box-shadow:0 0 0 2px var(--rk-pi-rh)}
 /* 全螢幕卡：段落透視（講義空格）、提問與回答 */
 .cards{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
