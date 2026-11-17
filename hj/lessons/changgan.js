@@ -2,7 +2,7 @@
    引擎＝hj/index.html；開法 hj/index.html?l=changgan。製作規範：教學系統專案 docs/規格_課文畫卷製作規範.md
    課文、注釋、句意、修辭、段旨、補充框、課本頁碼一律由引擎讀課檔（data/lessons/30.js 的 textPages），這裡不抄。
    這裡只放課檔沒有的東西，每一筆都要有來源（src）；Claude 自己寫的標 by:'Claude'。
-   2026-11-17 試作第一～三段；同日補第四～六段，做滿全課六段。第四～六段新畫未到，暫用 bg 替代背景。 */
+   2026-11-17 試作第一～三段；同日補第四～六段，做滿全課六段。六段的畫都已放進 img/hj/changgan/1～6.webp。 */
 window.HJ = {
   lesson: '樂府詩選—長干行',          /* TB_LESSONS 的課名 */
   file: '30',                         /* data/lessons/30.js */
@@ -16,10 +16,10 @@ window.HJ = {
     { img: 'changgan/1', bg: '2-garden',   tint: 'rgba(150,190,130,.18)', c: '#7fa35f' },
     { img: 'changgan/2', bg: '5-lookback', tint: 'rgba(120,96,104,.22)',  c: '#8b6f78' },
     { img: 'changgan/3', bg: '6-gugong',   tint: 'rgba(226,150,120,.18)', c: '#c2553f' },
-    /* 第四～六段：新畫還沒有，先只放替代背景（有新畫時再補 img） */
-    { bg: '4-snowpeak', tint: 'rgba(90,110,135,.22)',  c: '#5b6f86' },   /* 第四段 離別憂苦：三峽險灘，冷色 */
-    { bg: '2-garden',   tint: 'rgba(160,125,75,.24)',  c: '#8d7550' },   /* 第五段 別後相思：門前、西園，秋色 */
-    { bg: '3-westlake', tint: 'rgba(240,190,120,.16)', c: '#d9a050' }    /* 第六段 企盼團聚：江水、迎歸，暖色 */
+    /* 第四～六段：11/17 ChatGPT 產生（一張一個新對話），Claude 對照課文確認；老師還沒看 */
+    { img: 'changgan/4', bg: '4-snowpeak', tint: 'rgba(90,110,135,.22)',  c: '#5b6f86' },   /* 第四段 離別憂苦：三峽險灘，冷色 */
+    { img: 'changgan/5', bg: '2-garden',   tint: 'rgba(160,125,75,.24)',  c: '#8d7550' },   /* 第五段 別後相思：門前、西園，秋色 */
+    { img: 'changgan/6', bg: '3-westlake', tint: 'rgba(240,190,120,.16)', c: '#d9a050' }    /* 第六段 企盼團聚：江水、迎歸，暖色 */
   ],
 
   /* 字義：課本注釋以外、要學生抄的單字解釋。鍵＝'段-句'（從 0 起算），值＝[[字, 解釋], …] */
