@@ -124,7 +124,7 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .an.rhet.act{box-shadow:0 0 0 2px var(--rk-pi-rh)}
 /* 全螢幕卡：段落透視（講義空格）、提問與回答 */
 .cards{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.card{position:absolute;width:min(32em,90%);max-height:88%;overflow:auto;background:var(--rk-card);border:1px solid var(--rk-line);border-top:5px solid var(--c,var(--rk-zhu));border-radius:var(--rk-r);
+.card{position:absolute;width:min(36em,94%);max-height:94%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;background:var(--rk-card);border:1px solid var(--rk-line);border-top:5px solid var(--c,var(--rk-zhu));border-radius:var(--rk-r);
   box-shadow:3px 4px 0 var(--rk-shadow),0 10px 30px rgba(0,0,0,.18);padding:.7em 1.3em 1em;line-height:var(--rk-lh);
   opacity:0;transform:translateY(22px) scale(.96);filter:blur(6px);transition:opacity .55s,transform .6s cubic-bezier(.3,1.35,.5,1),filter .55s;pointer-events:none}
 .card.act{opacity:1;transform:none;filter:none;pointer-events:auto}
