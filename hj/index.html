@@ -70,11 +70,12 @@ body.night #view::before,body.night #view::after{filter:brightness(.75)}
 @keyframes ink{from{opacity:0;transform:scale(1.7);filter:blur(10px)}}
 .lead .au{writing-mode:vertical-rl;letter-spacing:.4em;color:var(--mute);font-size:.8em;align-self:flex-end;padding-bottom:3em}
 .lead .au b{display:inline-block;color:#fbefdc;background:var(--seal);border-radius:4px 6px 4px 7px;padding:.3em .12em;margin-top:.5em;letter-spacing:.1em;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5)}
-.pan{position:relative;flex:none;min-width:92vw;display:flex;flex-direction:row-reverse;align-items:center;gap:1.2em;padding:0 2.2em}
+.pan{position:relative;flex:none;min-width:92vw;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:1.2em;padding:.7em 2.2em 0}   /* 詩箋靠上：畫的人物在下半部，要露出來 */
 .pan .img,.pan .tint{position:absolute;top:0;bottom:0;left:calc(var(--ov)*-1);right:calc(var(--ov)*-1);pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%)}
-.pan .img{background:center/cover no-repeat}
+.pan .img{background-repeat:no-repeat;background-size:auto 100%;background-position:50% 100%;transition:background-position 1.5s cubic-bezier(.3,.05,.2,1)}   /* 圖＝畫面高；位置由 placeImgs() 跟著卷子移動（像鏡頭掃過畫） */
+#roll.jump .pan .img{transition:none}
 body.night .pan .img.own{filter:brightness(.42) saturate(.75)}
 .pan .tint{background:var(--tint);mix-blend-mode:multiply}
 .pan>*:not(.img):not(.tint){position:relative;z-index:1}
@@ -112,7 +113,7 @@ body.night .an .tg{color:#14161c}
 .an.nt{--c:var(--nt)} .an.zy{--c:var(--zy)} .an.mean{--c:var(--yi)} .an.rhet{--c:var(--rh)}
 .an.rhet.act{box-shadow:0 0 0 2px var(--rh)}
 /* 段與段之間的留白：段落透視（講義空格）、提問、補充 */
-.seam{flex:none;display:flex;flex-direction:row-reverse;align-items:center;gap:1em;padding:0 1.2em}
+.seam{flex:none;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:1em;padding:0 1.2em}
 .card{flex:none;width:15em;max-height:calc(100% - 1em);overflow:auto;background:var(--card);border-top:5px solid var(--zhu);border-radius:3px;box-shadow:3px 5px 16px rgba(60,40,20,.3);padding:.55em .9em .7em;line-height:1.6;opacity:0;transform:translateY(14px);filter:blur(6px);transition:opacity .7s .3s,transform .7s .3s,filter .7s .3s;pointer-events:none}
 .card.show{opacity:1;transform:none;filter:none;pointer-events:auto}
 .card.cur{box-shadow:0 0 0 2px var(--gold),3px 5px 16px rgba(60,40,20,.3)}
@@ -299,7 +300,7 @@ function setImgs() {
   const n = document.body.classList.contains('night') ? 'dark' : 'light';
   $$('.pan .img').forEach(x => { const P = PANS[+x.dataset.p] || {}, own = P.img ? `../img/hj/${P.img}.webp` : '', bg = P.bg ? `../img/ui/bg/${P.bg}-${n}.webp` : '';
     if (!own) { x.style.backgroundImage = bg ? `url("${bg}")` : ''; return; }
-    const im = new Image(); im.onload = () => { x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
+    const im = new Image(); im.onload = () => { RATIO[x.dataset.p] = im.naturalWidth / im.naturalHeight; x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; placeImgs(); }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
 }
 /* 詩箋高度＝最長那一行課文；旁批在這個高度裡自動換行 */
 function sizeLians() { $$('.lian').forEach(c => { c.style.height = ''; const h = Math.max(...$$('.col', c).map(x => x.offsetHeight)); c.style.height = (h + c.offsetHeight - c.clientHeight + 18) + 'px'; $$('.an', c).forEach(a => a.style.height = h + 'px'); }); }
@@ -315,7 +316,7 @@ TP.forEach((p, pi) => { STEPS.push({ t: 'pan', p: pi });
   askSteps(pi, pi);
   (EXT[pi] || []).forEach((x, j) => STEPS.push({ t: 'ext', p: pi, id: `ext-${pi}-${j}` })); });
 STEPS.push({ t: 'all' });
-const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false };
+const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, tx: 0, sc: 1 };
 const LAYER = ['note', 'mean'];
 const idx = (pred) => STEPS.findIndex(pred);
 const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j >= 0 && j <= st.i; };
@@ -324,7 +325,16 @@ function moveTo(el, side) {
   const vw = view.clientWidth, W = roll.scrollWidth, r0 = roll.getBoundingClientRect(), r = el.getBoundingClientRect(), sc = r0.width / W || 1, pad = vw * .02;
   const a = (r.left - r0.left) / sc, b = (r.right - r0.left) / sc;
   const x = side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2;
-  roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, x))}px)`;
+  st.tx = Math.max(vw - W, Math.min(0, x)); st.sc = 1;
+  roll.style.transform = `translateX(${st.tx}px)`;
+}
+/* 每段的畫：高度＝畫面高，水平位置讓它停在畫面中央（但不超出那一段），卷子移動時畫跟著慢慢移，像鏡頭掃過 */
+const RATIO = {};
+function placeImgs() {
+  const vw = view.clientWidth;
+  $$('.pan').forEach(pan => { const x = $('.img', pan), r = RATIO[x.dataset.p] || 16 / 9, ih = x.offsetHeight, iw = ih * r, ov = (x.offsetWidth - pan.offsetWidth) / 2;
+    const left = pan.offsetLeft - ov, want = (vw / 2 - st.tx) / st.sc - left - iw / 2;
+    x.style.backgroundPosition = `${Math.max(0, Math.min(x.offsetWidth - iw, want))}px 100%`; });
 }
 function draw() {
   const s = STEPS[st.i], fresh = st.i === st.last + 1, curK = s.k || null;
@@ -344,11 +354,12 @@ function draw() {
     if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = (st.ov[c.id + ':a']); $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
   roll.classList.toggle('whole', ['pian', 'all', 'ask', 'ans', 'hb', 'ext'].includes(s.t)); roll.classList.toggle('ovw', s.t === 'all');
   /* 卷子走到哪：整張詩箋放得下就置中；比畫面寬一點就靠邊（課文、注釋靠右，句意修辭靠左）；再寬就置中這一步出現的那一塊 */
-  if (s.t === 'all') { const sc = Math.min(1, view.clientWidth / roll.scrollWidth); roll.style.transform = `translateX(${(view.clientWidth - roll.scrollWidth * sc) / 2}px) scale(${sc})`; }
+  if (s.t === 'all') { const sc = Math.min(1, view.clientWidth / roll.scrollWidth); st.sc = sc; st.tx = (view.clientWidth - roll.scrollWidth * sc) / 2; roll.style.transform = `translateX(${st.tx}px) scale(${sc})`; }
   else if (s.k) { const w = $(`.lw[data-l="${s.k}"]`), vw = view.clientWidth;
     if (w.offsetWidth <= vw * .96) moveTo(w); else if (w.offsetWidth <= vw * 1.7) moveTo(w, s.t === 'mean' ? 'left' : 'right');
     else moveTo(s.t === 'line' ? $('.col', w) : $(`.an[data-t="${s.t}"]`, w) || w); }
   else moveTo(s.t === 'lead' ? $('.lead .tt') : s.id ? $('#' + s.id) : $(`.pan[data-p="${s.p}"] .tq`));
+  placeImgs();
   cap.innerHTML = s.t === 'pan' ? `先看畫。按下一步，課文落下。${H.segNote && s.p != null ? '<br><small>' + H.segNote.text + '</small>' : ''}`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
   if (s.t === 'ext') openExt(s.id); else if ($('#sheet').classList.contains('on') && fresh) closeSheet();
