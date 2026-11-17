@@ -624,6 +624,8 @@ if (MIR) { st.ans = true; document.body.classList.add('mir'); }
 else if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
 addEventListener('message', e => { if (!EMB || e.source !== window.parent || !e.data || !e.data.yfCmd) return; const c = e.data.yfCmd, v = e.data.v;
   if (c === 'mirror') { if (MIR) mirror(String(e.data.key || ''), +e.data.step); return; }
+  /* 變形記開著（老師 11/18：投影模式進了變形記就出不來）：網站的上一步／下一步交給變形記翻；換籤頁、跳頁先關掉變形記 */
+  { const lf = $('#lbx.on iframe'); if (lf) { if (c === 'next' || c === 'prev') { try { lf.contentDocument.dispatchEvent(new KeyboardEvent('keydown', { key: c === 'next' ? 'ArrowRight' : 'ArrowLeft', bubbles: true })); } catch (er) {} return; } closeLb(); } }
   if (rd.on && (c === 'next' || c === 'prev')) { if (c === 'next') $('#rdNx').click(); else focus(rd.i - 1); return; }
   if (rd.on) closeRd();
   if (c === 'next') next(); else if (c === 'prev') prev(); else if (c === 'ch') goCh(v); else if (c === 'go') go(v === 'last' ? S.length - 1 : +v); });
