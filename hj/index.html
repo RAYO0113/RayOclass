@@ -181,6 +181,7 @@ td.blk.on{color:inherit;background:none;animation:hbpop .4s cubic-bezier(.3,1.7,
   header,footer{font-size:calc(var(--rk-fs) * .72)} .logo,.lgs{display:none}
   .lead{gap:1em} .tq{right:calc(var(--ov) + .6em)}
 }
+body.mir header,body.mir footer,body.mir #cap{display:none}   /* 鏡像：只留畫與字卡 */
 @media (prefers-reduced-motion:reduce){*{transition-duration:0s;animation-duration:0s;animation-delay:0s}}
 </style>
 </head>
@@ -207,6 +208,9 @@ const fail = m => { document.body.innerHTML = `<p style="padding:2em">${m}</p>`;
 load(`lessons/${KEY}.js`).then(() => load(`../data/lessons/${window.HJ.file}.js`)).then(start).catch(e => { console.error(e); fail(e.message); });
 
 function start() {
+const ERR = [], cerr = console.error; console.error = (...a) => { ERR.push(a.join(' ')); cerr.apply(console, a); };   /* 自我檢查用：收集建卷時報的錯（?selftest=1，見 tools/hj_check.py） */
+const QS = new URLSearchParams(location.search), MIR = QS.has('mirror');   /* mirror=1：手機講稿上半的鏡像，只跟著平板走，不能點 */
+if (MIR) document.body.classList.add('mir');
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const H = window.HJ, LES = (window.TB_LESSONS || []).find(x => x[0] === H.lesson);
 if (!LES) return fail('課檔裡找不到這一課：' + H.lesson);
@@ -340,7 +344,12 @@ const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, peek: f
 const LAYER = ['note', 'mean'], TEXT = ['line', 'note', 'mean'], CARD = ['ask', 'ans', 'hb'];
 const idx = (pred) => STEPS.findIndex(pred);
 const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j >= 0 && j <= st.i; };
-const layerOn = (k, t) => { const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
+const layerOn = (k, t) => { if (MIR) return reached(k, 'line'); const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
+/* 每一步的固定代號（手機講稿用它對照，不用第幾步的數字——之後加減步驟也不會錯位）：
+   lead｜pan-段｜段-句｜段-句/note｜段-句/mean｜pian-段｜hb-段｜ask-段-題｜ask-段-題/a｜ext-段-個｜all（段、句、題都從 0 起算；卷首的題是 ask-lead-題） */
+const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t === 'pian' ? s.t + '-' + s.p : s.t === 'line' ? s.k : s.t === 'note' || s.t === 'mean' ? s.k + '/' + s.t : s.t === 'ans' ? s.id + '/a' : s.id;
+/* 嵌在教學網站裡時，每走一步回報位置：hjStep {l:課代號, id:步驟代號, i:第幾步, n:總步數} */
+const tell = s => { if (window.parent !== window && !MIR) window.parent.postMessage({ hjStep: { l: KEY, id: sid(s), i: st.i, n: STEPS.length } }, '*'); };
 function rollTo(el) { const vw = view.clientWidth, W = roll.scrollWidth; roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, vw / 2 - el.offsetLeft - el.offsetWidth / 2))}px)`; }
 function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b = a + el.offsetWidth, pad = vw * .03;
   $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
@@ -384,6 +393,7 @@ function draw() {
   $('#pg').textContent = (st.i + 1) + ' / ' + STEPS.length; $('#bPrev').disabled = st.i === 0;
   $('#bNext').textContent = st.i < STEPS.length - 1 ? '下一步 ▸' : '完';
   st.last = st.i; try { history.replaceState(null, '', location.search + '#' + st.i); } catch (e) {}
+  tell(s);
 }
 const skip = t => st.fast && LAYER.includes(t);
 function go(i) { if (i < 0 || i >= STEPS.length) return; st.i = i; st.rq = null; st.peek = false; draw(); }
@@ -449,6 +459,7 @@ $('#bFull').onclick = () => { const d = document.documentElement; if (!document.
 $('#shX').onclick = closeSheet; $('#sheet').onclick = e => { if (e.target.id === 'sheet') closeSheet(); };
 const flip = (k, t) => { (st.ov[k] = st.ov[k] || {})[t] = !layerOn(k, t); };
 view.addEventListener('click', e => {
+  if (MIR) return;
   if (st.peek) { st.peek = false; draw(); return; }
   const hb = e.target.closest('.hb'); if (hb) { hb.classList.toggle('on'); return; }
   const ob = e.target.closest('.opts button'); if (ob) { const c = CARDS.find(x => x.id === ob.closest('.card').id), ok = +ob.dataset.i === c.a.ans;
@@ -463,6 +474,7 @@ view.addEventListener('click', e => {
   next();
 });
 document.addEventListener('keydown', e => { const k = e.key;
+  if (MIR) return;
   if (k === 'p' || k === 'P') { if (!$('#bPeek').disabled) $('#bPeek').click(); return; }
   if ($('#sheet').classList.contains('on') && k === 'Escape') { closeSheet(); return; }
   if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
@@ -470,6 +482,8 @@ document.addEventListener('keydown', e => { const k = e.key;
   else if (k === 'Escape') go(0); });
 if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
 addEventListener('resize', relayout);
+/* 外面叫它跳到某一步：{hjCmd:'go', id:'3-1/mean'}（鏡像與教學網站都可用） */
+addEventListener('message', e => { const d = e.data; if (!d || d.hjCmd !== 'go') return; const j = STEPS.findIndex(s => sid(s) === d.id); if (j >= 0 && j !== st.i) go(j); });
 addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i) go(+x); });
 document.documentElement.style.setProperty('--zoom', zoom);
 setImgs();
@@ -477,7 +491,26 @@ const begin = () => { fit(); const h = location.hash.slice(1); st.i = /^\d+$/.te
   for (let j = st.i; j >= 0; j--) if (TEXT.includes(STEPS[j].t)) { st.seg = STEPS[j].p; break; }
   draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); };
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(begin);
-window.HJ_DEBUG = { STEPS, LN, CARDS, go, st };
+window.HJ_DEBUG = { STEPS, LN, CARDS, go, st, sid };
+/* ───────── 自我檢查：網址加 &selftest=1，把每一步走一遍，結果寫在 <pre id="selftest">（tools/hj_check.py 會讀） ───────── */
+if (QS.has('selftest')) (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => {
+  const bad = [], over = [], ids = STEPS.map(sid);
+  if (new Set(ids).size !== ids.length) bad.push('步驟代號有重複');
+  Object.entries(LN).forEach(([k, d]) => (d.line.rhet || []).forEach(r => { if (!d.plain.includes(strip(r[1]))) bad.push(`${k} 修辭引句和課文不一致：${strip(r[1])}`); }));
+  STEPS.forEach((s, i) => { go(i);
+    const on = stage.classList.contains('on'), seg = $$('.seg.act').length, card = $$('.card.act').length, sheet = $('#sheet').classList.contains('on');
+    const want = TEXT.includes(s.t) ? [true, 1, 0] : CARD.includes(s.t) ? [true, 0, 1] : [false, null, 0];
+    if (on !== want[0] || (want[1] !== null && seg !== want[1]) || card !== want[2] || sheet !== (s.t === 'ext')) bad.push(`第 ${i} 步（${ids[i]}）畫面狀態不對`);
+    if (TEXT.includes(s.t)) { const g = $('.seg.act'), b = Math.max(...$$('.lw.cur .col, .lw.cur .an:not(.off)', g).map(a => a.getBoundingClientRect().bottom)); if (b > g.getBoundingClientRect().bottom + 1) bad.push(`第 ${i} 步（${ids[i]}）字超出字卡下緣`); }
+    if (s.t === 'ans') { const c = $('.card.act'); if (c.scrollHeight > c.clientHeight + 2) over.push(`第 ${i} 步（${ids[i]}）的回答超過一個畫面，要滑動`); }
+    if (document.documentElement.scrollWidth > innerWidth) bad.push(`第 ${i} 步（${ids[i]}）左右超出畫面`); });
+  closeSheet(); go(0);
+  if (/\{[a-z]:/.test(stage.textContent + roll.textContent)) bad.push('畫面上有沒解析的課文標記');
+  const noImg = TP.map((p, i) => (PANS[i] || {}).img ? null : i + 1).filter(Boolean);
+  const pre = document.createElement('pre'); pre.id = 'selftest'; pre.hidden = true;
+  pre.textContent = JSON.stringify({ lesson: H.lesson, segs: TP.length, steps: STEPS.length, size: [innerWidth, innerHeight], ids, errors: ERR.concat(bad), warnings: over.concat(noImg.length ? ['還沒有新畫的段：' + noImg.join('、')] : []) });
+  document.body.appendChild(pre);
+}, 600));
 }
 </script>
 </body>
