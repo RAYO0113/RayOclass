@@ -21,6 +21,10 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:rgb(var(--rk-paper));color:var(--rk-ink);font-family:var(--rk-ming);font-size:calc(var(--rk-fs) * var(--zoom,1));-webkit-text-size-adjust:100%;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
+/* 粗體再加粗（老師 11/17）：字體檔只有 400、700 兩種粗細，再粗用同色描邊補；要改粗細調 --bd */
+:root{--bd:.024em}
+.col,.an b,.an.bu,.card .q,.card b,.hb,.tq .pn,.tq .sg,.lead .tt,#sheet b,#sheet th,#sheet h3,.qz .qq,.qz .ks button{-webkit-text-stroke:var(--bd) currentColor}
+.hb:not(.on),td.blk:not(.on) *{-webkit-text-stroke:0}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;background:rgb(var(--rk-paper))}
 header,footer{display:flex;align-items:center;gap:.4em;padding:.28em .6em;font-size:calc(var(--rk-fs) * .6);background:rgb(var(--rk-paper));z-index:3}
 header{border-bottom:1px solid var(--rk-line)} footer{border-top:1px solid var(--rk-line);padding-bottom:calc(.3em + env(safe-area-inset-bottom))}
