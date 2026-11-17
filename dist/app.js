@@ -13204,7 +13204,7 @@ try {
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="lb/index.html" title="詩的變形記" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="lb/index.html" title="詩的變形記" allow="fullscreen; autoplay"></iframe>';
     document.body.appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
@@ -13545,7 +13545,7 @@ try {
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen; autoplay"></iframe>';
     (document.fullscreenElement || document.body).appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
@@ -13635,7 +13635,7 @@ try {
   function ensure(m, spec) {
     if (Y[m]) return false;
     var f = document.createElement('iframe');
-    f.className = 'wk-yf-frame'; f.title = '樂府長卷'; f.setAttribute('allow', 'fullscreen');
+    f.className = 'wk-yf-frame'; f.title = '樂府長卷'; f.setAttribute('allow', 'fullscreen; autoplay');
     f.src = 'yf/index.html?embed=1#' + encodeURIComponent(spec);
     (m === 'f' ? document.getElementById('wk-fullscreen') : document.body).appendChild(f);
     Y[m] = f; Y.ready[m] = false;
@@ -13832,6 +13832,98 @@ try {
     if (isNaN(cur.step)) cur.step = -1;
     if (window.V217TN && window.V217TN.now) window.V217TN.now();
   });
+})();
+} catch (e) { setTimeout(function () { throw e; }); }
+/* ════ src/js/197_v260-hj-tnote-js.js ════ */
+try {
+(function () {
+  /* V260（老師 11/17「講稿放到手機版就好」「如何對照到手機的講稿，一併設計」；規範：教學系統 docs/規格_課文畫卷製作規範.md §12）
+     課文畫卷（hj/index.html?l=<課代號>）嵌在網站裡時，每走一步送 hjStep {l:課代號, id:步驟代號, i:第幾步, n:總步數}；
+     這裡記下來，交給 186 的講稿同步送出去（位置代號 hj:<課代號>:<步驟代號>，例 hj:changgan:3-1/mean）。只送位置，不送內容。
+     只認「正在顯示的那個畫卷 iframe」：class 要有 wk-hj-frame（之後接進課文頁的入口要用這個 class），而且看得到。
+     ⚠ 同名陷阱（AGENTS.md §10.3）：window.V217TN_EXT 原本是 196（樂府長卷）定義的。本檔先存下原本的，
+       畫卷沒有位置（不在畫卷、畫卷藏起來）時呼叫原本的 → 長卷照常同步。實際生效的 V217TN_EXT＝本檔這一支（它再叫 196 的）。 */
+  var prev = window.V217TN_EXT;
+  var cur = null, src = null;   /* cur＝{ l, id, i, n }；src＝送來的那個 iframe */
+  function shown(f) { return !!f && f.isConnected && f.style.display !== 'none' && f.getClientRects().length > 0; }
+  window.V217TN_EXT = function (s) {
+    if (cur && shown(src)) return { id: ('hj:' + cur.l + ':' + cur.id).slice(0, 80), h: ('畫卷　' + cur.id + '（' + (cur.i + 1) + '/' + cur.n + '）').slice(0, 60) };
+    return prev ? prev(s) : null;
+  };
+  window.addEventListener('message', function (e) {
+    var d = e.data; if (!d || typeof d !== 'object' || !d.hjStep) return;
+    var fs = document.querySelectorAll('iframe.wk-hj-frame'), f = null;
+    for (var i = 0; i < fs.length; i++) if (fs[i].contentWindow === e.source && shown(fs[i])) f = fs[i];
+    if (!f) return;   /* 只認正在顯示的那個畫卷（一般畫面、投影可能各一個） */
+    var l = String(d.hjStep.l || '').replace(/[^\w-]/g, ''), id = String(d.hjStep.id || '').replace(/[^\w\/-]/g, '');
+    if (!l || !id) return;
+    cur = { l: l, id: id, i: +d.hjStep.i || 0, n: +d.hjStep.n || 0 }; src = f;
+    if (window.V217TN && window.V217TN.now) window.V217TN.now();
+  });
+})();
+} catch (e) { setTimeout(function () { throw e; }); }
+/* ════ src/js/198_v260-hj-entry-js.js ════ */
+try {
+(function () {
+  /* V260（老師 11/18：「課文頁加按鈕」）課文畫卷的入口。
+     有畫卷的課（HJ_LESSONS），課文頁上方的按鈕列（.tp-btns，注釋／段旨／段析／翻譯那一排）多一顆「畫卷 ▸」；
+     點了蓋滿整個畫面開 hj/index.html?l=<課代號>，直接跳到這一段的「看畫」那一步。畫卷裡「✕ 回課文」（送 lbClose）關掉，回到原本那一頁。
+     iframe 的 class 是 wk-hj-frame：197 認這個 class 把畫卷位置送給手機講稿；關掉就移除，197 自動退回長卷／課文的同步。
+     一般畫面、投影都能開：投影時蓋在投影層上面（z-index 最高），網站的畫筆、換頁列在畫卷底下，畫卷自己有上一步／下一步。 */
+  var HJ_LESSONS = { '樂府詩選—長干行': 'changgan' };
+  var BOX = 'hj-anim';
+
+  function segOf() {   /* 現在是這一課的第幾段課文（0 起算）；不是課文頁回 -1 */
+    if (!wkSlides || !wkSlides[wkIdx] || wkSlides[wkIdx].type !== 'textpage') return -1;
+    var n = 0;
+    for (var i = 0; i < wkIdx; i++) if (wkSlides[i].type === 'textpage') n++;
+    return n;
+  }
+  function close() { var b = document.getElementById(BOX); if (b) b.remove(); window.focus(); }
+
+  window.hjOpen = function () {
+    var key = HJ_LESSONS[wkKey]; if (!key || document.getElementById(BOX)) return;
+    var seg = segOf(), want = seg >= 0 ? 'pan-' + seg : null;
+    var box = document.createElement('div');
+    box.id = BOX;
+    box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#F4F0E7';
+    var f = document.createElement('iframe');
+    f.className = 'wk-hj-frame'; f.title = '課文畫卷'; f.setAttribute('allow', 'fullscreen');
+    f.style.cssText = 'width:100%;height:100%;border:0;display:block';
+    f.src = 'hj/index.html?l=' + key;
+    box.appendChild(f);
+    (document.fullscreenElement || document.body).appendChild(box);
+    /* 畫卷第一次回報位置（剛載入＝卷首）時，跳到這一段的看畫 */
+    function first(e) {
+      if (e.source !== f.contentWindow || !e.data || !e.data.hjStep) return;
+      window.removeEventListener('message', first);
+      if (want && e.data.hjStep.id !== want) f.contentWindow.postMessage({ hjCmd: 'go', id: want }, '*');
+    }
+    window.addEventListener('message', first);
+    setTimeout(function () { try { f.focus(); } catch (er) {} }, 400);
+  };
+  window.addEventListener('message', function (e) {
+    var b = document.getElementById(BOX), f = b && b.querySelector('iframe');
+    if (f && e.source === f.contentWindow && e.data && e.data.lbClose) close();
+  });
+
+  /* 課文頁的按鈕列加「畫卷 ▸」（一般畫面、投影各自重畫，所以每次換頁都補） */
+  var _render = wkRenderCurrent;
+  wkRenderCurrent = function () {
+    var r = _render.apply(this, arguments);
+    try {
+      if (HJ_LESSONS[wkKey] && segOf() >= 0) {
+        document.querySelectorAll('#wk-slide-area .tp-btns, #wkfs-body .tp-btns').forEach(function (row) {
+          if (row.querySelector('.tp-b-hj')) return;
+          var b = document.createElement('button');
+          b.className = 'tp-b tp-b-hj'; b.type = 'button'; b.textContent = '畫卷 ▸';
+          b.onclick = function (ev) { ev.stopPropagation(); window.hjOpen(); };
+          row.appendChild(b);
+        });
+      }
+    } catch (er) { setTimeout(function () { throw er; }); }
+    return r;
+  };
 })();
 } catch (e) { setTimeout(function () { throw e; }); }
 /* ════ src/js/136_v113-ver-js.js ════ */

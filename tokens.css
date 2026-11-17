@@ -1,0 +1,155 @@
+/* ════════════════════════════════════════════════════════════════
+   全站共用色票 tokens.css（美化第 0 批，2026-11-16）
+   規範：教學系統專案 docs/規格_全站視覺規範.md；樣本頁：styleguide/index.html；檢查：python tools/style_check.py
+   來源：yf/index.html（樂府長卷）實際用的值，照抄，不要自己調。
+   變數一律加 --rk- 前綴：教學網站 001_base.css 已經有 --ink、--paper、--gold（值與寫法都不同），不加前綴會互相蓋掉。
+   夜間：長卷 body.night、教學網站 body.dark-mode、學霸網 html.dark，三種都認。
+   ════════════════════════════════════════════════════════════════ */
+@font-face{font-family:"RayGenRyuRead";src:url("fonts/genryumin-read-r.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"RayGenRyuRead";src:url("fonts/genryumin-read-b.woff2") format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  /* 字體：全站只有這一種（老師 11/16：內文全改明體） */
+  --rk-ming:"RayGenRyuRead","Noto Serif TC","PMingLiU",serif;
+
+  /* 六色與固定意思 */
+  --rk-paper:247,238,214;                 /* 紙：RGB 三個數，用 rgb(var(--rk-paper))、rgba(var(--rk-paper),.9) */
+  --rk-ink:#2a2521;                       /* 墨：內文 */
+  --rk-mute:#6a5a45;                      /* 淡墨：次要文字 */
+  --rk-zhu:#a8352a; --rk-zhu-d:#7f241c;   /* 朱：老師的重點字、標題、進度 */
+  --rk-hb:#1d4f91;                        /* 藍：學生講義要填的空格、字義 */
+  --rk-key:#17675a;                       /* 綠：關鍵詞 */
+  --rk-yi:#2f4a35; --rk-yi-bg:rgba(93,122,95,.13); --rk-yi-bd:#5d7a5f;   /* 綠底框：翻譯、解析、句意 */
+  --rk-gold:#b08d57;                      /* 金：細框、裝飾線 */
+  --rk-line:rgba(107,74,43,.32);          /* 一般框線 */
+  --rk-card:rgba(255,251,240,.86);        /* 卡片底 */
+  --rk-seal:linear-gradient(135deg,#b83f31,#98291f);   /* 印章紅：主要按鈕、時代章 */
+  --rk-seal-ink:#fbefdc;                  /* 印章上的字 */
+  --rk-ok:#3f6b52; --rk-no:#b0796a;       /* 答對、答錯 */
+  --rk-bu:#6f4a78; --rk-bu-bg:rgba(111,74,120,.1);   /* 茄紫：補充（不用抄），一律粗體（老師 11/16 選定；教學網站原本是 #7c4da0） */
+  --rk-shadow:rgba(107,74,43,.18);        /* 紙片的硬陰影 */
+
+  /* 課文旁批五色（老師 11/17 定：修辭紅、句意綠、字義藍、補充紫；注釋用赭石，老師同日確認）。
+     取國畫顏料的顏色，配水墨畫卷；意思固定，不可混用。 */
+  --rk-pi-rh:#a8352a;                     /* 朱砂：修辭（＝朱） */
+  --rk-pi-yi:#2c6a4a;                     /* 石綠：句意（比 --rk-yi 亮，投影才不會跟墨字混在一起） */
+  --rk-pi-zy:#1d4f91;                     /* 花青：字義（＝藍） */
+  --rk-pi-bu:#6f4a78;                     /* 茄紫：補充（＝--rk-bu） */
+  --rk-pi-nt:#86591f;                     /* 赭石：注釋（課本注釋） */
+
+  /* 畫卷裱邊：錦（深褐）＋金線＋綾（淺米） */
+  --rk-jin-1:#2d1f14; --rk-jin-2:#4b3422; --rk-jin-3:#6b4f2e; --rk-jin-gold:#c9a764; --rk-ling:#efe3c6;
+
+  /* 黑金頁首（老師 11/16：保留，金色要更明顯、有黃金顆粒感） */
+  --rk-night-bg:linear-gradient(135deg,#1a1209 0%,#2a1d0c 50%,#1a1209 100%);
+  --rk-leaf:linear-gradient(100deg,#c99a2e 0%,#f6d978 18%,#fff6c9 32%,#e8bf4f 50%,#c8962b 66%,#f8e08a 84%,#d9aa3c 100%);
+  --rk-leaf-flat:#f0cd62;                 /* 不能用漸層的地方（細線、小字）用這個 */
+  --rk-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 .96  0 0 0 0 .72  0 0 0 1.7 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* 圓角：只有三種（圓點另用 50%） */
+  --rk-r-s:3px;                           /* 標籤、小框 */
+  --rk-r:6px;                             /* 按鈕、卡片、浮框 */
+  --rk-r-seal:6px 9px 5px 10px;           /* 印章（故意不整齊） */
+
+  /* 字級階梯：一律 em，跟著根字級走，不寫死 px */
+  --rk-fs:clamp(19px,2.5vw,36px);         /* 投影、平板的根字級 */
+  --rk-t-xs:.6em;                         /* 小字：工具列、頁尾、標籤 */
+  --rk-t-m:1em;                           /* 內文、註解、翻譯都一樣大（老師 11/16：不要四級） */
+  --rk-t-l:1.35em;                        /* 標題（加粗） */
+  --rk-lh:2;                              /* 行高（老師 11/16） */
+
+  /* 間距階梯 */
+  --rk-sp-1:.25em; --rk-sp-2:.5em; --rk-sp-3:.9em; --rk-sp-4:1.6em;
+}
+@media (max-width:760px){ :root{ --rk-fs:17px } }
+
+body.night, body.dark-mode, html.dark{
+  --rk-paper:16,18,26; --rk-ink:#f1e6cb; --rk-mute:#b9a988;
+  --rk-zhu:#e9a45c; --rk-zhu-d:#f0c184; --rk-hb:#9cc4ff; --rk-key:#8fd9c6;
+  --rk-yi:#c5e3c8; --rk-yi-bg:rgba(127,174,134,.16); --rk-yi-bd:#7fae86;
+  --rk-gold:#d8b878; --rk-line:rgba(240,225,190,.28); --rk-card:rgba(22,24,34,.8);
+  --rk-shadow:rgba(0,0,0,.35);
+  --rk-bu:#c9a9d1; --rk-bu-bg:rgba(201,169,209,.13);
+  --rk-pi-rh:#f29484; --rk-pi-yi:#9fd6ae; --rk-pi-zy:#9cc4ff; --rk-pi-bu:#c9a9d1; --rk-pi-nt:#dfb877;
+}
+
+/* ════ 元件：每樣只有一種寫法（class 一律 rk- 開頭，不會撞到舊樣式） ════ */
+.rk{font-family:var(--rk-ming);color:var(--rk-ink);line-height:var(--rk-lh)}
+.rk *{box-sizing:border-box}
+.rk button{font:inherit;color:inherit;cursor:pointer}
+
+/* 按鈕：主要＝印章紅；次要＝紙底細框 */
+.rk-btn{border:1.5px solid var(--rk-line);background:rgba(var(--rk-paper),.75);border-radius:var(--rk-r);padding:.2em .7em;white-space:nowrap}
+.rk-btn.pri{border:0;background:var(--rk-seal);color:var(--rk-seal-ink);border-radius:var(--rk-r-seal);padding:.3em 1.1em;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(251,239,220,.5),0 2px 5px rgba(0,0,0,.25)}
+.rk-btn:disabled{opacity:.4;cursor:default}
+
+/* 標籤 */
+.rk-tag{display:inline-block;font-size:var(--rk-t-xs);letter-spacing:.05em;border:1px solid var(--rk-gold);border-radius:var(--rk-r-s);padding:0 .5em;color:var(--rk-mute)}
+.rk-tag.zhu{border-color:var(--rk-zhu);color:var(--rk-zhu-d)}
+.rk-tag.hb{border-color:var(--rk-hb);color:var(--rk-hb)}
+.rk-tag.seal{border:0;background:var(--rk-seal);color:var(--rk-seal-ink);font-weight:700}
+
+/* 卡片 */
+.rk-card{background:var(--rk-card);border:1px solid var(--rk-line);border-radius:var(--rk-r);padding:var(--rk-sp-2) var(--rk-sp-3);box-shadow:3px 4px 0 var(--rk-shadow)}
+
+/* 標題：前面一顆朱色菱形 */
+.rk-h{font-size:var(--rk-t-l);font-weight:700;line-height:1.4;margin:0 0 var(--rk-sp-2)}
+.rk-h::before{content:'';display:inline-block;width:.42em;height:.42em;background:var(--rk-zhu);transform:rotate(45deg);margin-right:.45em;vertical-align:.18em}
+
+/* 三種框：朱＝老師重點、藍＝講義空格／字義、綠＝翻譯解析句意 */
+.rk-zhu{color:var(--rk-zhu-d);font-weight:700;border-bottom:2.5px solid var(--rk-zhu);background:rgba(168,53,42,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
+.rk-hb{color:var(--rk-hb);font-weight:700;border-bottom:2.5px solid var(--rk-hb);background:rgba(29,79,145,.1);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em}
+.rk-key{color:var(--rk-key);font-weight:700}
+.rk-bu{color:var(--rk-bu);font-weight:700;background:var(--rk-bu-bg);border-left:4px solid var(--rk-bu);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
+.rk-tag.bu{border-color:var(--rk-bu);color:var(--rk-bu);font-weight:700}
+.rk-yi{color:var(--rk-yi);background:var(--rk-yi-bg);border-left:4px solid var(--rk-yi-bd);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
+
+/* 表格 */
+.rk-table{border-collapse:collapse;width:100%}
+.rk-table th{background:#98291f;color:var(--rk-seal-ink);font-weight:700;padding:.3em .7em;text-align:left}
+.rk-table td{border-bottom:1px solid var(--rk-line);padding:.3em .7em;vertical-align:top}
+.rk-table tr:nth-child(even) td{background:rgba(var(--rk-paper),.5)}
+
+/* 浮框 */
+.rk-pop{background:rgb(var(--rk-paper));border:1px solid var(--rk-gold);border-radius:var(--rk-r);padding:var(--rk-sp-2) var(--rk-sp-3);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+
+/* 黑金頁首：金箔字＋顆粒 */
+.rk-head{position:relative;overflow:hidden;background:var(--rk-night-bg);padding:.7em 1em;border-bottom:2px solid var(--rk-leaf-flat)}
+.rk-head::before{content:'';position:absolute;inset:0;background:var(--rk-grain);opacity:.32;mix-blend-mode:screen;pointer-events:none}
+.rk-head-title{position:relative;display:inline-block;font-family:var(--rk-ming);font-weight:700;font-size:var(--rk-t-l);letter-spacing:.14em;
+  background:var(--rk-grain),var(--rk-leaf);background-size:180px 180px,100% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(60,40,5,.9)) drop-shadow(0 0 12px rgba(240,205,98,.5))}
+.rk-head-sub{position:relative;font-size:var(--rk-t-xs);letter-spacing:.1em;color:var(--rk-leaf-flat);opacity:.85}
+
+/* ════ 教學網站外框元件（老師 11/16 問：頁籤、畫筆列、聚光燈、快速加減分、班級進度欄） ════ */
+/* 頁籤：紙底、淡墨字；選到的＝墨字加粗＋下面一道朱線（同長卷上列） */
+.rk-tabs{display:flex;flex-wrap:wrap;gap:.2em;border-bottom:1px solid var(--rk-line);font-size:var(--rk-t-xs)}
+.rk-tabs button{border:0;background:none;padding:.35em .8em;color:var(--rk-mute);font-weight:700;letter-spacing:.06em;position:relative;border-radius:var(--rk-r) var(--rk-r) 0 0}
+.rk-tabs button.on{color:var(--rk-ink);background:rgba(var(--rk-paper),.9)}
+.rk-tabs button.on::after{content:'';position:absolute;left:.6em;right:.6em;bottom:-1px;height:3px;background:var(--rk-zhu)}
+
+/* 投影下方工具列（畫筆、換頁）：黑底，鈕是金細框；正在用的那顆是金底墨字。筆的顏色是功能，不在這裡改 */
+.rk-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px));background:var(--rk-night-bg);font-size:var(--rk-t-xs)}
+.rk-bar button{border:1px solid rgba(240,205,98,.45);background:none;color:var(--rk-leaf-flat);border-radius:var(--rk-r);padding:0 .8em;min-width:44px;min-height:44px;font-weight:700;white-space:nowrap}
+/* 實測現況（11/16，V259）：鈕高 30px、筆色圓點 26px、彼此只隔 6px；直式時「清除」離「上一頁」只有 28px；工具列貼底、沒留 iPad 底部橫條的位置。所以：鈕最少 44px、間隔 12px、「清除」另外隔開、底部留安全距離 */
+.rk-bar .danger{margin-left:16px;margin-right:24px}
+.rk-bar button.on{background:var(--rk-leaf-flat);color:#1a1209;border-color:var(--rk-leaf-flat)}
+.rk-bar .sp{flex:1}
+.rk-bar .pg{color:var(--rk-leaf-flat);letter-spacing:.1em}
+
+/* 圓鈕（聚光燈、快速加減分的星星）：紙底、金框；開著的時候印章紅 */
+.rk-fab{width:2.6em;height:2.6em;border-radius:50%;border:1.5px solid var(--rk-gold);background:rgba(var(--rk-paper),.92);color:var(--rk-ink);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.rk-fab.on{background:var(--rk-seal);color:var(--rk-seal-ink);border-color:var(--rk-seal-ink)}
+
+/* 快速加減分：浮框裡兩顆大鈕，加＝答對綠、扣＝朱框 */
+.rk-pm{display:grid;grid-template-columns:1fr 1fr;gap:.4em}
+.rk-pm button{border-radius:var(--rk-r);padding:.3em 0;font-weight:700;font-size:var(--rk-t-l)}
+.rk-pm .plus{border:0;background:var(--rk-ok);color:var(--rk-seal-ink)}
+.rk-pm .minus{border:2px solid var(--rk-zhu);background:rgba(var(--rk-paper),.9);color:var(--rk-zhu-d)}
+
+/* 班級進度欄：右側直排的拉籤（黑金）＋拉出來的紙色面板；班級用頁籤、工具用卡片 */
+.rk-sidetab{writing-mode:vertical-rl;background:var(--rk-night-bg);color:var(--rk-leaf-flat);border:1px solid rgba(240,205,98,.45);border-right:0;border-radius:var(--rk-r) 0 0 var(--rk-r);padding:.8em .35em;font-size:var(--rk-t-xs);font-weight:700;letter-spacing:.2em}
+.rk-panel{background:rgb(var(--rk-paper));border-left:2px solid var(--rk-gold);padding:var(--rk-sp-3);box-shadow:-6px 0 18px rgba(0,0,0,.2)}
+.rk-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.5em;font-size:var(--rk-t-xs)}
+.rk-tiles button{background:var(--rk-card);border:1px solid var(--rk-line);border-top:4px solid var(--rk-zhu);border-radius:var(--rk-r-s);padding:.5em .3em;font-weight:700;box-shadow:2px 3px 0 var(--rk-shadow)}
+.rk-tiles small{display:block;font-weight:400;color:var(--rk-mute)}

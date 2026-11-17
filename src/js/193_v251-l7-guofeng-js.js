@@ -11,7 +11,7 @@
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen; autoplay"></iframe>';
     (document.fullscreenElement || document.body).appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
