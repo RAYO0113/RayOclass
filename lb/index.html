@@ -100,7 +100,7 @@ body.night .bk:not(.on){background:rgba(233,164,92,.14)}
 .toc small{display:block;font-weight:400;color:var(--mute);font-size:.72em}
 .cv .nx{font-size:.8em;letter-spacing:.15em;animation:enter .6s 3.3s both}
 /* ── 總覽：可拖動的長卷 ── */
-.tl-view{position:relative;overflow-x:auto;overflow-y:hidden;height:min(17.8em,calc(100vh - 8.2em));border-radius:4px;border:1px solid var(--line);background:rgba(var(--paper),.55);box-shadow:inset 0 0 2em rgba(107,74,43,.13);cursor:grab;user-select:none;-webkit-user-select:none;scrollbar-width:none}
+.tl-view{position:relative;overflow-x:auto;overflow-y:hidden;font-size:min(1em,calc((100vh - 8.2em) / 17.8));font-size:min(1em,calc((100dvh - 8.2em) / 17.8));height:17.8em;border-radius:4px;border:1px solid var(--line);background:rgba(var(--paper),.55);box-shadow:inset 0 0 2em rgba(107,74,43,.13);cursor:grab;user-select:none;-webkit-user-select:none;scrollbar-width:none}
 .tl-view::-webkit-scrollbar{display:none}
 .tl-view.all{overflow:hidden;cursor:default}
 .tl-track{position:relative;height:100%;width:calc(var(--ux) * 8.8 + 18.9em)}
@@ -384,7 +384,7 @@ const STOPS = [   /* [id, 名稱, 時代說明, x(格), y(列), 線段長] */
   ['yf', '樂府詩', '兩漢起・入樂', 2.2, 0, 2.6],
   ['gs', '古詩', '兩漢～六朝・不入樂', 2.2, 2, 2.6],
   ['jt', '近體詩', '唐', 5, 0, 1],
-  ['ci', '詞', '唐～宋', 5.2, 2, 1.9],
+  ['ci', '詞', '唐～宋', 5.75, 2, 1.45],
   ['qu', '曲', '元', 7.4, 1, 0.9],
   ['xs', '新詩', '五四以來', 8.8, 0, 0.8],
 ];
