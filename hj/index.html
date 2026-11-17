@@ -11,7 +11,7 @@
      第四版（老師 11/17：「字卡為什麼變小？應該是先秀圖，再切全螢幕字卡，再切回圖」「以 Opus 版為底，但要做出 Fable 版的美感」）：
      ・一段的順序：整幅畫（畫面上不疊字）→ 全螢幕字卡（紙色蓋過畫，課文大字直書，旁批緊跟在左）→ 讀完切回畫、段旨落款 → 講義空格、提問（全螢幕卡）→ 補充互動（整頁紙）
      ・字卡：字級依畫面高度自動放大（課文＝旁批的 1.35 倍，即色票的標題級／內文級）；正在讀的那一句是墨色，讀過的退成淡墨（偏灰）留在右邊
-     ・旁批五色（tokens.css 的 --rk-pi-*）：修辭＝朱砂、句意＝石綠、字義＝花青、補充＝茄紫、注釋＝赭石；講義空格＝墨字＋金底
+     ・旁批五色（tokens.css 的 --rk-pi-*）：修辭＝朱砂、句意＝石綠、字義＝花青、補充＝茄紫、注釋＝赭石；講義空格＝藍字＋講義編號＋頁碼（tokens.css 的 .rk-blank，老師 11/18 定稿＝樂府長卷）
      ・出現的方式：課文一字一字落下、旁批彈出、修辭蓋印、段旨落款、空格與回答彈出
      ・語譯、講稿、出處都不放在這一頁（老師 11/17：出處都刪掉，講稿放手機版就好）；出處記在設定檔的 src 欄。「看畫」（P）可以隨時把字卡收起來看畫
      字體＝源流明體。iPad 11（1194×834）為主、手機直式可用。 -->
@@ -23,8 +23,8 @@ html,body{margin:0;height:100%;background:rgb(var(--rk-paper));color:var(--rk-in
 button{font:inherit;color:inherit;cursor:pointer}
 /* 粗體再加粗（老師 11/17）：字體檔只有 400、700 兩種粗細，再粗用同色描邊補；要改粗細調 --bd */
 :root{--bd:.024em}
-.col,.an b,.an.bu,.card .q,.card b,.hb,.tq .pn,.tq .sg,.lead .tt,#sheet b,#sheet th,#sheet h3,.qz .qq,.qz .ks button{-webkit-text-stroke:var(--bd) currentColor}
-.hb:not(.on),td.blk:not(.on) *{-webkit-text-stroke:0}
+.col,.an b,.an.bu,.card .q,.card b,.rk-blank,.tq .pn,.tq .sg,.lead .tt,#sheet b,#sheet th,#sheet h3,.qz .qq,.qz .ks button{-webkit-text-stroke:var(--bd) currentColor}
+.rk-blank:not(.on),td.blk:not(.on) *{-webkit-text-stroke:0}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;background:rgb(var(--rk-paper))}
 header,footer{display:flex;align-items:center;gap:.4em;padding:.28em .6em;font-size:calc(var(--rk-fs) * .6);background:rgb(var(--rk-paper));z-index:3}
 header{border-bottom:1px solid var(--rk-line)} footer{border-top:1px solid var(--rk-line);padding-bottom:calc(.3em + env(safe-area-inset-bottom))}
@@ -68,7 +68,7 @@ body.night #view::before,body.night #view::after{filter:brightness(.75)}
 .pan .img,.pan .tint{position:absolute;top:0;bottom:0;left:calc(var(--ov)*-1);right:calc(var(--ov)*-1);pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--ov)*2),#000 calc(100% - var(--ov)*2),transparent 100%)}
-.pan .img{background:center bottom/cover no-repeat;transform-origin:50% 100%;transition:transform 1.6s cubic-bezier(.3,.05,.2,1)}   /* 讀課文時畫稍微推近，並跟著句子慢慢橫移（draw 裡設 transform） */
+.pan .img{background:center center/auto 100% no-repeat}   /* 老師 11/18：「圖片放太大，看不清全貌」→ 圖高＝畫面高，整張露出；不再放大、不再橫移 */
 .jump .pan .img{transition:none}
 body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .pan .tint{background:var(--tint);mix-blend-mode:multiply}
@@ -135,7 +135,7 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .card .ans:not(.off){animation:rise .55s cubic-bezier(.3,1.4,.5,1)}
 @keyframes rise{from{opacity:0;transform:translateY(.8em) scale(.9)}}
 .card .ans b{margin-right:.5em}
-.card.hbc{--c:var(--rk-leaf-flat);font-size:var(--rk-t-l)} .card.hbc small.k{font-size:.45em}
+.card.hbc{--c:var(--rk-hb);font-size:var(--rk-t-l)} .card.hbc small.k{font-size:.45em;display:flex;align-items:center;gap:.6em} .card.hbc .rk-hp{letter-spacing:.05em} .card.hbc .hbl{margin-top:.5em}   /* 空格上方要留位置給「✎ 填進講義」提示 */
 .opts{display:grid;gap:.4em;margin-top:.5em}
 .opts button{text-align:left;border:1.5px solid var(--rk-line);background:rgba(var(--rk-paper),.9);border-radius:var(--rk-r);padding:.1em .7em}
 .opts button b{color:var(--rk-zhu-d);margin-right:.5em}
@@ -144,9 +144,8 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @keyframes bump{from{transform:scale(.9)}60%{transform:scale(1.05)}}
 .hbl{margin:.2em 0}
-.hb{display:inline-block;min-width:3.2em;text-align:center;color:transparent;background:color-mix(in srgb,var(--rk-leaf-flat) 45%,transparent);border-bottom:2px solid var(--rk-ink);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .2em;margin:0 .1em;font-weight:700;cursor:pointer;position:relative;line-height:1.5}
-.hb::before{content:attr(data-n);position:absolute;left:-.1em;top:-1em;font-size:.45em;color:var(--rk-mute);font-weight:400}
-.hb.on{color:var(--rk-ink);animation:hbpop .45s cubic-bezier(.3,1.7,.5,1)}
+/* 講義空格＝tokens.css 的 .rk-blank（老師 11/18 定稿，與樂府長卷相同）；這裡不另寫樣式 */
+
 @keyframes hbpop{from{transform:scale(1.5)}}
 #cap{position:absolute;left:50%;bottom:1.6em;transform:translateX(-50%);z-index:3;background:var(--rk-card);border:1px solid var(--rk-gold);border-radius:var(--rk-r);padding:.15em 1em;font-size:.75em;max-width:94%;text-align:center;box-shadow:3px 4px 0 var(--rk-shadow);transition:opacity .5s}
 #cap:empty{opacity:0}
@@ -196,7 +195,7 @@ body.mir header,body.mir footer,body.mir #cap{display:none}   /* 鏡像：只留
     <button class="tool" id="bClose" hidden>✕ 回課文</button></header>
   <div id="view" class="jump"><div id="roll"></div><div id="stage"></div><div id="cap"></div></div>
   <footer><button class="tool" id="bPrev">← 上一步</button><span class="pg" id="pg"></span><button class="nx" id="bNext">下一步 ▸</button>
-    <span class="sp"></span><span class="lgs"><span class="lg" style="--c:var(--rk-pi-nt)">注釋</span><span class="lg" style="--c:var(--rk-pi-zy)">字義</span><span class="lg" style="--c:var(--rk-pi-yi)">句意</span><span class="lg" style="--c:var(--rk-pi-rh)">修辭</span><span class="lg" style="--c:var(--rk-pi-bu)">補充</span><span class="lg" style="--c:var(--rk-leaf-flat)">講義空格</span></span></footer>
+    <span class="sp"></span><span class="lgs"><span class="lg" style="--c:var(--rk-pi-nt)">注釋</span><span class="lg" style="--c:var(--rk-pi-zy)">字義</span><span class="lg" style="--c:var(--rk-pi-yi)">句意</span><span class="lg" style="--c:var(--rk-pi-rh)">修辭</span><span class="lg" style="--c:var(--rk-pi-bu)">補充</span><span class="lg" style="--c:var(--rk-hb)">講義空格</span></span></footer>
 </div>
 <div id="sheet"><div class="pp"><h3><span id="shT"></span><button class="tool" id="shX">✕ 回畫卷</button></h3><div id="shB"></div></div></div>
 <script>
@@ -282,7 +281,7 @@ function lianHtml(p, pi, li) {
 /* ── 全螢幕卡：講義空格、提問（補充互動另開整頁紙） ── */
 const CARDS = [], CH = [];   /* CARDS：{id, kind:'hb'|'ask'|'ext', p}；CH：卡片的 HTML */
 let nHb = 0;
-const hbHtml = s => s.replace(/\{([^{}]+)\}/g, (_, w) => `<span class="hb" data-n="${CIRC[nHb++] || ''}">${w}</span>`);
+const hbHtml = (s, pg) => s.replace(/\{(?:(\d+)\|)?([^{}|]+)\}/g, (_, n, w) => { const k = n ? +n : ++nHb; if (n) nHb = k; return `<span class="rk-blank" data-n="${CIRC[k - 1] || k}" data-p="${pg || ''}">${w}</span>`; });
 function askCard(a, where, j) {
   const id = `ask-${where}-${j}`;
   const body = a.kind === 'choice' ? `<div class="opts">${a.opts.map((o, i) => `<button data-i="${i}"><b>${'甲乙丙丁戊'[i]}</b>${o}</button>`).join('')}</div>` : '';
@@ -292,7 +291,8 @@ function askCard(a, where, j) {
 }
 function seamCards(pi) {
   if (HB[pi]) { const id = 'hb-' + pi; CARDS.push({ id, kind: 'hb', p: pi });
-    CH.push(`<div class="card hbc" id="${id}"><small class="k">段落透視・講義空格（點空格揭曉）</small>${HB[pi].map(s => `<div class="hbl">${hbHtml(s)}</div>`).join('')}</div>`); }
+    const pg = (H.hbPage || {})[pi] || '';
+    CH.push(`<div class="card hbc" id="${id}"><small class="k"><span>段落透視・講義空格</span>${pg ? `<span class="rk-hp">補充講義 ${pg}</span>` : ''}</small>${HB[pi].map(s => `<div class="hbl">${hbHtml(s, pg)}</div>`).join('')}</div>`); }
   (ASKS[pi] || []).forEach((a, j) => askCard(a, pi, j));
   (EXT[pi] || []).forEach((x, j) => CARDS.push({ id: `ext-${pi}-${j}`, kind: 'ext', p: pi, x }));
 }
@@ -378,8 +378,6 @@ function draw() {
   CARDS.forEach(c => { if (c.kind === 'ext') return; const el = $('#' + c.id); el.classList.toggle('act', s.id === c.id);
     if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = st.ov[c.id + ':a']; $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
   /* 畫跟著課文走：這一段讀到第幾句，畫就橫移到哪（卷子往左展開，所以畫往右退） */
-  $$('.pan .img', roll).forEach(x => { const n = TP[+x.dataset.p].lines.length, li = inText && +x.dataset.p === s.p ? +s.k.split('-')[1] : -1;
-    x.style.transform = li < 0 ? '' : `scale(1.1) translateX(${((n > 1 ? li / (n - 1) : .5) - .5) * 6}%)`; });
   /* 畫卷走到哪 */
   roll.classList.toggle('ovw', s.t === 'all');
   $$('.pan', roll).forEach(p => p.style.width = s.t === 'all' ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
@@ -397,7 +395,9 @@ function draw() {
 }
 const skip = t => st.fast && LAYER.includes(t);
 function go(i) { if (i < 0 || i >= STEPS.length) return; st.i = i; st.rq = null; st.peek = false; draw(); }
-function next() { let i = st.i + 1; while (i < STEPS.length && skip(STEPS[i].t)) i++; go(i); }
+function showBlank(b) { b.classList.add('on'); b.classList.remove('tip'); void b.offsetWidth; b.classList.add('tip'); }
+function next() { const s0 = STEPS[st.i]; if (s0 && s0.t === 'hb' && !st.peek) { const b = $(`#${s0.id} .rk-blank:not(.on)`); if (b) { showBlank(b); return; } }
+  let i = st.i + 1; while (i < STEPS.length && skip(STEPS[i].t)) i++; go(i); }
 function prev() { let i = st.i - 1; while (i > 0 && skip(STEPS[i].t)) i--; go(i); }
 /* ───────── 補充互動（整頁紙） ───────── */
 const box = label => { const b = ALL.flatMap(p => p.boxes || []).find(x => x.label === label); if (!b) throw new Error('課檔沒有這個補充框：' + label); return b.ask.join(''); };
@@ -461,7 +461,7 @@ const flip = (k, t) => { (st.ov[k] = st.ov[k] || {})[t] = !layerOn(k, t); };
 view.addEventListener('click', e => {
   if (MIR) return;
   if (st.peek) { st.peek = false; draw(); return; }
-  const hb = e.target.closest('.hb'); if (hb) { hb.classList.toggle('on'); return; }
+  const hb = e.target.closest('.rk-blank'); if (hb) { if (hb.classList.contains('on')) hb.classList.remove('on', 'tip'); else showBlank(hb); return; }
   const ob = e.target.closest('.opts button'); if (ob) { const c = CARDS.find(x => x.id === ob.closest('.card').id), ok = +ob.dataset.i === c.a.ans;
     ob.classList.remove('no'); void ob.offsetWidth; ob.classList.add(ok ? 'ok' : 'no'); if (ok) { st.ov[c.id + ':a'] = true; draw(); } return; }
   const cd = e.target.closest('.card.act'); if (cd) { if (cd.classList.contains('askc')) { st.ov[cd.id + ':a'] = $('.ans', cd).classList.contains('off'); draw(); } return; }

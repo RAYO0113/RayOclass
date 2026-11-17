@@ -104,6 +104,22 @@ body.night, body.dark-mode, html.dark{
 .rk-tag.bu{border-color:var(--rk-bu);color:var(--rk-bu);font-weight:700}
 .rk-yi{color:var(--rk-yi);background:var(--rk-yi-bg);border-left:4px solid var(--rk-yi-bd);border-radius:0 var(--rk-r) var(--rk-r) 0;padding:.35em .9em}
 
+/* 講義空格（老師 11/18 定稿：「講義空格說好藍字＋頁碼，參考樂府長卷的樣子當定稿，以後都這樣用，包含動畫」）
+   值照抄 yf/index.html 的 .bk.hb。用法：
+   <span class="rk-blank" data-n="②" data-p="P.79">追述</span>  ← data-n＝講義上的編號（照講義，不要自己重編）、data-p＝講義頁碼
+   - 藏著：藍底線、淡藍底、左邊藍色編號，字看不到
+   - 揭曉：加 .on → 藍字落下（rk-drop）；同時加 .tip → 上方浮出「✎ 填進講義 P.79 ②」2.8 秒後淡出
+   - 再點一次收回（拿掉 .on .tip）
+   卡片／頁面標題旁放頁碼：<span class="rk-hp">補充講義 P.79</span> */
+.rk-blank{position:relative;display:inline-block;color:transparent;font-weight:700;line-height:1.35;border-bottom:2.5px solid var(--rk-hb);background:color-mix(in srgb,var(--rk-hb) 13%,transparent);border-radius:var(--rk-r-s) var(--rk-r-s) 0 0;padding:0 .18em 0 1.3em;margin:0 .06em;min-width:3.4em;text-align:center;cursor:pointer;user-select:none;transition:color .35s,background .35s}
+.rk-blank::before{content:attr(data-n);position:absolute;left:.14em;top:0;color:var(--rk-hb);font-weight:700}
+.rk-blank.on{color:var(--rk-hb);background:color-mix(in srgb,var(--rk-hb) 7%,transparent);animation:rk-drop .45s cubic-bezier(.3,1.5,.5,1)}
+.rk-blank.tip::after{content:'✎ 填進講義 ' attr(data-p) ' ' attr(data-n);position:absolute;left:50%;bottom:104%;white-space:nowrap;font-size:.5em;line-height:1.7;letter-spacing:.05em;color:#fff;background:var(--rk-hb);border-radius:var(--rk-r);padding:0 .7em;pointer-events:none;animation:rk-hbtip 2.8s forwards}
+@keyframes rk-drop{from{transform:translateY(-.35em) scale(1.25);filter:blur(3px)}}
+@keyframes rk-hbtip{0%{opacity:0;transform:translate(-50%,8px)}12%,82%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+.rk-hp{display:inline-block;letter-spacing:.05em;border:1px solid var(--rk-hb);border-radius:var(--rk-r-s);padding:0 .5em;color:var(--rk-hb);font-weight:700}
+@media (prefers-reduced-motion:reduce){.rk-blank.on,.rk-blank.tip::after{animation:none}}
+
 /* 表格 */
 .rk-table{border-collapse:collapse;width:100%}
 .rk-table th{background:#98291f;color:var(--rk-seal-ink);font-weight:700;padding:.3em .7em;text-align:left}
