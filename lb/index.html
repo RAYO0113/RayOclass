@@ -578,32 +578,37 @@ P('qu2', 'qu', '曲｜曲牌', head('qu', '看形式：照曲牌填字') + `
   <div class="note st" data-hide>曲牌〈天淨沙〉規定：<b>六・六・六・四・六</b>字。<br>這首照規定填，<b>沒有加襯字</b>。</div>
   <div class="note st">曲比詞自由的地方：可以在規定的字數之外，<b>再加「襯字」</b>→ 下一頁</div></div>
 </div>`, { init: el => stagger($('#qud', el), .03) });
-/* 曲｜襯字：聽歌搶答（老師 11/18）。歌詞＝老師提供的四句；答案＝第三句「也許」後多唱一個「應」（龍騰技高國文(5)L4 曲選備課用書「我也會襯字」） */
-const CZ_L = ['是我做了什麼 讓天使生氣', '還是忘了做什麼 幸福遠離', '也許該要真的相信 是有種愛叫遠遠關心', '痛 卻又哽住呼吸'];
-const CZ_ANS = { l: 2, j: 2, w: '應' };   /* 第 3 句、第 2 個字後面（從 0 起算） */
+/* 曲｜襯字：聽歌搶答（老師 11/18）。歌詞＝老師提供的四句（第三句照原歌詞，沒有「是」）；
+   答案兩個：第三句「也許」後多唱的「應」（龍騰技高國文(5)L4 曲選備課用書「我也會襯字」）、後半句開頭多唱的「是」（老師 11/18 決定也算襯字） */
+const CZ_L = ['是我做了什麼 讓天使生氣', '還是忘了做什麼 幸福遠離', '也許該要真的相信 有種愛叫遠遠關心', '痛 卻又哽住呼吸'];
+const CZ_ANS = [{ l: 2, j: 2, w: '應' }, { l: 2, j: 8, w: '是' }];   /* 第 3 句：第 2 個字前、第 8 個字前（從 0 起算，不算空格） */
+const czHit = (l, j) => CZ_ANS.findIndex(a => a.l === l && a.j === j);
 /* 只放聲音：郭采潔〈誠實地想你〉官方 MV（YouTube，Timeless Music 頻道）2:20～2:48 */
 const CZ_SONG = { yt: 'ASMmljnWK2E', start: 140, end: 168 };
 P('qu3', 'qu', '曲｜襯字', head('qu', '看形式：襯字') + `
-<div class="tip">搶答！聽歌：唱的時候比下面的歌詞<b>多了一個字</b>——多了哪個字？加在哪裡？聽出來的人點那裡的「＋」</div>
+<div class="tip">搶答！聽歌：唱的時候比下面的歌詞<b>多了兩個字</b>——多了哪兩個字？加在哪裡？聽出來的人點那裡的「＋」</div>
 <div class="cz-play"><button class="tool" id="czp" style="font-size:.66em">♪ 播這兩句</button><span class="lab" id="czt"></span><div class="cz-yt" id="czy"><div id="czh"></div></div></div>
 <div class="cz-demo" id="czd" style="--c:${C.qu}">
-${CZ_L.map((ln, li) => { let k = 0; return `<div class="cz-row">` + ln.split(' ').map((ph, pi) => (pi ? '<span class="cz-gap"></span>' : '') + [...ph].map((c, cj) => { const j = k++, hit = li === CZ_ANS.l && j === CZ_ANS.j;
-  return `<button class="slot" data-l="${li}" data-j="${j}" data-end="${cj === 0 && pi ? 1 : 0}">＋</button>${hit ? `<span class="ch cz-new hid" style="--c:${C.qu}">${CZ_ANS.w}</span>` : ''}<span class="ch" style="--c:${C.qu}">${c}</span>`; }).join('')).join('') + `<button class="slot" data-l="${li}" data-j="${k}" data-end="1">＋</button></div>`; }).join('')}
+${CZ_L.map((ln, li) => { let k = 0; return `<div class="cz-row">` + ln.split(' ').map((ph, pi) => (pi ? '<span class="cz-gap"></span>' : '') + [...ph].map((c, cj) => { const j = k++, hit = czHit(li, j);
+  return `<button class="slot" data-l="${li}" data-j="${j}" data-end="${cj === 0 && pi ? 1 : 0}">＋</button>${hit >= 0 ? `<span class="ch cz-new hid" data-a="${hit}" style="--c:${C.qu}">${CZ_ANS[hit].w}</span>` : ''}<span class="ch" style="--c:${C.qu}">${c}</span>`; }).join('')).join('') + `<button class="slot" data-l="${li}" data-j="${k}" data-end="1">＋</button></div>`; }).join('')}
 </div>
 <div class="cnt" id="czf"></div>
 <button class="tool" id="czb" style="font-size:.66em">▶ 公布答案</button>
-<div class="src st" id="czs" style="margin-top:.4em;display:none">流行歌加襯字：郭采潔〈誠實地想你〉「也許該要真的相信」唱成「也許<b>應</b>該要真的相信」</div>
+<div class="src st" id="czs" style="margin-top:.4em;display:none">流行歌加襯字：郭采潔〈誠實地想你〉「也許該要真的相信」唱成「也許<b>應</b>該要真的相信　<b>是</b>有種愛叫遠遠關心」</div>
 <div class="note st"><b>襯字</b>：曲牌規定的字數以外，多加的字。</div>
 <div class="note st" data-hide>・可加在<b>句首、句中</b>，<b>不可加在句末</b><br>・可以是虛詞，也可以是實詞<br>・不改原意，讓語氣更像說話、更活潑（口語化）</div>`, { init: el => {
-  const d = $('#czd', el), cz = $('.cz-new', el), fb = $('#czf', el);
-  const set = on => { cz.classList.toggle('on', on); d.classList.toggle('cz-on', on); $('#czb', el).textContent = on ? '⟲ 重來' : '▶ 公布答案'; if (on) fb.textContent = '答對！多唱了一個「' + CZ_ANS.w + '」，就是襯字'; else fb.textContent = ''; $('#czs', el).style.display = on ? '' : 'none'; };
-  cz._rev = () => set(true);
+  const d = $('#czd', el), cz = $$('.cz-new', el), fb = $('#czf', el), all = CZ_ANS.map(a => a.w).join('」「');
+  const found = () => cz.filter(x => x.classList.contains('on')).length;
+  const set = on => { cz.forEach(x => x.classList.toggle('on', on)); d.classList.toggle('cz-on', on); $('#czb', el).textContent = on ? '⟲ 重來' : '▶ 公布答案'; fb.textContent = on ? '答對！多唱了「' + all + '」，都是襯字' : ''; $('#czs', el).style.display = on ? '' : 'none'; };
+  cz.forEach(x => x._rev = () => set(true));   /* 網站或頁面的「下一步」揭曉：兩個一起公布 */
   $$('.slot', el).forEach(s => s.onclick = e => {
     e.stopPropagation(); const l = +s.dataset.l, j = +s.dataset.j;
-    if (l === CZ_ANS.l && j === CZ_ANS.j) { set(true); upd(); return; }
+    const a = czHit(l, j);
+    if (a >= 0) { const x = cz.find(y => +y.dataset.a === a); x.classList.add('on'); s.style.visibility = 'hidden';
+      if (found() === cz.length) set(true); else fb.textContent = '答對一個：「' + CZ_ANS[a].w + '」！還有一個'; upd(); return; }
     shake(s); fb.textContent = s.dataset.end === '1' ? '襯字不可加在句末，再聽聽看' : '不是這裡，再聽聽看';
   });
-  $('#czb', el).onclick = e => { e.stopPropagation(); set(!cz.classList.contains('on')); upd(); };
+  $('#czb', el).onclick = e => { e.stopPropagation(); const on = found() < cz.length; set(on); if (!on) $$('.slot', el).forEach(x => x.style.visibility = ''); upd(); };
   /* 播放：載入 YouTube 播放器 API，播 start～end；影片藏起來只出聲。2 秒後還沒在播（瀏覽器擋自動出聲）→ 露出小播放器請老師點 */
   const S = CZ_SONG, h = $('#czy', el), btn = $('#czp', el), tm = $('#czt', el);
   let pl = null, tick = null;
