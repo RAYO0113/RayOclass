@@ -18,6 +18,10 @@ for f in sorted(glob.glob(os.path.join(ROOT, 'lb', '*.html'))):   # V248：〈�
     chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
 for f in sorted(glob.glob(os.path.join(ROOT, 'yf', '*.html')) + glob.glob(os.path.join(ROOT, 'yf', '*.js'))):   # V253：樂府長卷（含考點 exams.js、講稿 script.js）
     chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
+for f in sorted(glob.glob(os.path.join(ROOT, 'cg', '*.html'))):   # 〈長干行〉課文畫軸（試作）
+    chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
+for f in sorted(glob.glob(os.path.join(ROOT, 'hj', '*.html')) + glob.glob(os.path.join(ROOT, 'hj', 'lessons', '*.js'))):   # 課文畫卷引擎與每課設定
+    chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
 chars.update('，。、；：「」『』！？（）《》〈〉—…─．‧·○□①②③④⑤⑥⑦⑧⑨⑩')
 chars.update(chr(c) for c in range(0x20, 0x7F))            # 英數
 text = ''.join(sorted(chars))
