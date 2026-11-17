@@ -81,7 +81,8 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .tq .pn.on{color:var(--rk-zhu-d);background:none;animation:stamp .55s cubic-bezier(.3,1.4,.5,1)}
 @keyframes stamp{from{opacity:0;transform:scale(2) rotate(-10deg)}}
 .tq .mk{font-size:var(--rk-t-xs);color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-s);padding:.3em .1em;letter-spacing:.05em}
-#roll.ovw{--ov:2em} #roll.ovw .lead,#roll.ovw .tail,#roll.ovw .tq{display:none} #roll.ovw .pan{width:calc(var(--vw) / var(--n))}
+#roll{transform-origin:0 50%}
+#roll.ovw{--ov:6em} #roll.ovw .lead,#roll.ovw .tail,#roll.ovw .tq{display:none}   /* 全卷：每幅畫整張露出來（寬度由 draw 依圖的長寬比設定），整條縮小成一卷長卷 */
 /* ── 全螢幕字卡：紙色蓋過畫（畫在後面隱約透出來），四周一圈版框 ── */
 #stage{position:absolute;left:0;right:0;top:var(--mt);bottom:var(--mt);z-index:2;opacity:0;visibility:hidden;transition:opacity .8s,visibility 0s .8s;
   background:rgba(var(--rk-paper),.22)}   /* 只罩一層很薄的紙色：講課文時畫要一直看得到（老師 11/17：整個概念是畫卷） */
@@ -306,12 +307,13 @@ const segH = TP.map((p, pi) => `<div class="seg" data-p="${pi}"><div class="trac
 TP.forEach((p, pi) => seamCards(pi));
 stage.innerHTML = segH + `<div class="cards">${CH.join('')}</div>`;
 /* 畫：有新圖用新圖（img/hj/…），載不到就退回現有背景（img/ui/bg/…） */
+const RATIO = {};   /* 每幅畫的長寬比（全卷用） */
 function setImgs() {
   const n = document.body.classList.contains('night') ? 'dark' : 'light';
   $$('.pan .img').forEach(x => { const P = PANS[+x.dataset.p] || {}, own = P.img ? `../img/hj/${P.img}.webp` : '', bg = P.bg ? `../img/ui/bg/${P.bg}-${n}.webp` : '';
     if (P.pos) x.style.backgroundPosition = P.pos;
     if (!own) { x.style.backgroundImage = bg ? `url("${bg}")` : ''; return; }
-    const im = new Image(); im.onload = () => { x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
+    const im = new Image(); im.onload = () => { RATIO[x.dataset.p] = im.naturalWidth / im.naturalHeight; x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
 }
 /* 字卡字級：照畫面高度放大。詩（一行 ≤8 字）課文佔高度約 2/3，旁批用整個高度；文（一行較長）課文佔約九成。旁批＝1em、課文＝1.35em（色票的兩級） */
 let zoom = 1; try { zoom = +localStorage.getItem('hj_zoom') || 1; } catch (e) {}
@@ -371,7 +373,8 @@ function draw() {
     x.style.transform = li < 0 ? '' : `scale(1.1) translateX(${((n > 1 ? li / (n - 1) : .5) - .5) * 6}%)`; });
   /* 畫卷走到哪 */
   roll.classList.toggle('ovw', s.t === 'all');
-  if (s.t === 'all') roll.style.transform = 'translateX(0)'; else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
+  $$('.pan', roll).forEach(p => p.style.width = s.t === 'all' ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
+  if (s.t === 'all') { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
     : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
