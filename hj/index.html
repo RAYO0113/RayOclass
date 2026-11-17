@@ -78,6 +78,7 @@ body.night #view::before,body.night #view::after{filter:brightness(.75)}
 #roll.jump .pan .img{transition:none}
 body.night .pan .img.own{filter:brightness(.42) saturate(.75)}
 .pan .tint{background:var(--tint);mix-blend-mode:multiply}
+.pan .img.own~.tint{display:none}   /* 疊色只給替代的舊背景用；新圖本身已有色調 */
 .pan>*:not(.img):not(.tint){position:relative;z-index:1}
 /* 題簽：段名＋段旨（整段讀完才落款）＋課本頁碼＋自行分段提示 */
 .tq{flex:none;writing-mode:vertical-rl;display:flex;align-items:center;gap:.5em;background:var(--card);border:1px solid var(--gold);box-shadow:2px 3px 0 rgba(107,74,43,.2);padding:.7em .28em;font-size:.8em;letter-spacing:.18em}
