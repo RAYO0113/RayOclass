@@ -13204,7 +13204,7 @@ try {
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="lb/index.html" title="詩的變形記" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="lb/index.html" title="詩的變形記" allow="fullscreen; autoplay"></iframe>';
     document.body.appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
@@ -13504,7 +13504,7 @@ try {
     if (document.getElementById('l7-anim')) return;
     var box = document.createElement('div');
     box.id = 'l7-anim';
-    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen"></iframe>';
+    box.innerHTML = '<iframe src="yf/index.html' + (k ? '#' + encodeURIComponent(k) : '') + '" title="樂府長卷" allow="fullscreen; autoplay"></iframe>';
     (document.fullscreenElement || document.body).appendChild(box);
     setTimeout(function () { var f = box.querySelector('iframe'); if (f) f.focus(); }, 300);
   };
@@ -13594,7 +13594,7 @@ try {
   function ensure(m, spec) {
     if (Y[m]) return false;
     var f = document.createElement('iframe');
-    f.className = 'wk-yf-frame'; f.title = '樂府長卷'; f.setAttribute('allow', 'fullscreen');
+    f.className = 'wk-yf-frame'; f.title = '樂府長卷'; f.setAttribute('allow', 'fullscreen; autoplay');
     f.src = 'yf/index.html?embed=1#' + encodeURIComponent(spec);
     (m === 'f' ? document.getElementById('wk-fullscreen') : document.body).appendChild(f);
     Y[m] = f; Y.ready[m] = false;

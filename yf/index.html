@@ -440,7 +440,7 @@ function mirror(key, step) {
 function drawNote() { const n = $('#note'), t = SC[S[st.i].key]; n.classList.toggle('on', st.note);
   if (st.note) n.innerHTML = '<h4>講稿</h4>' + (t ? t.split('\n').map(x => `<p>${x}</p>`).join('') : '<p>（這一頁沒有講稿）</p>'); }
 /* 變形記蓋版：頁內「✕ 回課文」會送 lbClose 給上一層（就是這裡） */
-function openLb() { const b = $('#lbx'); b.innerHTML = '<iframe src="../lb/index.html" title="詩的變形記" allow="fullscreen"></iframe>'; b.classList.add('on'); setTimeout(() => { const f = $('iframe', b); f && f.focus(); }, 300); }
+function openLb() { const b = $('#lbx'); b.innerHTML = '<iframe src="../lb/index.html" title="詩的變形記" allow="fullscreen; autoplay"></iframe>'; b.classList.add('on'); setTimeout(() => { const f = $('iframe', b); f && f.focus(); }, 300); }
 function closeLb() { const b = $('#lbx'); b.classList.remove('on'); b.innerHTML = ''; window.focus(); }
 addEventListener('message', e => { const f = $('#lbx iframe'); if (f && e.source === f.contentWindow && e.data && e.data.lbClose) closeLb(); });
 const stage = $('#stage');
