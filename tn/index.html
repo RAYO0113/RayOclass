@@ -688,8 +688,50 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     return q2;
   }
 
+  /* V262（老師 11/18：珍奶基礎練習第 7 題「甲乙丙的詳解應拆到上面題幹，下面只放成語意思」）
+     題幹是「問句＋一個 aq-sub 區塊，區塊裡 (甲)(乙)(丙) 各一段」，詳解「(甲)…(乙)…」→ 掛到區塊裡對應那一段（點開），選項只留沒拆到的（成語解釋等）。 */
+  function jyBlock(q, stemKey, fmt) {
+    fmt = fmt || function (x) { return x; };
+    var st = String(q[stemKey] || ''), m = /<div class=['"]aq-sub['"]>/i.exec(st); if (!m) return null;
+    var head = st.slice(0, m.index), body = st.slice(m.index + m[0].length), src = '';
+    var sm = /<div class=['"]aq-src['"]>[\s\S]*?<\/div>/i.exec(body); if (sm) { src = sm[0]; body = body.replace(sm[0], ''); }
+    body = body.replace(/<\/div>\s*$/i, '');
+    if (/<(div|img|table)\b/i.test(body)) return null;
+    var lines = body.split(/<br\s*\/?>/i), items = [];
+    lines.forEach(function (ln) {
+      var mm = /^[\s　]*[（(][\s　]*([甲乙丙丁戊己庚辛])[\s　]*[）)][\s　]*/.exec(ln);
+      if (mm) items.push({ L: mm[1], lab: '(' + mm[1] + ')', t: ln.slice(mm[0].length) });
+      else if (items.length) items[items.length - 1].t += '<br>' + ln;
+      else return;
+    });
+    if (items.length < 2) return null;
+    for (var i = 0; i < items.length; i++) if (items[i].L !== JY_LET[i]) return null;
+    if (items.some(function (it) { return jyEmpty(it.t); })) return null;
+    var letters = items.map(function (it) { return it.L; }), X = {}, seen = {};
+    function eat(t) {
+      var r = jySplit(t, letters); if (!r) return t;
+      for (var L in r.per) r.per[L].forEach(function (p) { var k = L + '|' + p.replace(/<[^>]+>/g, '').replace(/\s/g, ''); if (!seen[k]) { seen[k] = 1; (X[L] = X[L] || []).push(p); } });
+      return r.rest;
+    }
+    var q2 = {}; for (var kk in q) q2[kk] = q[kk];
+    q2.opts = (q.opts || []).map(function (o) { var o2 = o.slice(); if (o2[2]) o2[2] = eat(o2[2]); return o2; });
+    if (q.per) { q2.per = {}; for (var k in q.per) q2.per[k] = eat(q.per[k]); }
+    if (q.exp) q2.exp = eat(q.exp);
+    if (!letters.some(function (L) { return X[L]; })) return null;
+    q2[stemKey] = (head ? fmt(head) : '') + '<div class="jy4 jy4-has">' +
+      items.map(function (it) {
+        var x = X[it.L];
+        return '<div class="jy4-l' + (x ? ' has' : '') + '"' + (x ? ' onclick="this.classList.toggle(\'jy4-on\');event.stopPropagation()"' : '') + '>' +
+          '<span class="jy4-m">' + it.lab + '</span><span class="jy4-t">' + fmt(it.t) + '</span>' +
+          (x ? '<div class="jy4-x">' + fmt(x.join('<br>')) + '</div>' : '') + '</div>';
+      }).join('') + '</div>' + (src ? fmt(src) : '');
+    q2._jy = 1;
+    return q2;
+  }
+
   function quizHTML(q, tag) {
     var key = q.q != null ? 'q' : 'stem', J = jyTransform(q, key, clean);   /* V245：甲乙丙丁題逐項換行、詳解點各項打開 */
+    if (!J) { var B = jyBlock(q, key, clean); if (B) J = B; }
     if (J) q = J; else { var E = jyExpLines(q, key, clean); if (E) q = E; }   /* V246：文章裡的甲乙丙 → 詳解一項一行 */
     var stem = q.q || q.stem || '', ans = String(q.ans || ''), per = q.per || {};
     var h = '<div class="ln qz"><div class="qn">' + esc(tag || '') + ' 第 ' + esc(q.n) + ' 題</div>';
@@ -1066,7 +1108,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V258', TN_DATE = '2026-11-16';
+  var TN_VER = 'V261', TN_DATE = '2026-11-18';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];

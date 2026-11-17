@@ -13419,8 +13419,49 @@ try {
     return q2;
   }
 
+  /* V262（老師 11/18：珍奶基礎練習第 7 題「甲乙丙的詳解應拆到上面題幹，下面只放成語意思」）
+     題幹是「問句＋一個 aq-sub 區塊，區塊裡 (甲)(乙)(丙) 各一段」，詳解「(甲)…(乙)…」→ 掛到區塊裡對應那一段（點開），選項只留沒拆到的（成語解釋等）。 */
+  function jyBlock(q, stemKey, fmt) {
+    fmt = fmt || function (x) { return x; };
+    var st = String(q[stemKey] || ''), m = /<div class=['"]aq-sub['"]>/i.exec(st); if (!m) return null;
+    var head = st.slice(0, m.index), body = st.slice(m.index + m[0].length), src = '';
+    var sm = /<div class=['"]aq-src['"]>[\s\S]*?<\/div>/i.exec(body); if (sm) { src = sm[0]; body = body.replace(sm[0], ''); }
+    body = body.replace(/<\/div>\s*$/i, '');
+    if (/<(div|img|table)\b/i.test(body)) return null;
+    var lines = body.split(/<br\s*\/?>/i), items = [];
+    lines.forEach(function (ln) {
+      var mm = /^[\s　]*[（(][\s　]*([甲乙丙丁戊己庚辛])[\s　]*[）)][\s　]*/.exec(ln);
+      if (mm) items.push({ L: mm[1], lab: '(' + mm[1] + ')', t: ln.slice(mm[0].length) });
+      else if (items.length) items[items.length - 1].t += '<br>' + ln;
+      else return;
+    });
+    if (items.length < 2) return null;
+    for (var i = 0; i < items.length; i++) if (items[i].L !== JY_LET[i]) return null;
+    if (items.some(function (it) { return jyEmpty(it.t); })) return null;
+    var letters = items.map(function (it) { return it.L; }), X = {}, seen = {};
+    function eat(t) {
+      var r = jySplit(t, letters); if (!r) return t;
+      for (var L in r.per) r.per[L].forEach(function (p) { var k = L + '|' + p.replace(/<[^>]+>/g, '').replace(/\s/g, ''); if (!seen[k]) { seen[k] = 1; (X[L] = X[L] || []).push(p); } });
+      return r.rest;
+    }
+    var q2 = {}; for (var kk in q) q2[kk] = q[kk];
+    q2.opts = (q.opts || []).map(function (o) { var o2 = o.slice(); if (o2[2]) o2[2] = eat(o2[2]); return o2; });
+    if (q.per) { q2.per = {}; for (var k in q.per) q2.per[k] = eat(q.per[k]); }
+    if (q.exp) q2.exp = eat(q.exp);
+    if (!letters.some(function (L) { return X[L]; })) return null;
+    q2[stemKey] = (head ? fmt(head) : '') + '<div class="jy4 jy4-has">' +
+      items.map(function (it) {
+        var x = X[it.L];
+        return '<div class="jy4-l' + (x ? ' has' : '') + '"' + (x ? ' onclick="this.classList.toggle(\'jy4-on\');event.stopPropagation()"' : '') + '>' +
+          '<span class="jy4-m">' + it.lab + '</span><span class="jy4-t">' + fmt(it.t) + '</span>' +
+          (x ? '<div class="jy4-x">' + fmt(x.join('<br>')) + '</div>' : '') + '</div>';
+      }).join('') + '</div>' + (src ? fmt(src) : '');
+    q2._jy = 1;
+    return q2;
+  }
+
   /* 平板：基礎練習（iquiz，題幹 q）、A卷（aq，題幹 stem）、習作（work，題幹 q；含 189 一題一頁）渲染前換成重排後的複本 */
-  function tx(q, key) { return (q && !q._jy && (jyTransform(q, key) || jyExpLines(q, key))) || q; }
+  function tx(q, key) { return (q && !q._jy && (jyTransform(q, key) || jyBlock(q, key) || jyExpLines(q, key))) || q; }
   var _render = wkRenderSlideHTML;
   wkRenderSlideHTML = function (slide) {
     if (slide && (slide.type === 'iquiz' || slide.type === 'aq') && slide.q) {
@@ -13797,7 +13838,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V259';
+  window.APP_VERSION = 'V261';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
