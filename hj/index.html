@@ -87,10 +87,10 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .track{position:absolute;left:0;top:0;bottom:0;width:max-content;display:flex;flex-direction:row-reverse;transition:transform 1.1s cubic-bezier(.3,.05,.2,1);will-change:transform}
 /* 一句＝一欄：課文直書（大字）＋緊跟在左邊的旁批。正在讀的是墨色，讀過的退成淡墨，還沒讀的不出現 */
 .lw{flex:none;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:.3em;padding:0 .5em;margin:0 .22em;
-  background:var(--rk-card);border:1px solid var(--rk-line);border-radius:var(--rk-r-s);box-shadow:3px 4px 0 var(--rk-shadow);   /* 一句一張詩箋，浮在畫上 */
+  background:linear-gradient(var(--rk-card),var(--rk-card)),rgb(var(--rk-paper));border:1px solid var(--rk-line);border-radius:var(--rk-r-s);box-shadow:3px 4px 0 var(--rk-shadow);   /* 一句一張詩箋，浮在畫上；底是不透明的，後面的畫不會透上來跟字疊在一起 */
   opacity:0;transform:translateX(-1em);filter:blur(6px);transition:opacity .7s,transform .7s,filter .7s,color .7s;pointer-events:none}
-.lw.show{opacity:.45;transform:none;filter:none;pointer-events:auto;color:var(--rk-mute)}
-.lw.cur{opacity:1;color:var(--rk-ink);box-shadow:0 0 0 2px var(--rk-gold),4px 7px 18px rgba(0,0,0,.28)}
+.lw.show{opacity:1;transform:none;filter:brightness(.84) saturate(.85);pointer-events:auto;color:var(--rk-mute)}   /* 讀過的：卡留著、不透明，整張暗一階、顏色淡一點（老師 11/17：太淺、重疊會亂） */
+.lw.cur{opacity:1;filter:none;color:var(--rk-ink);box-shadow:0 0 0 2px var(--rk-gold),4px 7px 18px rgba(0,0,0,.28)}
 .col{flex:none;writing-mode:vertical-rl;white-space:nowrap;font-size:var(--rk-t-l);font-weight:700;line-height:1.3;letter-spacing:.06em;cursor:pointer}
 .col i{font-style:normal;display:inline-block}
 .col i.pu{color:var(--rk-mute)} .col i.gap{height:.3em}
