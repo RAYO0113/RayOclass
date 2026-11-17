@@ -30,6 +30,11 @@ button,summary{cursor:pointer}
 #yfm{height:46vh;border-bottom:2px solid var(--line);background:#f7eed6}
 #yfm iframe{width:100%;height:100%;border:0;display:block}
 .yfsc p{margin:.55em 0;line-height:1.85}.yfsc .op{opacity:.62;font-size:.92em}
+/* V259 課文畫卷鏡像＋那一步的講稿 */
+#hjm{height:46vh;border-bottom:2px solid var(--line);background:#f3e6c8;overflow:hidden}
+#hjm iframe{width:100%;height:100%;border:0;display:block;pointer-events:none}
+.hjsc .it{margin:0 0 10px;line-height:1.8;overflow-wrap:anywhere}.hjsc .hjt{font-size:19px;font-weight:700;letter-spacing:.06em}
+.hjsc .hjans{color:var(--wb);font-weight:600}.hjsc ol{margin:4px 0 0;padding-left:1.4em}
 .top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top)) 16px 8px}
 .row{display:flex;align-items:center;gap:8px}
 .live{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);flex:1;min-width:0}
@@ -366,6 +371,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     <div class="flt" id="flt"><button type="button" class="c-m" data-c="m">句意</button><button type="button" class="c-w" data-c="w">字義</button><button type="button" class="c-r" data-c="r">修辭</button><button type="button" class="c-t" data-c="t">翻譯</button><button type="button" class="c-a" data-c="a">提問</button><button type="button" class="c-g" data-c="g">考點</button></div>
   </div>
   <div id="yfm" class="hide"></div>
+  <div id="hjm" class="hide"></div>
   <main id="main"></main>
   <button type="button" class="backf hide" id="backf">↩ 跟回平板<small id="backfw"></small></button>
   <div class="bar">
@@ -558,6 +564,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     var d = TB[L.k], ext = d ? extraList(d) : [];   /* V232：補充、說明頁也列進來（課前／作者／題解放課文前） */
     function addX(pre) { ext.forEach(function (a) { if (!!a.pre === pre && !seen[a.id]) { seen[a.id] = 1; var an = anchorOf(L, a.id); list.push({ id: a.id, h: a.h, n: an ? an.notes.length : 0 }); } }); }
     var yp = yfPages(L.k); if (yp) Object.keys(yp).forEach(function (key) { list.push({ id: 'yf:' + key, h: '長卷　' + key }); });   /* V258 */
+    var hq = hjOf(L.k); if (hq) (hq.d.steps || []).forEach(function (x) { list.push({ id: 'hj:' + hq.code + ':' + x[0], h: '畫卷　' + x[1] }); });   /* V259（解鎖後才有） */
     addX(true);
     if (d && d.textPages) d.textPages.forEach(function (p) { var id = 'seg:' + p.seg, a = anchorOf(L, id); seen[id] = 1; list.push({ id: id, h: a ? a.h : p.seg, n: a ? a.notes.length : 0 }); });
     var GL = guideOf(L.k); if (GL && GL.afterLabel && !seen['info:' + GL.afterLabel]) { seen['info:' + GL.afterLabel] = 1; list.push({ id: 'info:' + GL.afterLabel, h: '課後延伸｜談志（教師引導）' }); }   /* V231 */
@@ -878,6 +885,50 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     }
     return { t: '長卷　' + key, h: h, yf: key };
   }
+  /* ── V259（老師 11/17「講稿放到手機版就好」「如何對照到手機的講稿，一併設計」；教學系統 docs/規格_課文畫卷製作規範.md §12）課文畫卷 ──
+     平板送來 hj:<課代號>:<步驟代號>（例 hj:changgan:3-1/mean、hj:changgan:ask-3-0/a）。
+     上半：同一課畫卷鏡像（../hj/index.html?l=<課>&mirror=1；只建一次，換步用 {hjCmd:'go', id} 指揮；鏡像載好會送 hjReady）。
+     下半：這一步的講稿（加密檔的 hj[課代號] = {lesson, steps:[[代號,名稱]…], notes:{代號:{…}}}，解鎖後才有）。
+     同一句的三步（句子、/note、/mean）講稿相同；提問與回答（ask-…、ask-…/a）講稿相同。 */
+  var HM = { f: null, l: '', ready: false, on: false, id: '' };
+  function hjSend() { if (HM.on && HM.ready && HM.f && HM.f.contentWindow) HM.f.contentWindow.postMessage({ hjCmd: 'go', id: HM.id }, '*'); }
+  function hjMirror(o) {
+    var box = $('hjm'); HM.on = !!o; box.classList.toggle('hide', !o);
+    if (!o) return;
+    HM.id = o.id;
+    if (!HM.f || HM.l !== o.l) {
+      if (HM.f) HM.f.remove();
+      var f = document.createElement('iframe'); f.title = '課文畫卷'; f.tabIndex = -1;
+      f.src = '../hj/index.html?l=' + encodeURIComponent(o.l) + '&mirror=1&t=' + TN_VER; box.appendChild(f); HM.f = f; HM.l = o.l; HM.ready = false;
+    }
+    hjSend();
+  }
+  window.addEventListener('message', function (e) { if (HM.f && e.source === HM.f.contentWindow && e.data && e.data.hjReady) { HM.ready = true; hjSend(); } });
+  function hjOf(k) { var o = D && D.hj; if (!o) return null; for (var c in o) if (o[c] && o[c].lesson === k) return { code: c, d: o[c] }; return null; }
+  function hjNote(d, st) {
+    var base = st.replace(/\/(?:a|note|mean)$/, ''), n = (d.notes || {})[base], h = '';
+    if (!n) return '<div class="empty">這一步沒有講稿</div>';
+    function it(c, k, v) { return '<div class="it ' + c + '"><span class="k ' + k[0] + '">' + k[1] + '</span>' + v + '</div>'; }
+    if (n.text) h += '<div class="it hjt">' + esc(n.text) + '</div>';
+    if (n.q) h += it('c-a', ['a', '提問'], esc(n.q) + (n.opts ? '<ol type="A">' + n.opts.map(function (x, i) { return '<li' + (i === n.ans ? ' class="hjans"' : '') + '>' + esc(x) + '</li>'; }).join('') + '</ol>' : ''));
+    if (n.a) h += it('c-a', ['a', '回答'], '<span class="hjans">' + esc(n.a) + '</span>');
+    if (n.tr) h += it('c-t', ['t', '語譯'], '<span class="trx">' + esc(n.tr) + '</span>');
+    if (n.hb) h += it('c-a', ['w', '講義空格'], n.hb.map(function (x) { return esc(x).replace(/\{([^}]*)\}/g, '<b class="hjans">$1</b>'); }).join('<br>'));
+    if (n.tip) h += it('c-t', ['s', '提醒'], esc(n.tip));
+    if (n.note) h += it('c-t', ['s', '說明'], esc(n.note));
+    if (n.say) h += '<div class="card note"><div class="say">' + esc(n.say).replace(/\n/g, '<br>') + '</div></div>';
+    var src = [n.by ? (n.by === 'Claude' ? 'Claude 草擬' : n.by) : '', n.src || ''].filter(Boolean).join('｜');
+    if (src) h += '<div class="note"><div class="src">' + esc(src) + '</div></div>';
+    return h || '<div class="empty">這一步沒有講稿</div>';
+  }
+  function hjPage(k, id) {
+    var m = /^hj:([\w-]+):(.+)$/.exec(id || ''); if (!m) return null;
+    var code = m[1], st = m[2], d = D && D.hj && D.hj[code], t = st, h;
+    if (d) (d.steps || []).some(function (x) { if (x[0] === st) { t = x[1]; return true; } return false; });
+    if (!unlocked) h = lockedHTML();
+    else h = d ? '<div class="hjsc">' + hjNote(d, st) + '</div>' : '<div class="empty">這一課的畫卷還沒有講稿</div>';
+    return { t: '畫卷　' + t, h: h, hj: { l: code, id: st } };
+  }
   function render() {
     var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
     var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
@@ -886,8 +937,9 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (L) loadLesson(L.k);
     var A = anchorOf(L, id);
     var P = (L && /^seg:/.test(id)) ? pageOf(L.k, id.slice(4)) : null;
-    var X = L ? (practice(L.k, id) || extraPage(L.k, id) || yfPage(L.k, id)) : null;   /* V223：課後習題／習作／A卷頁；V232：補充、說明頁；V258：長卷頁 */
+    var X = L ? (practice(L.k, id) || extraPage(L.k, id) || yfPage(L.k, id) || hjPage(L.k, id)) : null;   /* V223：課後習題／習作／A卷頁；V232：補充、說明頁；V258：長卷頁；V259：畫卷 */
     yfMirror(X && X.yf ? { key: X.yf, step: sp.li } : null);
+    hjMirror(X && X.hj ? X.hj : null);   /* V259 */
     $('wls').textContent = L ? L.name : '';
     $('wpg').textContent = X && X.t ? X.t : A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     var h = '';
@@ -914,7 +966,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       '① 平板開教學網站並登入登記密碼（成績系統的那組）。<br>② 手機開這頁，保持「跟著平板」。平板翻到哪頁，這裡就跳到哪頁。<br>' +
       '③ 平板上點句子開頭那顆淡淡的小點（或句子本身），這裡會捲到那一句並框起來；小點閃綠＝手機收到了。<br>' +
       '　上方色塊＝分類開關：句意綠、字義黃、修辭紫、翻譯灰、提問藍、考點紅框；點一下收起那一類，再點打開。下面 A−／A+ 調字級。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
-      '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>　長卷頁：上半是平板同一頁（全部展開，橘框＝平板現在那一步），下半是講稿（要解鎖）。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
+      '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>　長卷頁：上半是平板同一頁（全部展開，橘框＝平板現在那一步），下半是講稿（要解鎖）。<br>　畫卷頁：上半是平板同一步的畫卷，下半是那一步的語譯、回答與講法（要解鎖）。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
     S.rendered = (L ? L.k : '') + '|' + id;
     S.li = null;
@@ -939,6 +991,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (key === S.li) return;
     S.li = key; S.sp = sp;
     if (YM.on) { YM.step = sp.li; yfSend(); return; }   /* V258：長卷頁 → 鏡像框出那一步 */
+    if (HM.on) { scrollTo(0, 0); return; }   /* V259：畫卷頁 → 講稿回到最上面 */
     var m = $('main');
     var all = m.querySelectorAll('.ln.cur, .tg.cur'); for (var i = 0; i < all.length; i++) all[i].classList.remove('cur');
     var old = $('nowc'); if (old) old.remove();
@@ -1066,7 +1119,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V258', TN_DATE = '2026-11-16';
+  var TN_VER = 'V259', TN_DATE = '2026-11-17';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];

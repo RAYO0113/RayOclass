@@ -30,6 +30,16 @@ def serve():
 
 
 def selftest(exe, port, key, w, h):
+    # 11/17：有的電腦 Edge 無頭模式連不到 127.0.0.1（整頁空白）→ 換下一個找得到的瀏覽器再試
+    res = None
+    for b in [exe] + [x for x in BROWSERS if x != exe and os.path.exists(x)]:
+        res = _selftest1(b, port, key, w, h)
+        if not res.get('_empty'): break
+    res.pop('_empty', None)
+    return res
+
+
+def _selftest1(exe, port, key, w, h):
     prof = tempfile.mkdtemp(prefix='hjcheck_')
     url = 'http://127.0.0.1:%d/hj/index.html?l=%s&selftest=1' % (port, key)
     out = subprocess.run([exe, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--user-data-dir=' + prof, '--window-size=%d,%d' % (w, h),
@@ -37,7 +47,7 @@ def selftest(exe, port, key, w, h):
     m = re.search(r'<pre id="selftest" hidden[^>]*>(.*?)</pre>', out, re.S)      # 要有 hidden：原始碼註解裡也有 <pre id="selftest"> 這串字
     if not m:
         msg = re.sub(r'<[^>]+>', '', out)[-300:].strip()
-        return {'errors': ['頁面沒有跑完自我檢查（可能整頁報錯）：' + msg], 'warnings': []}
+        return {'errors': ['頁面沒有跑完自我檢查（可能整頁報錯）：' + msg], 'warnings': [], '_empty': not out.strip()}
     import html
     return json.loads(html.unescape(m.group(1)))
 

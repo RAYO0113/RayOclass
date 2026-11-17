@@ -483,13 +483,15 @@ document.addEventListener('keydown', e => { const k = e.key;
 if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.onclick = () => window.parent.postMessage({ lbClose: 1 }, '*'); $('#bFull').hidden = true; }
 addEventListener('resize', relayout);
 /* 外面叫它跳到某一步：{hjCmd:'go', id:'3-1/mean'}（鏡像與教學網站都可用） */
-addEventListener('message', e => { const d = e.data; if (!d || d.hjCmd !== 'go') return; const j = STEPS.findIndex(s => sid(s) === d.id); if (j >= 0 && j !== st.i) go(j); });
+addEventListener('message', e => { const d = e.data; if (!d || d.hjCmd !== 'go') return; const j = STEPS.findIndex(s => sid(s) === d.id); if (j >= 0 && j !== st.i) go(j);
+  if (MIR && j >= 0 && STEPS[j].t !== 'ext' && $('#sheet').classList.contains('on')) closeSheet(); });   /* 鏡像是跳的：離開補充互動就收起整頁紙 */
 addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i) go(+x); });
 document.documentElement.style.setProperty('--zoom', zoom);
 setImgs();
 const begin = () => { fit(); const h = location.hash.slice(1); st.i = /^\d+$/.test(h) ? Math.min(+h, STEPS.length - 1) : 0; st.last = st.i;
   for (let j = st.i; j >= 0; j--) if (TEXT.includes(STEPS[j].t)) { st.seg = STEPS[j].p; break; }
-  draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); };
+  draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump')));
+  if (MIR && window.parent !== window) window.parent.postMessage({ hjReady: 1 }, '*'); };   /* 鏡像畫好了：外層（手機講稿）這時再送 hjCmd 才不會丟 */
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(begin);
 window.HJ_DEBUG = { STEPS, LN, CARDS, go, st, sid };
 /* ───────── 自我檢查：網址加 &selftest=1，把每一步走一遍，結果寫在 <pre id="selftest">（tools/hj_check.py 會讀） ───────── */
