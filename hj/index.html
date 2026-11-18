@@ -130,7 +130,7 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .card.act{opacity:1;transform:none;filter:none;pointer-events:auto}
 .card small.k{display:block;font-size:var(--rk-t-xs);letter-spacing:.25em;color:var(--rk-mute)}
 .card .q{font-weight:700;font-size:var(--rk-t-l);line-height:1.6}
-.card .ans{margin-top:.6em;padding:.35em .9em;border-left:4px solid var(--rk-yi-bd);background:var(--rk-yi-bg);color:var(--rk-yi);border-radius:0 var(--rk-r) var(--rk-r) 0}
+.card .ans{margin-top:.6em;padding:.35em .9em;font-size:var(--rk-t-l);line-height:1.7;border-left:4px solid var(--rk-yi-bd);background:var(--rk-yi-bg);color:var(--rk-yi);border-radius:0 var(--rk-r) var(--rk-r) 0}
 .card .ans.off{display:none}
 .card .ans:not(.off){animation:rise .55s cubic-bezier(.3,1.4,.5,1)}
 @keyframes rise{from{opacity:0;transform:translateY(.8em) scale(.9)}}
@@ -300,6 +300,7 @@ function seamCards(pi) {
 const view = $('#view'), roll = $('#roll'), stage = $('#stage'), cap = $('#cap');
 const ttl = LES[0].split('—')[1] || LES[0];
 (ASKS.lead || []).forEach((a, j) => askCard(a, 'lead', j));
+(ASKS.end || []).forEach((a, j) => askCard(a, 'end', j));   /* 卷末收束題（11/18）：asks.end，走完「全卷」後出現 */
 roll.style.setProperty('--n', TP.length);
 roll.innerHTML = `<section class="lead"><div class="tt">${[...ttl].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div>
     <div class="au">${L.author.dynasty}<b>${L.author.name}</b></div></section>` +
@@ -340,13 +341,14 @@ TP.forEach((p, pi) => { STEPS.push({ t: 'pan', p: pi });
   askSteps(pi, pi);
   (EXT[pi] || []).forEach((x, j) => STEPS.push({ t: 'ext', p: pi, id: `ext-${pi}-${j}` })); });
 STEPS.push({ t: 'all' });
+askSteps('end', 'end');   /* 卷末收束題：沒有 asks.end 就什麼都不加 */
 const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, peek: false, seg: -1 };
 const LAYER = ['note', 'mean'], TEXT = ['line', 'note', 'mean'], CARD = ['ask', 'ans', 'hb'];
 const idx = (pred) => STEPS.findIndex(pred);
 const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j >= 0 && j <= st.i; };
 const layerOn = (k, t) => { if (MIR) return reached(k, 'line'); const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
 /* 每一步的固定代號（手機講稿用它對照，不用第幾步的數字——之後加減步驟也不會錯位）：
-   lead｜pan-段｜段-句｜段-句/note｜段-句/mean｜pian-段｜hb-段｜ask-段-題｜ask-段-題/a｜ext-段-個｜all（段、句、題都從 0 起算；卷首的題是 ask-lead-題） */
+   lead｜pan-段｜段-句｜段-句/note｜段-句/mean｜pian-段｜hb-段｜ask-段-題｜ask-段-題/a｜ext-段-個｜all｜ask-end-題｜ask-end-題/a（段、句、題都從 0 起算；卷首的題是 ask-lead-題；卷末收束題在「全卷」之後） */
 const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t === 'pian' ? s.t + '-' + s.p : s.t === 'line' ? s.k : s.t === 'note' || s.t === 'mean' ? s.k + '/' + s.t : s.t === 'ans' ? s.id + '/a' : s.id;
 /* 嵌在教學網站裡時，每走一步回報位置：hjStep {l:課代號, id:步驟代號, i:第幾步, n:總步數} */
 const tell = s => { if (window.parent !== window && !MIR) window.parent.postMessage({ hjStep: { l: KEY, id: sid(s), i: st.i, n: STEPS.length } }, '*'); };
@@ -379,14 +381,15 @@ function draw() {
     if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = st.ov[c.id + ':a']; $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
   /* 畫跟著課文走：這一段讀到第幾句，畫就橫移到哪（卷子往左展開，所以畫往右退） */
   /* 畫卷走到哪 */
-  roll.classList.toggle('ovw', s.t === 'all');
-  $$('.pan', roll).forEach(p => p.style.width = s.t === 'all' ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
-  if (s.t === 'all') { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
+  const OVW = s.t === 'all' || s.p === 'end';   /* 全卷、卷末收束題都看整卷 */
+  roll.classList.toggle('ovw', OVW);
+  $$('.pan', roll).forEach(p => p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
+  if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
     : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
   if (s.t === 'ext') openExt(s.id); else if ($('#sheet').classList.contains('on') && fresh) closeSheet();
-  $$('#nav button').forEach(b => b.classList.toggle('on', +b.dataset.p === (s.p == null ? (s.t === 'all' ? -2 : -1) : s.p)));
+  $$('#nav button').forEach(b => b.classList.toggle('on', +b.dataset.p === (s.p === 'end' ? -2 : s.p == null ? (s.t === 'all' ? -2 : -1) : s.p)));
   $('#bPeek').classList.toggle('on', st.peek); $('#bPeek').disabled = !(inText || inCard);
   $('#pg').textContent = (st.i + 1) + ' / ' + STEPS.length; $('#bPrev').disabled = st.i === 0;
   $('#bNext').textContent = st.i < STEPS.length - 1 ? '下一步 ▸' : '完';
@@ -447,7 +450,7 @@ function openExt(id) {
 }
 /* ───────── 操作 ───────── */
 $('#nav').innerHTML = `<button data-p="-1">卷首</button>` + TP.map((p, i) => `<button data-p="${i}">${p.seg}</button>`).join('') + `<button data-p="-2">全卷</button>`;
-$$('#nav button').forEach(b => b.onclick = () => { const p = +b.dataset.p; go(p === -1 ? 0 : p === -2 ? STEPS.length - 1 : idx(s => s.t === 'pan' && s.p === p)); });
+$$('#nav button').forEach(b => b.onclick = () => { const p = +b.dataset.p; go(p === -1 ? 0 : p === -2 ? idx(s => s.t === 'all') : idx(s => s.t === 'pan' && s.p === p)); });
 $('#bNext').onclick = next; $('#bPrev').onclick = prev;
 $('#bPeek').onclick = () => { st.peek = !st.peek; draw(); };
 $('#bMode').onclick = e => { st.fast = !st.fast; e.currentTarget.textContent = st.fast ? '通讀' : '細讀'; e.currentTarget.classList.toggle('on', st.fast); if (skip(STEPS[st.i].t)) prev(); else draw(); };
