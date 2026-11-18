@@ -83,6 +83,7 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .tq .mk{font-size:var(--rk-t-xs);color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-s);padding:.3em .1em;letter-spacing:.05em}
 #roll{transform-origin:0 50%}
 #roll.ovw{--ov:6em} #roll.ovw .lead,#roll.ovw .tail,#roll.ovw .tq{display:none}   /* 全卷：每幅畫整張露出來（寬度由 draw 依圖的長寬比設定），整條縮小成一卷長卷 */
+#roll.endq{opacity:0;transition:opacity .35s}   /* 卷末題卡（ask-end-*）時整卷長圖淡出，不從題卡後面透出來（11/18） */
 /* ── 全螢幕字卡：紙色蓋過畫（畫在後面隱約透出來），四周一圈版框 ── */
 #stage{position:absolute;left:0;right:0;top:var(--mt);bottom:var(--mt);z-index:2;opacity:0;visibility:hidden;transition:opacity .8s,visibility 0s .8s;
   background:rgba(var(--rk-paper),.22)}   /* 只罩一層很薄的紙色：講課文時畫要一直看得到（老師 11/17：整個概念是畫卷） */
@@ -383,6 +384,7 @@ function draw() {
   /* 畫卷走到哪 */
   const OVW = s.t === 'all' || s.p === 'end';   /* 全卷、卷末收束題都看整卷 */
   roll.classList.toggle('ovw', OVW);
+  roll.classList.toggle('endq', s.p === 'end');
   $$('.pan', roll).forEach(p => p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
   if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
