@@ -221,9 +221,10 @@ if (!LES) return fail('課檔裡找不到這一課：' + H.lesson);
 const L = LES[1], ALL = L.textPages, TP = ALL.slice(0, H.segs || ALL.length);
 const PANS = H.pans || [], ASKS = H.asks || {}, HB = H.hb || {}, EXT = H.extras || {}, ZY = H.zy || {};
 /* 一景一圖（11/19）：pans[段].scenes = [{ from: 從第幾句起（0 起算）, img, pos }]。沒填 scenes＝一段一幅（舊課照舊）。
+   from 可以和上一景相同（11/19 老師要「初極狹」另畫一張：同一句前連看兩張畫，讀句時停在後一張）。
    換景時多一步「看畫」，代號 pan-段-景（景從 0 起算，第 0 景還是 pan-段）；段旨、講義、提問停在該段最後一景 */
 const SC = TP.map((p, pi) => { const P = PANS[pi] || {}, L0 = P.scenes && P.scenes.length ? P.scenes : [{ from: 0, img: P.img, pos: P.pos }];
-  L0.forEach((c, si) => { const f = c.from || 0; if (si ? !(f > (L0[si - 1].from || 0) && f < p.lines.length) : f !== 0) console.error(`第 ${pi + 1} 段第 ${si + 1} 景的 from 不對：${f}`); });
+  L0.forEach((c, si) => { const f = c.from || 0; if (si ? !(f >= (L0[si - 1].from || 0) && f < p.lines.length) : f !== 0) console.error(`第 ${pi + 1} 段第 ${si + 1} 景的 from 不對：${f}`); });
   return L0.map((c, si) => ({ bg: P.bg, tint: P.tint, c: P.c, img: c.img, pos: c.pos, from: c.from || 0, si })); });
 document.title = (LES[0].split('—')[1] || LES[0]) + '・畫卷'; $('#logo').textContent = LES[0].split('—')[1] || LES[0];
 const CIRC = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚';
