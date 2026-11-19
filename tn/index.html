@@ -196,6 +196,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
 .cv-card .ds{font-size:13px;color:var(--mut);margin-top:4px;line-height:1.5;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif}
 .cv-card .ds b{color:var(--zhu)}
 .cv-today{margin-top:14px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 14px;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;font-size:15px}
+.cv-mk .over{color:#b0301f}.cv-mk .muted{font-size:13px}
 .cv-today .h{font-family:"Noto Serif TC",serif;font-weight:900;color:var(--zhu);letter-spacing:.2em;font-size:14px;margin-bottom:4px}
 .cv-foot{margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-family:-apple-system,"PingFang TC",sans-serif}
 .cv-foot .ver{font-weight:700;color:var(--ink2)}
@@ -351,6 +352,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     <button class="cv-card" id="cvKey" type="button"><div class="ic">考點</div><div class="nm" id="cvKeyNm">已上鎖</div><div class="ds" id="cvKeyDs">點這裡輸入講稿密碼</div></button>
   </div>
   <div class="cv-today" id="cvToday"><div class="h">今日</div><div class="muted">輸入登記密碼後顯示今天的考試／作業</div></div>
+  <div class="cv-today cv-mk hide" id="cvMk"></div>
   <div class="cv-foot"><span>無腦上課 <span class="ver" id="cvVer"></span></span><span><button class="btn" id="cvTheme" type="button">◐</button> <button class="btn" id="cvReload" type="button">↻ 更新</button></span></div>
 </div>
 
@@ -1161,7 +1163,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V263', TN_DATE = '2026-11-18';
+  var TN_VER = 'V264', TN_DATE = '2026-11-19';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
@@ -1229,7 +1231,32 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     getLoad().then(function (ld) {
       var n = 0; CLS.forEach(function (c) { n += missOf(ld, c).total; });
       $('cvMissDs').innerHTML = '四班共 <b>' + n + '</b> 件未交';
+      paintMk(ld, td);
     }).catch(function () {});
+  }
+  /* V264（11/19 老師）補考提醒：成績系統「📅 約補考」登記的（後台 gr-24 makeups）；約了沒考（日期已過、還沒分數）＋今天起 7 天內 */
+  function paintMk(ld, td) {
+    var el = $('cvMk'), seen = {}, its = {}, sc = {}, nm = {}, L = [];
+    (ld.items || []).forEach(function (i) { its[i.id] = i; });
+    (ld.scores || []).forEach(function (s) { if (s.raw !== '' && s.raw != null) sc[s.item + '|' + (+s.seat)] = 1; });
+    (ld.students || []).forEach(function (s) { nm[s.cls + '|' + (+s.seat)] = s.name || ''; });
+    var end = ymd(new Date(pd(td).getTime() + 7 * 86400000));
+    (ld.makeups || []).slice().sort(function (a, b) { return String(a.created) < String(b.created) ? 1 : -1; }).forEach(function (m) {
+      var k = m.item + '|' + (+m.seat); if (seen[k] || !m.date) return; seen[k] = 1;
+      var it = its[m.item]; if (!it || sc[k] || m.date > end) return;
+      L.push({ m: m, it: it, n: nm[it.cls + '|' + (+m.seat)] || '' });
+    });
+    if (!L.length) { el.classList.add('hide'); el.innerHTML = ''; return; }
+    L.sort(function (a, b) { return a.m.date === b.m.date ? (String(a.m.period) < String(b.m.period) ? -1 : 1) : (a.m.date < b.m.date ? -1 : 1); });
+    var per = function (p) { p = String(p == null ? '' : p); return /^\d+$/.test(p) ? '第' + p + '節' : p; };
+    var day = function (s) { return s === td ? '今天' : md(s) + '（' + WD[pd(s).getDay()] + '）'; };
+    var h = '<div class="h">補考</div>';
+    L.forEach(function (o) {
+      var over = o.m.date < td;
+      h += '<div' + (over ? ' class="over"' : '') + '>' + (over ? '⚠ 約了沒考 ' : '') + '<b>' + day(o.m.date) + ' ' + esc(per(o.m.period)) + '</b>　<b style="color:' + ccol(o.it.cls) + '">' + esc(o.it.cls) + '</b> ' + (+o.m.seat) + '號 ' + esc(o.n) +
+        '<div class="muted">' + esc(o.it.title || o.it.type) + (o.m.note ? '・' + esc(o.m.note) : '') + '</div></div>';
+    });
+    el.innerHTML = h; el.classList.remove('hide');
   }
   function evName(e) {
     var les = (e.lessons || []).map(function (n) { return 'L' + n + (LES[n] ? LES[n] : ''); }).join('、');
