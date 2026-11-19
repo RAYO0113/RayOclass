@@ -83,6 +83,10 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .tq .mk{font-size:var(--rk-t-xs);color:var(--rk-seal-ink);background:var(--rk-seal);border-radius:var(--rk-r-s);padding:.3em .1em;letter-spacing:.05em}
 #roll{transform-origin:0 50%}
 #roll.ovw{--ov:6em} #roll.ovw .lead,#roll.ovw .tail,#roll.ovw .tq{display:none}   /* 全卷：每幅畫整張露出來（寬度由 draw 依圖的長寬比設定），整條縮小成一卷長卷 */
+#roll .brk,#roll .rl{display:none}
+#roll.rows{flex-wrap:wrap;align-content:flex-start;justify-content:center}   /* 全卷一段一行（11/19，有分景的課）：每段另起一行，段首直書段名；放不下才在段內折行 */
+#roll.rows .brk{display:block;flex:0 0 100%;height:calc(var(--rg) * 1.5)} #roll.rows .brk.sb{display:none} #roll.rows .brk.sb.on{display:block;height:calc(var(--rg) * .5)}
+#roll.rows .rl{display:flex;align-items:center;justify-content:center;flex:none;writing-mode:vertical-rl;letter-spacing:.25em;font-weight:700;font-size:var(--rk-t-s,.9em);color:var(--c);border-right:3px solid var(--c);background:var(--rk-card)}
 #roll.endq{opacity:0;transition:opacity .35s}   /* 卷末題卡（ask-end-*）時整卷長圖淡出，不從題卡後面透出來（11/18） */
 /* ── 全螢幕字卡：紙色蓋過畫（畫在後面隱約透出來），四周一圈版框 ── */
 #stage{position:absolute;left:0;right:0;top:var(--mt);bottom:var(--mt);z-index:2;opacity:0;visibility:hidden;transition:opacity .8s,visibility 0s .8s;
@@ -312,8 +316,8 @@ const ttl = LES[0].split('—')[1] || LES[0];
 roll.style.setProperty('--n', TP.length);
 roll.innerHTML = `<section class="lead"><div class="tt">${[...ttl].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div>
     <div class="au">${L.author.dynasty}<b>${L.author.name}</b></div></section>` +
-  TP.map((p, pi) => SC[pi].map(P => `<section class="pan" data-p="${pi}" data-s="${P.si}" style="--tint:${P.tint || 'transparent'}"><div class="img" data-p="${pi}" data-s="${P.si}"></div><div class="tint"></div>
-    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div></section>`).join('')).join('') +
+  TP.map((p, pi) => (pi ? '<i class="brk"></i>' : '') + `<b class="rl" style="--c:${(PANS[pi] || {}).c || 'var(--rk-mute)'}">${p.seg}</b>` + SC[pi].map(P => `<section class="pan" data-p="${pi}" data-s="${P.si}" style="--tint:${P.tint || 'transparent'}"><div class="img" data-p="${pi}" data-s="${P.si}"></div><div class="tint"></div>
+    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div></section>`).join('<i class="brk sb"></i>')).join('') +
   (TP.length < ALL.length ? `<section class="tail">${ALL[TP.length].seg}起　待續</section>` : '');
 const segH = TP.map((p, pi) => `<div class="seg" data-p="${pi}"><div class="track">${p.lines.map((l, li) => `<div class="lw" data-l="${pi}-${li}">${lianHtml(p, pi, li)}</div>`).join('')}</div></div>`).join('');
 TP.forEach((p, pi) => seamCards(pi));
@@ -361,6 +365,28 @@ const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t ==
 const tell = s => { if (window.parent !== window && !MIR) window.parent.postMessage({ hjStep: { l: KEY, id: sid(s), i: st.i, n: STEPS.length } }, '*'); };
 const sceneOf = s => s.t === 'pan' ? (s.sc || 0) : s.k ? SC[s.p].filter(c => c.from <= +s.k.split('-')[1]).pop().si : SC[s.p].length - 1;
 const panEl = s => $(`.pan[data-p="${s.p}"][data-s="${sceneOf(s)}"]`);
+/* 全卷一段一行：每段另起一行；h＝圖高，從大往小試，直到所有行（含段內折行）都放得進畫面（圖例上方） */
+function overviewRows() {
+  const vw = view.clientWidth, W = Math.floor(vw * .96), rem = parseFloat(getComputedStyle(document.documentElement).fontSize), lw = Math.round(rem * 1.9), g = Math.round(rem * .5);
+  const H = cap.textContent ? Math.min(roll.clientHeight, cap.getBoundingClientRect().top - view.getBoundingClientRect().top - roll.offsetTop - rem * .8) : roll.clientHeight;   /* 量圖例實際位置，排在它上面 */
+  const R = SC.map((c, pi) => c.map(x => RATIO[pi + '.' + x.si] || 16 / 9));
+  /* 圖高 h 時每段要折成幾行（平均分）；wrap=false 就只准一行 */
+  const plan = (h, wrap) => { let n = 0; const cut = [];
+    for (const r of R) { let k = 1;
+      for (;;) { const c = Math.ceil(r.length / k); let ok = true;
+        for (let i = 0; i < r.length; i += c) if (r.slice(i, i + c).reduce((a, b) => a + b * h, 0) + (i ? 0 : lw) > W) ok = false;
+        if (ok) break; if (!wrap || k >= r.length) return null; k++; }
+      const c = Math.ceil(r.length / k); cut.push(c); n += Math.ceil(r.length / c); }
+    return { n, cut }; };
+  const best = wrap => { for (let h = Math.floor(H); h > 16; h -= 2) { const q = plan(h, wrap); if (q && q.n * h + (q.n - R.length) * g * .5 + (R.length - 1) * g * 1.5 <= H) return { h, ...q }; } return { h: 16, ...(plan(16, true) || { n: R.length, cut: R.map(r => r.length) }) }; };
+  const one = best(false), two = best(true), B = one.h * 1.25 >= two.h ? one : two;   /* 老師 11/19：一段一行；只有折行能讓圖大 25% 以上（手機）才折 */
+  const h = B.h, bh = B.n * h + (B.n - R.length) * g * .5 + (R.length - 1) * g * 1.5;
+  roll.style.width = (W + 2) + 'px'; roll.style.setProperty('--ov', Math.round(h * .06) + 'px'); roll.style.setProperty('--rg', g + 'px');
+  $$('.pan', roll).forEach(p => { p.style.height = h + 'px'; p.style.width = h * (RATIO[p.dataset.p + '.' + p.dataset.s] || 16 / 9) + 'px'; });
+  $$('.brk.sb', roll).forEach(b => { const p = b.previousElementSibling; b.classList.toggle('on', (+p.dataset.s + 1) % B.cut[+p.dataset.p] === 0); });
+  $$('.rl', roll).forEach(e => { e.style.width = lw + 'px'; e.style.height = h + 'px'; });
+  roll.style.transform = `translate(${(vw - W - 2) / 2}px,${Math.max(0, (H - bh) / 2)}px)`;
+}
 function rollTo(el) { const vw = view.clientWidth, W = roll.scrollWidth; roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, vw / 2 - el.offsetLeft - el.offsetWidth / 2))}px)`; }
 function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b = a + el.offsetWidth, pad = vw * .03;
   $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
@@ -393,11 +419,16 @@ function draw() {
   const OVW = s.t === 'all' || s.p === 'end';   /* 全卷、卷末收束題都看整卷 */
   roll.classList.toggle('ovw', OVW);
   roll.classList.toggle('endq', s.p === 'end');
-  $$('.pan', roll).forEach(p => p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p + '.' + p.dataset.s] || 1.5) + 'px' : '');
-  if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? panEl(s) : $('.lead'));
+  const ROWS = OVW && SC.some(c => c.length > 1);
+  roll.classList.toggle('rows', ROWS);
+  if (!ROWS) { roll.style.width = ''; roll.style.removeProperty('--ov'); $$('.rl', roll).forEach(e => e.style.width = e.style.height = ''); }
+  $$('.pan', roll).forEach(p => { p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p + '.' + p.dataset.s] || 1.5) + 'px' : ''; p.style.height = ''; });
+  if (ROWS) overviewRows();
+  else if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? panEl(s) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
     : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
+  if (roll.classList.contains('rows')) overviewRows();   /* 圖例填好才量得到它的高度 */
   if (s.t === 'ext') openExt(s.id); else if ($('#sheet').classList.contains('on') && fresh) closeSheet();
   $$('#nav button').forEach(b => b.classList.toggle('on', +b.dataset.p === (s.p === 'end' ? -2 : s.p == null ? (s.t === 'all' ? -2 : -1) : s.p)));
   $('#bPeek').classList.toggle('on', st.peek); $('#bPeek').disabled = !(inText || inCard);
