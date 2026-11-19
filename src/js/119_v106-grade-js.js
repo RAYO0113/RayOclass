@@ -19,7 +19,7 @@
   var PEN = 0;                        /* 遲交每一上課日扣幾分；10/16 老師：暫時全部不扣（原 10）。恢復扣分改回 10，並同步 Code.gs ME_PEN */
   function penTxt(L) { return PEN ? ' −' + L * PEN : '（暫不扣）'; }
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
-  var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'] };
+  var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'], makeups: ['id'] };   /* gr-24：makeups＝補考約定 */
   var DEF_SLOTS = [[1,1,'冷一孝'],[1,2,'冷一忠'],[1,3,'建一忠'],[1,5,'建一孝'],[2,5,'建一孝'],[3,2,'冷一孝'],[3,3,'冷一孝'],[3,4,'冷一忠'],
     [4,1,'建一孝'],[4,3,'冷一孝'],[4,5,'建一忠'],[5,1,'建一忠'],[5,2,'建一忠'],[5,5,'冷一忠'],[5,6,'冷一忠'],[5,7,'建一孝']];   /* 同 V82 預設課表 */
 
@@ -140,7 +140,7 @@
   }
 
   /* ── 資料 ── */
-  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [] };
+  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [], makeups: [] };
   var SCI = {};   /* scores 索引 item|seat */
   function norm(r) {
     D.students = (r.students || []).map(function (s) { return { cls: s.cls, seat: +s.seat, sid: s.sid || '', name: s.name || '', active: s.active === '' || s.active == null ? 1 : +s.active, idt: /^[AFTK]$/.test(s.idt || '') ? s.idt : '' }; })
@@ -151,6 +151,7 @@
     D.tutors = r.tutors || [];
     D.weights = r.weights || []; D.points = (r.points || []).map(function (p) { return { id: p.id, ts: p.ts, date: p.date, period: p.period, cls: p.cls, seat: +p.seat, delta: +p.delta, reason: p.reason || '' }; });
     D.holidays = r.holidays || [];
+    D.makeups = (r.makeups || []).map(function (m) { return { id: m.id, cls: m.cls, seat: +m.seat, item: m.item, date: m.date || '', period: String(m.period == null ? '' : m.period), note: m.note || '', created: m.created || '' }; });   /* gr-24：舊後台沒有 makeups → 空陣列 */
     reindex();
   }
   function reindex() { SCI = {}; D.scores.forEach(function (s) { SCI[s.item + '|' + s.seat] = s; }); }
@@ -184,7 +185,7 @@
   function demoDB() {
     var db = get(K.demo, null);
     if (!db) {
-      db = { students: [], items: [], scores: [], weights: [], points: [], holidays: [] };
+      db = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], makeups: [] };
       classes().forEach(function (c) { for (var i = 1; i <= 35; i++) db.students.push({ cls: c, seat: String(i), sid: '', name: '示範學生' + pad(i), active: '1' }); });
       put(K.demo, db);
     }
@@ -195,7 +196,8 @@
     if (req.action === 'ping') return { ok: true, api: 'demo', hasPw: true };
     if (req.action === 'check') return { ok: true, admin: true };
     if (req.action === 'load') { var o = JSON.parse(JSON.stringify(db)); o.ok = true; o.admin = true; return o; }
-    var t = req.table, list = db[t];
+    var t = req.table; if (t === 'makeups' && !db.makeups) db.makeups = [];   /* gr-24：舊示範資料補表 */
+    var list = db[t];
     if (!list) return { ok: false, error: '不明的資料表' };
     if (req.action === 'put') {
       var idx = {}; list.forEach(function (o, i) { idx[keyOf(t, o)] = i; });
@@ -307,6 +309,7 @@
       '<span class="gr-muted" style="margin-left:auto">' + (isDemo() ? '示範模式' : (S.admin ? '已登入（可登記）' : '唯讀（投影）')) + '</span></div>';
     if (isDemo()) h += '<div class="gr-banner">⚠ 示範模式：尚未綁定 Google，資料只存在這台裝置，名單是假的「示範學生」。綁定方式見「⚙ 設定」。</div>';
     if (S.loadErr) h += '<div class="gr-banner" style="background:#fde8e6;color:#8a2a20">' + esc(S.loadErr) + '</div>';
+    h += mkBarHTML();   /* gr-24 */
     if (S.loading && !S.loaded) h += '<div class="gr-main"><div class="gr-pane">讀取中…</div></div>';
     else if (S.tab === 'reg') h += regHTML();
     else if (S.tab === 'proj') h += projHTML();
@@ -314,6 +317,7 @@
     else if (S.tab === 'dash') h += (S.admin || isDemo()) ? dashHTML() : needLogin('後台有成績與身份別，需要登入');
     else h += setHTML();
     if (S.hist && S.tab === 'reg' && S.admin) h += histHTML();   /* gr-5 */
+    if (S.mk && S.tab === 'reg' && (S.admin || isDemo())) h += mkFormHTML();   /* gr-24 */
     b.innerHTML = h;
     var np = m.querySelector('.gr-pane'); if (np && keep) np.scrollTop = keep;
   }
@@ -400,6 +404,11 @@
       : '<button class="gr-btn v110-lb" data-g="lvx|' + id + '">考試請假</button><button class="gr-btn v110-lb" data-g="lvs|' + id + '">繳交請假</button>';
     var late = L ? '<span class="late">' + (c.sub ? '遲' : '逾期') + L + '天' + penTxt(L) + '</span>' : '';
     if (!late && lo.k === '考' && c.raw == null) late = '<span class="late">未補考</span>';   /* v110 */
+    /* gr-24（11/19 老師）約補考：沒分數、且考試請假或已過期限 → 📅 約補考；已約 → 顯示日期節次，點了改、✕ 取消 */
+    var mk = mkOf(it.id, s.seat);
+    if (c.raw == null && (mk || lo.k === '考' || (it.due && it.due < td))) lv += mk
+      ? '<span class="gr-mk' + (mk.date < td ? ' over' : '') + '"><button class="gr-x" data-g="mk|' + id + '" title="改約定">📅 ' + esc(mkWhen(mk)) + '</button><button class="gr-x" data-g="mkdel|' + mk.id + '" title="取消約定">✕</button></span>'
+      : '<button class="gr-btn gr-mkb" data-g="mk|' + id + '">📅 約補考</button>';
     var bo = '<select data-g="bonus|' + id + '">' + [0,1,2,3,4,5,6,7,8,9,10].map(function (n) { return '<option value="' + n + '"' + ((c.bonus || 0) === n ? ' selected' : '') + '>' + (n ? '+' + n : '—') + '</option>'; }).join('') + '</select>';
     /* gr-5：改過的格子紅框紅字；姓名下方小字＝小老師登記者／✓檢查者／📜修改紀錄 */
     var cg = function (f) { return chgOf(it.id, s.seat, f) ? ' gr-chg' : ''; }, hs = histOf(it.id, s.seat), anyChg = hs.some(function (l) { return l.old !== ''; });
@@ -410,6 +419,78 @@
       '<td class="' + cg('raw') + '"><input class="gr-sc" type="text" inputmode="decimal" data-g="raw|' + id + '" value="' + (c.raw == null ? '' : c.raw) + '"></td>' +
       (isExam(it) ? '<td class="' + cg('ess') + '"><input class="gr-sc" type="text" inputmode="decimal" data-g="ess|' + id + '" value="' + (c.ess == null ? '' : c.ess) + '"></td>' : '') +
       '<td class="' + cg('sub') + '">' + sub + '</td><td class="' + cg('leave') + '">' + lv + '</td><td>' + late + '</td><td class="' + cg('bonus') + '">' + bo + '</td><td class="fin">' + (f == null ? (isExam(it) && c.raw != null ? '<span class="gr-muted">作文待登</span>' : '') : r1(f)) + '</td></tr>';
+  }
+  /* ── gr-24 約補考 ── */
+  var WD = '日一二三四五六';
+  function mkPer(p) { return /^\d+$/.test(p) ? '第' + p + '節' : (p || ''); }
+  function mkWhen(m) { return md(m.date) + '（' + WD[parse(m.date).getDay()] + '）' + mkPer(m.period); }
+  /* 同一張考卷同一人取最後登記的一筆 */
+  function mkOf(item, seat) {
+    var b = null; (D.makeups || []).forEach(function (m) { if (m.item === item && m.seat === seat && m.date && (!b || m.created >= b.created)) b = m; });
+    return b;
+  }
+  /* 還沒考的約定（考卷還在、還沒分數），依日期排 */
+  function mkPending() {
+    var seen = {}, out = [];
+    (D.makeups || []).slice().sort(function (a, b) { return a.created < b.created ? 1 : -1; }).forEach(function (m) {
+      var k = m.item + '|' + m.seat; if (seen[k] || !m.date) return; seen[k] = 1;
+      var it = itemById(m.item), c = scoreOf(m.item, m.seat);
+      if (!it || (c && c.raw != null)) return;
+      var st = D.students.filter(function (s) { return s.cls === it.cls && s.seat === m.seat; })[0];
+      out.push({ m: m, it: it, name: st ? st.name : '' });
+    });
+    return out.sort(function (a, b) { return a.m.date === b.m.date ? (a.m.period < b.m.period ? -1 : 1) : (a.m.date < b.m.date ? -1 : 1); });
+  }
+  /* 頂端提醒列：約了沒考（日期已過）／今天／下一個上課日。只給登入的老師、不在投影分頁 */
+  function mkBarHTML() {
+    if (!S.loaded || !(S.admin || isDemo()) || S.tab === 'proj') return '';
+    var td = today(), nx = nextSchoolDay(td), g = { over: [], td: [], nx: [] };
+    mkPending().forEach(function (p) { if (p.m.date < td) g.over.push(p); else if (p.m.date === td) g.td.push(p); else if (p.m.date === nx) g.nx.push(p); });
+    if (!g.over.length && !g.td.length && !g.nx.length) return '';
+    var one = function (p, showDate) {
+      return '<button class="gr-mkp" data-g="mkgo|' + esc(p.it.cls) + '|' + p.it.id + '">' + esc(p.it.cls) + ' ' + p.m.seat + '號' + (p.name ? ' ' + esc(p.name) : '') + '・' + esc(itemLabel(p.it)) +
+        (showDate ? '・' + esc(mkWhen(p.m)) : (p.m.period ? '・' + esc(mkPer(p.m.period)) : '')) + '</button>';
+    };
+    var h = '<div class="gr-mkbar">';
+    if (g.over.length) h += '<div class="over"><b>⚠ 約了沒考</b>' + g.over.map(function (p) { return one(p, true); }).join('') + '</div>';
+    if (g.td.length) h += '<div class="td"><b>📅 今天補考</b>' + g.td.map(function (p) { return one(p, false); }).join('') + '</div>';
+    if (g.nx.length) h += '<div class="nx"><b>📅 ' + (nx === addD(td, 1) ? '明天' : md(nx) + '（' + WD[parse(nx).getDay()] + '）') + '補考</b>' + g.nx.map(function (p) { return one(p, false); }).join('') + '</div>';
+    return h + '</div>';
+  }
+  var MK_PER = ['1', '2', '3', '4', '5', '6', '7', '8', '午休', '放學後'];
+  function mkFormHTML() {
+    var q = S.mk, it = itemById(q.item); if (!it) return '';
+    var st = roster(it.cls).filter(function (s) { return s.seat === q.seat; })[0];
+    return '<div class="gr-hist"><div class="gr-hbox gr-mkbox"><div class="gr-h"><h4>📅 約補考　' + esc(it.cls) + ' ' + q.seat + '號 ' + esc(st ? st.name : '') + '</h4>' +
+      '<span class="gr-sp" style="flex:1"></span><button class="gr-btn" data-g="mkx">關閉</button></div>' +
+      '<p class="gr-muted" style="margin:0 0 8px">' + esc(itemLabel(it)) + '</p>' +
+      '<div class="gr-row"><label class="k">日期</label><input type="date" id="gr-mkd" value="' + esc(q.date) + '"></div>' +
+      '<div class="gr-row"><label class="k">時間</label><select id="gr-mkp">' + MK_PER.map(function (p) { return '<option value="' + p + '"' + (q.period === p ? ' selected' : '') + '>' + mkPer(p) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="gr-row"><label class="k">備註</label><input type="text" id="gr-mkn" value="' + esc(q.note) + '" placeholder="（可空白）" style="flex:1"></div>' +
+      '<div class="gr-row"><button class="gr-btn pri" data-g="mksave">儲存</button>' + (q.id ? '<button class="gr-btn warn" data-g="mkdel|' + q.id + '">取消約定</button>' : '') + '</div>' +
+      '<p class="gr-muted">存了之後：成績系統上方、手機講稿封面會提醒；學生在學霸網看得到自己約的時間。登了分數就自動不再提醒。</p></div></div>';
+  }
+  function mkOpen(item, seat) {
+    var it = itemById(item); if (!it) return;
+    var m = mkOf(item, seat), td = today();
+    S.mk = m ? { id: m.id, item: item, seat: seat, date: m.date, period: m.period, note: m.note }
+      : { id: '', item: item, seat: seat, date: nextLesson(it.cls, td) || nextSchoolDay(td), period: curPeriod(it.cls) ? String(curPeriod(it.cls)) : '1', note: '' };
+    render();
+  }
+  function mkSave() {
+    var q = S.mk, it = itemById(q.item); if (!it) return;
+    var d = (document.getElementById('gr-mkd') || {}).value, p = (document.getElementById('gr-mkp') || {}).value || '', n = ((document.getElementById('gr-mkn') || {}).value || '').trim();
+    if (!d) { alert('請選日期'); return; }
+    var row = { id: q.id || uid('mk'), cls: it.cls, seat: q.seat, item: q.item, date: d, period: p, note: n, created: new Date().toISOString() };
+    save('makeups', [row], '已約補考 ' + mkWhen(row)).then(function () {
+      var i = -1; D.makeups.forEach(function (m, j) { if (m.id === row.id) i = j; });
+      if (i >= 0) D.makeups[i] = row; else D.makeups.push(row);
+      S.mk = null; render();
+    }).catch(function () {});
+  }
+  function mkDel(id) {
+    if (!confirm('取消這個補考約定？')) return;
+    remove('makeups', [id]).then(function () { D.makeups = D.makeups.filter(function (m) { return m.id !== id; }); S.mk = null; render(); }).catch(function () {});
   }
   /* gr-5：修改紀錄視窗（單一學生，或 seat 為 0＝整份考卷只列「改過」的） */
   function histHTML() {
@@ -432,6 +513,8 @@
     var tr = document.querySelector('#v106-gr tr[data-row="' + item + '|' + seat + '"]');
     if (!it || !s || !tr) { render(); return; }
     var t = document.createElement('tbody'); t.innerHTML = rowHTML(it, s, today()); tr.parentNode.replaceChild(t.firstChild, tr);
+    var ob = document.querySelector('#v106-gr .gr-mkbar'), nb = mkBarHTML();   /* gr-24：登了分數 → 提醒列跟著更新 */
+    if (ob && nb) ob.outerHTML = nb; else if (ob) ob.remove(); else if (nb) { render(); return; }
     var side = document.querySelector('#v106-gr .gr-side'); if (side) { var st = side.scrollTop; var tmp = document.createElement('div'); tmp.innerHTML = regHTML(); var ns = tmp.querySelector('.gr-side'); if (ns) { side.innerHTML = ns.innerHTML; side.scrollTop = st; } }
   }
   function patchScore(item, seat, p) {
@@ -1575,6 +1658,11 @@
     }
     if (/^(item|new|imp|cls|tab|edit)$/.test(t)) S.mg = null;   /* V154：離開合併畫面 */
     if (t === 'x') close();
+    else if (t === 'mk') { var mq = v.split('|'); mkOpen(mq[0], +mq[1]); }   /* gr-24 約補考 */
+    else if (t === 'mkx') { S.mk = null; render(); }
+    else if (t === 'mksave') mkSave();
+    else if (t === 'mkdel') mkDel(v);
+    else if (t === 'mkgo') { var gq = v.split('|'); S.cls = gq[0]; put(K.cls, gq[0]); S.setCls = gq[0]; S.tab = 'reg'; put(K.tab, 'reg'); S.item = gq[1]; S.edit = null; S.imp = null; S.mg = null; render(); }
     else if (t === 'tab') { S.tab = v; put(K.tab, v); render(); }
     else if (t === 'cls') { S.cls = v; put(K.cls, v); S.setCls = v; S.preview = null; S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }   /* V158：上方班級也帶動「設定班級」（老師 10/22：配分只設得到冷一忠） */
     else if (t === 'reload') { S.loaded = false; load(true); }
@@ -1703,7 +1791,7 @@
   }
   function onInput(e) { if (e.target.id === 'gr-paste') S.paste = e.target.value; }
   function onKey(e) {
-    if (e.key === 'Escape') { if (S.hist) { S.hist = null; render(); } else close(); e.stopPropagation(); return; }
+    if (e.key === 'Escape') { if (S.mk) { S.mk = null; render(); } else if (S.hist) { S.hist = null; render(); } else close(); e.stopPropagation(); return; }
     var g = e.target.getAttribute && e.target.getAttribute('data-g');
     if (e.key === 'Enter' && g && (g.indexOf('raw|') === 0 || g.indexOf('ess|') === 0)) {
       e.preventDefault();
