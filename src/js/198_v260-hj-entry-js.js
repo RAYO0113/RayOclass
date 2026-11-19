@@ -4,7 +4,7 @@
      點了蓋滿整個畫面開 hj/index.html?l=<課代號>，直接跳到這一段的「看畫」那一步。畫卷裡「✕ 回課文」（送 lbClose）關掉，回到原本那一頁。
      iframe 的 class 是 wk-hj-frame：197 認這個 class 把畫卷位置送給手機講稿；關掉就移除，197 自動退回長卷／課文的同步。
      一般畫面、投影都能開：投影時蓋在投影層上面（z-index 最高），網站的畫筆、換頁列在畫卷底下，畫卷自己有上一步／下一步。 */
-  var HJ_LESSONS = { '樂府詩選—長干行': 'changgan' };
+  var HJ_LESSONS = { '樂府詩選—長干行': 'changgan', '桃花源記': 'taohua' };   /* 桃花源記：老師 11/19 說上線 */
   var BOX = 'hj-anim';
 
   function segOf() {   /* 現在是這一課的第幾段課文（0 起算）；不是課文頁回 -1 */
