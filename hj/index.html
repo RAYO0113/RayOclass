@@ -216,6 +216,11 @@ const H = window.HJ, LES = (window.TB_LESSONS || []).find(x => x[0] === H.lesson
 if (!LES) return fail('課檔裡找不到這一課：' + H.lesson);
 const L = LES[1], ALL = L.textPages, TP = ALL.slice(0, H.segs || ALL.length);
 const PANS = H.pans || [], ASKS = H.asks || {}, HB = H.hb || {}, EXT = H.extras || {}, ZY = H.zy || {};
+/* 一景一圖（11/19）：pans[段].scenes = [{ from: 從第幾句起（0 起算）, img, pos }]。沒填 scenes＝一段一幅（舊課照舊）。
+   換景時多一步「看畫」，代號 pan-段-景（景從 0 起算，第 0 景還是 pan-段）；段旨、講義、提問停在該段最後一景 */
+const SC = TP.map((p, pi) => { const P = PANS[pi] || {}, L0 = P.scenes && P.scenes.length ? P.scenes : [{ from: 0, img: P.img, pos: P.pos }];
+  L0.forEach((c, si) => { const f = c.from || 0; if (si ? !(f > (L0[si - 1].from || 0) && f < p.lines.length) : f !== 0) console.error(`第 ${pi + 1} 段第 ${si + 1} 景的 from 不對：${f}`); });
+  return L0.map((c, si) => ({ bg: P.bg, tint: P.tint, c: P.c, img: c.img, pos: c.pos, from: c.from || 0, si })); });
 document.title = (LES[0].split('—')[1] || LES[0]) + '・畫卷'; $('#logo').textContent = LES[0].split('—')[1] || LES[0];
 const CIRC = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚';
 const NUMZH = '一二三四五六七八九十';
@@ -307,9 +312,8 @@ const ttl = LES[0].split('—')[1] || LES[0];
 roll.style.setProperty('--n', TP.length);
 roll.innerHTML = `<section class="lead"><div class="tt">${[...ttl].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div>
     <div class="au">${L.author.dynasty}<b>${L.author.name}</b></div></section>` +
-  TP.map((p, pi) => { const P = PANS[pi] || {};
-    return `<section class="pan" data-p="${pi}" style="--tint:${P.tint || 'transparent'}"><div class="img" data-p="${pi}"></div><div class="tint"></div>
-    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div></section>`; }).join('') +
+  TP.map((p, pi) => SC[pi].map(P => `<section class="pan" data-p="${pi}" data-s="${P.si}" style="--tint:${P.tint || 'transparent'}"><div class="img" data-p="${pi}" data-s="${P.si}"></div><div class="tint"></div>
+    <div class="tq"><span class="sg">${p.seg}</span><b class="pn">${p.pian}</b><span class="bkp">${p.book}</span>${H.segNote ? `<span class="mk">課本標「${NUMZH[pi]}」</span>` : ''}</div></section>`).join('')).join('') +
   (TP.length < ALL.length ? `<section class="tail">${ALL[TP.length].seg}起　待續</section>` : '');
 const segH = TP.map((p, pi) => `<div class="seg" data-p="${pi}"><div class="track">${p.lines.map((l, li) => `<div class="lw" data-l="${pi}-${li}">${lianHtml(p, pi, li)}</div>`).join('')}</div></div>`).join('');
 TP.forEach((p, pi) => seamCards(pi));
@@ -318,10 +322,10 @@ stage.innerHTML = segH + `<div class="cards">${CH.join('')}</div>`;
 const RATIO = {};   /* 每幅畫的長寬比（全卷用） */
 function setImgs() {
   const n = document.body.classList.contains('night') ? 'dark' : 'light';
-  $$('.pan .img').forEach(x => { const P = PANS[+x.dataset.p] || {}, own = P.img ? `../img/hj/${P.img}.webp` : '', bg = P.bg ? `../img/ui/bg/${P.bg}-${n}.webp` : '';
+  $$('.pan .img').forEach(x => { const P = SC[+x.dataset.p][+x.dataset.s] || {}, own = P.img ? `../img/hj/${P.img}.webp` : '', bg = P.bg ? `../img/ui/bg/${P.bg}-${n}.webp` : '';
     if (P.pos) x.style.backgroundPosition = P.pos;
     if (!own) { x.style.backgroundImage = bg ? `url("${bg}")` : ''; return; }
-    const im = new Image(); im.onload = () => { RATIO[x.dataset.p] = im.naturalWidth / im.naturalHeight; x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
+    const im = new Image(); im.onload = () => { RATIO[x.dataset.p + '.' + x.dataset.s] = im.naturalWidth / im.naturalHeight; x.classList.add('own'); x.style.backgroundImage = `url("${own}")`; }; im.onerror = () => { x.style.backgroundImage = bg ? `url("${bg}")` : ''; }; im.src = own; });
 }
 /* 字卡字級：照畫面高度放大。詩（一行 ≤8 字）課文佔高度約 2/3，旁批用整個高度；文（一行較長）課文佔約九成。旁批＝1em、課文＝1.35em（色票的兩級） */
 let zoom = 1; try { zoom = +localStorage.getItem('hj_zoom') || 1; } catch (e) {}
@@ -337,7 +341,7 @@ const STEPS = [{ t: 'lead' }];
 const askSteps = (where, p) => (ASKS[where] || []).forEach((a, j) => { STEPS.push({ t: 'ask', p, id: `ask-${where}-${j}` }); STEPS.push({ t: 'ans', p, id: `ask-${where}-${j}` }); });
 askSteps('lead');
 TP.forEach((p, pi) => { STEPS.push({ t: 'pan', p: pi });
-  p.lines.forEach((l, li) => { const k = pi + '-' + li, d = LN[k]; STEPS.push({ t: 'line', p: pi, k });
+  p.lines.forEach((l, li) => { const k = pi + '-' + li, d = LN[k]; SC[pi].forEach(c => { if (c.si && c.from === li) STEPS.push({ t: 'pan', p: pi, sc: c.si }); }); STEPS.push({ t: 'line', p: pi, k });
     if (d.notes.length || d.gl.length || d.zy.length) STEPS.push({ t: 'note', p: pi, k }); if (l.mean || (l.rhet || []).length) STEPS.push({ t: 'mean', p: pi, k }); });
   STEPS.push({ t: 'pian', p: pi });
   if (HB[pi]) STEPS.push({ t: 'hb', p: pi, id: 'hb-' + pi });
@@ -352,9 +356,11 @@ const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j
 const layerOn = (k, t) => { if (MIR) return reached(k, 'line'); const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
 /* 每一步的固定代號（手機講稿用它對照，不用第幾步的數字——之後加減步驟也不會錯位）：
    lead｜pan-段｜段-句｜段-句/note｜段-句/mean｜pian-段｜hb-段｜ask-段-題｜ask-段-題/a｜ext-段-個｜all｜ask-end-題｜ask-end-題/a（段、句、題都從 0 起算；卷首的題是 ask-lead-題；卷末收束題在「全卷」之後） */
-const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t === 'pian' ? s.t + '-' + s.p : s.t === 'line' ? s.k : s.t === 'note' || s.t === 'mean' ? s.k + '/' + s.t : s.t === 'ans' ? s.id + '/a' : s.id;
+const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t === 'pian' ? s.t + '-' + s.p + (s.sc ? '-' + s.sc : '') : s.t === 'line' ? s.k : s.t === 'note' || s.t === 'mean' ? s.k + '/' + s.t : s.t === 'ans' ? s.id + '/a' : s.id;
 /* 嵌在教學網站裡時，每走一步回報位置：hjStep {l:課代號, id:步驟代號, i:第幾步, n:總步數} */
 const tell = s => { if (window.parent !== window && !MIR) window.parent.postMessage({ hjStep: { l: KEY, id: sid(s), i: st.i, n: STEPS.length } }, '*'); };
+const sceneOf = s => s.t === 'pan' ? (s.sc || 0) : s.k ? SC[s.p].filter(c => c.from <= +s.k.split('-')[1]).pop().si : SC[s.p].length - 1;
+const panEl = s => $(`.pan[data-p="${s.p}"][data-s="${sceneOf(s)}"]`);
 function rollTo(el) { const vw = view.clientWidth, W = roll.scrollWidth; roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, vw / 2 - el.offsetLeft - el.offsetWidth / 2))}px)`; }
 function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b = a + el.offsetWidth, pad = vw * .03;
   $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
@@ -379,7 +385,7 @@ function draw() {
     if (w.offsetWidth <= vw * .94) slide(seg, w); else if (w.offsetWidth <= vw * 1.7) slide(seg, w, s.t === 'mean' ? 'left' : 'right');
     else slide(seg, s.t === 'line' ? $('.col', w) : $(`.an[data-t="${s.t}"]`, w) || w); }
   /* 段旨落款、卡片 */
-  TP.forEach((p, pi) => { const o = (st.ov['p' + pi] || {}).pian; $(`.pan[data-p="${pi}"] .pn`).classList.toggle('on', o !== undefined ? o : idx(x => x.t === 'pian' && x.p === pi) <= st.i); });
+  TP.forEach((p, pi) => { const o = (st.ov['p' + pi] || {}).pian; const on = o !== undefined ? o : idx(x => x.t === 'pian' && x.p === pi) <= st.i; $$(`.pan[data-p="${pi}"] .pn`).forEach(e => e.classList.toggle('on', on)); });
   CARDS.forEach(c => { if (c.kind === 'ext') return; const el = $('#' + c.id); el.classList.toggle('act', s.id === c.id);
     if (c.kind === 'ask') { const aj = idx(x => x.id === c.id && x.t === 'ans'), o = st.ov[c.id + ':a']; $('.ans', el).classList.toggle('off', !(o !== undefined ? o : aj <= st.i)); } });
   /* 畫跟著課文走：這一段讀到第幾句，畫就橫移到哪（卷子往左展開，所以畫往右退） */
@@ -387,8 +393,8 @@ function draw() {
   const OVW = s.t === 'all' || s.p === 'end';   /* 全卷、卷末收束題都看整卷 */
   roll.classList.toggle('ovw', OVW);
   roll.classList.toggle('endq', s.p === 'end');
-  $$('.pan', roll).forEach(p => p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p] || 1.5) + 'px' : '');
-  if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? $(`.pan[data-p="${s.p}"]`) : $('.lead'));
+  $$('.pan', roll).forEach(p => p.style.width = OVW ? roll.clientHeight * (RATIO[p.dataset.p + '.' + p.dataset.s] || 1.5) + 'px' : '');
+  if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? panEl(s) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
     : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
@@ -515,7 +521,7 @@ if (QS.has('selftest')) (document.fonts && document.fonts.ready ? document.fonts
     if (document.documentElement.scrollWidth > innerWidth) bad.push(`第 ${i} 步（${ids[i]}）左右超出畫面`); });
   closeSheet(); go(0);
   if (/\{[a-z]:/.test(stage.textContent + roll.textContent)) bad.push('畫面上有沒解析的課文標記');
-  const noImg = TP.map((p, i) => (PANS[i] || {}).img ? null : i + 1).filter(Boolean);
+  const noImg = SC.flatMap((c, i) => c.filter(x => !x.img).map(x => c.length > 1 ? (i + 1) + '之' + (x.si + 1) : String(i + 1)));
   const pre = document.createElement('pre'); pre.id = 'selftest'; pre.hidden = true;
   pre.textContent = JSON.stringify({ lesson: H.lesson, segs: TP.length, steps: STEPS.length, size: [innerWidth, innerHeight], ids, errors: ERR.concat(bad), warnings: over.concat(noImg.length ? ['還沒有新畫的段：' + noImg.join('、')] : []) });
   document.body.appendChild(pre);
