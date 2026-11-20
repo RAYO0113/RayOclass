@@ -6493,6 +6493,19 @@ body.dark-mode #v98-cal .v143-vp { background:#221c15; }
 #v106-gr .gr-dr-bar { background:#2e5a7a; border-radius:3px 3px 0 0; min-height:0; }
 #v106-gr .gr-dr-col:nth-child(-n+3) .gr-dr-bar { background:#c8902c; }
 #v106-gr .gr-dr-seat { margin-top:4px; text-align:center; font-size:14px; font-weight:700; min-width:0; padding:3px 0; border-radius:3px; }
+/* gr-24（11/19）約補考：列內按鈕、頂端提醒列 */
+#v106-gr .gr-mkb { margin-left:4px; background:#eef5ff; border-color:#9cb9de; color:#1f4f86; }
+#v106-gr .gr-mk { display:inline-flex; align-items:center; margin-left:4px; background:#eef5ff; border:1px solid #9cb9de; border-radius:6px; }
+#v106-gr .gr-mk .gr-x { color:#1f4f86; font-weight:700; }
+#v106-gr .gr-mk.over { background:#fde8e6; border-color:#e0a49c; }
+#v106-gr .gr-mk.over .gr-x { color:#a3281b; }
+#v106-gr .gr-mkbar { display:flex; flex-direction:column; gap:3px; padding:5px 12px; border-bottom:1px solid #d9cfb8; background:#f6f9ff; font-size:13px; }
+#v106-gr .gr-mkbar > div { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+#v106-gr .gr-mkbar b { margin-right:2px; color:#1f4f86; }
+#v106-gr .gr-mkbar .over b { color:#a3281b; }
+#v106-gr .gr-mkp { font:inherit; font-size:13px; border:1px solid #9cb9de; background:#fff; color:#1f3550; border-radius:12px; padding:2px 9px; cursor:pointer; }
+#v106-gr .gr-mkbar .over .gr-mkp { border-color:#e0a49c; background:#fff3f1; color:#7a1e14; }
+#v106-gr .gr-mkbox { width:min(440px,100%); }
 /* ════ src/css/121_v107-sync-css.css ════ */
 
 /* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
