@@ -1249,7 +1249,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (!L.length) { el.classList.add('hide'); el.innerHTML = ''; return; }
     L.sort(function (a, b) { return a.m.date === b.m.date ? (String(a.m.period) < String(b.m.period) ? -1 : 1) : (a.m.date < b.m.date ? -1 : 1); });
     var per = function (p) { p = String(p == null ? '' : p); return /^\d+$/.test(p) ? '第' + p + '節' : p; };
-    var day = function (s) { return s === td ? '今天' : md(s) + '（' + WD[pd(s).getDay()] + '）'; };
+    var day = function (s) { return md(s) + '（' + WD[pd(s).getDay()] + '）'; };
     var h = '<div class="h">補考</div>';
     L.forEach(function (o) {
       var over = o.m.date < td;

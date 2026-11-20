@@ -453,8 +453,8 @@
     };
     var h = '<div class="gr-mkbar">';
     if (g.over.length) h += '<div class="over"><b>⚠ 約了沒考</b>' + g.over.map(function (p) { return one(p, true); }).join('') + '</div>';
-    if (g.td.length) h += '<div class="td"><b>📅 今天補考</b>' + g.td.map(function (p) { return one(p, false); }).join('') + '</div>';
-    if (g.nx.length) h += '<div class="nx"><b>📅 ' + (nx === addD(td, 1) ? '明天' : md(nx) + '（' + WD[parse(nx).getDay()] + '）') + '補考</b>' + g.nx.map(function (p) { return one(p, false); }).join('') + '</div>';
+    if (g.td.length) h += '<div class="td"><b>📅 ' + md(td) + '（' + WD[parse(td).getDay()] + '）補考</b>' + g.td.map(function (p) { return one(p, false); }).join('') + '</div>';
+    if (g.nx.length) h += '<div class="nx"><b>📅 ' + md(nx) + '（' + WD[parse(nx).getDay()] + '）' + '補考</b>' + g.nx.map(function (p) { return one(p, false); }).join('') + '</div>';
     return h + '</div>';
   }
   var MK_PER = ['1', '2', '3', '4', '5', '6', '7', '8', '午休', '放學後'];
