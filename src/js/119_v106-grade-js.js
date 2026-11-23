@@ -19,7 +19,7 @@
   var PEN = 0;                        /* 遲交每一上課日扣幾分；10/16 老師：暫時全部不扣（原 10）。恢復扣分改回 10，並同步 Code.gs ME_PEN */
   function penTxt(L) { return PEN ? ' −' + L * PEN : '（暫不扣）'; }
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
-  var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'], makeups: ['id'] };   /* gr-24：makeups＝補考約定 */
+  var TABLE_KEY = { students: ['cls', 'seat'], items: ['id'], scores: ['item', 'seat'], weights: ['cls'], points: ['id'], holidays: ['date'], makeups: ['id'], mkopen: ['date'] };   /* gr-24：makeups＝補考約定 */
   var DEF_SLOTS = [[1,1,'冷一孝'],[1,2,'冷一忠'],[1,3,'建一忠'],[1,5,'建一孝'],[2,5,'建一孝'],[3,2,'冷一孝'],[3,3,'冷一孝'],[3,4,'冷一忠'],
     [4,1,'建一孝'],[4,3,'冷一孝'],[4,5,'建一忠'],[5,1,'建一忠'],[5,2,'建一忠'],[5,5,'冷一忠'],[5,6,'冷一忠'],[5,7,'建一孝']];   /* 同 V82 預設課表 */
 
@@ -140,7 +140,7 @@
   }
 
   /* ── 資料 ── */
-  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [], makeups: [] };
+  var D = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], log: [], tutors: [], makeups: [], mkopen: [] };
   var SCI = {};   /* scores 索引 item|seat */
   function norm(r) {
     D.students = (r.students || []).map(function (s) { return { cls: s.cls, seat: +s.seat, sid: s.sid || '', name: s.name || '', active: s.active === '' || s.active == null ? 1 : +s.active, idt: /^[AFTK]$/.test(s.idt || '') ? s.idt : '' }; })
@@ -151,7 +151,8 @@
     D.tutors = r.tutors || [];
     D.weights = r.weights || []; D.points = (r.points || []).map(function (p) { return { id: p.id, ts: p.ts, date: p.date, period: p.period, cls: p.cls, seat: +p.seat, delta: +p.delta, reason: p.reason || '' }; });
     D.holidays = r.holidays || [];
-    D.makeups = (r.makeups || []).map(function (m) { return { id: m.id, cls: m.cls, seat: +m.seat, item: m.item, date: m.date || '', period: String(m.period == null ? '' : m.period), note: m.note || '', created: m.created || '' }; });   /* gr-24：舊後台沒有 makeups → 空陣列 */
+    D.makeups = (r.makeups || []).map(function (m) { return { id: m.id, cls: m.cls, seat: +m.seat, item: m.item, date: m.date || '', period: String(m.period == null ? '' : m.period), note: m.note || '', created: m.created || '', st: m.st || '', by: m.by || '' }; });   /* gr-24：舊後台沒有 makeups → 空陣列；gr-25：st＝''已約好／req 學生申請／no 不同意 */
+    D.mkopen = (r.mkopen || []).map(function (o) { return String(o.date || ''); }).filter(function (d) { return /^\d{4}-\d{2}-\d{2}$/.test(d); });   /* gr-25：開放學生申請的中午 */
     reindex();
   }
   function reindex() { SCI = {}; D.scores.forEach(function (s) { SCI[s.item + '|' + s.seat] = s; }); }
@@ -185,7 +186,7 @@
   function demoDB() {
     var db = get(K.demo, null);
     if (!db) {
-      db = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], makeups: [] };
+      db = { students: [], items: [], scores: [], weights: [], points: [], holidays: [], makeups: [], mkopen: [] };
       classes().forEach(function (c) { for (var i = 1; i <= 35; i++) db.students.push({ cls: c, seat: String(i), sid: '', name: '示範學生' + pad(i), active: '1' }); });
       put(K.demo, db);
     }
@@ -196,7 +197,7 @@
     if (req.action === 'ping') return { ok: true, api: 'demo', hasPw: true };
     if (req.action === 'check') return { ok: true, admin: true };
     if (req.action === 'load') { var o = JSON.parse(JSON.stringify(db)); o.ok = true; o.admin = true; return o; }
-    var t = req.table; if (t === 'makeups' && !db.makeups) db.makeups = [];   /* gr-24：舊示範資料補表 */
+    var t = req.table; if (t === 'makeups' && !db.makeups) db.makeups = []; if (t === 'mkopen' && !db.mkopen) db.mkopen = [];   /* gr-24／25：舊示範資料補表 */
     var list = db[t];
     if (!list) return { ok: false, error: '不明的資料表' };
     if (req.action === 'put') {
@@ -405,8 +406,9 @@
     var late = L ? '<span class="late">' + (c.sub ? '遲' : '逾期') + L + '天' + penTxt(L) + '</span>' : '';
     if (!late && lo.k === '考' && c.raw == null) late = '<span class="late">未補考</span>';   /* v110 */
     /* gr-24（11/19 老師）約補考：沒分數、且考試請假或已過期限 → 📅 約補考；已約 → 顯示日期節次，點了改、✕ 取消 */
-    var mk = mkOf(it.id, s.seat);
-    if (c.raw == null && (mk || lo.k === '考' || (it.due && it.due < td))) lv += mk
+    var mk = mkOf(it.id, s.seat), rq = mk ? null : mkReqOf(it.id, s.seat);
+    if (c.raw == null && rq && rq.st === 'req') lv += '<span class="gr-mk req">📝 申請 ' + esc(mkWhen(rq)) + '<button class="gr-btn pri" data-g="mkok|' + rq.id + '">同意</button><button class="gr-x" data-g="mkno|' + rq.id + '" title="不同意">✕</button></span>';   /* gr-25 */
+    else if (c.raw == null && (mk || lo.k === '考' || (it.due && it.due < td))) lv += mk
       ? '<span class="gr-mk' + (mk.date < td ? ' over' : '') + '"><button class="gr-x" data-g="mk|' + id + '" title="改約定">📅 ' + esc(mkWhen(mk)) + '</button><button class="gr-x" data-g="mkdel|' + mk.id + '" title="取消約定">✕</button></span>'
       : '<button class="gr-btn gr-mkb" data-g="mk|' + id + '">📅 約補考</button>';
     var bo = '<select data-g="bonus|' + id + '">' + [0,1,2,3,4,5,6,7,8,9,10].map(function (n) { return '<option value="' + n + '"' + ((c.bonus || 0) === n ? ' selected' : '') + '>' + (n ? '+' + n : '—') + '</option>'; }).join('') + '</select>';
@@ -426,14 +428,32 @@
   function mkWhen(m) { return md(m.date) + '（' + WD[parse(m.date).getDay()] + '）' + mkPer(m.period); }
   /* 同一張考卷同一人取最後登記的一筆 */
   function mkOf(item, seat) {
-    var b = null; (D.makeups || []).forEach(function (m) { if (m.item === item && m.seat === seat && m.date && (!b || m.created >= b.created)) b = m; });
+    var b = null; (D.makeups || []).forEach(function (m) { if (!m.st && m.item === item && m.seat === seat && m.date && (!b || m.created >= b.created)) b = m; });
     return b;
   }
+  /* gr-25：學生線上申請（st＝req 待確認、no 不同意）。同一張考卷已約好就不算申請 */
+  function mkReqOf(item, seat) {
+    var b = null; (D.makeups || []).forEach(function (m) { if (m.st && m.item === item && m.seat === seat && m.date && (!b || m.created >= b.created)) b = m; });
+    return b;
+  }
+  function mkReqs() {
+    return (D.makeups || []).filter(function (m) {
+      if (m.st !== 'req' || !m.date) return false;
+      var it = itemById(m.item), c = scoreOf(m.item, m.seat);
+      return it && !(c && c.raw != null) && !mkOf(m.item, m.seat);
+    }).map(function (m) {
+      var it = itemById(m.item), st = D.students.filter(function (s) { return s.cls === it.cls && s.seat === m.seat; })[0];
+      return { m: m, it: it, name: st ? st.name : '' };
+    }).sort(function (a, b) { return a.m.date === b.m.date ? (a.m.created < b.m.created ? -1 : 1) : (a.m.date < b.m.date ? -1 : 1); });
+  }
+  /* gr-25：接下來 10 個上課日（給老師勾開放中午） */
+  function mkNextDays(n) { var td = today(), off = offSet(), d = td, out = [], g = 0; if (isSchool(d, off)) out.push(d); while (out.length < n && g++ < 60) { d = addD(d, 1); if (isSchool(d, off)) out.push(d); } return out; }
+  function mkDayLbl(d) { return md(d) + '（' + WD[parse(d).getDay()] + '）'; }
   /* 還沒考的約定（考卷還在、還沒分數），依日期排 */
   function mkPending() {
     var seen = {}, out = [];
     (D.makeups || []).slice().sort(function (a, b) { return a.created < b.created ? 1 : -1; }).forEach(function (m) {
-      var k = m.item + '|' + m.seat; if (seen[k] || !m.date) return; seen[k] = 1;
+      var k = m.item + '|' + m.seat; if (m.st || seen[k] || !m.date) return; seen[k] = 1;
       var it = itemById(m.item), c = scoreOf(m.item, m.seat);
       if (!it || (c && c.raw != null)) return;
       var st = D.students.filter(function (s) { return s.cls === it.cls && s.seat === m.seat; })[0];
@@ -446,7 +466,17 @@
     if (!S.loaded || !(S.admin || isDemo()) || S.tab === 'proj') return '';
     var td = today(), nx = nextSchoolDay(td), g = { over: [], td: [], nx: [] };
     mkPending().forEach(function (p) { if (p.m.date < td) g.over.push(p); else if (p.m.date === td) g.td.push(p); else if (p.m.date === nx) g.nx.push(p); });
-    if (!g.over.length && !g.td.length && !g.nx.length) return '';
+    var rqs = mkReqs(), opn = (D.mkopen || []).filter(function (d) { return d >= td; }).sort();
+    var open = '<div class="opn"><b>🍱 開放中午申請</b>' + (opn.length ? opn.map(function (d) { return '<span class="gr-mkd">' + esc(mkDayLbl(d)) + '</span>'; }).join('') : '<span class="gr-muted">沒有開放</span>') +
+      '<button class="gr-btn" data-g="mkopen">' + (S.mkset ? '收起' : '設定') + '</button></div>';
+    if (S.mkset) open += '<div class="opn set"><span class="gr-muted">點日期開或關（學生在學霸網只看得到開著的中午，當天 12 點後不能再選當天）：</span>' +
+      mkNextDays(10).map(function (d) { var on = D.mkopen.indexOf(d) >= 0; return '<button class="gr-chip' + (on ? ' on' : '') + '" data-g="mkday|' + d + '">' + (on ? '✓ ' : '') + esc(mkDayLbl(d)) + '</button>'; }).join('') +
+      (opn.length ? '<button class="gr-btn warn" data-g="mkclose">全部關閉</button>' : '') + '</div>';
+    var req = rqs.length ? '<div class="rq"><b>📝 學生申請（待確認）</b>' + rqs.map(function (p) {
+      return '<span class="gr-mkr"><button class="gr-mkp" data-g="mkgo|' + esc(p.it.cls) + '|' + p.it.id + '">' + esc(p.it.cls) + ' ' + p.m.seat + '號' + (p.name ? ' ' + esc(p.name) : '') + '・' + esc(itemLabel(p.it)) + '・' + esc(mkWhen(p.m)) + '</button>' +
+        '<button class="gr-btn pri" data-g="mkok|' + p.m.id + '">同意</button><button class="gr-btn" data-g="mkno|' + p.m.id + '">不同意</button></span>';
+    }).join('') + '</div>' : '';
+    if (!g.over.length && !g.td.length && !g.nx.length) return '<div class="gr-mkbar">' + req + open + '</div>';
     var one = function (p, showDate) {
       return '<button class="gr-mkp" data-g="mkgo|' + esc(p.it.cls) + '|' + p.it.id + '">' + esc(p.it.cls) + ' ' + p.m.seat + '號' + (p.name ? ' ' + esc(p.name) : '') + '・' + esc(itemLabel(p.it)) +
         (showDate ? '・' + esc(mkWhen(p.m)) : (p.m.period ? '・' + esc(mkPer(p.m.period)) : '')) + '</button>';
@@ -455,7 +485,7 @@
     if (g.over.length) h += '<div class="over"><b>⚠ 約了沒考</b>' + g.over.map(function (p) { return one(p, true); }).join('') + '</div>';
     if (g.td.length) h += '<div class="td"><b>📅 ' + md(td) + '（' + WD[parse(td).getDay()] + '）補考</b>' + g.td.map(function (p) { return one(p, false); }).join('') + '</div>';
     if (g.nx.length) h += '<div class="nx"><b>📅 ' + md(nx) + '（' + WD[parse(nx).getDay()] + '）' + '補考</b>' + g.nx.map(function (p) { return one(p, false); }).join('') + '</div>';
-    return h + '</div>';
+    return h + req + open + '</div>';
   }
   var MK_PER = ['1', '2', '3', '4', '5', '6', '7', '8', '午休', '放學後'];
   function mkFormHTML() {
@@ -487,6 +517,24 @@
       if (i >= 0) D.makeups[i] = row; else D.makeups.push(row);
       S.mk = null; render();
     }).catch(function () {});
+  }
+  /* gr-25：同意＝st 清空（變成約好），不同意＝st no（學生看到「老師沒有同意」） */
+  function mkAns(id, ok) {
+    var m = (D.makeups || []).filter(function (x) { return x.id === id; })[0]; if (!m) return;
+    if (!ok && !confirm('不同意這個補考申請？學生會看到「老師沒有同意，請下課找老師」。')) return;
+    var row = { id: m.id, cls: m.cls, seat: m.seat, item: m.item, date: m.date, period: m.period, note: m.note, created: m.created, st: ok ? '' : 'no', by: m.by };
+    save('makeups', [row], ok ? '已同意補考 ' + mkWhen(m) : '已回覆不同意').then(function () { m.st = row.st; render(); }).catch(function () {});
+  }
+  function mkDay(d) {
+    var on = D.mkopen.indexOf(d) >= 0;
+    (on ? remove('mkopen', [d]) : save('mkopen', [{ date: d, note: '' }], '已開放 ' + mkDayLbl(d) + ' 中午')).then(function () {
+      D.mkopen = on ? D.mkopen.filter(function (x) { return x !== d; }) : D.mkopen.concat([d]); render();
+    }).catch(function () {});
+  }
+  function mkCloseAll() {
+    var td = today(), ks = D.mkopen.filter(function (d) { return d >= td; });
+    if (!ks.length || !confirm('關閉全部中午申請？已送出的申請不受影響。')) return;
+    remove('mkopen', ks).then(function () { D.mkopen = D.mkopen.filter(function (d) { return ks.indexOf(d) < 0; }); render(); }).catch(function () {});
   }
   function mkDel(id) {
     if (!confirm('取消這個補考約定？')) return;
@@ -1662,6 +1710,11 @@
     else if (t === 'mkx') { S.mk = null; render(); }
     else if (t === 'mksave') mkSave();
     else if (t === 'mkdel') mkDel(v);
+    else if (t === 'mkok') mkAns(v, true);   /* gr-25 學生申請 */
+    else if (t === 'mkno') mkAns(v, false);
+    else if (t === 'mkopen') { S.mkset = !S.mkset; render(); }
+    else if (t === 'mkday') mkDay(v);
+    else if (t === 'mkclose') mkCloseAll();
     else if (t === 'mkgo') { var gq = v.split('|'); S.cls = gq[0]; put(K.cls, gq[0]); S.setCls = gq[0]; S.tab = 'reg'; put(K.tab, 'reg'); S.item = gq[1]; S.edit = null; S.imp = null; S.mg = null; render(); }
     else if (t === 'tab') { S.tab = v; put(K.tab, v); render(); }
     else if (t === 'cls') { S.cls = v; put(K.cls, v); S.setCls = v; S.preview = null; S.item = ''; S.edit = null; S.imp = null; S.undo = []; render(); }   /* V158：上方班級也帶動「設定班級」（老師 10/22：配分只設得到冷一忠） */

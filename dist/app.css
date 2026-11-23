@@ -6506,6 +6506,14 @@ body.dark-mode #v98-cal .v143-vp { background:#221c15; }
 #v106-gr .gr-mkp { font:inherit; font-size:13px; border:1px solid #9cb9de; background:#fff; color:#1f3550; border-radius:12px; padding:2px 9px; cursor:pointer; }
 #v106-gr .gr-mkbar .over .gr-mkp { border-color:#e0a49c; background:#fff3f1; color:#7a1e14; }
 #v106-gr .gr-mkbox { width:min(440px,100%); }
+
+/* gr-25（V265）學生線上申請中午補考：待確認、開放中午 */
+#v106-gr .gr-mkbar .rq b { color:#8a5a00; }
+#v106-gr .gr-mkbar .gr-mkr { display:inline-flex; align-items:center; gap:3px; padding:2px 4px; border:1px solid #e8cf8f; border-radius:8px; background:#fff8e6; }
+#v106-gr .gr-mkbar .opn b { color:#2f6b3a; }
+#v106-gr .gr-mkbar .gr-mkd { padding:1px 7px; border-radius:10px; background:#e5f3e7; color:#245c2f; }
+#v106-gr .gr-mkbar .opn.set { padding:4px 0 2px; }
+#v106-gr .gr-mk.req { display:inline-flex; align-items:center; gap:4px; padding:1px 6px; border-radius:8px; background:#fff8e6; color:#7a5200; border:1px solid #e8cf8f; }
 /* ════ src/css/121_v107-sync-css.css ════ */
 
 /* v107：雲端同步。把各裝置瀏覽器裡的教學資料（日曆、班級進度、課表…）同步到老師的 Google 試算表「雲端同步」工作表。 */
