@@ -295,7 +295,8 @@ function lianHtml(p, pi, li) {
     IT.push({ id: 'r' + j, kd: 'rh', a, n, whole: q === plain || a0 < 0 }); });
   const PRI = ['zy', 'bu', 'rh', 'yi'], colorAt = i => PRI.find(kd => IT.some(t => t.kd === kd && !t.whole && i >= t.a && i < t.a + t.n));
   LN[k0] = { plain, line, gl, zy, items: IT, notes: [...new Set(chars.filter(x => x.n).map(x => x.n))].map(note), chars };
-  const anH = (t, cls, body, tg) => `<div class="an ${cls}${t.whole ? ' whole' : ''}" data-t="${t.id}" data-kd="${t.kd}"><span>${tagH(tg)}<span class="bd">${body}</span></span></div>`;
+  /* 直書時半形括號會橫躺（老師 11/25 截圖「示現(追述)」）→ 旁批裡的 ( ) 改全形 */
+  const anH = (t, cls, body, tg) => `<div class="an ${cls}${t.whole ? ' whole' : ''}" data-t="${t.id}" data-kd="${t.kd}"><span>${tagH(tg)}<span class="bd">${body.replace(/\(/g, '（').replace(/\)/g, '）')}</span></span></div>`;
   let k = 0;
   const html = columns(chars).map(col => {
     let h = '', on = 0; const ns = [];
@@ -420,6 +421,9 @@ function overviewRows() {
 function rollTo(el) { const vw = view.clientWidth, W = roll.scrollWidth; roll.style.transform = `translateX(${Math.max(vw - W, Math.min(0, vw / 2 - el.offsetLeft - el.offsetWidth / 2))}px)`; }
 function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b = a + el.offsetWidth, pad = vw * .03;
   $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
+/* iPad（Safari／WebKit）直書旁批折成兩行以上時，框只算一行寬，第二行跑出字卡外、疊在畫上（老師 11/25 iPad 截圖；Chrome 不會）。
+   CSS 修不好（width:max-content／fit-content 都試過），改成每次畫完量裡面那一塊的實際寬度，寫回框的寬度 */
+function fixAn() { $$('.lw.show .an:not(.off)', stage).forEach(a => { const sp = a.firstElementChild; if (!sp) return; a.style.width = ''; const w = sp.offsetWidth; if (w > a.clientWidth + 1) a.style.width = w + 'px'; }); }
 function draw() {
   const s = STEPS[st.i], fresh = st.i === st.last + 1, curK = s.k || null, inText = TEXT.includes(s.t), inCard = CARD.includes(s.t);
   /* 字卡 */
@@ -436,8 +440,9 @@ function draw() {
     if (a0 < 0) console.error('修辭引句在課文裡找不到：' + q);
     else { const m = /<b class='rq-hi'>([^<]*)<\/b>/.exec(h), a = m ? a0 + strip(h.slice(0, m.index)).length : a0, n = m ? m[1].length : q.length;
       const w = $(`.lw[data-l="${k}"]`); for (let x = a; x < a + n; x++) { const e = $(`i[data-k="${x}"]`, w); e && e.classList.add('rq'); } } }
+  fixAn();
   /* 字卡走到哪：整句放得下就置中；比畫面寬一點就靠邊（課文、注釋靠右，句意修辭靠左）；再寬就置中這一步出現的那一塊 */
-  const fe = st.fk && $(`.lw[data-l="${st.fk.k}"] .an[data-t="${st.fk.t}"]:not(.off)`);   /* 剛點開的旁批：整句放不下時捲到它 */
+  const fe =st.fk && $(`.lw[data-l="${st.fk.k}"] .an[data-t="${st.fk.t}"]:not(.off)`);   /* 剛點開的旁批：整句放不下時捲到它 */
   if (inText) { const seg = $(`.seg[data-p="${s.p}"]`), w = $(`.lw[data-l="${s.k}"]`), vw = seg.clientWidth;
     if (fe && (fe.closest('.lw') !== w || w.offsetWidth > vw * .94)) slide(seg, fe);
     else if (w.offsetWidth <= vw * .94) slide(seg, w); else if (w.offsetWidth <= vw * 1.7) slide(seg, w, s.t === 'mean' ? 'left' : 'right');
@@ -554,17 +559,18 @@ view.addEventListener('click', e => {
     ob.classList.remove('no'); void ob.offsetWidth; ob.classList.add(ok ? 'ok' : 'no'); if (ok) { st.ov[c.id + ':a'] = true; draw(); } return; }
   const cd = e.target.closest('.card.act'); if (cd) { if (cd.classList.contains('askc')) { st.ov[cd.id + ':a'] = $('.ans', cd).classList.contains('off'); draw(); } return; }
   const pn = e.target.closest('.pn'); if (pn) { const pi = pn.closest('.pan').dataset.p; (st.ov['p' + pi] = st.ov['p' + pi] || {}).pian = !pn.classList.contains('on'); draw(); return; }
-  const w = e.target.closest('.lw.show'); if (!w) return next();
+  /* 11/25 老師：「把點擊畫面就下一步的功能刪除，避免我誤觸」→ 點畫、點字卡空白處都不再往下走；只有「下一步」鈕、方向鍵、空白鍵 */
+  const w = e.target.closest('.lw.show'); if (!w) return;
   const k = w.dataset.l, an = e.target.closest('.an');
   /* 旁批：點了開／收（11/25 第二版：每一條各自開關） */
   const tog = ts => { const open = ts.some(t => !layerOn(k, t)); ts.forEach(t => (st.ov[k] = st.ov[k] || {})[t] = open); st.fk = open ? { k, t: ts[0] } : null; draw(); };
   if (an) return tog([an.dataset.t]);
-  /* 點課文的字：開／收管這個字、範圍最小的那幾條（注釋、字義、補充、句意、修辭）；沒有標的字＝下一步 */
+  /* 點課文的字：開／收管這個字、範圍最小的那幾條（注釋、字義、補充、句意、修辭） */
   const nw = e.target.closest('.nw'); if (nw && !e.target.closest('i[data-k]')) return tog(['nt' + nw.dataset.n]);   /* 點到圈號 */
   const ci = e.target.closest('i[data-k]');
   if (ci) { const i = +ci.dataset.k, hit = LN[k].items.filter(t => !t.whole && i >= t.a && i < t.a + t.n);
     if (hit.length) { const m = Math.min(...hit.map(t => t.n)); return tog(hit.filter(t => t.n === m).map(t => t.id)); } }
-  next();
+  /* 沒有標的字：不做事（11/25 起不再下一步） */
 });
 document.addEventListener('keydown', e => { const k = e.key;
   if (MIR) return;
