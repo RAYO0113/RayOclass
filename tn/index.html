@@ -63,6 +63,9 @@ details.kd .card.note{padding:8px 12px;margin-bottom:8px;font-size:15.5px}
 details.kd .note .t{font-weight:600}
 .sec-h{font-size:14px;color:var(--mut);margin:20px 0 8px;font-weight:700;letter-spacing:.05em}
 .empty{color:var(--mut);text-align:center;padding:18px 0}
+/* V268 下一頁、預覽 */
+.wnx{font-size:13px;color:var(--mut);margin-top:2px;cursor:pointer}.wnx:empty{display:none}.wnx b{color:var(--ink,inherit)}
+.nxp{margin-top:18px;border-top:3px dashed var(--line);padding-top:8px;opacity:.92}.nxh{font-weight:700;color:var(--pri);margin:4px 0 8px}
 details>summary{list-style:none}
 details>summary::-webkit-details-marker{display:none}
 details.all{margin-top:8px}
@@ -368,9 +371,10 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   <div class="top">
     <div class="row">
       <div class="live"><i class="dot" id="dot"></i><span id="lv">連線中…</span></div>
+      <button class="btn" id="prev" type="button" title="本頁講稿下面接著放下一頁的講稿">預覽</button>
       <button class="btn on" id="follow" type="button">跟著平板</button>
     </div>
-    <div class="where"><div class="ls" id="wls"></div><div class="pg" id="wpg"></div></div>
+    <div class="where"><div class="ls" id="wls"></div><div class="pg" id="wpg"></div><div class="wnx" id="wnx"></div></div>
     <div class="flt" id="flt"><button type="button" class="c-m" data-c="m">句意</button><button type="button" class="c-w" data-c="w">字義</button><button type="button" class="c-r" data-c="r">修辭</button><button type="button" class="c-t" data-c="t">翻譯</button><button type="button" class="c-a" data-c="a">提問</button><button type="button" class="c-g" data-c="g">考點</button></div>
   </div>
   <div id="yfm" class="hide"></div>
@@ -476,6 +480,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   function pageOf(k, seg) { var d = TB[k]; if (!d || !d.textPages) return null; return d.textPages.filter(function (p) { return p.seg === seg; })[0] || null; }
 
   /* ── 狀態 ── */
+  var PREV = false; try { PREV = localStorage.getItem('tn_prev_v1') === '1'; } catch (e) {}   /* V268 預覽模式（這支手機記住） */
   var D = null, S = { cls: false, follow: true, pos: null, viewK: '', viewId: '', err: '', li: -1, rendered: '' };
   function lessonOf(k) { if (!D) return null; for (var i = 0; i < D.lessons.length; i++) if (D.lessons[i].k === k) return D.lessons[i]; return null; }
   function anchorOf(L, id) { if (!L || !id) return null; for (var i = 0; i < L.anchors.length; i++) { var a = L.anchors[i]; if (a.id === id || (a.ids && a.ids.indexOf(id) >= 0)) return a; } return null; }
@@ -974,19 +979,11 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     else h = d ? '<div class="hjsc">' + hjNote(d, st) + '</div>' : '<div class="empty">這一課的畫卷還沒有講稿</div>';
     return { t: '畫卷　' + t, h: h, hj: { l: code, id: st } };
   }
-  function render() {
-    var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
-    var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
-    var L = lessonOf(k) || (D && D.lessons[0]);
-    if (!S.viewK && L) S.viewK = L.k;
-    if (L) loadLesson(L.k);
+  /* V268：一頁講稿的內容（本頁、下一頁預覽共用；原本寫在 render() 裡） */
+  function pageBody(L, id) {
     var A = anchorOf(L, id);
     var P = (L && /^seg:/.test(id)) ? pageOf(L.k, id.slice(4)) : null;
     var X = L ? (practice(L.k, id) || extraPage(L.k, id) || yfPage(L.k, id) || hjPage(L.k, id)) : null;   /* V223：課後習題／習作／A卷頁；V232：補充、說明頁；V258：長卷頁；V259：畫卷 */
-    yfMirror(X && X.yf ? { key: X.yf, step: sp.li } : null);
-    hjMirror(X && X.hj ? X.hj : null);   /* V259 */
-    $('wls').textContent = L ? L.name : '';
-    $('wpg').textContent = X && X.t ? X.t : A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     var h = '';
     if (P) {
       h += segHTML(L, A, P);
@@ -1001,6 +998,35 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       else if (!unlocked) h += lockedHTML();
       else if (S.follow && S.pos && lessonOf(S.pos.k)) h += '<div class="empty">這頁沒有特別提醒</div>';
     }
+    return { A: A, P: P, X: X, h: h, t: X && X.t ? X.t : A ? A.h : P ? P.seg + (P.sub ? '　' + plain(P.sub) : '') : '' };
+  }
+  /* V268：下一頁是什麼。畫卷＝講稿裡的步驟表往後一步；其他頁＝平板送來的（186 把下一頁代號接在 h 後面，見 poll()） */
+  function nextOf(L, id) {
+    var m = /^hj:([\w-]+):(.+)$/.exec(id || '');
+    if (m) { var d = D && D.hj && D.hj[m[1]], st = d ? d.steps || [] : [];
+      for (var i = 0; i < st.length - 1; i++) if (st[i][0] === m[2]) return { id: 'hj:' + m[1] + ':' + st[i + 1][0], t: '畫卷　' + st[i + 1][1] };
+      return null; }
+    var nx = S.pos && S.pos.nx; if (!nx) return null;
+    return nx.charAt(0) === '~' ? { t: nx.slice(1) } : { id: nx };
+  }
+  function render() {
+    var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
+    var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
+    var L = lessonOf(k) || (D && D.lessons[0]);
+    if (!S.viewK && L) S.viewK = L.k;
+    if (L) loadLesson(L.k);
+    var B = pageBody(L, id), A = B.A, P = B.P, X = B.X;
+    yfMirror(X && X.yf ? { key: X.yf, step: sp.li } : null);
+    hjMirror(X && X.hj ? X.hj : null);   /* V259 */
+    $('wls').textContent = L ? L.name : '';
+    $('wpg').textContent = B.t || (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
+    /* V268（老師 11/25「手機講稿加上預覽模式，我想先知道下一頁是什麼」）：標題下一行寫「下一頁 ▸ …」；開了「預覽」，本頁講稿下面接著放下一頁的講稿 */
+    var NX = S.follow ? nextOf(L, id) : null, nb = NX && NX.id ? pageBody(L, NX.id) : null, nxT = NX ? (nb && nb.t) || NX.t || NX.id.replace(/^[\w]+:/, '').replace(/\|/g, '　') : '';
+    $('wnx').innerHTML = nxT ? '下一頁 ▸ <b>' + esc(nxT) + '</b>' : '';
+    $('prev').classList.toggle('on', PREV);
+    var h = '<div id="curp">' + B.h + '</div>';
+    if (PREV && nb && unlocked) h += '<div class="nxp"><div class="nxh">▼ 下一頁預覽：' + esc(nxT) + '</div>' + nb.h + '</div>';
+    else if (PREV && NX) h += '<div class="nxp"><div class="nxh">▼ 下一頁：' + esc(nxT) + '</div><div class="empty">' + (unlocked ? '這一頁沒有可預覽的講稿' : '解鎖後才看得到下一頁的講稿') + '</div></div>';
     if (L) {
       if (L.overview && L.overview.length) h += '<details class="blk"' + (A || P || X ? '' : ' open') + '><summary>本課總提醒（' + L.overview.length + '）</summary>' + L.overview.map(noteHTML).join('') + '</details>';
       var list = pageList(L);
@@ -1013,7 +1039,9 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       '　上方色塊＝分類開關：句意綠、字義黃、修辭紫、翻譯灰、提問藍、考點紅框；點一下收起那一類，再點打開。下面 A−／A+ 調字級。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
       '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>　長卷頁：上半是平板同一頁（全部展開，橘框＝平板現在那一步），下半是講稿（要解鎖）。<br>　畫卷頁：上半是平板同一步的畫卷，下半是那一步的語譯、回答與講法（要解鎖）。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
-    S.rendered = (L ? L.k : '') + '|' + id;
+    /* V268（老師 11/25「手機講稿有時候沒跟著平板，會亂跳」）：原本記的是「手機解析出來的課」L.k；平板在沒有講稿的課、或還沒解鎖（D 是空的）時
+       L 會退成第一課，和 poll() 比對用的平板課名永遠不同 → 每秒重畫一次、捲回最上面。改記平板原本的課名 k */
+    S.rendered = k + '|' + id;
     S.li = null;
     $('lsel').value = L ? L.k : '';
     $('follow').classList.toggle('on', S.follow);
@@ -1037,7 +1065,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     S.li = key; S.sp = sp;
     if (YM.on) { YM.step = sp.li; yfSend(); return; }   /* V258：長卷頁 → 鏡像框出那一步 */
     if (HM.on) { scrollTo(0, 0); return; }   /* V259：畫卷頁 → 講稿回到最上面 */
-    var m = $('main');
+    var m = $('curp') || $('main');   /* V268：只在本頁找（下面可能接著下一頁預覽） */
     var all = m.querySelectorAll('.ln.cur, .tg.cur'); for (var i = 0; i < all.length; i++) all[i].classList.remove('cur');
     var old = $('nowc'); if (old) old.remove();
     var tag = sp.tag || '', el = null;
@@ -1085,6 +1113,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
           S.err = '';
           var p = r.pos;
           if (p && r.now) p.t = p.t + (Date.now() - r.now);
+          if (p && p.h && p.h.indexOf('⟫') >= 0) { var hp = p.h.split('⟫'); p.h = hp[0]; p.nx = hp[1] || ''; }   /* V268：平板把下一頁代號接在頁名後面（不用改 Apps Script） */
           S.pos = p || null;
           if (S.follow && p) {
             var sp = splitId(p.id);
@@ -1106,6 +1135,8 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   /* ── 互動 ── */
   function followBack() { S.follow = true; S.cls = true; render(); scrollTo(0, 0); poll(); wake(); }
   $('backf').onclick = followBack;
+  function togPrev() { PREV = !PREV; try { localStorage.setItem('tn_prev_v1', PREV ? '1' : '0'); } catch (e) {} render(); }
+  $('prev').onclick = togPrev; $('wnx').onclick = togPrev;
   $('follow').onclick = function () { if (!S.follow) { followBack(); return; } S.follow = false; if (!S.follow && S.pos) { S.viewK = S.pos.k; S.viewId = splitId(S.pos.id).id; } render(); if (S.follow) { scrollTo(0, 0); poll(); wake(); } };
   $('main').addEventListener('click', function (e) {
     var b = e.target.closest('.alist button'); if (!b) return;
@@ -1165,7 +1196,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
      ・日曆、缺交讀成績系統後台（同教學網站）：日曆＝雲端同步 exam_cal_v1（syncGet），缺交＝load（考卷、成績、學生名單）。
        兩者都要成績系統的登記密碼，存在這支手機（tn_gr_pw_v1）；只看不改，不寫任何資料。
      ・缺交規則同成績系統：已過期限、沒分數、沒繳交日、沒請假＝缺交；全班都沒分數的考卷（還沒改）不算；L1～L3 有分數未滿 10 人也不算。 */
-  var TN_VER = 'V267', TN_DATE = '2026-11-25';
+  var TN_VER = 'V268', TN_DATE = '2026-11-25';
   var GRPW_K = 'tn_gr_pw_v1', CLS = ['建一忠', '建一孝', '冷一忠', '冷一孝'], CCOL = ['#1f7a7a', '#c0662a', '#6b4aa0', '#3d8a3d'];
   var LES = { 1: '身為魚販', 2: '世說新語選', 3: '師說', 4: '珍珠奶茶', 5: '火車線', 6: '侍坐', 7: '長干行', 8: '茫茫人海', 9: '桃花源記', 10: '極短篇' };
   var WD = ['日', '一', '二', '三', '四', '五', '六'];

@@ -581,7 +581,8 @@ addEventListener('message', e => { const d = e.data; if (!d || d.hjCmd !== 'go')
 addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\d+$/.test(x) && +x !== st.i) go(+x); });
 document.documentElement.style.setProperty('--zoom', zoom);
 setImgs();
-const begin = () => { fit(); const h = location.hash.slice(1); st.i = /^\d+$/.test(h) ? Math.min(+h, STEPS.length - 1) : 0; st.last = st.i;
+const begin = () => { fit(); const h = location.hash.slice(1), g0 = QS.get('go'), gi = g0 ? STEPS.findIndex(s => sid(s) === g0) : -1;   /* ?go=步驟代號：教學網站從課文頁開畫卷時直接開在那一段（11/25） */
+  st.i = gi >= 0 ? gi : /^\d+$/.test(h) ? Math.min(+h, STEPS.length - 1) : 0; st.last = st.i;
   for (let j = st.i; j >= 0; j--) if (TEXT.includes(STEPS[j].t)) { st.seg = STEPS[j].p; break; }
   draw(); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump')));
   if (MIR && window.parent !== window) window.parent.postMessage({ hjReady: 1 }, '*'); };   /* 鏡像畫好了：外層（手機講稿）這時再送 hjCmd 才不會丟 */

@@ -13,7 +13,9 @@
     for (var i = 0; i < wkIdx; i++) if (wkSlides[i].type === 'textpage') n++;
     return n;
   }
-  function close() { var b = document.getElementById(BOX); if (b) b.remove(); window.focus(); }
+  function close() { var b = document.getElementById(BOX); if (b) b.remove(); window.focus();
+    /* V268（老師 11/25「手機講稿有時候沒跟著平板」）：關掉畫卷後原本不會再送位置，手機一直停在畫卷最後一步 → 關掉就補送目前這一頁 */
+    try { if (window.V217TN) window.V217TN.send(); } catch (e) {} }
 
   window.hjOpen = function () {
     var key = HJ_LESSONS[wkKey]; if (!key || document.getElementById(BOX)) return;
@@ -24,7 +26,7 @@
     var f = document.createElement('iframe');
     f.className = 'wk-hj-frame'; f.title = '課文畫卷'; f.setAttribute('allow', 'fullscreen');
     f.style.cssText = 'width:100%;height:100%;border:0;display:block';
-    f.src = 'hj/index.html?l=' + key;
+    f.src = 'hj/index.html?l=' + key + (want ? '&go=' + encodeURIComponent(want) : '');   /* V268：直接開在這一段的看畫，不再先送卷首再跳（手機會閃一下） */
     box.appendChild(f);
     (document.fullscreenElement || document.body).appendChild(box);
     /* 畫卷第一次回報位置（剛載入＝卷首）時，跳到這一段的看畫 */

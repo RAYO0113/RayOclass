@@ -63,7 +63,7 @@
     return String(s.head || (s.page && (s.page.title || s.page.seg)) || (s.sec && s.sec.title) || s.label || s.title || TYPE_NAME[s.type] || s.type || '').slice(0, 60);
   }
 
-  var timer = 0, lastSent = '', busy = false, again = false, curLi = -1, doneCb = null;
+  var timer = 0, lastSent = '', busy = false, again = false, curLi = -1, doneCb = null, retryN = 0, retrySig = '', retryT = 0;
   /* V231（老師 11/10「我點提問，手機要直接跳到提問的地方；點到哪手機都要迅速對應」）：
      代號後面再加「點了什麼」：@題號（.gd[data-gq] 提問）、@end（本段統整框）、~m／~r／~t／~a／~s（句意／修辭／翻譯／提問／筆法按鈕）。
      點提問立刻送（不等 0.3 秒）。 */
@@ -76,6 +76,7 @@
   }
   function send() {
     if (jget(OFF_K, 0) == 1 || !pw() || typeof wkKey === 'undefined') return;
+    if (document.hidden) return;   /* V268：背景分頁（另一個分頁、別台忘了關的）不送，才不會把手機拉走；回到前景時 visibilitychange 會補送 */
     var k = wkKey;
     if (!k || typeof wkSlides === 'undefined' || !wkSlides.length) return;
     var s = wkSlides[wkIdx];
@@ -85,15 +86,24 @@
     /* V258：長卷頁（type yf）的代號與頁名由 196 提供（yf:<長卷頁代號>#<第幾步>） */
     var ext = null; try { ext = window.V217TN_EXT ? window.V217TN_EXT(s) : null; } catch (e) {}
     if (ext && ext.id) { pos.id = String(ext.id); if (ext.h) pos.h = String(ext.h); }
+    /* V268（老師 11/25「手機講稿加上預覽模式，我想先知道下一頁是什麼」）：下一頁的代號接在頁名後面（⟫ 分隔；Apps Script 只存 k/i/n/id/h，h 上限 80 字，不用改後台）。
+       長卷、畫卷頁不接（畫卷由手機照步驟表自己算）。代號太長就只送下一頁名稱（~開頭，手機只顯示名稱、不預覽） */
+    else if (wkSlides[wkIdx + 1]) { var nxs = wkSlides[wkIdx + 1], nid = sidN(nxs), hh = pos.h.slice(0, 26);
+      pos.h = hh + '⟫' + (nid.length <= 79 - hh.length - 1 ? nid : ('~' + head(nxs)).slice(0, 79 - hh.length - 1)); }
     var sig = JSON.stringify(pos);
     if (sig === lastSent) return;
     if (busy) { again = true; return; }
     busy = true;
-    fetch(url(), { method: 'POST', body: JSON.stringify({ action: 'liveSet', pw: pw(), pos: pos }), redirect: 'follow' })
+    /* V268（老師 11/25「有時候沒跟著平板」）：原本送失敗（學校網路斷一下、Google 忙）就不再送，要等下一次翻頁 → 失敗 2 秒後自動重送（同一個位置最多 5 次）；
+       一次最多等 8 秒，卡住的請求不再擋住後面的翻頁 */
+    var ac = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ac) ac.abort(); }, 8000), ok = false, noAuth = false;
+    fetch(url(), { method: 'POST', body: JSON.stringify({ action: 'liveSet', pw: pw(), pos: pos }), redirect: 'follow', signal: ac ? ac.signal : undefined })
       .then(function (r) { return r.json(); })
-      .then(function (r) { if (r && r.ok) lastSent = sig; if (doneCb) { doneCb(!!(r && r.ok)); doneCb = null; } })
+      .then(function (r) { ok = !!(r && r.ok); if (ok) lastSent = sig; if (doneCb) { doneCb(ok); doneCb = null; } if (r && r.auth === false) noAuth = true; })
       .catch(function () { if (doneCb) { doneCb(false); doneCb = null; } })
-      .then(function () { busy = false; if (again) { again = false; send(); } });
+      .then(function () { clearTimeout(to); busy = false;
+        if (again) { again = false; retryN = 0; send(); return; }
+        if (!ok && !noAuth) { if (retrySig !== sig) { retrySig = sig; retryN = 0; } if (++retryN <= 5) { clearTimeout(retryT); retryT = setTimeout(send, 2000); } } });
   }
   function soon() { clearTimeout(timer); timer = setTimeout(send, 600); }
 
