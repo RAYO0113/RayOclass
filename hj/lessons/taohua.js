@@ -108,7 +108,14 @@ window.HJ = {
         a: '想報告、想炫耀奇遇；三個三字短句，讀得出他很急。<br>小結論：三字短句節奏急促；漁人直奔官府，動機並不單純。',
         src: '07.js 已上線提問 t8（2-1；老師 11/11 核可）' }
     ]
-  }
+  },
 
-  /* extras：課檔三段都沒有 boxes（補充框），不做 rhetQuiz／tableBlank */
+  /* extras：課檔三段都沒有 boxes（補充框），不做 rhetQuiz／tableBlank。
+     11/25 老師：「句意字義修辭補充等都補充上去」→ 課檔 extras.supplement 兩頁（教學網站已上線的補充頁，V262）放在第三段讀完後；內容由引擎讀課檔，不抄 */
+  extras: {
+    2: [
+      { type: 'sup', label: '補充·真實人物', src: '07.js extras.supplement[0]「劉子驥真有其人」（V262，老師 11/19 勾選）' },
+      { type: 'sup', label: '補充·延伸', src: '07.js extras.supplement[1]「傳統仙鄉故事模式」（V262，老師 11/19 勾選）' }
+    ]
+  }
 };

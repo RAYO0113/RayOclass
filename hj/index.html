@@ -179,6 +179,8 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .tb-ctl{display:flex;gap:.4em;align-items:center;flex-wrap:wrap;color:var(--rk-mute)}
 td.blk{cursor:pointer;color:transparent;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 12%,transparent) 0 .5em,transparent .5em 1em)}
 td.blk.on{color:inherit;background:none;animation:hbpop .4s cubic-bezier(.3,1.7,.5,1)} td.blk:not(.on) *{visibility:hidden}
+.sup{font-size:var(--rk-t-l);line-height:1.8} .sup .dz-img{float:right;width:min(40%,12em);margin:0 0 .5em .8em;border-radius:var(--rk-r-s);border:1px solid var(--rk-line)} .sup .bk-note{display:block;clear:both;font-size:var(--rk-t-xs);color:var(--rk-mute)}
+#cap .xib{font-size:1.2em;color:var(--rk-pi-bu);border-color:var(--rk-pi-bu);font-weight:700;margin:.15em 0}
 .fnote{color:var(--rk-mute);border-top:1px dashed var(--rk-line);margin-top:.6em;padding-top:.4em}
 @media (max-width:760px){
   :root{--ov:4em}
@@ -233,6 +235,7 @@ const strip = h => String(h).replace(/<[^>]+>/g, '');
 const rqOf = (h, plain) => { const m = /<span class=["']tp-rq["']>([\s\S]*?)<\/span>/.exec(String(h)); let q = m ? strip(m[1]) : strip(h);
   if (plain != null && !plain.includes(q)) { const hit = q.split(/[。！？；]/).map(x => x.trim()).filter(Boolean).find(x => plain.includes(x)); if (hit) q = hit; } return q; };
 const PU = '，。？！、；：';
+const MEANS = l => [[l.mean, l.cite], [l.mean2, l.cite2], [l.mean3, l.cite3]].filter(x => x[0]);   /* 一句的句意（最多三條）＋各自的引句 */
 /* ── 課文標記解析：{n:編號|詞}（可套 {g:詞|字義}、{z:字|通同}、{p:詞|補充}、{y:字}）。不認得的標記直接報錯，不原樣印出 ── */
 function close(t, i) { let d = 0; for (let j = i; j < t.length; j++) { if (t[j] === '{') d++; else if (t[j] === '}' && --d === 0) return j; } throw new Error('課文標記沒有收尾：' + t.slice(i, i + 20)); }
 function parse(t, ctx = {}, gl = []) {
@@ -266,7 +269,9 @@ const tagH = t => `<span class="tg">${t}</span>`;
 function lianHtml(p, pi, li) {
   const line = p.lines[li], gl = [], chars = parse(line.text, {}, gl), k0 = pi + '-' + li;
   const note = n => { const t = p.notes[n - p.noteStart]; if (!t) throw new Error(`第 ${pi + 1} 段找不到注釋 ${n}`); return { n, w: t[0], d: t[1] }; };
-  const plain = chars.map(x => x.c).join(''), zy = (ZY[k0] || []).map(([w, d]) => ({ kind: '字義', cls: 'zy', w, d }));
+  const plain = chars.map(x => x.c).join('');
+  /* 設定檔的字義（zy）：課檔這一句已經用 {g:} 標了同一個字，就不再重複出（11/25：課檔 11/19 補了 24 處字義，和設定檔重疊） */
+  const zy = (ZY[k0] || []).filter(([w]) => !gl.some(g => g.w === w)).map(([w, d]) => ({ kind: '字義', cls: 'zy', w, d }));
   zy.forEach(z => { if (!plain.includes(z.w)) console.error(`字義「${z.w}」在 ${k0} 這一句找不到`); });
   LN[k0] = { plain, line, gl, zy, notes: [...new Set(chars.filter(x => x.n).map(x => x.n))].map(note), chars };
   let k = 0;
@@ -282,13 +287,16 @@ function lianHtml(p, pi, li) {
     if (on) h += '</span>';
     /* 這一行的注釋、字義、補充緊跟在它左邊 */
     const txt = col.map(x => x.c).join('');
-    const nH = ns.map(note).map(n => `<div class="an nt" data-t="note"><span>${tagH('注釋')}<b class="w">${CIRC[n.n - 1] || n.n}${n.w}</b>${n.d}</span></div>`).join('');
+    /* 注釋預設收起（老師 11/25：「注釋預設收起，我點擊才打開」）：點課文裡帶圈號的詞才打開那一條，各條各自開關；不算進「下一步」 */
+    const nH = ns.map(note).map(n => `<div class="an nt" data-t="nt${n.n}"><span>${tagH('注釋')}<b class="w">${CIRC[n.n - 1] || n.n}${n.w}</b>${n.d}</span></div>`).join('');
     const gH = gs.map(g => gl[g]).concat(zy.filter(z => txt.includes(z.w))).map(g => `<div class="an ${g.cls}" data-t="note"><span>${tagH(g.kind)}<b class="w">${g.w}</b>${g.d}</span></div>`).join('');
     return `<span class="col">${h}</span>${nH}${gH}`;
   }).join('');
-  const mean = line.mean ? `<div class="an mean" data-t="mean"><span>${tagH('句意')}${line.mean}</span></div>` : '';
+  /* 句意：課檔一句最多三條（mean／mean2／mean3，各有引句 cite／cite2／cite3）；11/25 起三條都出（之前只出第一條）。
+     引句不是整句時標出「引句」，點了在課文上標出那幾個字（同修辭） */
+  const mean = MEANS(line).map(([m, c], j) => `<div class="an mean" data-t="mean"${c && c !== plain && plain.includes(c) ? ` data-r="m${j}"` : ''}><span>${tagH('句意')}${c && c !== plain ? `<span class="q">「${c}」</span>` : ''}${m}</span></div>`).join('');
   const rhet = (line.rhet || []).map((r, j) => { const q = rqOf(r[1], plain), sh = (line.rhetShort || [])[j];
-    return `<div class="an rhet" data-t="mean" data-r="${j}"><span>${tagH('修辭')}<b>${r[0]}</b>${q !== plain ? `<span class="q">「${q}」</span>` : ''}${sh ? `<span class="q">${sh}</span>` : ''}</span></div>`; }).join('');
+    return `<div class="an rhet" data-t="mean" data-r="r${j}"><span>${tagH('修辭')}<b>${r[0]}</b>${q !== plain ? `<span class="q">「${q}」</span>` : ''}${sh ? `<span class="q">${sh}</span>` : ''}</span></div>`; }).join('');
   return html + mean + rhet;
 }
 /* ── 全螢幕卡：講義空格、提問（補充互動另開整頁紙） ── */
@@ -347,7 +355,8 @@ const askSteps = (where, p) => (ASKS[where] || []).forEach((a, j) => { STEPS.pus
 askSteps('lead');
 TP.forEach((p, pi) => { STEPS.push({ t: 'pan', p: pi });
   p.lines.forEach((l, li) => { const k = pi + '-' + li, d = LN[k]; SC[pi].forEach(c => { if (c.si && c.from === li) STEPS.push({ t: 'pan', p: pi, sc: c.si }); }); STEPS.push({ t: 'line', p: pi, k });
-    if (d.notes.length || d.gl.length || d.zy.length) STEPS.push({ t: 'note', p: pi, k }); if (l.mean || (l.rhet || []).length) STEPS.push({ t: 'mean', p: pi, k }); });
+    /* 「注釋字義」這一步只出字義、通同、補充（注釋收起來，點了才開，11/25）；只有注釋的句子沒有這一步 */
+    if (d.gl.length || d.zy.length) STEPS.push({ t: 'note', p: pi, k }); if (MEANS(l).length || (l.rhet || []).length) STEPS.push({ t: 'mean', p: pi, k }); });
   STEPS.push({ t: 'pian', p: pi });
   if (HB[pi]) STEPS.push({ t: 'hb', p: pi, id: 'hb-' + pi });
   askSteps(pi, pi);
@@ -358,7 +367,7 @@ const st = { i: 0, fast: false, ov: {}, rq: null, last: -1, note: false, peek: f
 const LAYER = ['note', 'mean'], TEXT = ['line', 'note', 'mean'], CARD = ['ask', 'ans', 'hb'];
 const idx = (pred) => STEPS.findIndex(pred);
 const reached = (k, t) => { const j = idx(s => s.k === k && s.t === t); return j >= 0 && j <= st.i; };
-const layerOn = (k, t) => { if (MIR) return reached(k, 'line'); const o = (st.ov[k] || {})[t]; return o !== undefined ? o : (!st.fast && reached(k, t)); };
+const layerOn = (k, t) => { if (MIR) return reached(k, 'line'); const o = (st.ov[k] || {})[t]; return o !== undefined ? o : /^nt\d/.test(t) ? false : (!st.fast && reached(k, t)); };   /* 注釋（nt編號）預設收起 */
 /* 每一步的固定代號（手機講稿用它對照，不用第幾步的數字——之後加減步驟也不會錯位）：
    lead｜pan-段｜段-句｜段-句/note｜段-句/mean｜pian-段｜hb-段｜ask-段-題｜ask-段-題/a｜ext-段-個｜all｜ask-end-題｜ask-end-題/a（段、句、題都從 0 起算；卷首的題是 ask-lead-題；卷末收束題在「全卷」之後） */
 const sid = s => s.t === 'lead' || s.t === 'all' ? s.t : s.t === 'pan' || s.t === 'pian' ? s.t + '-' + s.p + (s.sc ? '-' + s.sc : '') : s.t === 'line' ? s.k : s.t === 'note' || s.t === 'mean' ? s.k + '/' + s.t : s.t === 'ans' ? s.id + '/a' : s.id;
@@ -403,7 +412,7 @@ function draw() {
     w.classList.toggle('show', on); w.classList.toggle('cur', k === curK);
     $$('.an', w).forEach(a => { a.classList.toggle('off', !layerOn(k, a.dataset.t)); a.classList.toggle('act', a.dataset.r != null && st.rq === k + ':' + a.dataset.r); });
     $$('.col i', w).forEach(x => x.classList.remove('rq')); });
-  if (st.rq) { const [k, j] = st.rq.split(':'), d = LN[k], h = d.line.rhet[+j][1], q = rqOf(h, d.plain), a0 = d.plain.indexOf(q);
+  if (st.rq) { const [k, j] = st.rq.split(':'), d = LN[k], h = j[0] === 'm' ? MEANS(d.line)[+j.slice(1)][1] : d.line.rhet[+j.slice(1)][1], q = rqOf(h, d.plain), a0 = d.plain.indexOf(q);
     if (a0 < 0) console.error('修辭引句在課文裡找不到：' + q);
     else { const m = /<b class='rq-hi'>([^<]*)<\/b>/.exec(h), a = m ? a0 + strip(h.slice(0, m.index)).length : a0, n = m ? m[1].length : q.length;
       const w = $(`.lw[data-l="${k}"]`); for (let x = a; x < a + n; x++) { const e = $(`i[data-k="${x}"]`, w); e && e.classList.add('rq'); } } }
@@ -428,6 +437,7 @@ function draw() {
   else if (OVW) { const vw = view.clientWidth, W = roll.scrollWidth, sc = Math.min(1, vw * .96 / W); roll.style.transform = `translateX(${(vw - W * sc) / 2}px) scale(${sc})`; } else rollTo(s.p != null ? panEl(s) : $('.lead'));
   cap.innerHTML = st.peek ? '看畫中。再按一次「看畫」回到字卡。'
     : s.t === 'pan' ? `先看畫。按下一步，進課文。${H.segNote ? '<br><small>' + H.segNote.text + '</small>' : ''}`
+    : s.t === 'pian' && TP[s.p].xi ? `<button class="tool xib" data-p="${s.p}">段析</button>`
     : s.t === 'all' ? TP.map((q, i) => `<i style="--c:${(PANS[i] || {}).c || 'var(--rk-mute)'}">${q.seg}　${q.pian}</i>`).join('→') : '';
   if (roll.classList.contains('rows')) overviewRows();   /* 圖例填好才量得到它的高度 */
   if (s.t === 'ext') openExt(s.id); else if ($('#sheet').classList.contains('on') && fresh) closeSheet();
@@ -446,6 +456,10 @@ function next() { const s0 = STEPS[st.i]; if (s0 && s0.t === 'hb' && !st.peek) {
 function prev() { let i = st.i - 1; while (i > 0 && skip(STEPS[i].t)) i--; go(i); }
 /* ───────── 補充互動（整頁紙） ───────── */
 const box = label => { const b = ALL.flatMap(p => p.boxes || []).find(x => x.label === label); if (!b) throw new Error('課檔沒有這個補充框：' + label); return b.ask.join(''); };
+/* 課檔 extras.supplement 的補充頁（11/25 老師：「句意字義修辭補充等都補充上去」）：設定檔 extras 寫 { type: 'sup', label: '補充·真實人物' } */
+const supOf = label => { const b = ((L.extras || {}).supplement || []).find(x => x.label === label); if (!b) throw new Error('課檔沒有這個補充頁：' + label); return b; };
+/* 段析（課檔 textPages[].xi）：段旨那一步的圖例列出「段析」鈕，點了才打開（同注釋，預設收起） */
+function openXi(pi) { $('#shT').textContent = '段析：' + TP[pi].seg; $('#sheet .pp').classList.remove('rh'); $('#shB').innerHTML = `<div class="sup">${TP[pi].xi}</div>`; $('#sheet').classList.add('on'); }
 function closeSheet() { $('#sheet').classList.remove('on'); }
 function rows(html) { /* 補充框表格 → 列（處理 rowspan） */
   const t = document.createElement('template'); t.innerHTML = html; const out = [], carry = {};
@@ -456,9 +470,11 @@ function rows(html) { /* 補充框表格 → 列（處理 rowspan） */
   return { out, t: t.content };
 }
 function openExt(id) {
-  const c = CARDS.find(x => x.id === id), x = c.x, B = $('#shB'); $('#shT').textContent = x.type === 'rhetQuiz' ? '修辭：' + x.name : '補充：' + x.box;
+  const c = CARDS.find(x => x.id === id), x = c.x, B = $('#shB'), sp = x.type === 'sup' ? supOf(x.label) : null;
+  $('#shT').textContent = x.type === 'rhetQuiz' ? '修辭：' + x.name : '補充：' + (sp ? sp.head : x.box);
   $('#sheet .pp').classList.toggle('rh', x.type === 'rhetQuiz'); $('#sheet').classList.add('on');
-  if (x.type === 'rhetQuiz') {
+  if (sp) B.innerHTML = `<div class="sup">${sp.body.replace(/(<img[^>]*\ssrc=['"])(?!https?:|\/|\.\.\/)/g, '$1../')}</div>`;   /* 課檔的補充頁（11/25）：圖的路徑是網站根目錄起算，這裡在 hj/ 底下要加 ../ */
+  else if (x.type === 'rhetQuiz') {
     const R = rows(box(x.box)), def = ($('div', R.t) || {}).textContent || '';
     /* 題目：補充框表裡的例句（類型＝那一列），加上本課標了這種修辭的句子 */
     const Q = [];
@@ -506,7 +522,8 @@ const flip = (k, t) => { (st.ov[k] = st.ov[k] || {})[t] = !layerOn(k, t); };
 view.addEventListener('click', e => {
   if (MIR) return;
   if (st.peek) { st.peek = false; draw(); return; }
-  const hb = e.target.closest('.rk-blank'); if (hb) { if (hb.classList.contains('on')) hb.classList.remove('on', 'tip'); else showBlank(hb); return; }
+  const xb = e.target.closest('.xib'); if (xb) { openXi(+xb.dataset.p); return; }
+  const hb =e.target.closest('.rk-blank'); if (hb) { if (hb.classList.contains('on')) hb.classList.remove('on', 'tip'); else showBlank(hb); return; }
   const ob = e.target.closest('.opts button'); if (ob) { const c = CARDS.find(x => x.id === ob.closest('.card').id), ok = +ob.dataset.i === c.a.ans;
     ob.classList.remove('no'); void ob.offsetWidth; ob.classList.add(ok ? 'ok' : 'no'); if (ok) { st.ov[c.id + ':a'] = true; draw(); } return; }
   const cd = e.target.closest('.card.act'); if (cd) { if (cd.classList.contains('askc')) { st.ov[cd.id + ':a'] = $('.ans', cd).classList.contains('off'); draw(); } return; }
@@ -515,7 +532,8 @@ view.addEventListener('click', e => {
   const k = w.dataset.l, an = e.target.closest('.an');
   /* 旁批：藏著的點了就出現（整層一起）；出現後，點修辭＝在課文上標出那幾個字，點其他＝收回 */
   if (an) { if (an.classList.contains('off')) flip(k, an.dataset.t); else if (an.dataset.r != null) st.rq = st.rq === k + ':' + an.dataset.r ? null : k + ':' + an.dataset.r; else flip(k, an.dataset.t); draw(); return; }
-  if (e.target.closest('.nw,.gw,.bw')) { flip(k, 'note'); draw(); return; }
+  const nw = e.target.closest('.nw'); if (nw) { flip(k, 'nt' + nw.dataset.n); draw(); return; }   /* 點帶圈號的詞＝開／收那一條注釋 */
+  if (e.target.closest('.gw,.bw')) { flip(k, 'note'); draw(); return; }
   next();
 });
 document.addEventListener('keydown', e => { const k = e.key;
