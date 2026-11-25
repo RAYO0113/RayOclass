@@ -14044,8 +14044,9 @@ try {
     setTimeout(function () { try { f.focus(); } catch (er) {} }, 400);
   };
   window.addEventListener('message', function (e) {
-    var b = document.getElementById(BOX), f = b && b.querySelector('iframe');
-    if (f && e.source === f.contentWindow && e.data && e.data.lbClose) close();
+    /* 11/25 老師：「畫卷的回課文失效」→ 不再要求訊息一定來自畫卷 iframe 本身（巢狀、iPad 上可能對不上）；畫卷開著、同網站送來的 lbClose 就關 */
+    var b = document.getElementById(BOX);
+    if (b && e.data && e.data.lbClose && (e.origin === location.origin || e.origin === 'null')) close();
   });
 
   /* 課文頁的按鈕列加「畫卷 ▸」（一般畫面、投影各自重畫，所以每次換頁都補） */
