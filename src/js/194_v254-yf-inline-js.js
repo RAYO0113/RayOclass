@@ -160,6 +160,13 @@
     var d = e.data; if (!d || typeof d !== 'object') return;
     var m = mode();
     if (!Y[m] || e.source !== Y[m].contentWindow) return;
+    /* V269（老師 11/25「樂府長卷回課文壞了」）：長卷嵌在投影裡（11/16 起）時，頁內「✕ 回課文」送的 lbClose 沒有人接（188 只關蓋版的 #l7-anim）→ 按了沒反應。
+       改成跳到這一課第一頁課文（第一段）；嵌入模式的長卷不會因為讀詩送 lbClose（rd.direct 只在蓋版直接讀詩時成立） */
+    if (d.lbClose) {
+      var t = wkSlides.findIndex(function (s) { return s && s.type === 'textpage'; });
+      if (t >= 0) { wkIdx = t; wkRenderCurrent(); if (wkProjMode && typeof wkInkSync === 'function') wkInkSync(); window.focus(); }
+      return;
+    }
     if (d.yfAt) {
       Y.page = d.yfAt.i; Y.count = d.yfAt.n;
       var tab = TAB_OF[d.yfAt.ch] || '作者';
