@@ -123,15 +123,16 @@ body.night .pan .img.own{filter:brightness(.5) saturate(.8)}
 .an.whole.off{display:block;height:auto;align-self:flex-start;background:none;border-top-color:transparent} .an.whole.off>span{opacity:1;filter:none;height:auto} .an.off .bd{display:none}
 .an.whole.off .tg{margin-bottom:0}
 .an:not(.whole).off{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 15%,transparent) 0 .5em,color-mix(in srgb,var(--c) 6%,transparent) .5em 1em)}
-.lw.cur .an:not(.off)>span{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both}
+/* 點開的特效（11/25 老師：「點開的特效怎麼不見了」）：原本只在「目前這一句」播，點前面句子的旁批沒有特效 → 改成哪一句點開都播（引擎加 .pop） */
+.an.pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes pop{from{opacity:0;transform:translateY(-.5em) scale(.85);filter:blur(4px)}}
 .an .tg{display:inline-block;font-weight:700;color:rgb(var(--rk-paper));background:var(--c);border-radius:var(--rk-r-s);padding:.25em 0;margin-bottom:.5em;letter-spacing:0;font-size:var(--rk-t-xs);line-height:1.5}
 .an b{font-weight:700} .an b.w{margin-bottom:.6em} .an .q{margin-top:.35em}   /* 直書的冒號會橫躺，詞條和解釋之間改用空一格 */
 .an.nt{--c:var(--rk-pi-nt)} .an.zy{--c:var(--rk-pi-zy)} .an.mean{--c:var(--rk-pi-yi)} .an.rhet{--c:var(--rk-pi-rh)} .an.bu{--c:var(--rk-pi-bu);font-weight:700}
-.an .tg{border-radius:var(--rk-r-seal);transform:rotate(var(--tilt,-4deg));box-shadow:inset 0 0 0 1.5px rgba(var(--rk-paper),.55)}   /* 注釋、字義、句意、修辭、補充的標籤都是一方小印（老師 11/17），各歪一點點才像手蓋的 */
+.an .tg{border-radius:var(--rk-r-seal);box-shadow:inset 0 0 0 1.5px rgba(var(--rk-paper),.55)}   /* 11/25 老師：印章都轉正（原本各歪幾度） */   /* 注釋、字義、句意、修辭、補充的標籤都是一方小印（老師 11/17），各歪一點點才像手蓋的 */
 .an.nt{--tilt:3deg} .an.zy{--tilt:-2deg} .an.mean{--tilt:2deg} .an.bu{--tilt:-3deg}
-.lw.cur .an:not(.off) .tg{animation:seal .6s cubic-bezier(.3,1.5,.5,1) .15s both}
-@keyframes seal{from{opacity:0;transform:scale(2.2) rotate(calc(var(--tilt,-4deg) * 4))}}
+.an.pop .tg{animation:seal .6s cubic-bezier(.3,1.5,.5,1) .15s both}
+@keyframes seal{from{opacity:0;transform:scale(2.2)}}
 .an.rhet.act{box-shadow:0 0 0 2px var(--rk-pi-rh)}
 /* 全螢幕卡：段落透視（講義空格）、提問與回答 */
 .cards{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -423,9 +424,17 @@ function slide(seg, el, side) { const vw = seg.clientWidth, a = el.offsetLeft, b
   $('.track', seg).style.transform = `translateX(${side === 'left' ? pad - a : side === 'right' ? vw - pad - b : vw / 2 - (a + b) / 2}px)`; }
 /* iPad（Safari／WebKit）直書旁批折成兩行以上時，框只算一行寬，第二行跑出字卡外、疊在畫上（老師 11/25 iPad 截圖；Chrome 不會）。
    CSS 修不好（width:max-content／fit-content 都試過），改成每次畫完量裡面那一塊的實際寬度，寫回框的寬度 */
-function fixAn() { $$('.lw.show .an:not(.off)', stage).forEach(a => { const sp = a.firstElementChild; if (!sp) return; a.style.width = ''; const w = sp.offsetWidth; if (w > a.clientWidth + 1) a.style.width = w + 'px'; }); }
+function fixAn() { $$('.lw.show .an', stage).forEach(a => { a.style.width = ''; const sp = a.firstElementChild; if (!sp || getComputedStyle(a).display === 'none') return;
+  /* 變寬、變窄 WebKit 都可能不跟著改（收起後留一塊空白）→ 一律寫明寬度；收起的小印只量印章 */
+  const w = a.classList.contains('off') ? ($('.tg', sp) || sp).offsetWidth : sp.offsetWidth; if (w) a.style.width = w + 'px'; });
+  /* 字卡本身（flex 列）在 WebKit 也不會跟著縮回 → 照裡面各塊加總寫明寬度 */
+  $$('.lw.show', stage).forEach(c => { c.style.width = ''; const cs = getComputedStyle(c), kids = [...c.children].filter(k => getComputedStyle(k).display !== 'none');
+    const sum = kids.reduce((t, k) => t + k.offsetWidth, 0) + parseFloat(cs.columnGap || 0) * Math.max(0, kids.length - 1) + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+    c.style.width = Math.ceil(sum) + 'px'; }); }
 function draw() {
   const s = STEPS[st.i], fresh = st.i === st.last + 1, curK = s.k || null, inText = TEXT.includes(s.t), inCard = CARD.includes(s.t);
+  /* 11/25 老師：「字不要左右移來移去」→ 點開／收起旁批時（同一步重畫），記下那一句課文的位置，畫完把卷子移回原位，課文不動 */
+  const ancEl = st.i === st.last && st.anc ? $(`.lw[data-l="${st.anc}"] .col`) : null, x0 = ancEl ? ancEl.getBoundingClientRect().right : 0;
   /* 字卡 */
   if (inText && st.seg !== s.p) { view.classList.add('jump'); requestAnimationFrame(() => requestAnimationFrame(() => view.classList.remove('jump'))); }
   if (inText) st.seg = s.p;
@@ -441,11 +450,12 @@ function draw() {
     else { const m = /<b class='rq-hi'>([^<]*)<\/b>/.exec(h), a = m ? a0 + strip(h.slice(0, m.index)).length : a0, n = m ? m[1].length : q.length;
       const w = $(`.lw[data-l="${k}"]`); for (let x = a; x < a + n; x++) { const e = $(`i[data-k="${x}"]`, w); e && e.classList.add('rq'); } } }
   fixAn();
+  if (st.pop) { st.pop.ids.forEach(t => { const a = $(`.lw[data-l="${st.pop.k}"] .an[data-t="${t}"]`); if (a) { a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); } }); st.pop = null; }
   /* 字卡走到哪：整句放得下就置中；比畫面寬一點就靠邊（課文、注釋靠右，句意修辭靠左）；再寬就置中這一步出現的那一塊 */
-  const fe =st.fk && $(`.lw[data-l="${st.fk.k}"] .an[data-t="${st.fk.t}"]:not(.off)`);   /* 剛點開的旁批：整句放不下時捲到它 */
-  if (inText) { const seg = $(`.seg[data-p="${s.p}"]`), w = $(`.lw[data-l="${s.k}"]`), vw = seg.clientWidth;
-    if (fe && (fe.closest('.lw') !== w || w.offsetWidth > vw * .94)) slide(seg, fe);
-    else if (w.offsetWidth <= vw * .94) slide(seg, w); else if (w.offsetWidth <= vw * 1.7) slide(seg, w, s.t === 'mean' ? 'left' : 'right');
+  if (ancEl) { const tr = ancEl.closest('.track'), dx = x0 - ancEl.getBoundingClientRect().right;
+    if (Math.abs(dx) > .5) { const m = new DOMMatrix(getComputedStyle(tr).transform); tr.style.transition = 'none'; tr.style.transform = `translateX(${m.m41 + dx}px)`; void tr.offsetWidth; tr.style.transition = ''; } }
+  else if (inText) { const seg = $(`.seg[data-p="${s.p}"]`), w = $(`.lw[data-l="${s.k}"]`), vw = seg.clientWidth;
+    if (w.offsetWidth <= vw * .94) slide(seg, w); else if (w.offsetWidth <= vw * 1.7) slide(seg, w, s.t === 'mean' ? 'left' : 'right');
     else slide(seg, s.t === 'line' ? $('.col', w) : $(`.an[data-t="${s.t}"]`, w) || w); }
   /* 段旨落款、卡片 */
   TP.forEach((p, pi) => { const o = (st.ov['p' + pi] || {}).pian; const on = o !== undefined ? o : idx(x => x.t === 'pian' && x.p === pi) <= st.i; $$(`.pan[data-p="${pi}"] .pn`).forEach(e => e.classList.toggle('on', on)); });
@@ -540,7 +550,7 @@ $('#bNext').onclick = next; $('#bPrev').onclick = prev;
 $('#bMode').hidden = true;   /* 11/25 第二版：旁批都改成點了才開，細讀／通讀沒有差別了 */
 /* 圖例點一下＝目前這一句的這一類全開／全收（11/25） */
 $$('.lg[data-kd]').forEach(g => g.onclick = () => { const s = STEPS[st.i]; if (!s.k || st.peek) return; const kd = g.dataset.kd, ids = LN[s.k].items.filter(t => t.kd === kd).map(t => t.id); if (!ids.length) return;
-  const open = ids.some(t => !layerOn(s.k, t)); ids.forEach(t => (st.ov[s.k] = st.ov[s.k] || {})[t] = open); st.fk = open ? { k: s.k, t: ids[0] } : null; draw(); });
+  const open = ids.some(t => !layerOn(s.k, t)); ids.forEach(t => (st.ov[s.k] = st.ov[s.k] || {})[t] = open); st.anc = s.k; st.pop = open ? { k: s.k, ids } : null; draw(); st.anc = null; });
 $('#bPeek').onclick = () => { st.peek = !st.peek; draw(); };
 $('#bMode').onclick = e => { st.fast = !st.fast; e.currentTarget.textContent = st.fast ? '通讀' : '細讀'; e.currentTarget.classList.toggle('on', st.fast); if (skip(STEPS[st.i].t)) prev(); else draw(); };
 $('#bNight').onclick = e => { e.currentTarget.classList.toggle('on', document.body.classList.toggle('night')); setImgs(); };
@@ -563,7 +573,7 @@ view.addEventListener('click', e => {
   const w = e.target.closest('.lw.show'); if (!w) return;
   const k = w.dataset.l, an = e.target.closest('.an');
   /* 旁批：點了開／收（11/25 第二版：每一條各自開關） */
-  const tog = ts => { const open = ts.some(t => !layerOn(k, t)); ts.forEach(t => (st.ov[k] = st.ov[k] || {})[t] = open); st.fk = open ? { k, t: ts[0] } : null; draw(); };
+  const tog = ts => { const open = ts.some(t => !layerOn(k, t)); ts.forEach(t => (st.ov[k] = st.ov[k] || {})[t] = open); st.anc = k; st.pop = open ? { k, ids: ts } : null; draw(); st.anc = null; };
   if (an) return tog([an.dataset.t]);
   /* 點課文的字：開／收管這個字、範圍最小的那幾條（注釋、字義、補充、句意、修辭） */
   const nw = e.target.closest('.nw'); if (nw && !e.target.closest('i[data-k]')) return tog(['nt' + nw.dataset.n]);   /* 點到圈號 */
