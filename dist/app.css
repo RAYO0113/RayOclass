@@ -7306,8 +7306,8 @@ body.dark-mode #rd-fs { background:#16130f; color:#eadfcb; }
 body.dark-mode #rd-fs .rd-bar button { background:transparent; color:#9cc0f0; border-color:#9cc0f0; }
 #rd-fs .rd-txt * { font-family:inherit; }   /* 注釋、出處也用同一字型 */
 /* 原文頁字型：源流明體 GenRyuMin2 TW（SIL OFL 1.1），字集＝全部課文資料用到的字（tools/make_font_subset_read.py）；只有原文頁用到，打開時才下載 */
-@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-r.woff2?v=d5013e70") format("woff2"); font-weight:400; font-display:swap; }
-@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-b.woff2?v=1e9c0d20") format("woff2"); font-weight:700; font-display:swap; }
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-r.woff2?v=fbfa7b36") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"RayGenRyuRead"; src:url("../fonts/genryumin-read-b.woff2?v=1e5b823f") format("woff2"); font-weight:700; font-display:swap; }
 /* V136 二改：一句原文＋一句語譯（語譯點開才顯示、不同顏色） */
 #rd-fs .rd-pair { margin:0 0 .35em; }
 #rd-fs .rd-pair.has-t .rd-o { cursor:pointer; }
