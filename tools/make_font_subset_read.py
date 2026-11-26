@@ -22,6 +22,8 @@ for f in sorted(glob.glob(os.path.join(ROOT, 'cg', '*.html'))):   # 〈長干行
     chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
 for f in sorted(glob.glob(os.path.join(ROOT, 'hj', '*.html')) + glob.glob(os.path.join(ROOT, 'hj', 'lessons', '*.js'))):   # 課文畫卷引擎與每課設定
     chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
+for f in sorted(glob.glob(os.path.join(ROOT, 'dk', '*.html')) + glob.glob(os.path.join(ROOT, 'dk', 'exams', '*.js'))):   # V270：段考檢討（題目、選項、題組文本、詳解）
+    chars.update(c for c in io.open(f, encoding='utf-8').read() if ord(c) > 0x2E7F)
 chars.update('，。、；：「」『』！？（）《》〈〉—…─．‧·○□①②③④⑤⑥⑦⑧⑨⑩')
 chars.update(chr(c) for c in range(0x20, 0x7F))            # 英數
 text = ''.join(sorted(chars))
