@@ -29,6 +29,11 @@ button,summary{cursor:pointer}
 /* V258 長卷鏡像 */
 #yfm{height:46vh;border-bottom:2px solid var(--line);background:#f7eed6}
 #yfm iframe{width:100%;height:100%;border:0;display:block}
+/* V271 預覽：下一步的畫面（目前鏡像縮小一點，講稿才不會被擠出畫面） */
+#nxm{border-bottom:2px solid var(--line);background:#f3e6c8}
+#nxmh{font-size:14px;font-weight:700;color:var(--pri);padding:4px 12px;background:var(--card);border-bottom:1px dashed var(--line)}
+#nxmb{height:24vh}#nxmb iframe{width:100%;height:100%;border:0;display:block;pointer-events:none}
+body.nxon #yfm,body.nxon #hjm{height:36vh}
 .yfsc p{margin:.55em 0;line-height:1.85}.yfsc .op{opacity:.62;font-size:.92em}
 /* V259 課文畫卷鏡像＋那一步的講稿 */
 #hjm{height:46vh;border-bottom:2px solid var(--line);background:#f3e6c8;overflow:hidden}
@@ -379,6 +384,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
   </div>
   <div id="yfm" class="hide"></div>
   <div id="hjm" class="hide"></div>
+  <div id="nxm" class="hide"><div id="nxmh"></div><div id="nxmb"></div></div>
   <main id="main"></main>
   <button type="button" class="backf hide" id="backf">↩ 跟回平板<small id="backfw"></small></button>
   <div class="bar">
@@ -928,7 +934,7 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     if (!/^yf:/.test(id || '')) return null;
     var key = id.slice(3), pg = yfPages(k), h;
     /* V271（老師 11/27）：長卷「流變」蓋版開的變形記也會同步（yf:變形記·<頁>#<步>）；變形記沒有講稿，答案在上方鏡像全開，所以不用解鎖 */
-    if (/^變形記·/.test(key) && !(pg && pg[key])) return { t: (S.pos && splitId(S.pos.id).id === id && S.pos.h ? String(S.pos.h).replace(/^長卷　/, '') : '變形記　' + key.slice(4)), h: '<div class="empty">變形記這一頁沒有講稿；答案在上方，已全部打開，橘框＝平板現在那一步。</div>', yf: key };
+    if (/^變形記·/.test(key) && !(pg && pg[key])) return { t: (S.pos && splitId(S.pos.id).id === id && S.pos.h ? String(S.pos.h).replace(/^長卷　/, '') : '變形記　' + key.slice(4)), h: '<div class="empty">變形記這一頁沒有講稿；畫面上的答案已全部打開，橘框＝那一步。</div>', yf: key };
     if (!unlocked) h = lockedHTML();
     else {
       var t = pg && (pg[key] || (/^讀詩·/.test(key) ? (pg['代表作·' + key.slice(3)] || pg['代表作']) : ''));
@@ -1009,8 +1015,31 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       for (var i = 0; i < st.length - 1; i++) if (st[i][0] === m[2]) return { id: 'hj:' + m[1] + ':' + st[i + 1][0], t: '畫卷　' + st[i + 1][1] };
       return null; }
     var nx = S.pos && S.pos.nx; if (!nx) return null;
-    return nx.charAt(0) === '~' ? { t: nx.slice(1) } : { id: nx };
+    return nx.charAt(0) === '~' ? { t: nx.slice(1) } : { id: nx, t: S.pos.nxh || '' };   /* V271：長卷／變形記另送下一步頁名（⟪ 後面） */
   }
+  /* ── V271（老師 11/27「預覽部分為何沒有出現下一頁的畫面」）預覽時，目前鏡像下面再放一個小鏡像＝下一步的畫面 ──
+     長卷／變形記（yf:…）用 yf 鏡像、畫卷（hj:…）用 hj 鏡像；只建一次，換步用訊息指揮（同上方鏡像）。課文頁等沒有畫面的頁不顯示。 */
+  var NM = { f: null, kind: '', ready: false, key: '', step: -1, id: '' };
+  function nmSend() {
+    if (!NM.f || !NM.ready || !NM.f.contentWindow) return;
+    if (NM.kind.charAt(0) === 'y') NM.f.contentWindow.postMessage({ yfCmd: 'mirror', key: NM.key, step: NM.step }, '*');
+    else NM.f.contentWindow.postMessage({ hjCmd: 'go', id: NM.id }, '*');
+  }
+  function nxMirror(id, t) {
+    var sp = splitId(id || ''), m = null, kind = '', src = '';
+    if (/^yf:/.test(sp.id)) { kind = 'yf'; NM.key = sp.id.slice(3); NM.step = sp.li; src = '../yf/index.html?embed=1&mirror=1&t=' + TN_VER + '#0'; }
+    else if ((m = /^hj:([\w-]+):(.+)$/.exec(sp.id))) { kind = 'hj:' + m[1]; NM.id = m[2]; src = '../hj/index.html?l=' + encodeURIComponent(m[1]) + '&mirror=1&t=' + TN_VER; }
+    $('nxm').classList.toggle('hide', !kind); document.body.classList.toggle('nxon', !!kind);
+    if (!kind) return;
+    $('nxmh').textContent = '▼ 下一步的畫面' + (t ? '：' + t : '');
+    if (NM.kind !== kind) {
+      if (NM.f) NM.f.remove();
+      var f = document.createElement('iframe'); f.title = '下一步'; f.tabIndex = -1; f.src = src; $('nxmb').appendChild(f);
+      NM.f = f; NM.kind = kind; NM.ready = false;
+    }
+    nmSend();
+  }
+  window.addEventListener('message', function (e) { if (NM.f && e.source === NM.f.contentWindow && e.data && (e.data.yfReady || e.data.hjReady)) { NM.ready = true; nmSend(); } });
   function render() {
     var raw = S.follow && S.pos ? S.pos.id : S.viewId, sp = splitId(raw);
     var k = S.follow && S.pos ? S.pos.k : S.viewK, id = sp.id;
@@ -1023,12 +1052,14 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
     $('wls').textContent = L ? L.name : '';
     $('wpg').textContent = B.t || (S.follow && S.pos ? (S.pos.h || '（這頁）') + (lessonOf(S.pos.k) ? '' : '　（這課還沒有講稿）') : '本課總提醒');
     /* V268（老師 11/25「手機講稿加上預覽模式，我想先知道下一頁是什麼」）：標題下一行寫「下一頁 ▸ …」；開了「預覽」，本頁講稿下面接著放下一頁的講稿 */
-    var NX = S.follow ? nextOf(L, id) : null, nb = NX && NX.id ? pageBody(L, NX.id) : null, nxT = NX ? (nb && nb.t) || NX.t || NX.id.replace(/^[\w]+:/, '').replace(/\|/g, '　') : '';
+    var NX = S.follow ? nextOf(L, id) : null, nxI = NX && NX.id ? splitId(NX.id).id : '', nb = nxI ? pageBody(L, nxI) : null,
+      nxT = NX ? NX.t || (nb && nb.t) || NX.id.replace(/^[\w]+:/, '').replace(/\|/g, '　') : '';   /* V271：長卷下一步帶 #步，先拆掉再找講稿；頁名優先用平板送的 */
+    if (nxI && nxI === id && /^yf:/.test(id)) nb = null, NX = { t: NX.t, id: NX.id, same: true };   /* V271：長卷同一頁的下一步＝講稿相同，不重複放，只放下一步畫面 */
     $('wnx').innerHTML = nxT ? '下一頁 ▸ <b>' + esc(nxT) + '</b>' : '';
     $('prev').classList.toggle('on', PREV);
     var h = '<div id="curp">' + B.h + '</div>';
     if (PREV && nb && unlocked) h += '<div class="nxp"><div class="nxh">▼ 下一頁預覽：' + esc(nxT) + '</div>' + nb.h + '</div>';
-    else if (PREV && NX) h += '<div class="nxp"><div class="nxh">▼ 下一頁：' + esc(nxT) + '</div><div class="empty">' + (unlocked ? '這一頁沒有可預覽的講稿' : '解鎖後才看得到下一頁的講稿') + '</div></div>';
+    else if (PREV && NX && !NX.same) h += '<div class="nxp"><div class="nxh">▼ 下一頁：' + esc(nxT) + '</div><div class="empty">' + (unlocked ? '這一頁沒有可預覽的講稿' : '解鎖後才看得到下一頁的講稿') + '</div></div>';
     if (L) {
       if (L.overview && L.overview.length) h += '<details class="blk"' + (A || P || X ? '' : ' open') + '><summary>本課總提醒（' + L.overview.length + '）</summary>' + L.overview.map(noteHTML).join('') + '</details>';
       var list = pageList(L);
@@ -1041,9 +1072,10 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
       '　上方色塊＝分類開關：句意綠、字義黃、修辭紫、翻譯灰、提問藍、考點紅框；點一下收起那一類，再點打開。下面 A−／A+ 調字級。<br>④ 想先看後面的內容：點「跟著平板」切成自己翻，下面選課、點「本課所有頁面」；看完再點一次跟回來。<br>' +
       '⑤ 備課時不用開平板，直接選課、選頁就能看。<br>　長卷頁：上半是平板同一頁（全部展開，橘框＝平板現在那一步），下半是講稿（要解鎖）。<br>　畫卷頁：上半是平板同一步的畫卷，下半是那一步的語譯、回答與講法（要解鎖）。<br>⑥ 考點：用老師專屬網址（掃 QR code）打開就自動解鎖；建議把那個網址「加入主畫面」，以後點圖示就好。</div></details>';
     $('main').innerHTML = h;
+    nxMirror(PREV && NX && NX.id ? NX.id : null, nxT);   /* V271：下一步的畫面 */
     /* V268（老師 11/25「手機講稿有時候沒跟著平板，會亂跳」）：原本記的是「手機解析出來的課」L.k；平板在沒有講稿的課、或還沒解鎖（D 是空的）時
        L 會退成第一課，和 poll() 比對用的平板課名永遠不同 → 每秒重畫一次、捲回最上面。改記平板原本的課名 k */
-    S.rendered = k + '|' + id;
+    S.rendered = k + '|' + id + '|' + (S.follow && S.pos ? S.pos.nx || '' : '');   /* V271：長卷每一步的「下一步」不同 → 下一步變了也要重畫（poll() 用同一個寫法比對） */
     S.li = null;
     $('lsel').value = L ? L.k : '';
     $('follow').classList.toggle('on', S.follow);
@@ -1116,10 +1148,11 @@ main.no-a .ln.blkln.c-a,main.no-a .ln:not([data-li]):has(>.it.c-a:only-child){di
           var p = r.pos;
           if (p && r.now) p.t = p.t + (Date.now() - r.now);
           if (p && p.h && p.h.indexOf('⟫') >= 0) { var hp = p.h.split('⟫'); p.h = hp[0]; p.nx = hp[1] || ''; }   /* V268：平板把下一頁代號接在頁名後面（不用改 Apps Script） */
+          if (p && p.nx && p.nx.indexOf('⟪') >= 0) { var np = p.nx.split('⟪'); p.nx = np[0]; p.nxh = np[1] || ''; }   /* V271：長卷／變形記的下一步頁名 */
           S.pos = p || null;
           if (S.follow && p) {
             var sp = splitId(p.id);
-            if (S.rendered !== p.k + '|' + sp.id) { render(); if (sp.li < 0 && !sp.tag) scrollTo(0, 0); }
+            if (S.rendered !== p.k + '|' + sp.id + '|' + (p.nx || '')) { render(); if (sp.li < 0 && !sp.tag) scrollTo(0, 0); }
             else markLine(sp, true);
           }
         })

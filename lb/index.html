@@ -796,7 +796,11 @@ body.mir main{pointer-events:none}
     if (!EMB || MIR) return;
     const s = S[st.i], n = $$('.st.show, .bk.on, .hid.on', stage).length;
     const t = String(s.title || ($('h2', stage) || {}).textContent || s.id || '').trim().slice(0, 30);
-    const m = { id: s.id, step: n - 1, h: t }, sig = JSON.stringify(m);
+    /* 下一步（手機預覽用）：這頁還有藏著的段落／重點字（或互動頁還有步驟）＝同頁下一步；沒有就下一頁（有自訂步驟的頁第 -1 步，其餘第 0 步） */
+    let nx = null;
+    if (pending() || (s.more && s.more(stage))) nx = { id: s.id, step: pending() ? n : n - 1, h: t };
+    else if (S[st.i + 1]) { const q = S[st.i + 1]; nx = { id: q.id, step: q.steps ? -1 : 0, h: String(q.title || q.id).slice(0, 30) }; }
+    const m = { id: s.id, step: n - 1, h: t, nx: nx }, sig = JSON.stringify(m);
     if (sig === last) return; last = sig;
     window.parent.postMessage({ lbStep: m }, '*');
   }

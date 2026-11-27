@@ -651,9 +651,29 @@ if (/^\d+$/.test(h)) go(+h); else if (h === 'last') go(S.length - 1); else if (/
   addEventListener('message', e => {
     const f = lbf(), d = e.data; if (!f || !d || typeof d !== 'object' || !(e.source === f.contentWindow || ours(e))) return;
     if (d.lbClose) { closeLb(); return; }
-    if (d.lbStep && !MIR) { const m = d.lbStep; toTop({ yfStep: { key: ('變形記·' + String(m.id || '')).slice(0, 60), step: +m.step, h: ('變形記　' + String(m.h || m.id || '')).slice(0, 40) } }); }
+    if (d.lbStep && !MIR) { const m = d.lbStep, x = m.nx;
+      toTop({ yfStep: { key: ('變形記·' + String(m.id || '')).slice(0, 60), step: +m.step, h: ('變形記　' + String(m.h || m.id || '')).slice(0, 40),
+        nx: x ? { key: ('變形記·' + String(x.id || '')).slice(0, 60), step: +x.step, h: ('變形記　' + String(x.h || x.id || '')).slice(0, 40) } : null } }); }
     if (d.lbReady && MIR) { LB.ready = true; lbSend(); }
   });
+  /* V271（老師 11/27「預覽部分為何沒有出現下一頁的畫面」）：tell() 換成這一版——內容同原本，另附 nx＝下一步 {key, step, h}，手機預覽用。
+     原本 reveal() 在加上 class 之前就呼叫 tell()，那時算不出下一步 → 改成等這一輪畫完（setTimeout 0）再送。
+     下一步：讀詩＝下一段（最後一段＝回長卷這一頁）；長卷＝這一頁下一個還藏著的段落／重點字，沒有就下一頁第 0 步（考點頁 -1）。
+     ⚠ 重新指定 tell（AGENTS §10.3）：實際生效的是這一支；go／reveal／focus／closeRd 都呼叫它。 */
+  let tT = 0;
+  function nxOf() {
+    if (rd.on) return rd.i < rd.n - 1 ? { key: '讀詩·' + rd.k, step: rd.i + 1, h: '讀詩　' + rd.k } : { key: S[st.i].key, step: st.step == null ? -1 : st.step, h: S[st.i].key };
+    const p = pending();
+    if (p) return { key: S[st.i].key, step: stepEls().indexOf(p), h: S[st.i].key };
+    const s = S[st.i + 1]; return s ? { key: s.key, step: s.cls === 'exam' ? -1 : 0, h: s.key } : null;
+  }
+  function send0() {
+    if (rd.on) { toTop({ yfStep: { key: '讀詩·' + rd.k, step: rd.i, h: '讀詩　' + rd.k, nx: nxOf() } }); return; }
+    const s = S[st.i], h2 = $('h2', stage);
+    toTop({ yfStep: { key: s.key, step: st.step == null ? -1 : st.step, h: (h2 ? h2.textContent : s.key).trim().slice(0, 40), nx: nxOf() } });
+  }
+  tell = function () { if (MIR) return; clearTimeout(tT); tT = setTimeout(() => { try { send0(); } catch (er) {} }, 0); };
+  tell();   /* 剛載入時第一頁是原本的 tell() 送的（本檔還沒載），沒有下一步 → 補送一次 */
   const c0 = closeLb;
   closeLb = function () { const r = c0.apply(this, arguments); try { tell(); } catch (er) {} return r; };
   const m0 = mirror;
