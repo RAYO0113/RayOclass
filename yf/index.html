@@ -634,5 +634,40 @@ addEventListener('hashchange', () => { const x = location.hash.slice(1); if (/^\
 const h = decodeURIComponent(location.hash.slice(1));
 if (/^\d+$/.test(h)) go(+h); else if (h === 'last') go(S.length - 1); else if (/^ch=/.test(h) && S.some(s => s.ch === h.slice(3))) goCh(h.slice(3)); else if (h && INTRO.some(x => x.label === '代表作·' + h)) { const p = page('代表作·' + h), e = ($('.l7-who', p.d) || { textContent: '' }).textContent.split('｜')[0]; go(Math.max(0, S.findIndex(s => s.era === e))); rd.direct = true; openRd(h); } else go(0);
 </script>
+<script id="v271-yf-lb-sync-js">
+/* V271（老師 11/27「我剛剛在上樂府詩 詩的流變，手機都沒有跟著，答案也沒有預設顯示」）
+   變形記（#lbx 蓋版的 lb/）原本不回報位置，手機停在「流變·入口」。
+   ・平板：變形記送來 lbStep → 轉成 yfStep，key＝「變形記·<頁代號>」、step＝第幾步（網站 196 照舊轉給手機，位置代號 yf:變形記·<頁>#<步>）；
+     關掉變形記（✕、Esc、網站換頁）時補送長卷目前這一頁。
+   ・鏡像（手機上半）：key 是「變形記·…」就在鏡像裡蓋版開變形記鏡像（lb/?mirror=1，答案全開），叫它跳頁、框出那一步；回到長卷的頁就關掉。
+   ⚠ 本檔重新指定 closeLb、mirror（AGENTS §10.3 同名陷阱）：實際生效的是這裡包過的版本，原本的照樣被呼叫。 */
+(function () {
+  const LB = { id: '', step: -1, ready: false };
+  const lbf = () => $('#lbx iframe');
+  function lbSend() { const f = lbf(); if (LB.ready && f && f.contentWindow) f.contentWindow.postMessage({ lbCmd: 'go', id: LB.id, step: LB.step }, '*'); }
+  /* WebKit（iPad）實測：真的用手指點變形記的「✕ 回課文」，送來的 lbClose 的 e.source 和 iframe.contentWindow 對不上 → 原本的接收（只認 e.source）不關，
+     變形記關不掉（同 11/25 畫卷回課文失效）。改：變形記開著、同網站送來的就收（比照 198） */
+  const ours = e => (e.origin === location.origin || e.origin === 'null') && !!lbf();
+  addEventListener('message', e => {
+    const f = lbf(), d = e.data; if (!f || !d || typeof d !== 'object' || !(e.source === f.contentWindow || ours(e))) return;
+    if (d.lbClose) { closeLb(); return; }
+    if (d.lbStep && !MIR) { const m = d.lbStep; toTop({ yfStep: { key: ('變形記·' + String(m.id || '')).slice(0, 60), step: +m.step, h: ('變形記　' + String(m.h || m.id || '')).slice(0, 40) } }); }
+    if (d.lbReady && MIR) { LB.ready = true; lbSend(); }
+  });
+  const c0 = closeLb;
+  closeLb = function () { const r = c0.apply(this, arguments); try { tell(); } catch (er) {} return r; };
+  const m0 = mirror;
+  mirror = function (key, step) {
+    if (/^變形記·/.test(key)) {
+      LB.id = key.slice(4); LB.step = isNaN(step) ? -1 : step;
+      if (!lbf()) { LB.ready = false; const b = $('#lbx'); b.innerHTML = '<iframe src="../lb/index.html?mirror=1#' + encodeURIComponent(LB.id) + '" title="詩的變形記"></iframe>'; b.classList.add('on'); }
+      else lbSend();
+      return;
+    }
+    if (lbf()) c0();
+    return m0.apply(this, arguments);
+  };
+})();
+</script>
 </body>
 </html>

@@ -776,5 +776,49 @@ if (window.parent !== window) { const b = $('#bClose'); b.hidden = false; b.oncl
 const h = location.hash.slice(1); go(S.some(p => p.id === h) ? h : 0);
 addEventListener('hashchange', () => { const h = location.hash.slice(1); if (S.some(p => p.id === h) && S[st.i].id !== h) go(h); });
 </script>
+<style id="v271-lb-sync-css">
+/* V271 鏡像（手機講稿上半）：不顯示上下列，答案全開，橘框＝平板現在那一步 */
+body.mir header,body.mir footer,body.mir #bar{display:none}
+body.mir main{pointer-events:none}
+.mcur{outline:.16em solid #e08a1e;outline-offset:.14em;border-radius:3px}
+</style>
+<script id="v271-lb-sync-js">
+/* V271（老師 11/27「我剛剛在上樂府詩 詩的流變，手機都沒有跟著，答案也沒有預設顯示」）
+   原因：長卷「流變」蓋版開的變形記（這一頁）從來不回報位置，手機一直停在「流變·入口」；手機也沒有變形記的畫面。
+   ・嵌在長卷裡時：每換一頁、每按一步，送 lbStep {id: 頁代號, step: 已出現第幾個（0 起算）, h: 頁名} 給上一層（長卷 yf 轉給網站、再轉給手機）。
+     做法：包住 upd()（go、next、點朱框字最後都會呼叫它），內容沒變就不送。
+   ・鏡像（?mirror=1，長卷鏡像裡開）：答案全部打開；收到 {lbCmd:'go', id, step} 跳到那頁、框出那一步；載好送 lbReady。 */
+(function () {
+  const EMB = window.parent !== window, MIR = /[?&]mirror=1/.test(location.search);
+  const els = () => $$('.st, .bk, .hid', stage);
+  let last = '';
+  function tell() {
+    if (!EMB || MIR) return;
+    const s = S[st.i], n = $$('.st.show, .bk.on, .hid.on', stage).length;
+    const t = String(s.title || ($('h2', stage) || {}).textContent || s.id || '').trim().slice(0, 30);
+    const m = { id: s.id, step: n - 1, h: t }, sig = JSON.stringify(m);
+    if (sig === last) return; last = sig;
+    window.parent.postMessage({ lbStep: m }, '*');
+  }
+  const u0 = upd;
+  upd = function () { const r = u0.apply(this, arguments); try { tell(); } catch (e) {} return r; };
+  if (EMB && !MIR) tell();
+  if (!MIR) return;
+  document.body.classList.add('mir');
+  st.ans = true; $('#bAns').classList.add('on'); revealAll(); u0();
+  function mark(step) {
+    $$('.mcur', stage).forEach(x => x.classList.remove('mcur'));
+    const el = els()[step];
+    if (el) { el.classList.add('mcur'); el.scrollIntoView({ block: 'center' }); } else stage.scrollTop = 0;
+  }
+  addEventListener('message', e => {
+    const d = e.data; if (!d || d.lbCmd !== 'go') return;
+    const i = S.findIndex(p => p.id === d.id); if (i < 0) return;
+    if (i !== st.i) go(i);
+    mark(+d.step);
+  });
+  if (EMB) window.parent.postMessage({ lbReady: 1 }, '*');
+})();
+</script>
 </body>
 </html>
