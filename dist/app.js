@@ -6652,6 +6652,66 @@ try {
     });
     return h + '</tbody></table></div>';
   }
+  /* V272（老師 11/27「找出四個班學生兩次段考選擇題的成績，做一個進步退步的表，整合到投影」）：投影「段考進退步」。
+     只比選擇題（raw，一段、二段滿分都是 76），作文不算。分數要登入才有（無密碼 load 只回「已交」記號，gr-19），沒登入就不顯示。
+     上面四班互比（平均、進步／持平／退步人數）；下面本班依增減由多到少的長條圖＋明細表。
+     座號預設遮住，點一下看單一個，或「顯示座號」全開（同刷題排行）；不顯示姓名。缺考（任一次沒有選擇題分數）另外列人數，不算進平均增減。 */
+  function dkItem(cls, type) {   /* 同班同類型若有兩張，取登了最多選擇題分數的那張 */
+    var best = null, bn = -1;
+    itemsOf(cls).filter(function (it) { return it.type === type; }).forEach(function (it) {
+      var n = D.scores.filter(function (c) { return c.item === it.id && c.raw != null; }).length;
+      if (n > bn) { best = it; bn = n; }
+    });
+    return best;
+  }
+  function dkStat(cls) {
+    var a = dkItem(cls, '一段'), b = dkItem(cls, '二段'), rows = [], miss = 0;
+    roster(cls).forEach(function (s) {
+      var x = a && scoreOf(a.id, s.seat), y = b && scoreOf(b.id, s.seat);
+      var r1 = x && x.raw != null ? x.raw : null, r2 = y && y.raw != null ? y.raw : null;
+      if (r1 == null || r2 == null) { miss++; rows.push({ seat: s.seat, r1: r1, r2: r2, d: null }); }
+      else rows.push({ seat: s.seat, r1: r1, r2: r2, d: Math.round((r2 - r1) * 10) / 10 });
+    });
+    var ok = rows.filter(function (r) { return r.d != null; });
+    function avg(k) { var v = rows.filter(function (r) { return r[k] != null; }); return v.length ? v.reduce(function (t, r) { return t + r[k]; }, 0) / v.length : null; }
+    return { cls: cls, a: a, b: b, rows: rows, ok: ok, miss: miss, a1: avg('r1'), a2: avg('r2'),
+      ad: ok.length ? ok.reduce(function (t, r) { return t + r.d; }, 0) / ok.length : null,
+      up: ok.filter(function (r) { return r.d > 0; }).length, eq: ok.filter(function (r) { return r.d === 0; }).length, dn: ok.filter(function (r) { return r.d < 0; }).length };
+  }
+  function dkSign(v) { return v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '±') + r1(Math.abs(v)); }
+  function dkHTML() {
+    if (!S.admin && !isDemo()) return '<p class="gr-muted gr-dk-msg">🔒 段考分數要先登入才看得到（沒登入的投影只有「有沒有交」）。請按上面「🔒 登入」。</p>';
+    var all = classes().map(dkStat), me = all.filter(function (x) { return x.cls === S.cls; })[0] || dkStat(S.cls);
+    var h = '<div class="gr-dk"><table class="gr-t gr-dk-cmp"><thead><tr><th>班級</th><th>一段平均</th><th>二段平均</th><th>平均增減</th><th class="up">進步</th><th>持平</th><th class="dn">退步</th><th>缺考</th></tr></thead><tbody>' +
+      all.map(function (x) {
+        var none = !x.a || !x.b;
+        return '<tr class="' + (x.cls === S.cls ? 'on' : '') + '"><td class="c">' + esc(x.cls) + '</td>' + (none
+          ? '<td colspan="7" class="gr-muted">' + (!x.a ? '沒有一段' : '') + (!x.a && !x.b ? '、' : '') + (!x.b ? '沒有二段' : '') + '的成績</td>'
+          : '<td>' + (x.a1 == null ? '—' : r1(x.a1)) + '</td><td>' + (x.a2 == null ? '—' : r1(x.a2)) + '</td>' +
+            '<td class="' + (x.ad > 0 ? 'up' : x.ad < 0 ? 'dn' : '') + '">' + dkSign(x.ad == null ? null : Math.round(x.ad * 10) / 10) + '</td>' +
+            '<td class="up">' + x.up + '</td><td>' + x.eq + '</td><td class="dn">' + x.dn + '</td><td>' + (x.miss || '') + '</td>') + '</tr>';
+      }).join('') + '</tbody></table>' +
+      '<p class="gr-muted">選擇題滿分 76（作文不算）。平均增減只算兩次都有考的人；缺考＝任一次沒有選擇題分數。</p>';
+    if (!me.a || !me.b) return h + '<p class="gr-muted">' + esc(S.cls) + ' 還沒有' + (!me.a ? '一段' : '二段') + '的考卷，或還沒登分。</p></div>';
+    var rows = me.ok.slice().sort(function (p, q) { return q.d - p.d || p.seat - q.seat; });
+    h += '<div class="gr-dr-top"><span class="gr-dr-sum">' + esc(S.cls) + '　<span class="up">進步 <b>' + me.up + '</b> 人</span>　持平 <b>' + me.eq + '</b> 人　<span class="dn">退步 <b>' + me.dn + '</b> 人</span>' + (me.miss ? '　<span class="gr-muted">缺考 ' + me.miss + ' 人</span>' : '') + '</span>' +
+      '<button class="gr-btn" data-g="kseatall">' + (S.kSeatAll ? '🙈 遮住座號' : '👁 顯示座號') + '</button></div>';
+    if (!rows.length) return h + '<p class="gr-muted">還沒有兩次都登了選擇題分數的學生。</p></div>';
+    var mx = Math.max(1, Math.max.apply(null, rows.map(function (r) { return Math.abs(r.d); })));
+    function seatCell(seat, tag) {
+      var key = S.cls + '|' + seat, shown = S.kSeatAll || (S.kSeat && S.kSeat[key]);
+      return '<' + tag + ' class="gr-dk-seat gr-mask' + (shown ? '' : ' m') + '" data-g="kseat|' + esc(key) + '"><span>' + seat + '</span></' + tag + '>';
+    }
+    h += '<div class="gr-dk-chart" style="--n:' + rows.length + '">' + rows.map(function (r) {
+      var pc = r.d ? Math.max(3, Math.abs(r.d) / mx * 100) : 0, cl = r.d > 0 ? 'up' : r.d < 0 ? 'dn' : 'eq';
+      return '<div class="gr-dk-col ' + cl + '"><div class="gr-dk-hi">' + (r.d > 0 ? '<span class="v">' + dkSign(r.d) + '</span><i style="height:' + pc + '%"></i>' : (r.d === 0 ? '<span class="v">±0</span>' : '')) + '</div>' +
+        '<div class="gr-dk-lo">' + (r.d < 0 ? '<i style="height:' + pc + '%"></i><span class="v">' + dkSign(r.d) + '</span>' : '') + '</div>' + seatCell(r.seat, 'div') + '</div>';
+    }).join('') + '</div>';
+    h += '<table class="gr-t gr-dk-t"><thead><tr><th>座號</th><th>一段</th><th>二段</th><th>增減</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr>' + seatCell(r.seat, 'td') + '<td>' + r1(r.r1) + '</td><td>' + r1(r.r2) + '</td><td class="' + (r.d > 0 ? 'up' : r.d < 0 ? 'dn' : '') + '">' + dkSign(r.d) + '</td></tr>'; }).join('') +
+      '</tbody></table>';
+    return h + '<p class="gr-muted">由進步最多排到退步最多。座號預設遮住，點座號格可單獨顯示。</p></div>';
+  }
   function projHTML() {
     var its = itemsOf(S.cls), st = roster(S.cls), td = today();
     if (!st.length) return '<div class="gr-main"><div class="gr-pane"><p class="gr-muted">這班還沒有學生名單。</p></div></div>';
@@ -6661,8 +6721,10 @@ try {
       '<button class="gr-chip' + (S.projView === 'all' ? ' on' : '') + '" data-g="pv|all">全班總覽</button>' +   /* V259 */
       '<button class="gr-chip' + (S.projView === 'item' ? ' on' : '') + '" data-g="pv|item">單份考卷</button>' +
       '<button class="gr-chip' + (S.projView === 'drill' ? ' on' : '') + '" data-g="pv|drill">📈 刷題排行</button>' +   /* V230 */
+      '<button class="gr-chip' + (S.projView === 'dk' ? ' on' : '') + '" data-g="pv|dk">📊 段考進退步</button>' +   /* V272 */
       '';   /* v110：投影不顯示成績，拿掉「各項平均」 */
     if (S.projView === 'drill') return h + '</div>' + drillHTML() + '</div></div>';
+    if (S.projView === 'dk') return h + '</div>' + dkHTML() + '</div></div>';   /* V272 */
     if (S.projView === 'all') return h + '</div>' + projAllHTML(its, st, td) + '</div></div>';   /* V259 */
     if (S.projView !== 'item') { S.projView = 'wall'; return h + '</div>' + projWallHTML(its, st, td) + '</div></div>'; }   /* V259：預設卡片牆 */
     if (S.projView === 'item') {
@@ -7398,6 +7460,8 @@ try {
     else if (t === 'drup') loadDrill(true);   /* V230 刷題排行 */
     else if (t === 'dseat') { S.dSeat = S.dSeat || {}; S.dSeat[v] = !S.dSeat[v]; b.classList.toggle('m', !(S.dSeatAll || S.dSeat[v])); }
     else if (t === 'dseatall') { S.dSeatAll = !S.dSeatAll; S.dSeat = {}; render(); }
+    else if (t === 'kseat') { S.kSeat = S.kSeat || {}; S.kSeat[v] = !S.kSeat[v]; document.querySelectorAll('#v106-gr [data-g="kseat|' + v + '"]').forEach(function (e) { e.classList.toggle('m', !(S.kSeatAll || S.kSeat[v])); }); }   /* V272：長條圖和表格的同一個座號一起開 */
+    else if (t === 'kseatall') { S.kSeatAll = !S.kSeatAll; S.kSeat = {}; render(); }
     else if (t === 'ptv') { S.ptView = v; put('gr_ptview_v1', v); S.seatEdit = false; render(); }
     else if (t === 'seatedit') { S.seatEdit = v === '1'; render(); }
     else if (t === 'seatdim') seatDim(v);
@@ -14169,7 +14233,7 @@ try {
 try {
 
 (function () {
-  window.APP_VERSION = 'V271';
+  window.APP_VERSION = 'V272';
   function setVer() { var d = document.getElementById('v88-ver'); if (d) d.textContent = window.APP_VERSION; }
   setVer(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setVer);
 })();
